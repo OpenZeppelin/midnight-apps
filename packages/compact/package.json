@@ -1,17 +1,17 @@
 {
-	"name": "@midnight-dapps/compact",
-	"version": "1.2.0",
-	"keywords": ["compact", "compiler"],
-	"author": "",
-	"license": "ISC",
-	"description": "Compact fetcher",
-	"type": "module",
-	"main": "index.js",
-	"bin": {
-		"run-compactc": "src/run-compactc.cjs"
-	},
-	"packageManager": "pnpm@10.4.1",
-	"devDependencies": {
-		"typescript": "~5.7.2"
-	}
+  "name": "@midnight-dapps/compact",
+  "version": "1.2.0",
+  "keywords": ["compact", "compiler"],
+  "author": "",
+  "license": "ISC",
+  "description": "Compact fetcher",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "run-compactc": "src/run-compactc.cjs"
+  },
+  "packageManager": "pnpm@10.4.1",
+  "devDependencies": {
+    "typescript": "~5.7.2"
+  }
 }

@@ -1,0 +1,48 @@
+pragma language_version >= 0.14.0;
+
+import CompactStandardLibrary;
+
+export {Maybe, CoinInfo, MerkleTreePath, ZswapCoinPublicKey}
+
+export enum Role {
+    Admin,
+    Lp,
+    Trader,
+    None
+};
+
+// Public state
+export ledger roleCommits: MerkleTree<10, Bytes<32>>;
+
+// Private state
+witness getRole(user: ZswapCoinPublicKey): Role;
+witness updateRole(userRoleCommit: Bytes<32>, user: ZswapCoinPublicKey, role: Role): [];
+witness getRolePath(userRoleCommit: Bytes<32>): Maybe<MerkleTreePath<10, Bytes<32>>>;
+
+constructor(initialAdmin: ZswapCoinPublicKey) {
+    const adminRoleCommit = hashRole(initialAdmin, Role.Admin);
+    roleCommits.insert(adminRoleCommit);
+    updateRole(adminRoleCommit, initialAdmin, Role.Admin);
+}
+
+export circuit addRole(user: ZswapCoinPublicKey, role: Role, coin: CoinInfo): [] {
+    assert (hasRole(Role.Admin)) "RoleError: Caller does not have an Admin role.";
+    assert (roleCommits.is_full() == false) "RoleError: Role commitments tree is full!";
+
+    const userRoleCommit = hashRole(user, role);
+    roleCommits.insert(userRoleCommit);
+
+    updateRole(userRoleCommit, user, role);
+    //getRolePath(user);
+    return [];
+}
+
+circuit hasRole(role: Role): Boolean {
+    const caller = own_public_key();
+    return getRole(caller) == role;
+}
+
+export circuit hashRole(user: ZswapCoinPublicKey, role: Role): Bytes<32> {
+    const roleHash = persistent_hash<Vector<1, Role>>([role]);
+    return persistent_hash<Vector<2, Bytes<32>>>([user.bytes, roleHash]);
+}

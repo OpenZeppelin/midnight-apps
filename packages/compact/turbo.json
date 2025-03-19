@@ -1,12 +1,12 @@
 {
-	"$schema": "https://turbo.build/schema.json",
-	"extends": ["//"],
-	"tasks": {
-		"build": {
-			"outputs": ["compactc/**"],
-			"env": ["COMPACT_HOME"],
-			"inputs": ["src/**.cjs"],
-			"cache": true
-		}
-	}
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "outputs": ["compactc/**"],
+      "env": ["COMPACT_HOME"],
+      "inputs": ["src/**.cjs"],
+      "cache": true
+    }
+  }
 }

@@ -1,19 +1,15 @@
 {
-    "$schema": "https://turbo.build/schema.json",
-    "tasks": {
-        "compact": {
-            "env": [
-                "COMPACT_HOME"
-            ],
-            "inputs": [
-                "src/**/*.compact"
-            ],
-            "outputLogs": "new-only",
-            "outputs": [
-                "src/artifacts/**",
-                "src/gen/**",
-                "gen/**"
-            ]
-        }
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "compact": {
+      "env": ["COMPACT_HOME"],
+      "inputs": ["src/**/*.compact"],
+      "outputLogs": "new-only",
+      "outputs": ["src/artifacts/**", "src/gen/**", "gen/**"]
+    },
+    "test": {
+      "outputs": [],
+      "cache": false
     }
+  }
 }
