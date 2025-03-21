@@ -1,23 +1,37 @@
-// TODO check the recent compact version
+// TODO: check the recent compact version
 pragma language_version >= 0.14.0;
 
 import CompactStandardLibrary;
-// TODO Not sure if I should user prefix better, like Access_. 
-import "./AccessControl"; 
+// TODO: Not sure if I should use prefix better, like Access_.
+import "./AccessControl";
 
 // Export std
-export {Maybe, CoinInfo, MerkleTreePath, ZswapCoinPublicKey}
-// Export Public state
-export {Role, roleCommits}
-// Export circuits
-export {hashUserRole}
+export {Maybe, CoinInfo, MerkleTreePath, ZswapCoinPublicKey};
 
+// Export Public state
+export {Role, roleCommits};
+
+// Export circuits
+export {hashUserRole};
+
+/**
+ * @description Constructs the contract by initializing the AccessControl module with an initial admin.
+ * @param {ZswapCoinPublicKey} initialAdmin - The public key of the initial admin.
+ * @returns {[]} - An empty array indicating successful initialization.
+ * @throws {RoleError} - If the contract is already initialized (inherited from AccessControl).
+ */
 constructor(initialAdmin: ZswapCoinPublicKey) {
-    const bool = true;
+    const bool = true; // Unused variable, possibly for future use
     return initialize(initialAdmin);
 }
 
+/**
+ * @description Test circuit to grant a role to a user, wrapping AccessControl's grantRole.
+ * @param {ZswapCoinPublicKey} user - The public key of the user to grant the role to.
+ * @param {Role} role - The role to grant (Admin, Lp, Trader, or None).
+ * @returns {[]} - An empty array indicating success.
+ * @throws {RoleError} - If the contract is not initialized, caller is not Admin, or the role tree is full.
+ */
 export circuit testGrantRole(user: ZswapCoinPublicKey, role: Role): [] {
     return grantRole(user, role);
-} 
-
+}
