@@ -27,7 +27,7 @@ describe('AccessControl', () => {
       testAccessControlMockContract.getCurrentPrivateState();
 
     const adminRoleCommitContract =
-      TestAccessControlContract.pureCircuits.hashRole(
+      TestAccessControlContract.pureCircuits.hashUserRole(
         { bytes: adminPkBytes },
         TestAccessControlContract.Role.Admin,
       );
@@ -71,7 +71,7 @@ describe('AccessControl', () => {
 
     // Failed test: Non Admin call!
     expect(() =>
-      testAccessControlMockContract.contract.circuits.testAddRole(
+      testAccessControlMockContract.contract.circuits.testGrantRole(
         circuitContext(
           currentPrivateState,
           currentContractState,
@@ -85,7 +85,7 @@ describe('AccessControl', () => {
 
     // Success test: Admin call!
     const circuitResult =
-      testAccessControlMockContract.contract.impureCircuits.testAddRole(
+      testAccessControlMockContract.contract.impureCircuits.testGrantRole(
         circuitContext(
           currentPrivateState,
           currentContractState,
@@ -97,7 +97,7 @@ describe('AccessControl', () => {
       );
 
     const lpRoleCommitContract =
-      TestAccessControlContract.pureCircuits.hashRole(
+      TestAccessControlContract.pureCircuits.hashUserRole(
         { bytes: encodeCoinPublicKey(lpUser) },
         TestAccessControlContract.Role.Lp,
       );

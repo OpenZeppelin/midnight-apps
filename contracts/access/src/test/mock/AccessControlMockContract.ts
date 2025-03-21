@@ -61,7 +61,7 @@ export class TestAccessControlMockContract {
     return this.circuitContext.originalState;
   }
 
-  public testAddRole(user: Contract.ZswapCoinPublicKey, role: Contract.Role) {
-    this.contract.impureCircuits.testAddRole(this.circuitContext, user, role);
+  public testGrantRole(user: Contract.ZswapCoinPublicKey, role: Contract.Role) {
+    this.contract.impureCircuits.testGrantRole(this.circuitContext, user, role);
   }
 }

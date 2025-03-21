@@ -10,14 +10,14 @@ export {Maybe, CoinInfo, MerkleTreePath, ZswapCoinPublicKey}
 // Export Public state
 export {Role, roleCommits}
 // Export circuits
-export {hashRole}
+export {hashUserRole}
 
 constructor(initialAdmin: ZswapCoinPublicKey) {
     const bool = true;
     return initialize(initialAdmin);
 }
 
-export circuit testAddRole(user: ZswapCoinPublicKey, role: Role): [] {
-    return addRole(user, role);
+export circuit testGrantRole(user: ZswapCoinPublicKey, role: Role): [] {
+    return grantRole(user, role);
 } 
 

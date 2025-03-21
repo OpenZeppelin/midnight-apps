@@ -24,25 +24,40 @@ module AccessControl {
     export circuit initialize(initialAdmin: ZswapCoinPublicKey): [] {
         assert (!isInitialized) "RoleError: Role contract is initialized!";
 
-        insertRole(initialAdmin, Role.Admin);
+        _grantRole(initialAdmin, Role.Admin);
 
         isInitialized = true;
 
         return [];
     }
 
-    export circuit addRole(user: ZswapCoinPublicKey, role: Role): [] {
+    export circuit grantRole(user: ZswapCoinPublicKey, role: Role): [] {
         assert (isInitialized) "RoleError: Role contract is not initialized yet!";
         assert (onlyAdmin()) "RoleError: Caller does not have an Admin role.";
         assert (!roleCommits.is_full()) "RoleError: Role commitments tree is full!";
 
-        return insertRole(user, role);
+        return _grantRole(user, role);
     }
 
-    export circuit hashRole(user: ZswapCoinPublicKey, role: Role): Bytes<32> {
+    circuit _grantRole(user: ZswapCoinPublicKey, role: Role): [] {
+        const userRoleCommit = hashUserRole(user, role);
+
+        const currentIndex = index;
+
+        roleCommits.insert_index(userRoleCommit, currentIndex);
+        
+        updateRole(userRoleCommit, role, currentIndex);
+        
+        return index.increment(1);
+    }
+
+    export circuit hashUserRole(user: ZswapCoinPublicKey, role: Role): Bytes<32> {
         // TODO: Revisit to enhance privacy by adding salt or randomness for shielding user identity
-        const roleHash = persistent_hash<Vector<1, Role>>([role]);
-        return persistent_hash<Vector<2, Bytes<32>>>([user.bytes, roleHash]);
+        return persistent_hash<Vector<2, Bytes<32>>>([user.bytes, hashRole(role)]);
+    }
+
+    circuit hashRole(role: Role): Bytes<32> {
+        return persistent_hash<Vector<1, Role>>([role]);
     }
 
     export circuit onlyAdmin(): Boolean {
@@ -60,7 +75,7 @@ module AccessControl {
     circuit hasRole(role: Role): Boolean {
         const caller = own_public_key();
 
-        const userRoleCommit = hashRole(caller, role);
+        const userRoleCommit = hashUserRole(caller, role);
         const userRolePath = getRolePath(userRoleCommit);
         const ind = index;
 
@@ -71,18 +86,6 @@ module AccessControl {
         ) "RoleError: Unauthorized action!";    
 
         return true;
-    }
-
-    circuit insertRole(user: ZswapCoinPublicKey, role: Role): [] {
-        const userRoleCommit = hashRole(user, role);
-
-        const currentIndex = index;
-
-        roleCommits.insert_index(userRoleCommit, currentIndex);
-        
-        updateRole(userRoleCommit, role, currentIndex);
-        
-        return index.increment(1);
     }
 
     // TODO: move that to utils.compact
