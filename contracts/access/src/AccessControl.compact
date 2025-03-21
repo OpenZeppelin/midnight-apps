@@ -188,6 +188,7 @@ module AccessControl {
         return true;
     }
 
+    // TODO: Should be in a general Compact utils contract for MerkleTree.
     /**
      * @description Computes the Merkle tree root from a path.
      * @param {MerkleTreePath<10, Bytes<32>>} path - The Merkle path to compute the root from.
