@@ -1,0 +1,52 @@
+pragma language_version >= 0.14.0;
+
+module Queue<True> {
+    import CompactStandardLibrary;
+
+    // Compact does not currently support defining a global constant. 
+    // TODO: replace all 1024 with MAX_SIZE
+    // const MAX_SIZE: = 1024;
+
+    struct Queue {
+        elements: Vector<1024, T>,
+        front: Uint<64>,
+        tail: Uint<64>,
+        size: Counter
+    }
+
+
+    export ledger queue: Queue;
+
+    export circuit enqueue(item: T): [] {
+        assert (queue.size < 1024) "QueueError: Queue is full!";
+        queue.elements[queue.tail] = item;
+        queue.tail = (queue.tail + 1) % 1024;
+        queue.size.increment(1);
+        return [];
+    }
+
+    export circuit dequeue(): T {
+        assert (queue.size > 0) "QueueError: Queue is empty!";
+        const item = queue.elements[queue.front];
+        queue.front = (queue.front + 1) % 1024;
+        queue.size.decrement(1);
+        return [];
+    }
+
+    export circuit length(): Uint<64> {
+        return queue.size;
+    }
+
+    export circuit isEmpty(): Boolean {
+        return queue.size == 0;
+    }
+
+    export circuit isFull(): Boolean {
+        return queue.size == 1024;
+    }
+
+    export circuit peek(): T {
+        assert (queue.size > 0) "QueueError: Queue is empty!";
+        return queue.elements[queue.front];
+    }
+}
