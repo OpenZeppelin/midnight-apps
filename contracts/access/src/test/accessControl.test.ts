@@ -21,7 +21,7 @@ describe('AccessControl', () => {
     testAccessControlMockContract = new MockAccessControlContract(admin);
   });
 
-  test.skip('initialize', () => {
+  test('initialize', () => {
     const currentPublicState = testAccessControlMockContract.getCurrentLedger();
     const currentPrivateState =
       testAccessControlMockContract.getCurrentPrivateState();
@@ -41,11 +41,11 @@ describe('AccessControl', () => {
     //     [adminPkBytes, adminRoleHash],
     //   );
 
-    const actualAdminRoleValue = currentPrivateState.roles[admin];
+    const actualAdminRoleValue = currentPrivateState.roles[adminRoleCommitContract.toString()];
     const expectedAdminRoleValue: RoleValue = {
-      role: MockAccessContract.AccessControl_Role.Admin,
       commitment: adminRoleCommitContract,
       index: 0n,
+      role: MockAccessContract.AccessControl_Role.Admin,
     };
 
     // Check the hash calculation
