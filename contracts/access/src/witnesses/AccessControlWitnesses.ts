@@ -1,25 +1,52 @@
-import * as crypto from 'node:crypto';
+import { getRandomValues } from 'node:crypto';
 import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
-import * as Contract from '..//artifacts/MockAccessControl/contract/index.cjs';
+import {
+  AccessControl_Role,
+  type Ledger,
+  type Maybe,
+  type MerkleTreePath,
+  type Witnesses,
+  type ZswapCoinPublicKey,
+} from '../artifacts/MockAccessControl/contract/index.cjs';
 import type { RoleValue } from '../types';
 import { maybeFromNullable } from '../utils';
 import { emptyMerkleTreePath } from '../utils/test';
 
+/**
+ * @description Represents the private state of an access control contract, storing a secret key and role assignments.
+ */
 export type AccessContractPrivateState = {
+  /** @description A 32-byte secret key used for cryptographic operations, such as nullifier generation. */
   secretKey: Buffer;
+
+  /** @description A record mapping user-role commitment strings to their role values. */
   roles: Record<string, RoleValue>;
 };
 
-// Operations on PrivateState
+/**
+ * @description Utility object for managing the private state of an access control contract.
+ */
 export const AccessContractPrivateState = {
+  /**
+   * @description Generates a new private state with a random secret key and empty roles.
+   * @returns A fresh AccessContractPrivateState instance.
+   */
   generate: (): AccessContractPrivateState => {
-    return { secretKey: crypto.getRandomValues(Buffer.alloc(32)), roles: {} };
+    return { secretKey: getRandomValues(Buffer.alloc(32)), roles: {} };
   },
 
+  /**
+   * @description Updates the private state with a new role assignment for a user.
+   * @param state - The current private state to update.
+   * @param userRoleCommit - The commitment hash of the user-role pair.
+   * @param role - The role to assign (e.g., Admin, Lp, Trader, None).
+   * @param index - The index of the commitment in the Merkle tree.
+   * @returns The updated private state with the new role entry.
+   */
   updateRole: (
     state: AccessContractPrivateState,
     userRoleCommit: Uint8Array,
-    role: Contract.AccessControl_Role,
+    role: AccessControl_Role,
     index: bigint,
   ): AccessContractPrivateState => {
     const userRoleCommitString = userRoleCommit.toString();
@@ -37,18 +64,31 @@ export const AccessContractPrivateState = {
     };
   },
 
+  /**
+   * @description Retrieves the role for a given user from the private state.
+   * @param state - The current private state.
+   * @param user - The public key of the user to query.
+   * @returns The user’s role, defaulting to None if not found.
+   */
   getRole: (
     state: AccessContractPrivateState,
-    user: Contract.ZswapCoinPublicKey,
-  ): Contract.AccessControl_Role => {
+    user: ZswapCoinPublicKey,
+  ): AccessControl_Role => {
     const userKey = Buffer.from(user.bytes).toString('hex');
-    return state.roles[userKey]?.role ?? Contract.AccessControl_Role.None;
+    return state.roles[userKey]?.role ?? AccessControl_Role.None;
   },
 
+  /**
+   * @description Updates the Merkle tree path for an existing role in the private state.
+   * @param state - The current private state.
+   * @param userRoleCommit - The commitment hash of the user-role pair.
+   * @param path - The Merkle tree path to store.
+   * @returns The updated private state, or unchanged if the role doesn’t exist.
+   */
   updatePath: (
     state: AccessContractPrivateState,
     userRoleCommit: Uint8Array,
-    path: Contract.MerkleTreePath<Uint8Array>,
+    path: MerkleTreePath<Uint8Array>,
   ): AccessContractPrivateState => {
     const userRoleCommitString = userRoleCommit.toString();
     const existing = state.roles[userRoleCommitString];
@@ -63,12 +103,24 @@ export const AccessContractPrivateState = {
   },
 };
 
+/**
+ * @description Factory function creating witness implementations for access control operations.
+ * @returns An object implementing the Witnesses interface for AccessContractPrivateState.
+ */
 export const AccessControlWitnesses =
-  (): Contract.Witnesses<AccessContractPrivateState> => ({
+  (): Witnesses<AccessContractPrivateState> => ({
+    /**
+     * @description Updates the private state with a new role assignment.
+     * @param context - The witness context containing ledger and private state.
+     * @param userRoleCommit - The commitment hash of the user-role pair.
+     * @param role - The role to assign.
+     * @param index - The Merkle tree index for the commitment.
+     * @returns A tuple of the updated private state and an empty array as the witness result.
+     */
     updateRole(
-      context: WitnessContext<Contract.Ledger, AccessContractPrivateState>,
+      context: WitnessContext<Ledger, AccessContractPrivateState>,
       userRoleCommit: Uint8Array,
-      role: Contract.AccessControl_Role,
+      role: AccessControl_Role,
       index: bigint,
     ): [AccessContractPrivateState, []] {
       return [
@@ -81,13 +133,17 @@ export const AccessControlWitnesses =
         [],
       ];
     },
+
+    /**
+     * @description Retrieves the Merkle tree path for a user-role commitment from the ledger or private state.
+     * @param context - The witness context containing ledger and private state.
+     * @param userRoleCommit - The commitment hash to look up.
+     * @returns A tuple of the unchanged private state and a Maybe containing the Merkle path or an empty path.
+     */
     getRolePath(
-      context: WitnessContext<Contract.Ledger, AccessContractPrivateState>,
+      context: WitnessContext<Ledger, AccessContractPrivateState>,
       userRoleCommit: Uint8Array,
-    ): [
-      AccessContractPrivateState,
-      Contract.Maybe<Contract.MerkleTreePath<Uint8Array>>,
-    ] {
+    ): [AccessContractPrivateState, Maybe<MerkleTreePath<Uint8Array>>] {
       const userRoleCommitString = userRoleCommit.toString();
       const roleEntry = context.privateState.roles[userRoleCommitString];
 
@@ -109,8 +165,14 @@ export const AccessControlWitnesses =
         ),
       ];
     },
+
+    /**
+     * @description Retrieves the secret key from the private state.
+     * @param context - The witness context containing the private state.
+     * @returns A tuple of the unchanged private state and the secret key as a Uint8Array.
+     */
     getSecretKey(
-      context: WitnessContext<Contract.Ledger, AccessContractPrivateState>,
+      context: WitnessContext<Ledger, AccessContractPrivateState>,
     ): [AccessContractPrivateState, Uint8Array] {
       return [context.privateState, context.privateState.secretKey];
     },

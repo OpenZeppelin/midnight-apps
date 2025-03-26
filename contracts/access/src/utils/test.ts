@@ -17,12 +17,12 @@ import type { MockContract } from '../types';
  * sender identity, and transaction data.
  *
  * @template P - The type of the contract's private state.
- *
  * @param privateState - The current private state of the contract.
  * @param contractState - The full contract state, including public and private data.
  * @param sender - The public key of the sender (used in the circuit).
  * @param contractAddress - The address of the deployed contract.
  * @returns A fully populated `CircuitContext` for circuit execution.
+ * @todo TODO: Move this utility to a generic package for broader reuse across contracts.
  */
 export function useCircuitContext<P>(
   privateState: P,
@@ -46,10 +46,10 @@ export function useCircuitContext<P>(
  * @template P - The type of the contract's private state.
  * @template L - The type of the contract's ledger (public state).
  * @template C - The specific type of the contract implementing `MockContract`.
- *
  * @param contract - The contract instance implementing `MockContract`.
  * @param sender - The public key to set as the sender in the new circuit context.
  * @returns A new `CircuitContext` with the sender and updated context values.
+ * @todo TODO: Move this utility to a generic package for broader reuse across contracts.
  */
 export function useCircuitContextSender<P, L, C extends MockContract<P, L>>(
   contract: C,
@@ -67,6 +67,10 @@ export function useCircuitContextSender<P, L, C extends MockContract<P, L>>(
   };
 }
 
+/**
+ * @description A default empty Merkle tree path with a depth of 10, used as a placeholder.
+ * @todo TODO: Move this utility to a generic package for broader reuse across contracts.
+ */
 export const emptyMerkleTreePath: MerkleTreePath<Uint8Array> = {
   leaf: new Uint8Array(32),
   path: Array(10).fill({
