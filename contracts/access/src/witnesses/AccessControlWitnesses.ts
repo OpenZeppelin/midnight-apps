@@ -1,9 +1,9 @@
+import * as crypto from 'node:crypto';
 import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
 import * as Contract from '..//artifacts/MockAccessControl/contract/index.cjs';
 import type { RoleValue } from '../types';
 import { maybeFromNullable } from '../utils';
 import { emptyMerkleTreePath } from '../utils/test';
-import * as crypto from 'node:crypto';
 
 export type AccessContractPrivateState = {
   secretKey: Buffer;

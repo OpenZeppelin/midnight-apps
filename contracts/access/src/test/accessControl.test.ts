@@ -6,10 +6,9 @@ import { sampleCoinPublicKey } from '@midnight-ntwrk/zswap';
 import { beforeEach, describe, expect, test } from 'vitest';
 import * as MockAccessContract from '../artifacts/MockAccessControl/contract/index.cjs';
 import type { RoleValue } from '../types';
-import { MockAccessControlContract } from './mock/AccessControlMockContract';
-import { useCircuitContextSender } from '../utils/test';
+import { MockAccessControlContract } from './mock/MockAccessControlContract';
 
-let testAccessControlMockContract: MockAccessControlContract;
+let mockAccessControlContract: MockAccessControlContract;
 let admin: CoinPublicKey;
 let adminPkBytes: Uint8Array;
 
@@ -18,13 +17,14 @@ describe('AccessControl', () => {
     // Fixing Admin address for testing purposes
     admin = '9905a18ce5bd2d7945818b18be9b0afe387efe29c8ffa81d90607a651fb83a2b';
     adminPkBytes = encodeCoinPublicKey(admin);
-    testAccessControlMockContract = new MockAccessControlContract(admin);
+    mockAccessControlContract = new MockAccessControlContract(admin);
   });
 
   test('initialize', () => {
-    const currentPublicState = testAccessControlMockContract.getCurrentLedger();
+    const currentPublicState =
+      mockAccessControlContract.getCurrentPublicState();
     const currentPrivateState =
-      testAccessControlMockContract.getCurrentPrivateState();
+      mockAccessControlContract.getCurrentPrivateState();
 
     const adminRoleCommitContract =
       MockAccessContract.pureCircuits.AccessControl_hashUserRole(
@@ -41,7 +41,8 @@ describe('AccessControl', () => {
     //     [adminPkBytes, adminRoleHash],
     //   );
 
-    const actualAdminRoleValue = currentPrivateState.roles[adminRoleCommitContract.toString()];
+    const actualAdminRoleValue =
+      currentPrivateState.roles[adminRoleCommitContract.toString()];
     const expectedAdminRoleValue: RoleValue = {
       commitment: adminRoleCommitContract,
       index: 0n,
@@ -69,23 +70,19 @@ describe('AccessControl', () => {
 
     // Failed test: Non Admin call!
     expect(() =>
-      testAccessControlMockContract.contract.circuits.grantRole(
-        useCircuitContextSender(
-          testAccessControlMockContract,
-          notAuthorizedUser,
-        ),
+      mockAccessControlContract.grantRole(
         { bytes: encodeCoinPublicKey(lpUser) },
         MockAccessContract.AccessControl_Role.Lp,
+        notAuthorizedUser,
       ),
     ).toThrowError('AccessControl: Unauthorized user!');
 
     // Success test: Admin call!
-    const circuitResult =
-      testAccessControlMockContract.contract.impureCircuits.grantRole(
-        useCircuitContextSender(testAccessControlMockContract, admin),
-        { bytes: encodeCoinPublicKey(lpUser) },
-        MockAccessContract.AccessControl_Role.Lp,
-      );
+    const circuitResult = mockAccessControlContract.grantRole(
+      { bytes: encodeCoinPublicKey(lpUser) },
+      MockAccessContract.AccessControl_Role.Lp,
+      admin,
+    );
 
     const lpRoleCommitContract =
       MockAccessContract.pureCircuits.AccessControl_hashUserRole(
@@ -94,9 +91,7 @@ describe('AccessControl', () => {
       );
 
     const actualLpRoleValue =
-      circuitResult.context.currentPrivateState.roles[
-        lpRoleCommitContract.toString()
-      ];
+      circuitResult.currentPrivateState.roles[lpRoleCommitContract.toString()];
     const expectedLpRoleValue: RoleValue = {
       role: MockAccessContract.AccessControl_Role.Lp,
       commitment: lpRoleCommitContract,
@@ -107,10 +102,10 @@ describe('AccessControl', () => {
 
     // Fail test: Prevent double granting the same role to the same address!
     expect(() =>
-      testAccessControlMockContract.contract.impureCircuits.grantRole(
-        useCircuitContextSender(testAccessControlMockContract, admin),
+      mockAccessControlContract.grantRole(
         { bytes: encodeCoinPublicKey(lpUser) },
         MockAccessContract.AccessControl_Role.Lp,
+        admin,
       ),
     ).toThrowError('AccessControl: Role already granted!');
   });

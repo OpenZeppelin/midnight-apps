@@ -20,7 +20,7 @@ export interface MockContract<PrivateState, Ledger> {
   circuitContext: CircuitContext<PrivateState>;
 
   /** Retrieves the current ledger state. */
-  getCurrentLedger(): Ledger;
+  getCurrentPublicState(): Ledger;
 
   /** Retrieves the current private state. */
   getCurrentPrivateState(): PrivateState;

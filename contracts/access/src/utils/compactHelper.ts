@@ -1,4 +1,4 @@
-import type * as Contract from '..//artifacts/TestAccessControl/contract/index.cjs';
+import type * as Contract from '../artifacts/MockAccessControl/contract/index.cjs';
 
 export const maybeFromNullable = <T>(
   nullable: T | null | undefined,
