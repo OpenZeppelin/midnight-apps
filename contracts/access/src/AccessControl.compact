@@ -72,9 +72,8 @@ module AccessControl {
      */
     export circuit initialize(initialAdmin: ZswapCoinPublicKey): [] {
         assert (!isInitialized) "AccessControl: AccessControl contract is initialized!";
-        _grantRole(initialAdmin, Role.Admin);
         isInitialized = true;
-        return [];
+        return _grantRole(initialAdmin, Role.Admin);
     }
 
     /**
@@ -84,16 +83,10 @@ module AccessControl {
      * @returns {[]} - An empty array indicating success.
      * @throws {RoleError} - If the contract is not initialized, caller is not Admin, or the role tree is full.
      */
-    export circuit grantRole(user: ZswapCoinPublicKey, role: Role): [] {
+    export circuit grantRole(user: ZswapCoinPublicKey, role: Role): [] { 
         assert (isInitialized) "AccessControl: Role contract is not initialized yet!";
         assert (onlyAdmin()) "AccessControl: Caller does not have an Admin role!";
-        assert (!roleCommits.is_full()) "AccessControl: Role commitments tree is full!";
 
-        const nullifier = hashNullifier(user, role);
-        const isExist = roleNullifiers.member(nullifier);
-        assert (!roleNullifiers.member(nullifier)) "AccessControl: Role already granted!";
-    
-        roleNullifiers.insert(disclose(nullifier));
         return _grantRole(user, role);
     }
 
@@ -104,10 +97,20 @@ module AccessControl {
      * @returns {[]} - An empty array indicating success.
      */
     circuit _grantRole(user: ZswapCoinPublicKey, role: Role): [] {
+        assert (!roleCommits.is_full()) "AccessControl: Role commitments tree is full!";
+
+        const nullifier = hashNullifier(user, role);
+        const isExist = roleNullifiers.member(nullifier);
+        assert (!roleNullifiers.member(nullifier)) "AccessControl: Role already granted!";
+    
+        roleNullifiers.insert(disclose(nullifier));
+
         const userRoleCommit = hashUserRole(user, role);
         const currentIndex = index;
+
         roleCommits.insert_index(userRoleCommit, currentIndex);
         updateRole(userRoleCommit, role, currentIndex);
+
         return index.increment(1);
     }
 

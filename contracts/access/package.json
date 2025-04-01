@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "compact": "find src -name '*.compact' -exec sh -c 'run-compactc \"{}\" \"src/artifacts/$(basename \"{}\" .compact)\"' \\;",
-    "build": "rm -rf dist && tsc --project tsconfig.build.json && cp -Rf ./src/artifacts ./dist/artifacts && cp ./src/counter.compact ./dist",
+    "build": "rm -rf dist && tsc --project tsconfig.build.json && cp -Rf ./src/artifacts ./dist/artifacts && cp ./src/AccessControl.compact ./dist",
     "test": "vitest run --printConsoleTrace"
   },
   "keywords": [],

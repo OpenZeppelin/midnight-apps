@@ -6,10 +6,10 @@ import type {
 
 /**
  * Generic interface for mock contract implementations.
- * @template PrivateState - The type of the contract's private state.
+ * @template P - The type of the contract's private state.
  * @template L - The type of the contract's ledger (public state).
  */
-export interface MockContract<PrivateState, Ledger> {
+export interface IMockContract<P, L> {
   /** The contract's deployed address. */
   readonly contractAddress: string;
 
@@ -17,13 +17,13 @@ export interface MockContract<PrivateState, Ledger> {
   readonly admin: CoinPublicKey;
 
   /** The current circuit context. */
-  circuitContext: CircuitContext<PrivateState>;
+  circuitContext: CircuitContext<P>;
 
   /** Retrieves the current ledger state. */
-  getCurrentPublicState(): Ledger;
+  getCurrentPublicState(): L;
 
   /** Retrieves the current private state. */
-  getCurrentPrivateState(): PrivateState;
+  getCurrentPrivateState(): P;
 
   /** Retrieves the current contract state. */
   getCurrentContractState(): ContractState;

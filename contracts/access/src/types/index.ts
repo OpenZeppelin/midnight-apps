@@ -1,2 +1,2 @@
 export type { RoleValue } from './role';
-export type { MockContract } from './test';
+export type { IMockContract } from './test';
