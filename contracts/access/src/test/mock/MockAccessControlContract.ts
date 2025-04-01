@@ -15,19 +15,19 @@ import {
   type ZswapCoinPublicKey,
   ledger,
 } from '../../artifacts/MockAccessControl/contract/index.cjs'; // Combined imports
-import type { IMockContract } from '../../types';
+import type { IContractSimulator } from '../../types';
 import {
   AccessContractPrivateState,
   AccessControlWitnesses,
 } from '../../witnesses';
 
 /**
- * @description A mock implementation of an access control contract for testing purposes.
+ * @description A simulator implementation of an access control contract for testing purposes.
  * @template P - The private state type, fixed to AccessContractPrivateState.
  * @template L - The ledger type, fixed to Contract.Ledger.
  */
-export class MockAccessControlContract
-  implements IMockContract<AccessContractPrivateState, Ledger>
+export class AccessControlContractSimulator
+  implements IContractSimulator<AccessContractPrivateState, Ledger>
 {
   /** @description The underlying contract instance managing access control logic. */
   readonly contract: MockAccessControl<AccessContractPrivateState>;

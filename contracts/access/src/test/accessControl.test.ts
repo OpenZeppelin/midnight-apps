@@ -6,16 +6,16 @@ import { sampleCoinPublicKey } from '@midnight-ntwrk/zswap';
 import { beforeEach, describe, expect, test } from 'vitest';
 import * as MockAccessContract from '../artifacts/MockAccessControl/contract/index.cjs';
 import type { RoleValue } from '../types';
-import { MockAccessControlContract } from './mock/MockAccessControlContract';
+import { AccessControlContractSimulator } from './mock/MockAccessControlContract';
 
-let mockAccessControlContract: MockAccessControlContract;
+let mockAccessControlContract: AccessControlContractSimulator;
 let admin: CoinPublicKey;
 let adminPkBytes: Uint8Array;
 
 const setup = () => {
   admin = '9905a18ce5bd2d7945818b18be9b0afe387efe29c8ffa81d90607a651fb83a2b';
   adminPkBytes = encodeCoinPublicKey(admin);
-  mockAccessControlContract = new MockAccessControlContract(admin);
+  mockAccessControlContract = new AccessControlContractSimulator(admin);
 };
 
 describe('AccessControl', () => {

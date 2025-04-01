@@ -9,7 +9,7 @@ import type {
  * @template P - The type of the contract's private state.
  * @template L - The type of the contract's ledger (public state).
  */
-export interface IMockContract<P, L> {
+export interface IContractSimulator<P, L> {
   /** The contract's deployed address. */
   readonly contractAddress: string;
 
