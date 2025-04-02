@@ -3,6 +3,13 @@
 #### Overview
 <!-- 
 Briefly describe what this PR introduces or changes. Include context for why the change is being made and what problem it solves. 
+If the PR is nontrivial, consider linking to a related issue.
+-->
+
+#### Resolves
+<!-- 
+If applicable, include a reference to the issue this PR resolves.
+e.g., Resolves #123
 -->
 
 #### Key Changes
