@@ -96,6 +96,8 @@ module Queue<T> {
      * and increments `tail`. Time complexity: O(1).
      */
     export circuit enqueue(item: T): [] {
+        // TODO: test tail overflow, currently that will be an infeasible test.
+        // Because of the limit of increment(steps: Uint<16>)
         const MAX_UINT64 = 18446744073709551615;
         assert (tail != MAX_UINT64) "Queue: tail counter reached maximum capacity.";
         state.insert(tail, item);
