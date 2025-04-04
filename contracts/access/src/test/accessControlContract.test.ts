@@ -25,11 +25,10 @@ describe('AccessControl', () => {
     test('should initialize with admin role', () => {
       const publicState = mockAccessControlContract.getCurrentPublicState();
       const privateState = mockAccessControlContract.getCurrentPrivateState();
-      const adminRoleCommit =
-        MockAccessContract.pureCircuits.hashUserRole(
-          { bytes: adminPkBytes },
-          MockAccessContract.AccessControl_Role.Admin,
-        );
+      const adminRoleCommit = MockAccessContract.pureCircuits.hashUserRole(
+        { bytes: adminPkBytes },
+        MockAccessContract.AccessControl_Role.Admin,
+      );
       const expectedAdminRole: RoleValue = {
         commitment: adminRoleCommit,
         index: 0n,
@@ -67,11 +66,10 @@ describe('AccessControl', () => {
         MockAccessContract.AccessControl_Role.Lp,
         admin,
       );
-      const lpRoleCommit =
-        MockAccessContract.pureCircuits.hashUserRole(
-          { bytes: encodeCoinPublicKey(lpUser) },
-          MockAccessContract.AccessControl_Role.Lp,
-        );
+      const lpRoleCommit = MockAccessContract.pureCircuits.hashUserRole(
+        { bytes: encodeCoinPublicKey(lpUser) },
+        MockAccessContract.AccessControl_Role.Lp,
+      );
       const expectedLpRole: RoleValue = {
         role: MockAccessContract.AccessControl_Role.Lp,
         commitment: lpRoleCommit,
@@ -170,11 +168,10 @@ describe('AccessControl', () => {
         MockAccessContract.AccessControl_Role.None,
         admin,
       );
-      const noneRoleCommit =
-        MockAccessContract.pureCircuits.hashUserRole(
-          { bytes: encodeCoinPublicKey(user) },
-          MockAccessContract.AccessControl_Role.None,
-        );
+      const noneRoleCommit = MockAccessContract.pureCircuits.hashUserRole(
+        { bytes: encodeCoinPublicKey(user) },
+        MockAccessContract.AccessControl_Role.None,
+      );
       const expectedNoneRole: RoleValue = {
         role: MockAccessContract.AccessControl_Role.None,
         commitment: noneRoleCommit,
