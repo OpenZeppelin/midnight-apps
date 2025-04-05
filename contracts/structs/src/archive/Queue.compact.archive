@@ -20,11 +20,6 @@ pragma language_version >= 0.14.0;
 module Queue<T> {
     import CompactStandardLibrary;
 
-    // Compact does not currently support defining a global 
-    // constant.
-    // TODO: replace all 1024 with MAX_SIZE
-    // const MAX_SIZE: = 1024;
-
     /**
      * @struct Queue
      * @description Fixed-size queue structure with Vector storage.
@@ -42,6 +37,13 @@ module Queue<T> {
 
     /** @type {Queue} The queue’s ledger state. */
     export ledger queue: Queue;
+
+    /** @type */
+    export sealed ledger MAX_SIZE: Uint<10>;
+
+    export circuit initialize(): [] {
+        MAX_SIZE = 1024;
+    }
 
     /**
      * @description Adds an item to the back of the queue.
