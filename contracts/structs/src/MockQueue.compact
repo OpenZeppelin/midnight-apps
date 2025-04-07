@@ -2,19 +2,31 @@ pragma language_version >= 0.14.0;
 
 import CompactStandardLibrary;
 
-import Queue<Uint<16>> prefix Queue_;
+import Queue<Uint<64>> prefix Queue_;
 
 // Export Public state
 export { Queue_state, Queue_tail, Queue_head }
 
-export circuit enqueue(item: Uint<16>): [] {
+export circuit enqueue(item: Uint<64>): [] {
     return Queue_enqueue(item);
 }
 
-export circuit dequeue(): Maybe<Uint<16>> {
+export circuit dequeue(): Maybe<Uint<64>> {
     return Queue_dequeue();
 }
 
+export circuit dequeue2(): Uint<64> {
+    const value = Queue_dequeue();
+
+    assert (value.is_some) "Error: value is not set";
+
+    return value.value;
+}
+
 export circuit isEmpty(): Boolean {
-    return Queue_isEmpty();
+    if (Queue_isEmpty()) {
+        return true;
+    } else {
+        return false;
+    }
 }

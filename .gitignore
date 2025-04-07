@@ -152,3 +152,6 @@ dist
 
 # Compact
 artifacts/
+
+# env
+.envrc

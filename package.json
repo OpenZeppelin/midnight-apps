@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "compact": "turbo run compact",
+    "build": "turbo run build",
     "test": "turbo run test",
     "fmt": "biome format --write",
     "lint": "biome lint",

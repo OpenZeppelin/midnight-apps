@@ -7,7 +7,7 @@ import {
   QueryContext,
   emptyZswapLocalState,
 } from '@midnight-ntwrk/compact-runtime';
-import type { MockContract } from '../types';
+import type { IContractSimulator } from '../types';
 
 /**
  * Constructs a `CircuitContext` from the given state and sender information.
@@ -51,7 +51,7 @@ export function useCircuitContext<P>(
  * @returns A new `CircuitContext` with the sender and updated context values.
  * @todo TODO: Move this utility to a generic package for broader reuse across contracts.
  */
-export function useCircuitContextSender<P, L, C extends MockContract<P, L>>(
+export function useCircuitContextSender<P, L, C extends IContractSimulator<P, L>>(
   contract: C,
   sender: CoinPublicKey,
 ): CircuitContext<P> {

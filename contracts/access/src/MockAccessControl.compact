@@ -9,7 +9,13 @@ import AccessControl prefix AccessControl_;
 export { Maybe, MerkleTreePath, ZswapCoinPublicKey };
 
 // Export Public state
-export { AccessControl_Role, AccessControl_roleCommits, AccessControl_isInitialized, AccessControl_index };
+export { 
+    AccessControl_Role, 
+    AccessControl_roleCommits, 
+    AccessControl_isInitialized, 
+    AccessControl_index, 
+    AccessControl_userRoleNullifier
+};
 
 // Export circuits
 export { AccessControl_hashUserRole };
@@ -33,6 +39,10 @@ constructor(initialAdmin: ZswapCoinPublicKey) {
  */
 export circuit grantRole(user: ZswapCoinPublicKey, role: AccessControl_Role): [] {
     return AccessControl_grantRole(user, role);
+}
+
+export circuit revokeRole(user: ZswapCoinPublicKey, role: AccessControl_Role, index: Uint<64>): [] {
+    return AccessControl_revokeRole(user, role, index);
 }
 
 /**
