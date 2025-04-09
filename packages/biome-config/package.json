@@ -1,0 +1,9 @@
+{
+  "name": "@midnight-dapps/biome-config",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./biome": "./biome.json"
+  }
+}

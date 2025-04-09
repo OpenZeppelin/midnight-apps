@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "types": "tsc -p tsconfig.json --noEmit",
+    "fmt": "biome format --write",
+    "lint": "next lint && biome lint",
+    "lint:fix": "biome check --write",
+    "githook:precommit": "lint-staged && pnpm run types"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -60,6 +64,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@midnight-dapps/biome-config": "workspace:^",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",

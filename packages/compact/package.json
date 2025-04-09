@@ -1,17 +1,33 @@
 {
   "name": "@midnight-dapps/compact",
   "version": "1.2.0",
-  "keywords": ["compact", "compiler"],
+  "keywords": [
+    "compact",
+    "compiler"
+  ],
   "author": "",
   "license": "ISC",
   "description": "Compact fetcher",
   "type": "module",
   "main": "index.js",
   "bin": {
-    "run-compactc": "src/run-compactc.cjs"
+    "compact-compile": "dist/Compiler.js",
+    "compact-build": "dist/Builder.js"
+  },
+  "scripts": {
+    "prepare": "tsc",
+    "build": "tsc"
   },
   "packageManager": "pnpm@10.4.1",
   "devDependencies": {
+    "@midnight-dapps/biome-config": "workspace:^",
+    "pino-pretty": "^13.0.0",
     "typescript": "~5.7.2"
+  },
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "log-symbols": "^7.0.0",
+    "ora": "^8.2.0",
+    "pino": "^9.6.0"
   }
 }
