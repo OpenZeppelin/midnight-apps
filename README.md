@@ -37,12 +37,12 @@ nvm use 22.14.0
 
    See `pnpm-workspace.yaml` for the full list.
 
-4. **Build the Workspace**:
+4. **Build Contracts Packages**:
    ```bash
-   pnpm build
+   pnpm build:contracts
    ```
    - Runs `turbo run build`, which compiles `.compact` files (via `compact`) and builds all projects (e.g., TypeScript compilation, artifact copying).
-   
+
 ### Tasks with Turbo
 Turbo manages tasks across the monorepo, defined in `turbo.json`. Key tasks:
 
@@ -51,10 +51,14 @@ Turbo manages tasks across the monorepo, defined in `turbo.json`. Key tasks:
   - Run: `pnpm compact`.
 
 - **`build`**:
-  - Builds projects, including TypeScript compilation and artifact copying, after running `compact`.
-  - Run: `pnpm build`.
-  - Dependencies: Ensures `compact` tasks complete first.
-
+  - **`build:contracts`**
+    - Builds contracts projects, including TypeScript compilation and artifact copying, after running `compact`.
+    - Run: `pnpm build:contracts`.
+    - Dependencies: Ensures `compact` tasks complete first.
+  - **`build:apps`**
+    - Builds apps projects.
+    - Run: `pnpm build:apps`.
+    
 - **`test`**:
   - Runs tests with Vitest.
   - Run: `pnpm test`.

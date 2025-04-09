@@ -6,7 +6,8 @@
   "scripts": {
     "prepare": "is-ci || husky",
     "compact": "turbo run compact",
-    "build": "turbo run build",
+    "build:contracts": "turbo run build --filter './contracts/*'",
+    "build:apps": "turbo run build --filter './apps/*'",
     "test": "turbo run test",
     "fmt": "turbo run fmt",
     "lint": "turbo run lint",

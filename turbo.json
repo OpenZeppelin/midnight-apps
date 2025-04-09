@@ -24,6 +24,7 @@
         "^build",
         "compact"
       ],
+      "env": ["COMPACT_HOME"],
       "inputs": [
         "src/**/*.ts",
         "src/**/*.mts",
