@@ -118,6 +118,6 @@ export class AccessControlContractSimulator
       user,
       role,
     ).context;
-    return this.circuitContext;
+    return this.circuitContext
   }
 }
