@@ -12,7 +12,7 @@
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
     "types": "turbo run types",
-    "githook:precommit": "turbo run precommit"
+    "precommit": "turbo run precommit"
   },
   "keywords": [],
   "author": "",
