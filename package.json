@@ -4,7 +4,7 @@
   "description": "Experimental sample projects on top of Midnight using Compact",
   "main": "index.js",
   "scripts": {
-    "prepare": "husky",
+    "prepare": "is-ci || husky",
     "compact": "turbo run compact",
     "build": "turbo run build",
     "test": "turbo run test",
@@ -28,6 +28,7 @@
     "@types/node": "^22.14.0",
     "@vitest/coverage-v8": "^3.0.9",
     "husky": "^9.1.7",
+    "is-ci": "^4.1.0",
     "lint-staged": "^15.5.0",
     "tailwindcss": "^4.0.6",
     "ts-node": "^10.9.2",
