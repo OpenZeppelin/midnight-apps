@@ -1,5 +1,5 @@
 import type { MerkleTreePath } from '@midnight-dapps/compact-std';
-import type { AccessControl_Role } from '../artifacts/MockAccessControl/contract/index.d.cts';
+import type { AccessControl_Role } from '../artifacts/Index/contract/index.d.cts';
 
 /**
  * @description Represents a role assignment with its cryptographic commitment and Merkle tree metadata.

@@ -4,8 +4,8 @@
   "description": "Compacts for implementing LunarSwap DEX",
   "type": "module",
   "scripts": {
-    "compact": "pnpm exec compact-compile",
-    "build": "pnpm exec compact-build",
+    "compact": "pnpm exec compact-compiler",
+    "build": "pnpm exec compact-builder",
     "test": "vitest run --printConsoleTrace",
     "types": "tsc -p tsconfig.json --noEmit",
     "fmt": "biome format --write",

@@ -51,7 +51,7 @@ const execAsync = promisify(exec);
  *     [BUILD] ❌ Build failed: Command failed: tsc --project tsconfig.build.json
  * ```
  */
-class CompactBuilder {
+export class CompactBuilder {
   private readonly compilerFlags: string;
   private readonly steps: Array<{ cmd: string; msg: string; shell?: string }> = [
     {
@@ -147,11 +147,3 @@ class CompactBuilder {
     }
   }
 }
-
-// Main execution
-const compilerFlags: string = process.argv.slice(2).join(' ');
-const builder = new CompactBuilder(compilerFlags);
-builder.build().catch((err: Error) => {
-  console.error(chalk.red('[BUILD] Unexpected error:', err.message));
-  process.exit(1)
-});

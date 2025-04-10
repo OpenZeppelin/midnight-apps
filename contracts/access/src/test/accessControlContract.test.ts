@@ -4,7 +4,8 @@ import {
 } from '@midnight-ntwrk/compact-runtime';
 import { sampleCoinPublicKey } from '@midnight-ntwrk/zswap';
 import { beforeEach, describe, expect, test } from 'vitest';
-import * as MockAccessContract from '../artifacts/MockAccessControl/contract/index.cjs';
+import { AccessControl_Role } from '../artifacts/Index/contract/index.cjs';
+import { pureCircuits } from '../artifacts/MockAccessControl/contract/index.cjs';
 import type { RoleValue } from '../types';
 import { AccessControlContractSimulator } from './AccessControlContractSimulator';
 
@@ -25,14 +26,14 @@ describe('AccessControl', () => {
     test('should initialize with admin role', () => {
       const publicState = mockAccessControlContract.getCurrentPublicState();
       const privateState = mockAccessControlContract.getCurrentPrivateState();
-      const adminRoleCommit = MockAccessContract.pureCircuits.hashUserRole(
+      const adminRoleCommit = pureCircuits.AccessControl_hashUserRole(
         { bytes: adminPkBytes },
-        MockAccessContract.AccessControl_Role.Admin,
+        AccessControl_Role.Admin,
       );
       const expectedAdminRole: RoleValue = {
         commitment: adminRoleCommit,
         index: 0n,
-        role: MockAccessContract.AccessControl_Role.Admin,
+        role: AccessControl_Role.Admin,
       };
 
       expect(privateState.roles[adminRoleCommit.toString()]).toEqual(
