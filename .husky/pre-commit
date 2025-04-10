@@ -1,0 +1,1 @@
+CI=true NODE_ENV=production pnpm turbo run precommit

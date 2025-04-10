@@ -1,14 +1,19 @@
 {
   "name": "midnight-dapps",
   "version": "1.0.0",
-  "description": "",
+  "description": "Experimental sample projects on top of Midnight using Compact",
   "main": "index.js",
   "scripts": {
+    "prepare": "is-ci || husky",
     "compact": "turbo run compact",
+    "build:contracts": "turbo run build --filter './contracts/*'",
+    "build:apps": "turbo run build --filter './apps/*'",
     "test": "turbo run test",
-    "fmt": "biome format --write",
-    "lint": "biome lint",
-    "lint:fix": "biome check --write"
+    "fmt": "turbo run fmt",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "types": "turbo run types",
+    "precommit": "turbo run precommit"
   },
   "keywords": [],
   "author": "",
@@ -16,20 +21,31 @@
   "packageManager": "pnpm@10.4.1",
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "@commitlint/cli": "^19.8.0",
+    "@commitlint/config-conventional": "^19.8.0",
+    "@commitlint/types": "^19.8.0",
     "@midnight-ntwrk/compact-runtime": "^0.7.0",
     "@tailwindcss/vite": "^4.0.6",
     "@types/node": "^22.14.0",
     "@vitest/coverage-v8": "^3.0.9",
+    "husky": "^9.1.7",
+    "is-ci": "^4.1.0",
+    "lint-staged": "^15.5.0",
     "tailwindcss": "^4.0.6",
+    "ts-node": "^10.9.2",
     "turbo": "^2.4.4",
     "typescript": "^5.8.2",
     "vite": "^6.2.2",
     "vitest": "^3.0.9"
   },
   "pnpm": {
-    "ignoredBuiltDependencies": ["@biomejs/biome", "esbuild"]
+    "ignoredBuiltDependencies": [
+      "@biomejs/biome",
+      "esbuild"
+    ]
   },
   "engines": {
     "node": "22.x"
-  }
+  },
+  "engineStrict": true
 }

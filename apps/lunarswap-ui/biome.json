@@ -1,0 +1,3 @@
+{
+  "extends": ["@midnight-dapps/biome-config/biome"]
+}

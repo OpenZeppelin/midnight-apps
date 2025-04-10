@@ -17,7 +17,6 @@
     "lineWidth": 80
   },
   "linter": {
-    "ignore": ["packages/create-wagmi/templates/*"],
     "enabled": true,
     "rules": {
       "recommended": true,

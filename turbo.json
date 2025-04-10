@@ -2,12 +2,66 @@
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
     "compact": {
-      "env": ["COMPACT_HOME"],
-      "inputs": ["src/**/*.compact"],
+      "env": [
+        "COMPACT_HOME"
+      ],
+      "inputs": [
+        "src/**/*.compact"
+      ],
       "outputLogs": "new-only",
-      "outputs": ["src/artifacts/**", "src/gen/**", "gen/**"]
+      "outputs": [
+        "src/artifacts/**",
+        "src/gen/**",
+        "gen/**"
+      ]
     },
     "test": {
+      "outputs": [],
+      "cache": false
+    },
+    "build": {
+      "dependsOn": [
+        "^build",
+        "compact"
+      ],
+      "env": [
+        "COMPACT_HOME"
+      ],
+      "inputs": [
+        "src/**/*.ts",
+        "src/**/*.mts",
+        "src/**/*.tsx",
+        "!src/**/*.test.ts",
+        "!tests/**/*.ts",
+        "tsconfig.json",
+        "tsconfig.build.json",
+        ".env"
+      ],
+      "outputs": [
+        "dist/**"
+      ]
+    },
+    "types": {
+      "outputs": [],
+      "cache": false,
+      "dependsOn": [
+        "compact"
+      ]
+    },
+    "precommit": {
+      "dependsOn": [],
+      "outputs": [],
+      "cache": false
+    },
+    "fmt": {
+      "outputs": [],
+      "cache": false
+    },
+    "lint": {
+      "outputs": [],
+      "cache": false
+    },
+    "lint:fix": {
       "outputs": [],
       "cache": false
     }
