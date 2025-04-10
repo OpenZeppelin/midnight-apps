@@ -1,0 +1,27 @@
+{
+  "name": "@midnight-dapps/structs-contracts",
+  "version": "1.0.0-alpha.1",
+  "description": "Compacts contracts for Data structures i.e. Queue",
+  "type": "module",
+  "scripts": {
+    "compact": "find src -name '*.compact' -exec sh -c 'run-compactc \"{}\" \"src/artifacts/$(basename \"{}\" .compact)\"' \\;",
+    "build": "rm -rf dist && tsc --project tsconfig.build.json && cp -Rf ./src/artifacts ./dist/artifacts && cp ./src/Queue.compact ./dist",
+    "test": "vitest run --printConsoleTrace",
+    "fmt": "biome format --write"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.4.1",
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.9"
+  },
+  "dependencies": {
+    "@midnight-dapps/compact": "workspace:^",
+    "@midnight-ntwrk/compact-runtime": "^0.7.0",
+    "@midnight-ntwrk/midnight-js-network-id": "^0.2.5",
+    "@midnight-ntwrk/zswap": "^3.0.6"
+  }
+}

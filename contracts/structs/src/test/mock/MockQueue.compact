@@ -2,7 +2,7 @@ pragma language_version >= 0.14.0;
 
 import CompactStandardLibrary;
 
-import Queue<Uint<16>> prefix Queue_;
+import "../../Queue"<Uint<16>> prefix Queue_;
 
 // Export Public state
 export { Queue_state, Queue_tail, Queue_head }
