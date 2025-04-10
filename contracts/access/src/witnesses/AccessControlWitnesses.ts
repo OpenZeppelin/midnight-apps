@@ -1,12 +1,14 @@
 import { getRandomValues } from 'node:crypto';
+import type {
+  Maybe,
+  MerkleTreePath,
+  ZswapCoinPublicKey,
+} from '@midnight-dapps/compact-std';
 import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
 import {
   AccessControl_Role,
   type Ledger,
-  type Maybe,
-  type MerkleTreePath,
   type Witnesses,
-  type ZswapCoinPublicKey,
 } from '../artifacts/MockAccessControl/contract/index.cjs';
 import type { RoleValue } from '../types';
 import { maybeFromNullable } from '../utils';

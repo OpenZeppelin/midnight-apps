@@ -240,6 +240,9 @@ importers:
       '@midnight-dapps/compact':
         specifier: workspace:^
         version: link:../../packages/compact
+      '@midnight-dapps/compact-std':
+        specifier: workspace:^
+        version: link:../../packages/compact-std
       '@midnight-ntwrk/compact-runtime':
         specifier: ^0.7.0
         version: 0.7.0
@@ -286,6 +289,34 @@ importers:
       typescript:
         specifier: ~5.7.2
         version: 5.7.3
+
+  packages/compact-std:
+    dependencies:
+      '@midnight-dapps/biome-config':
+        specifier: workspace:^
+        version: link:../biome-config
+      '@midnight-dapps/compact':
+        specifier: workspace:^
+        version: link:../compact
+      '@midnight-ntwrk/compact-runtime':
+        specifier: ^0.7.0
+        version: 0.7.0
+      '@midnight-ntwrk/midnight-js-network-id':
+        specifier: ^0.2.5
+        version: 0.2.5
+      '@midnight-ntwrk/zswap':
+        specifier: ^3.0.6
+        version: 3.0.6
+    devDependencies:
+      '@types/node':
+        specifier: ^22.13.10
+        version: 22.14.0
+      typescript:
+        specifier: ^5.8.2
+        version: 5.8.2
+      vitest:
+        specifier: ^3.0.9
+        version: 3.0.9(@types/node@22.14.0)(jiti@2.4.2)(lightningcss@1.29.1)(yaml@2.7.1)
 
 packages:
 

@@ -1,3 +1,4 @@
+import type { ZswapCoinPublicKey } from '@midnight-dapps/compact-std';
 import {
   type CircuitContext,
   type CoinPublicKey,
@@ -12,9 +13,8 @@ import {
   type AccessControl_Role,
   type Ledger,
   Contract as MockAccessControl,
-  type ZswapCoinPublicKey,
   ledger,
-} from '../artifacts/MockAccessControl/contract/index.cjs'; // Combined imports
+} from '../artifacts/MockAccessControl/contract/index.cjs';
 import type { IContractSimulator } from '../types';
 import {
   AccessContractPrivateState,

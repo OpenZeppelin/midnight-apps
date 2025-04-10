@@ -1,17 +1,20 @@
 {
-  "name": "@midnight-dapps/access-contract",
+  "name": "@midnight-dapps/compact-std",
   "version": "1.0.0-alpha.1",
-  "description": "Compacts for implementing LunarSwap DEX",
+  "description": "",
   "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
+    "prepare": "pnpm build",
     "compact": "pnpm exec compact-compile",
-    "build": "pnpm exec compact-build",
+    "build": "pnpm exec compact-build && tsc",
     "test": "vitest run --printConsoleTrace",
     "types": "tsc -p tsconfig.json --noEmit",
     "fmt": "biome format --write",
     "lint": "biome lint",
     "lint:fix": "biome check --write",
-    "precommit": "lint-staged --no-stash && pnpm run types"
+    "precommit": "lint-staged && pnpm run types"
   },
   "keywords": [],
   "author": "",
@@ -25,7 +28,6 @@
   "dependencies": {
     "@midnight-dapps/biome-config": "workspace:^",
     "@midnight-dapps/compact": "workspace:^",
-    "@midnight-dapps/compact-std": "workspace:^",
     "@midnight-ntwrk/compact-runtime": "^0.7.0",
     "@midnight-ntwrk/midnight-js-network-id": "^0.2.5",
     "@midnight-ntwrk/zswap": "^3.0.6"

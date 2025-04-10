@@ -1,4 +1,4 @@
-import type { Maybe } from '../artifacts/MockAccessControl/contract/index.d.cts';
+import type { Maybe } from '@midnight-dapps/compact-std';
 
 /**
  * @description Converts a nullable value into a Maybe type, providing a default empty value if null or undefined.
