@@ -24,7 +24,9 @@
         "^build",
         "compact"
       ],
-      "env": ["COMPACT_HOME"],
+      "env": [
+        "COMPACT_HOME"
+      ],
       "inputs": [
         "src/**/*.ts",
         "src/**/*.mts",
@@ -41,7 +43,10 @@
     },
     "types": {
       "outputs": [],
-      "cache": false
+      "cache": false,
+      "dependsOn": [
+        "compact"
+      ]
     },
     "precommit": {
       "dependsOn": [],

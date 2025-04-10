@@ -74,7 +74,7 @@ export function StarsBackground() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // Draw stars
-      stars.forEach((star) => {
+      for (const star of stars) {
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
         ctx.fillStyle = isDark
@@ -90,7 +90,7 @@ export function StarsBackground() {
           star.y = 0;
           star.x = Math.random() * canvas.width;
         }
-      });
+      }
 
       animationFrame = requestAnimationFrame(animate);
     };
