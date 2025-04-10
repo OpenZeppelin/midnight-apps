@@ -5,7 +5,12 @@ import CompactStandardLibrary;
 import "../../AccessControl" prefix AccessControl_;
 
 // Export circuits for testing purposes
-export { AccessControl_hashUserRole };
+export { 
+    AccessControl_hashUserRole,
+    AccessControl_roleCommits,
+    AccessControl_isInitialized,
+    AccessControl_index
+};
 
 /**
  * @description Constructs the contract by initializing the AccessControl module with an initial admin.

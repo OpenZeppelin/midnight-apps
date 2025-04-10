@@ -9,10 +9,10 @@ import {
   AccessControl_Role,
   type Ledger,
 } from '../artifacts/Index/contract/index.cjs';
-import type { RoleValue } from '../types';
-import { maybeFromNullable } from '../utils';
+import type { RoleValue } from '../types/role';
+import { maybeFromNullable } from '../utils/compactHelper';
 import { emptyMerkleTreePath } from '../utils/test';
-import type { IWitnesses } from './interface';
+import type { IAccessControlWitnesses } from './interface';
 
 /**
  * @description Represents the private state of an access control contract, storing a secret key and role assignments.
@@ -110,7 +110,7 @@ export const AccessContractPrivateState = {
  * @returns An object implementing the Witnesses interface for AccessContractPrivateState.
  */
 export const AccessControlWitnesses =
-  (): IWitnesses<AccessContractPrivateState> => ({
+  (): IAccessControlWitnesses<AccessContractPrivateState> => ({
     /**
      * @description Updates the private state with a new role assignment.
      * @param context - The witness context containing ledger and private state.

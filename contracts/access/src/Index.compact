@@ -1,18 +1,20 @@
 pragma language_version >= 0.14.0;
 
+/**
+ * @module Index
+ * @description Re-exports ledger-related types and state from AccessControl.compact for use in contracts and TypeScript.
+ * @remarks This file provides a centralized export of AccessControl's public ledger state, 
+ * making it accessible for TypeScript type generation via compactc. So no need to export them in a Mock*.compact.
+ */
+
 import AccessControl prefix AccessControl_;
 
-// Export Ledger
+/**
+ * @description Exports public ledger state and types from AccessControl for contract and TypeScript integration.
+ */
 export { 
-    AccessControl_Role, 
-    AccessControl_roleCommits, 
-    AccessControl_isInitialized, 
-    AccessControl_index 
+    AccessControl_Role,       // Enum defining user roles (Admin, Lp, Trader, None)
+    AccessControl_roleCommits, // Merkle tree storing role commitments
+    AccessControl_isInitialized, // Boolean indicating contract initialization
+    AccessControl_index       // Counter for the next Merkle tree index
 };
-
-// Export Circuits
-export {
-    AccessControl_initialize,
-    AccessControl_grantRole,
-    AccessControl_hashUserRole
-}

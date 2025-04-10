@@ -3,9 +3,11 @@
   "version": "1.0.0-alpha.1",
   "description": "Compacts for implementing LunarSwap DEX",
   "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "compact": "pnpm exec compact-compiler",
-    "build": "pnpm exec compact-builder",
+    "build": "pnpm exec compact-builder && tsc",
     "test": "vitest run --printConsoleTrace",
     "types": "tsc -p tsconfig.json --noEmit",
     "fmt": "biome format --write",

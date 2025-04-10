@@ -10,7 +10,7 @@ import type {
  * Matches the structure expected by Index and MockAccessControl artifacts.
  * @template P - The private state type.
  */
-export interface IWitnesses<P> {
+export interface IAccessControlWitnesses<P> {
   /**
    * Updates the private state with a new role assignment.
    * @param context - The witness context containing ledger and private state.

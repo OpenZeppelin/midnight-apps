@@ -4,9 +4,9 @@ import {
 } from '@midnight-ntwrk/compact-runtime';
 import { sampleCoinPublicKey } from '@midnight-ntwrk/zswap';
 import { beforeEach, describe, expect, test } from 'vitest';
-import { AccessControl_Role } from '../artifacts/Index/contract/index.cjs';
 import { pureCircuits } from '../artifacts/MockAccessControl/contract/index.cjs';
-import type { RoleValue } from '../types';
+import { AccessControlRole } from '../types/ledger';
+import type { RoleValue } from '../types/role';
 import { AccessControlContractSimulator } from './AccessControlContractSimulator';
 
 let mockAccessControlContract: AccessControlContractSimulator;
@@ -28,12 +28,12 @@ describe('AccessControl', () => {
       const privateState = mockAccessControlContract.getCurrentPrivateState();
       const adminRoleCommit = pureCircuits.AccessControl_hashUserRole(
         { bytes: adminPkBytes },
-        AccessControl_Role.Admin,
+        AccessControlRole.Admin,
       );
       const expectedAdminRole: RoleValue = {
         commitment: adminRoleCommit,
         index: 0n,
-        role: AccessControl_Role.Admin,
+        role: AccessControlRole.Admin,
       };
 
       expect(privateState.roles[adminRoleCommit.toString()]).toEqual(
@@ -64,15 +64,15 @@ describe('AccessControl', () => {
       const lpUser = sampleCoinPublicKey();
       const circuitResult = mockAccessControlContract.grantRole(
         { bytes: encodeCoinPublicKey(lpUser) },
-        MockAccessContract.AccessControl_Role.Lp,
+        AccessControlRole.Lp,
         admin,
       );
-      const lpRoleCommit = MockAccessContract.pureCircuits.hashUserRole(
+      const lpRoleCommit = pureCircuits.AccessControl_hashUserRole(
         { bytes: encodeCoinPublicKey(lpUser) },
-        MockAccessContract.AccessControl_Role.Lp,
+        AccessControlRole.Lp,
       );
       const expectedLpRole: RoleValue = {
-        role: MockAccessContract.AccessControl_Role.Lp,
+        role: AccessControlRole.Lp,
         commitment: lpRoleCommit,
         index: 1n,
       };
@@ -88,7 +88,7 @@ describe('AccessControl', () => {
       expect(() =>
         mockAccessControlContract.grantRole(
           { bytes: encodeCoinPublicKey(lpUser) },
-          MockAccessContract.AccessControl_Role.Lp,
+          AccessControlRole.Lp,
           notAuthorizedUser,
         ),
       ).toThrowError('AccessControl: Unauthorized user!');
@@ -98,13 +98,13 @@ describe('AccessControl', () => {
       const lpUser = sampleCoinPublicKey();
       mockAccessControlContract.grantRole(
         { bytes: encodeCoinPublicKey(lpUser) },
-        MockAccessContract.AccessControl_Role.Lp,
+        AccessControlRole.Lp,
         admin,
       );
       expect(() =>
         mockAccessControlContract.grantRole(
           { bytes: encodeCoinPublicKey(lpUser) },
-          MockAccessContract.AccessControl_Role.Lp,
+          AccessControlRole.Lp,
           admin,
         ),
       ).toThrowError('AccessControl: Role already granted!');
@@ -114,7 +114,7 @@ describe('AccessControl', () => {
       const lpUser = sampleCoinPublicKey();
       mockAccessControlContract.grantRole(
         { bytes: encodeCoinPublicKey(lpUser) },
-        MockAccessContract.AccessControl_Role.Lp,
+        AccessControlRole.Lp,
         admin,
       );
       const publicState = mockAccessControlContract.getCurrentPublicState();
@@ -126,7 +126,7 @@ describe('AccessControl', () => {
         const user = sampleCoinPublicKey();
         mockAccessControlContract.grantRole(
           { bytes: encodeCoinPublicKey(user) },
-          MockAccessContract.AccessControl_Role.Lp,
+          AccessControlRole.Lp,
           admin,
         );
       }
@@ -134,7 +134,7 @@ describe('AccessControl', () => {
       expect(() =>
         mockAccessControlContract.grantRole(
           { bytes: encodeCoinPublicKey(lastUser) },
-          MockAccessContract.AccessControl_Role.Lp,
+          AccessControlRole.Lp,
           admin,
         ),
       ).toThrowError('AccessControl: Role commitments tree is full!');
@@ -148,12 +148,12 @@ describe('AccessControl', () => {
         await Promise.all([
           mockAccessControlContract.grantRole(
             { bytes: encodeCoinPublicKey(user1) },
-            MockAccessContract.AccessControl_Role.Lp,
+            AccessControlRole.Lp,
             admin,
           ),
           mockAccessControlContract.grantRole(
             { bytes: encodeCoinPublicKey(user2) },
-            MockAccessContract.AccessControl_Role.Trader,
+            AccessControlRole.Trader,
             admin,
           ),
         ]);
@@ -166,15 +166,15 @@ describe('AccessControl', () => {
       const user = sampleCoinPublicKey();
       const circuitResult = mockAccessControlContract.grantRole(
         { bytes: encodeCoinPublicKey(user) },
-        MockAccessContract.AccessControl_Role.None,
+        AccessControlRole.None,
         admin,
       );
-      const noneRoleCommit = MockAccessContract.pureCircuits.hashUserRole(
+      const noneRoleCommit = pureCircuits.AccessControl_hashUserRole(
         { bytes: encodeCoinPublicKey(user) },
-        MockAccessContract.AccessControl_Role.None,
+        AccessControlRole.None,
       );
       const expectedNoneRole: RoleValue = {
-        role: MockAccessContract.AccessControl_Role.None,
+        role: AccessControlRole.None,
         commitment: noneRoleCommit,
         index: 1n,
       };
@@ -187,12 +187,12 @@ describe('AccessControl', () => {
       const user = sampleCoinPublicKey();
       mockAccessControlContract.grantRole(
         { bytes: encodeCoinPublicKey(user) },
-        MockAccessContract.AccessControl_Role.Lp,
+        AccessControlRole.Lp,
         admin,
       );
       mockAccessControlContract.grantRole(
         { bytes: encodeCoinPublicKey(user) },
-        MockAccessContract.AccessControl_Role.Trader,
+        AccessControlRole.Trader,
         admin,
       );
       const privateState = mockAccessControlContract.getCurrentPrivateState();
