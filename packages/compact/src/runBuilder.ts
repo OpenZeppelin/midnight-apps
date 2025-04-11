@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import ora from 'ora';
 import chalk from 'chalk';
+import ora from 'ora';
 import { CompactBuilder } from './Builder.js';
 
 /**
@@ -26,16 +26,18 @@ import { CompactBuilder } from './Builder.js';
  * ```
  */
 async function runBuilder(): Promise<void> {
-    const spinner = ora(chalk.blue('[BUILD] Compact Builder started')).info();
+  const spinner = ora(chalk.blue('[BUILD] Compact Builder started')).info();
 
-    try {
-        const compilerFlags = process.argv.slice(2).join(' ');
-        const builder = new CompactBuilder(compilerFlags);
-        await builder.build();
-    } catch (err) {
-        spinner.fail(chalk.red('[BUILD] Unexpected error:', (err as Error).message));
-        process.exit(1);
-    }
+  try {
+    const compilerFlags = process.argv.slice(2).join(' ');
+    const builder = new CompactBuilder(compilerFlags);
+    await builder.build();
+  } catch (err) {
+    spinner.fail(
+      chalk.red('[BUILD] Unexpected error:', (err as Error).message),
+    );
+    process.exit(1);
+  }
 }
 
 runBuilder();

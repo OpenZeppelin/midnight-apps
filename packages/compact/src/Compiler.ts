@@ -1,20 +1,18 @@
 #!/usr/bin/env node
 
-import { exec } from 'child_process';
-import { existsSync, readdirSync } from 'fs';
-import { join, basename, resolve } from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-import { promisify } from 'util';
-import ora, { Ora } from 'ora';
+import { exec as execCallback } from 'node:child_process';
+import { existsSync, readdirSync } from 'node:fs';
+import { basename, dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { promisify } from 'node:util';
 import chalk from 'chalk';
-
-const execAsync = promisify(exec);
+import ora, { type Ora } from 'ora';
 
 const DIRNAME: string = dirname(fileURLToPath(import.meta.url));
 const SRC_DIR: string = 'src';
 const ARTIFACTS_DIR: string = 'src/artifacts';
-const COMPACT_HOME: string = process.env.COMPACT_HOME ?? resolve(DIRNAME, '../compactc');
+const COMPACT_HOME: string =
+  process.env.COMPACT_HOME ?? resolve(DIRNAME, '../compactc');
 const COMPACTC_PATH: string = join(COMPACT_HOME, 'compactc');
 
 /**
@@ -39,7 +37,11 @@ export class CompactCompiler {
     spinner.info(chalk.blue(`[COMPILE] COMPACTC_PATH: ${COMPACTC_PATH}`));
 
     if (!existsSync(COMPACTC_PATH)) {
-      spinner.fail(chalk.red(`[COMPILE] Error: compactc not found at ${COMPACTC_PATH}. Set COMPACT_HOME to the compactc binary path.`));
+      spinner.fail(
+        chalk.red(
+          `[COMPILE] Error: compactc not found at ${COMPACTC_PATH}. Set COMPACT_HOME to the compactc binary path.`,
+        ),
+      );
       throw new Error(`compactc not found at ${COMPACTC_PATH}`);
     }
   }
@@ -53,12 +55,17 @@ export class CompactCompiler {
    * @throws {Error} If compilation fails for any file
    */
   public async compile(): Promise<void> {
-    const compactFiles: string[] = readdirSync(SRC_DIR, { recursive: true, withFileTypes: true })
+    const compactFiles: string[] = readdirSync(SRC_DIR, {
+      recursive: true,
+      withFileTypes: true,
+    })
       .filter((dirent): boolean => {
         const filePath = join(dirent.path, dirent.name);
         return dirent.isFile() && filePath.endsWith('.compact');
       })
-      .map((dirent): string => join(dirent.path, dirent.name).replace(`${SRC_DIR}/`, ''));
+      .map((dirent): string =>
+        join(dirent.path, dirent.name).replace(`${SRC_DIR}/`, ''),
+      );
 
     const spinner = ora();
     if (compactFiles.length === 0) {
@@ -66,7 +73,11 @@ export class CompactCompiler {
       return;
     }
 
-    spinner.info(chalk.blue(`[COMPILE] Found ${compactFiles.length} .compact file(s) to compile`));
+    spinner.info(
+      chalk.blue(
+        `[COMPILE] Found ${compactFiles.length} .compact file(s) to compile`,
+      ),
+    );
 
     for (const [index, file] of compactFiles.entries()) {
       await this.compileFile(file, index, compactFiles.length);
@@ -83,16 +94,25 @@ export class CompactCompiler {
    * @returns A promise that resolves when the file is compiled successfully
    * @throws {Error} If compilation fails
    */
-  private async compileFile(file: string, index: number, total: number): Promise<void> {
+  private async compileFile(
+    file: string,
+    index: number,
+    total: number,
+  ): Promise<void> {
+    const execAsync = promisify(execCallback);
     const inputPath: string = join(SRC_DIR, file);
     const outputDir: string = join(ARTIFACTS_DIR, basename(file, '.compact'));
     const step: string = `[${index + 1}/${total}]`;
-    const spinner: Ora = ora(chalk.blue(`[COMPILE] ${step} Compiling ${file}`)).start();
+    const spinner: Ora = ora(
+      chalk.blue(`[COMPILE] ${step} Compiling ${file}`),
+    ).start();
 
     try {
-      const command: string = `${COMPACTC_PATH} ${this.flags} "${inputPath}" "${outputDir}"`.trim();
+      const command: string =
+        `${COMPACTC_PATH} ${this.flags} "${inputPath}" "${outputDir}"`.trim();
       spinner.text = chalk.blue(`[COMPILE] ${step} Running: ${command}`);
-      const { stdout }: { stdout: string; stderr: string } = await execAsync(command);
+      const { stdout }: { stdout: string; stderr: string } =
+        await execAsync(command);
       spinner.succeed(chalk.green(`[COMPILE] ${step} Compiled ${file}`));
       this.printOutput(stdout, chalk.cyan);
     } catch (error: any) {
@@ -109,12 +129,16 @@ export class CompactCompiler {
    * @param output - The compiler output string to print (stdout or stderr)
    * @param colorFn - Chalk color function to style the output (e.g., `chalk.cyan` for success, `chalk.red` for errors)
    */
-  private printOutput(output: string | undefined, colorFn: (text: string) => string): void {
+  private printOutput(
+    output: string | undefined,
+    colorFn: (text: string) => string,
+  ): void {
     if (output) {
       const lines: string[] = output
         .split('\n')
         .filter((line: string): boolean => line.trim() !== '')
         .map((line: string): string => `    ${line}`);
+      // biome-ignore lint/suspicious/noConsoleLog: needed for debugging
       console.log(colorFn(lines.join('\n')));
     }
   }
