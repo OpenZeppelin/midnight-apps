@@ -35,7 +35,6 @@ module Math {
      * @description Computes the square root of a Uint<128> value locally (off-chain).
      *
      * @param radicand The number to compute the square root of.
-     *
      * @returns Uint<128> The square root of radicand.
      */
     export witness sqrtLocally(: Uint<128>): Uint<128>;
