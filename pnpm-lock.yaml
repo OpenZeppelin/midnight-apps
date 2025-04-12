@@ -265,6 +265,9 @@ importers:
 
   contracts/math:
     dependencies:
+      '@midnight-dapps/biome-config':
+        specifier: workspace:^
+        version: link:../../packages/biome-config
       '@midnight-dapps/compact':
         specifier: workspace:^
         version: link:../../packages/compact
