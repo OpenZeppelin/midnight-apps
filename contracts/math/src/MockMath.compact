@@ -1,7 +1,7 @@
 pragma language_version >= 0.14.0;
 
 import CompactStandardLibrary;
-import "../../Math" prefix Math_;
+import Math prefix Math_;
 
 export {
     Math_DivResult,
