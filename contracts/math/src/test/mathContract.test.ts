@@ -96,7 +96,7 @@ describe('Math', () => {
 
     test('should fail if number exceeds MAX_U128', () => {
       expect(() => mathSimulator.sqrt(MAX_U128 + 1n)).toThrow(
-        "expected value of type Uint<0..340282366920938463463374607431768211455> but received 340282366920938463463374607431768211456n"
+        'expected value of type Uint<0..340282366920938463463374607431768211455> but received 340282366920938463463374607431768211456n',
       );
     });
 
