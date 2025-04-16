@@ -111,10 +111,11 @@ export class CompactCompiler {
       const command: string =
         `${COMPACTC_PATH} ${this.flags} "${inputPath}" "${outputDir}"`.trim();
       spinner.text = chalk.blue(`[COMPILE] ${step} Running: ${command}`);
-      const { stdout }: { stdout: string; stderr: string } =
+      const { stdout, stderr }: { stdout: string; stderr: string } =
         await execAsync(command);
       spinner.succeed(chalk.green(`[COMPILE] ${step} Compiled ${file}`));
       this.printOutput(stdout, chalk.cyan);
+      this.printOutput(stderr, chalk.yellow);
     } catch (error: any) {
       spinner.fail(chalk.red(`[COMPILE] ${step} Failed ${file}`));
       this.printOutput(error.stdout, chalk.cyan);
