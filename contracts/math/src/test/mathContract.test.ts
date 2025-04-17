@@ -55,6 +55,43 @@ describe('Math', () => {
   });
 
   describe('Sub', () => {
+    test('should subtract two numbers', () => {
+      expect(mathSimulator.sub(10n, 4n)).toBe(6n);
+    });
+
+    test('should subtract zero', () => {
+      expect(mathSimulator.sub(5n, 0n)).toBe(5n);
+      expect(mathSimulator.sub(0n, 0n)).toBe(0n);
+    });
+
+    test('should subtract from zero', () => {
+      expect(() => mathSimulator.sub(0n, 5n)).toThrowError(
+        'Math: subtraction underflow',
+      );
+    });
+
+    test('should subtract max Uint<128> minus 1', () => {
+      expect(mathSimulator.sub(MAX_U128, 1n)).toBe(MAX_U128 - 1n);
+    });
+
+    test('should subtract max Uint<128> minus itself', () => {
+      expect(mathSimulator.sub(MAX_U128, MAX_U128)).toBe(0n);
+    });
+
+    test('should fail on underflow with small numbers', () => {
+      expect(() => mathSimulator.sub(3n, 5n)).toThrowError(
+        'Math: subtraction underflow',
+      );
+    });
+
+    test('should fail on underflow with large numbers', () => {
+      expect(() => mathSimulator.sub(MAX_U128 - 10n, MAX_U128)).toThrowError(
+        'Math: subtraction underflow',
+      );
+    });
+  });
+
+  describe('Sqrt', () => {
     test('should compute square root of small perfect squares', () => {
       expect(mathSimulator.sqrt(4n)).toBe(2n);
       expect(mathSimulator.sqrt(9n)).toBe(3n);
@@ -104,7 +141,7 @@ describe('Math', () => {
     });
 
     test('should handle max Uint<64>', () => {
-      expect(mathSimulator.sqrt(MAX_U64)).toBe(4294967295n); // floor(sqrt(2^64 - 1)) = 2^32 - 1
+      expect(mathSimulator.sqrt(MAX_U64)).toBe(MAX_U32); // floor(sqrt(2^64 - 1)) = 2^32 - 1
     });
 
     test('should handle max Uint<128>', () => {
@@ -159,24 +196,6 @@ describe('Math', () => {
 
     test('should compute remainder of max Uint<128> by 2', () => {
       expect(mathSimulator.remainder(MAX_U128, 2n)).toBe(1n);
-    });
-  });
-
-  describe('Sqrt', () => {
-    test('should compute square root', () => {
-      expect(mathSimulator.sqrt(16n)).toBe(4n);
-    });
-
-    test('should handle zero', () => {
-      expect(mathSimulator.sqrt(0n)).toBe(0n);
-    });
-
-    test('should handle max Uint<128>', () => {
-      expect(mathSimulator.sqrt(MAX_U128)).toBe(MAX_U64); // sqrt(2^128 - 1) ≈ 2^64 - 1
-    });
-
-    test('should handle 1', () => {
-      expect(mathSimulator.sqrt(1n)).toBe(1n);
     });
   });
 
