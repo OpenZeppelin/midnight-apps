@@ -131,29 +131,9 @@ module Queue<T> {
         }
     }
 
-    // /**
-    //  * @description Shifts all elements down by one position 
-    //  * after dequeue (not implemented).
-    //  * @remarks Hypothetical shifting circuit; commented out 
-    //  * due to unsupported variable-range loops.
-    //  */
-    // circuit shift(): [] {
-    //     const start = head + 1;
-    //     const end = tail - 1;
-    //
-    //     for (const index of start..end) {
-    //         const item = state.lookup(index);
-    //         state.insert(index - 1, item);
-    //         state.remove(index);
-    //     }
-    //
-    //     // Decrement tail by 1
-    //     tail.decrement(1);
-    // }
-
     /**
      * @description Checks if the queue is empty.
-     * @returns {Boolean} True if the queue is empty (head >= 
+     * @returns {Boolean} True if the queue is empty (head == 
      * tail), false otherwise.
      * @remarks Relies on comparing `head` and `tail` counters. 
      * Time complexity: O(1).

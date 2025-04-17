@@ -18,6 +18,30 @@ const COMPACTC_PATH: string = join(COMPACT_HOME, 'compactc');
 /**
  * A class to handle compilation of `.compact` files using the `compactc` compiler.
  * Provides progress feedback and colored output for success and error states.
+ *
+ * @example
+ * ```typescript
+ * const compiler = new CompactCompiler('--skip-zk');
+ * compiler.compile().catch(err => console.error(err));
+ * ```
+ *
+ * @example Successful Compilation Output
+ * ```
+ * ℹ [COMPILE] Found 2 .compact file(s) to compile
+ * ✔ [COMPILE] [1/2] Compiled AccessControl.compact
+ *     Compactc version: 0.22.0
+ * ✔ [COMPILE] [2/2] Compiled MockAccessControl.compact
+ *     Compactc version: 0.22.0
+ *     Compiling circuit "src/artifacts/MockAccessControl/zkir/grantRole.zkir"... (skipped proving keys)
+ * ```
+ *
+ * @example Failed Compilation Output
+ * ```
+ * ℹ [COMPILE] Found 2 .compact file(s) to compile
+ * ✖ [COMPILE] [1/2] Failed AccessControl.compact
+ *     Compactc version: 0.22.0
+ *     Error: Expected ';' at line 5 in AccessControl.compact
+ * ```
  */
 export class CompactCompiler {
   /** Stores the compiler flags passed via command-line arguments */

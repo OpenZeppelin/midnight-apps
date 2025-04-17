@@ -110,7 +110,7 @@ export class CompactBuilder {
   private async executeStep(
     step: { cmd: string; msg: string; shell?: string },
     index: number,
-    total: number,
+    total: number
   ): Promise<void> {
     const stepLabel: string = `[${index + 1}/${total}]`;
     const spinner: Ora = ora(`[BUILD] ${stepLabel} ${step.msg}`).start();
