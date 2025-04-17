@@ -9,17 +9,17 @@ import {
   encodeCoinPublicKey,
 } from '@midnight-ntwrk/compact-runtime';
 import { sampleContractAddress } from '@midnight-ntwrk/zswap';
+import type { AccessControl_Role } from '../artifacts/Index/contract/index.cjs';
 import {
-  type AccessControl_Role,
   type Ledger,
   Contract as MockAccessControl,
   ledger,
 } from '../artifacts/MockAccessControl/contract/index.cjs';
-import type { IContractSimulator } from '../types';
+import type { IContractSimulator } from '../types/test';
 import {
   AccessContractPrivateState,
   AccessControlWitnesses,
-} from '../witnesses';
+} from '../witnesses/AccessControlWitnesses';
 
 /**
  * @description A simulator implementation of an access control contract for testing purposes.
@@ -108,7 +108,7 @@ export class AccessControlContractSimulator
     role: AccessControl_Role,
     sender?: CoinPublicKey,
   ): CircuitContext<AccessContractPrivateState> {
-    this.circuitContext = this.contract.impureCircuits.grantRole(
+    this.circuitContext = this.contract.impureCircuits.testGrantRole(
       {
         ...this.circuitContext,
         currentZswapLocalState: sender

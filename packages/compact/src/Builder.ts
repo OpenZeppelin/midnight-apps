@@ -2,8 +2,8 @@
 
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
-import ora, { Ora } from 'ora';
 import chalk from 'chalk';
+import ora, { type Ora } from 'ora';
 import { CompactCompiler } from './Compiler.js';
 
 // Promisified exec for async execution
@@ -11,7 +11,7 @@ const execAsync = promisify(exec);
 
 /**
  * A class to handle the build process for a project.
- * Runs CompactCompiler as a prerequisite, then executes build steps (TypeScript compilation, 
+ * Runs CompactCompiler as a prerequisite, then executes build steps (TypeScript compilation,
  * artifact copying, etc.)
  * with progress feedback and colored output for success and error states.
  *
@@ -51,30 +51,31 @@ const execAsync = promisify(exec);
  *     [BUILD] ❌ Build failed: Command failed: tsc --project tsconfig.build.json
  * ```
  */
-class CompactBuilder {
+export class CompactBuilder {
   private readonly compilerFlags: string;
-  private readonly steps: Array<{ cmd: string; msg: string; shell?: string }> = [
-    {
-      cmd: 'tsc --project tsconfig.build.json',
-      msg: 'Compiling TypeScript',
-    },
-    {
-      cmd: 'mkdir -p dist/artifacts && cp -Rf src/artifacts/* dist/artifacts/ 2>/dev/null || true',
-      msg: 'Copying artifacts',
-      shell: '/bin/bash',
-    },
-    {
-      cmd: 'cp src/*.compact dist/ 2>/dev/null || true && rm dist/Mock*.compact 2>/dev/null || true',
-      msg: 'Copying and cleaning .compact files',
-      shell: '/bin/bash',
-    },
-  ];
+  private readonly steps: Array<{ cmd: string; msg: string; shell?: string }> =
+    [
+      {
+        cmd: 'tsc --project tsconfig.build.json',
+        msg: 'Compiling TypeScript',
+      },
+      {
+        cmd: 'mkdir -p dist/artifacts && cp -Rf src/artifacts/* dist/artifacts/ 2>/dev/null || true',
+        msg: 'Copying artifacts',
+        shell: '/bin/bash',
+      },
+      {
+        cmd: 'cp src/*.compact dist/ 2>/dev/null || true && rm dist/Mock*.compact 2>/dev/null || true',
+        msg: 'Copying and cleaning .compact files',
+        shell: '/bin/bash',
+      },
+    ];
 
   /**
    * Constructs a new ProjectBuilder instance.
    * @param compilerFlags - Optional space-separated string of `compactc` flags (e.g., "--skip-zk")
    */
-  constructor(compilerFlags: string = '') {
+  constructor(compilerFlags = '') {
     this.compilerFlags = compilerFlags;
   }
 
@@ -109,15 +110,16 @@ class CompactBuilder {
   private async executeStep(
     step: { cmd: string; msg: string; shell?: string },
     index: number,
-    total: number
+    total: number,
   ): Promise<void> {
     const stepLabel: string = `[${index + 1}/${total}]`;
     const spinner: Ora = ora(`[BUILD] ${stepLabel} ${step.msg}`).start();
 
     try {
-      const { stdout, stderr }: { stdout: string; stderr: string } = await execAsync(step.cmd, {
-        shell: step.shell, // Only pass shell where needed
-      });
+      const { stdout, stderr }: { stdout: string; stderr: string } =
+        await execAsync(step.cmd, {
+          shell: step.shell, // Only pass shell where needed
+        });
       spinner.succeed(`[BUILD] ${stepLabel} ${step.msg}`);
       this.printOutput(stdout, chalk.cyan);
       this.printOutput(stderr, chalk.yellow); // Show stderr (warnings) in yellow if present
@@ -137,21 +139,17 @@ class CompactBuilder {
    * @param output - The command output string to print (stdout or stderr)
    * @param colorFn - Chalk color function to style the output (e.g., `chalk.cyan` for success, `chalk.red` for errors)
    */
-  private printOutput(output: string | undefined, colorFn: (text: string) => string): void {
+  private printOutput(
+    output: string | undefined,
+    colorFn: (text: string) => string,
+  ): void {
     if (output) {
       const lines: string[] = output
         .split('\n')
         .filter((line: string): boolean => line.trim() !== '')
         .map((line: string): string => `    ${line}`);
+      // biome-ignore lint/suspicious/noConsoleLog: needed for debugging
       console.log(colorFn(lines.join('\n')));
     }
   }
 }
-
-// Main execution
-const compilerFlags: string = process.argv.slice(2).join(' ');
-const builder = new CompactBuilder(compilerFlags);
-builder.build().catch((err: Error) => {
-  console.error(chalk.red('[BUILD] Unexpected error:', err.message));
-  process.exit(1)
-});

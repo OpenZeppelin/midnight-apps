@@ -8,11 +8,11 @@ import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
 import {
   AccessControl_Role,
   type Ledger,
-  type Witnesses,
-} from '../artifacts/MockAccessControl/contract/index.cjs';
-import type { RoleValue } from '../types';
-import { maybeFromNullable } from '../utils';
+} from '../artifacts/Index/contract/index.cjs';
+import type { RoleValue } from '../types/role';
+import { maybeFromNullable } from '../utils/compactHelper';
 import { emptyMerkleTreePath } from '../utils/test';
+import type { IAccessControlWitnesses } from './interface';
 
 /**
  * @description Represents the private state of an access control contract, storing a secret key and role assignments.
@@ -110,7 +110,7 @@ export const AccessContractPrivateState = {
  * @returns An object implementing the Witnesses interface for AccessContractPrivateState.
  */
 export const AccessControlWitnesses =
-  (): Witnesses<AccessContractPrivateState> => ({
+  (): IAccessControlWitnesses<AccessContractPrivateState> => ({
     /**
      * @description Updates the private state with a new role assignment.
      * @param context - The witness context containing ledger and private state.

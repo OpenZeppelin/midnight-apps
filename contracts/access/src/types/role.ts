@@ -1,12 +1,12 @@
 import type { MerkleTreePath } from '@midnight-dapps/compact-std';
-import type { AccessControl_Role } from '../artifacts/MockAccessControl/contract/index.d.cts';
+import type { AccessControlRole } from './ledger';
 
 /**
  * @description Represents a role assignment with its cryptographic commitment and Merkle tree metadata.
  */
 export type RoleValue = {
   /** @description The role assigned to a user (e.g., Admin, Lp, Trader, None). */
-  role: AccessControl_Role;
+  role: AccessControlRole;
 
   /** @description The cryptographic commitment hash of the user-role pair, as a 32-byte array. */
   commitment: Uint8Array;

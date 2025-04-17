@@ -1,15 +1,16 @@
-// TODO: check the recent compact version
 pragma language_version >= 0.14.0;
 
 import CompactStandardLibrary;
 
-import AccessControl prefix AccessControl_;
+import "../../AccessControl" prefix AccessControl_;
 
-// Export Public state
-export { AccessControl_Role, AccessControl_roleCommits, AccessControl_isInitialized, AccessControl_index };
-
-// Export circuits
-export { AccessControl_hashUserRole };
+// Export circuits for testing purposes
+export { 
+    AccessControl_hashUserRole,
+    AccessControl_roleCommits,
+    AccessControl_isInitialized,
+    AccessControl_index
+};
 
 /**
  * @description Constructs the contract by initializing the AccessControl module with an initial admin.
@@ -28,17 +29,6 @@ constructor(initialAdmin: ZswapCoinPublicKey) {
  * @returns {[]} - An empty array indicating success.
  * @throws {RoleError} - If the contract is not initialized, caller is not Admin, or the role tree is full.
  */
-export circuit grantRole(user: ZswapCoinPublicKey, role: AccessControl_Role): [] {
+export circuit testGrantRole(user: ZswapCoinPublicKey, role: AccessControl_Role): [] {
     return AccessControl_grantRole(user, role);
-}
-
-/**
- * @description Test circuit to Computes a commitment hash for a user and role.  
- * @param {ZswapCoinPublicKey} user - The public key of the user.
- * @param {Role} role - The role to hash.
- * @returns {Bytes<32>} - A 32-byte hash of the user-role pair.
- * @todo Revisit to add salt or randomness for privacy.
- */
-export circuit hashUserRole(user: ZswapCoinPublicKey, role: AccessControl_Role): Bytes<32> {
-    return AccessControl_hashUserRole(user, role);
 }
