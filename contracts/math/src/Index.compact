@@ -1,0 +1,12 @@
+pragma language_version >= 0.14.0;
+
+import Math prefix Math_;
+
+export {
+    Math_DivResult,
+    Math_MAX_U8,
+    Math_MAX_U16,
+    Math_MAX_U32,
+    Math_MAX_U64,
+    Math_MAX_U128
+};
