@@ -1,6 +1,3 @@
-// sqrtFunction.test.ts
-// SPDX-License-Identifier: MIT
-
 import { describe, expect, test } from 'vitest';
 import { sqrtBigint } from './sqrtBigint';
 
