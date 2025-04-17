@@ -1,34 +1,16 @@
 {
-	"compilerOptions": {
-		/* Output & Build */
-		"rootDir": "src",
-		"outDir": "dist",
-		"declaration": true,
-		"tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
-		/* Target & Module */
-		"target": "ES2022",
-		"lib": ["ESNext"],
-		"module": "ESNext",
-		"moduleResolution": "node",
-		"skipLibCheck": true,
-		/* Bundler Mode */
-		"allowJs": true,
-		"resolveJsonModule": true,
-		"isolatedModules": true,
-		"moduleDetection": "force",
-		"allowImportingTsExtensions": true,
-		"noEmit": true,
-		/* Linting */
-		"strict": true,
-		"forceConsistentCasingInFileNames": true,
-		"noImplicitAny": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"noFallthroughCasesInSwitch": true,
-		"noUncheckedSideEffectImports": true,
-		/* Debugging */
-		"sourceMap": true,
-		"esModuleInterop": true
-	},
-	"include": ["src/**/*.ts", "vitest.config.ts"]
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "outDir": "dist",
+    "rootDir": "src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node",
+    "declaration": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "src/artifacts"]
 }

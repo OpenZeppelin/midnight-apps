@@ -6,13 +6,19 @@ import {
   constructorContext,
   sampleContractAddress,
 } from '@midnight-ntwrk/compact-runtime';
-import * as Contract from '../artifacts/MockQueue/contract/index.cjs';
-import { Contract as MockQueue } from '../artifacts/MockQueue/contract/index.cjs';
-import type { IContractSimulator } from '../types';
-import { QueueContractPrivateState, QueueWitnesses } from '../witnesses';
+import {
+  type Ledger,
+  Contract as MockQueue,
+  ledger,
+} from '../artifacts/MockQueue/contract/index.cjs';
+import type { IContractSimulator } from '../types/test';
+import {
+  QueueContractPrivateState,
+  QueueWitnesses,
+} from '../witnesses/QueueWitnesses';
 
 export class QueueContractSimulator
-  implements IContractSimulator<QueueContractPrivateState, Contract.Ledger>
+  implements IContractSimulator<QueueContractPrivateState, Ledger>
 {
   readonly contract: MockQueue<QueueContractPrivateState>;
   readonly contractAddress: string;
@@ -42,8 +48,8 @@ export class QueueContractSimulator
     this.contractAddress = this.circuitContext.transactionContext.address;
   }
 
-  public getCurrentPublicState(): Contract.Ledger {
-    return Contract.ledger(this.circuitContext.transactionContext.state);
+  public getCurrentPublicState(): Ledger {
+    return ledger(this.circuitContext.transactionContext.state);
   }
 
   public getCurrentPrivateState(): QueueContractPrivateState {
@@ -54,23 +60,20 @@ export class QueueContractSimulator
     return this.circuitContext.originalState;
   }
 
-  public enqueue(item: bigint): Contract.Ledger {
+  public enqueue(item: bigint): Ledger {
     this.circuitContext = this.contract.impureCircuits.enqueue(
       this.circuitContext,
       item,
     ).context;
-    return Contract.ledger(this.circuitContext.transactionContext.state);
+    return ledger(this.circuitContext.transactionContext.state);
   }
 
-  public dequeue(): [Contract.Ledger, bigint] {
+  public dequeue(): [Ledger, bigint] {
     const { context, result } = this.contract.impureCircuits.dequeue(
       this.circuitContext,
     );
     this.circuitContext = context;
-    return [
-      Contract.ledger(this.circuitContext.transactionContext.state),
-      result.value,
-    ];
+    return [ledger(this.circuitContext.transactionContext.state), result.value];
   }
 
   public isEmpty(): boolean {

@@ -1,4 +1,4 @@
-import type { EmptyState } from '../types';
+import type { EmptyState } from '../types/state';
 
 export type QueueContractPrivateState = EmptyState;
 

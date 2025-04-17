@@ -4,7 +4,7 @@ import {
   QueryContext,
   emptyZswapLocalState,
 } from '@midnight-ntwrk/compact-runtime';
-import type { IContractSimulator } from '../types';
+import type { IContractSimulator } from '../types/test';
 
 // TODO: that is being used in contracts/access and contracts/data-structure,
 // should be moved to unified shared pkg.

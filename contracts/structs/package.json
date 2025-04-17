@@ -4,10 +4,14 @@
   "description": "Compacts contracts for Data structures i.e. Queue",
   "type": "module",
   "scripts": {
-    "compact": "find src -name '*.compact' -exec sh -c 'run-compactc \"{}\" \"src/artifacts/$(basename \"{}\" .compact)\"' \\;",
-    "build": "rm -rf dist && tsc --project tsconfig.build.json && cp -Rf ./src/artifacts ./dist/artifacts && cp ./src/Queue.compact ./dist",
+    "compact": "pnpm exec compact-compiler",
+    "build": "pnpm exec compact-builder && tsc",
     "test": "vitest run --printConsoleTrace",
-    "fmt": "biome format --write"
+    "types": "tsc -p tsconfig.json --noEmit",
+    "fmt": "biome format --write",
+    "lint": "biome lint",
+    "lint:fix": "biome check --write",
+    "precommit": "lint-staged --no-stash && pnpm run types"
   },
   "keywords": [],
   "author": "",
