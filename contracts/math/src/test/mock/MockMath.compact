@@ -48,7 +48,7 @@ export circuit div(
     return disclose(Math_div(dividend, divisor));
 }
 
-export circuit remainder(
+export circuit rem(
     dividend: Uint<128>,
     divisor: Uint<128>
 ): Uint<128> {
