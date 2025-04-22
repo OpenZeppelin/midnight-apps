@@ -213,6 +213,10 @@ describe('Math', () => {
     test('should check max Uint<128> is multiple of 1', () => {
       expect(mathSimulator.isMultiple(MAX_U128, 1n)).toBe(true);
     });
+
+    test('should detect a failed case', () => {
+      expect(mathSimulator.isMultiple(7n, 3n)).toBe(false);
+    });
   });
 
   describe('Min', () => {
