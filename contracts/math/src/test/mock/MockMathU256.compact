@@ -1,0 +1,116 @@
+pragma language_version >= 0.14.0;
+
+import CompactStandardLibrary;
+
+import "../../interface/IMath";
+import "../../interface/IMathU256";
+import "../../interface/IUint256";
+
+import "../../MathU256" prefix MathU256_;
+
+// Export IMathU256 structs
+export {
+    U256,
+    DivResultU256
+}
+
+// Circuits that are leaking private output
+export circuit initialize(): [] {
+    return MathU256_initialize();
+}
+
+export circuit toU256(value: Uint<256>): U256 {
+    return disclose(MathU256_toU256(value));
+}
+
+export circuit fromU256(value: U256): Uint<256> {
+    return disclose(MathU256_fromU256(value));
+}
+
+export circuit lessThanU256(a: U256, b: U256): Boolean {
+    return disclose(MathU256_lessThanU256(a, b));
+}
+
+export circuit lessThan(a: Uint<256>, b: Uint<256>): Boolean {
+    return disclose(MathU256_lessThan(a, b));
+}
+
+export circuit greaterThanU256(a: U256, b: U256): Boolean {
+    return disclose(MathU256_greaterThanU256(a, b));
+}
+
+export circuit greaterThan(a: Uint<256>, b: Uint<256>): Boolean {
+    return disclose(MathU256_greaterThan(a, b));
+}
+
+export circuit add(a: Uint<256>, b: Uint<256>): Uint<256> {
+    return disclose(MathU256_add(a, b));
+}
+
+export circuit addU256(a: U256, b: U256): U256 {
+    return disclose(MathU256_addU256(a, b));
+}
+
+export circuit sub(a: Uint<256>, b: Uint<256>): Uint<256> {
+    return disclose(MathU256_sub(a, b));
+}
+
+export circuit subU256(a: U256, b: U256): U256 {
+    return disclose(MathU256_subU256(a, b));
+}
+
+export circuit mul(a: Uint<256>, b: Uint<256>): Uint<256> {
+    return disclose(MathU256_mul(a, b));
+}
+
+export circuit mulU256(a: U256, b: U256): U256 {
+    return disclose(MathU256_mulU256(a, b));
+}
+
+export circuit div(dividend: Uint<256>, divisor: Uint<256>): Uint<256> {
+    return disclose(MathU256_div(dividend, divisor));
+}
+
+export circuit divU256(dividend: U256, divisor: U256): U256 {
+    return disclose(MathU256_divU256(dividend, divisor));
+}
+
+export circuit rem(dividend: Uint<256>, divisor: Uint<256>): Uint<256> {
+    return disclose(MathU256_rem(dividend, divisor));
+}
+
+export circuit remU256(dividend: U256, divisor: U256): U256 {
+    return disclose(MathU256_remU256(dividend, divisor));
+}
+
+export circuit sqrt(radicand: Uint<256>): Uint<128> {
+    return disclose(MathU256_sqrt(radicand));
+}
+
+export circuit sqrtU256(radicand: U256): Uint<128> {
+    return disclose(MathU256_sqrtU256(radicand));
+}
+
+export circuit min(a: Uint<256>, b: Uint<256>): Uint<256> {
+    return disclose(MathU256_min(a, b));
+}
+
+export circuit minU256(aU256: U256, bU256: U256): U256 {
+    return disclose(MathU256_minU256(aU256, bU256));
+}
+
+export circuit max(a: Uint<256>, b: Uint<256>): Uint<256> {
+    return disclose(MathU256_max(a, b));
+}
+
+export circuit maxU256(aU256: U256, bU256: U256): U256 {
+    return disclose(MathU256_maxU256(aU256, bU256));
+}
+
+export circuit isMultiple(value: Uint<256>, divisor: Uint<256>): Boolean {
+    return disclose(MathU256_isMultiple(value, divisor));
+}
+
+export circuit isMultipleU256(value: U256, divisor: U256): Boolean {
+    return disclose(MathU256_isMultipleU256(value, divisor));
+}

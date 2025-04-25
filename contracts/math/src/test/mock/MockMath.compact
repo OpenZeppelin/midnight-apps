@@ -2,45 +2,26 @@ pragma language_version >= 0.14.0;
 
 import CompactStandardLibrary;
 
+import "../../interface/IMath";
+
 import "../../Math" prefix Math_;
 
+// Export IMath interface
 export {
-    Math_DivResult,
-    Math_MAX_U8,
-    Math_MAX_U16,
-    Math_MAX_U32,
-    Math_MAX_U64,
-    Math_MAX_U128
+    DivResult 
 };
 
-/**
- * @description A mock contract for testing the Math module's circuits.
- */
-export circuit initialize(): [] {
-    return Math_initialize();
+// Export Circuits 
+export {
+    Math_initialize,
+    Math_add,
+    Math_sub,
+    Math_mul,
+    Math_min,
+    Math_max
 }
 
-export circuit add(
-    addend: Uint<128>,
-    augend: Uint<128>
-): Uint<128> {
-    return Math_add(addend, augend);
-}
-
-export circuit sub(
-    minuend: Uint<128>,
-    subtrahend: Uint<128>
-): Uint<128> {
-    return Math_sub(minuend, subtrahend);
-}
-
-export circuit mul(
-    multiplicand: Uint<128>,
-    multiplier: Uint<128>
-): Uint<256> {
-    return Math_mul(multiplicand, multiplier);
-}
-
+// Circuits that are leaking private output
 export circuit div(
     dividend: Uint<128>,
     divisor: Uint<128>
@@ -66,18 +47,4 @@ export circuit isMultiple(
     divisor: Uint<128>
 ): Boolean {
     return disclose(Math_isMultiple(value, divisor));
-}
-
-export circuit min(
-    a: Uint<128>,
-    b: Uint<128>
-): Uint<128> {
-    return Math_min(a, b);
-}
-
-export circuit max(
-    a: Uint<128>,
-    b: Uint<128>
-): Uint<128> {
-    return Math_max(a, b);
 }

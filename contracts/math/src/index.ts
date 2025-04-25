@@ -7,7 +7,7 @@
 export {
   type MathContractPrivateState,
   MathWitnesses,
-} from './witnesses/MathWitnesses';
+} from './witnesses/Math';
 export { sqrtBigint } from './utils/sqrtBigint';
 export type { IContractSimulator } from './types/test';
 export type { EmptyState } from './types/state';

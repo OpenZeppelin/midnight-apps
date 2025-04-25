@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: MIT
+pragma language_version >= 0.14.0;
+
+/**
+ * @description An interface module for MAX Uint values.
+ */
+module IMaxUint {    
+    /** @description Maximum value for Uint<8> (2^8 - 1). */
+    export ledger MAX_U8: Uint<8>;
+
+    /** @description Maximum value for Uint<16> (2^16 - 1). */
+    export ledger MAX_U16: Uint<16>;
+
+    /** @description Maximum value for Uint<32> (2^32 - 1). */
+    export ledger MAX_U32: Uint<32>;
+
+    /** @description Maximum value for Uint<64> (2^64 - 1). */
+    export ledger MAX_U64: Uint<64>;
+
+    /** @description Maximum value for Uint<128> (2^128 - 1). */
+    export ledger MAX_U128: Uint<128>;
+    
+    /** @description Maximum value for Uint<256> (2^256 - 1). */
+    export ledger MAX_U256: Uint<256>;
+}

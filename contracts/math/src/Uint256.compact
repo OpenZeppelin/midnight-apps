@@ -1,0 +1,19 @@
+// SPDX-License-Identifier: MIT
+pragma language_version >= 0.14.0;
+
+/**
+ * @description An interface module for Uint<256> types using U256 struct.
+ */
+module Uint256 {
+    import "./interface/IUint256";
+
+    /**
+     * @description Initializes the max value constants for common Uint types.
+     *
+     * @returns None
+     */
+    export circuit initialize(): [] {
+        // pow() is not supported yet so we hardcode this value.
+        TWO_POW_128 = 340282366920938463463374607431768211456;
+    }
+}

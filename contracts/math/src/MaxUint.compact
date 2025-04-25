@@ -1,0 +1,23 @@
+// SPDX-License-Identifier: MIT
+pragma language_version >= 0.14.0;
+
+/**
+ * @description A module for MAX Uint values.
+ */
+module MaxUint {
+    import "./interface/IMaxUint";
+
+    /**
+     * @description Initializes the max value constants for common Uint types.
+     *
+     * @returns None
+     */
+    export circuit initialize(): [] {
+        MAX_U8   = 255; // 2^8 - 1
+        MAX_U16  = 65535; // 2^16 - 1
+        MAX_U32  = 4294967295; // 2^32 - 1
+        MAX_U64  = 18446744073709551615; // 2^64 - 1
+        MAX_U128 = 340282366920938463463374607431768211455; // 2^128 - 1
+        MAX_U256 = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
+    }
+}

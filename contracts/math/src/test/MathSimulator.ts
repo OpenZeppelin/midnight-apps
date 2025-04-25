@@ -14,10 +14,7 @@ import {
   ledger,
 } from '../artifacts/MockMath/contract/index.cjs';
 import type { IContractSimulator } from '../types/test';
-import {
-  MathContractPrivateState,
-  MathWitnesses,
-} from '../witnesses/MathWitnesses';
+import { MathContractPrivateState, MathWitnesses } from '../witnesses/Math';
 
 export class MathContractSimulator
   implements IContractSimulator<MathContractPrivateState, Ledger>
@@ -48,7 +45,9 @@ export class MathContractSimulator
       ),
     };
     // Call initialize to set ledger constants
-    const initResult = this.contract.circuits.initialize(this.circuitContext);
+    const initResult = this.contract.circuits.Math_initialize(
+      this.circuitContext,
+    );
     this.circuitContext = initResult.context;
     this.contractAddress = this.circuitContext.transactionContext.address;
   }
@@ -66,7 +65,7 @@ export class MathContractSimulator
   }
 
   public add(addend: bigint, augend: bigint): bigint {
-    const result = this.contract.circuits.add(
+    const result = this.contract.circuits.Math_add(
       this.circuitContext,
       addend,
       augend,
@@ -76,7 +75,7 @@ export class MathContractSimulator
   }
 
   public sub(minuend: bigint, subtrahend: bigint): bigint {
-    const result = this.contract.circuits.sub(
+    const result = this.contract.circuits.Math_sub(
       this.circuitContext,
       minuend,
       subtrahend,
@@ -86,7 +85,7 @@ export class MathContractSimulator
   }
 
   public mul(multiplicand: bigint, multiplier: bigint): bigint {
-    const result = this.contract.circuits.mul(
+    const result = this.contract.circuits.Math_mul(
       this.circuitContext,
       multiplicand,
       multiplier,
@@ -105,8 +104,8 @@ export class MathContractSimulator
     return result.result;
   }
 
-  public remainder(dividend: bigint, divisor: bigint): bigint {
-    const result = this.contract.circuits.remainder(
+  public rem(dividend: bigint, divisor: bigint): bigint {
+    const result = this.contract.circuits.rem(
       this.circuitContext,
       dividend,
       divisor,
@@ -132,13 +131,13 @@ export class MathContractSimulator
   }
 
   public min(a: bigint, b: bigint): bigint {
-    const result = this.contract.circuits.min(this.circuitContext, a, b);
+    const result = this.contract.circuits.Math_min(this.circuitContext, a, b);
     this.circuitContext = result.context;
     return result.result;
   }
 
   public max(a: bigint, b: bigint): bigint {
-    const result = this.contract.circuits.max(this.circuitContext, a, b);
+    const result = this.contract.circuits.Math_max(this.circuitContext, a, b);
     this.circuitContext = result.context;
     return result.result;
   }

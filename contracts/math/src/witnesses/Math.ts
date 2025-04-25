@@ -1,8 +1,6 @@
 import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
-import type {
-  Ledger,
-  Math_DivResult,
-} from '../artifacts/Index/contract/index.cjs'; // Adjust path to your generated artifacts
+import type { DivResult } from '../artifacts/Index/contract/index.cjs';
+import type { Ledger } from '../artifacts/Math/contract/index.cjs';
 import type { EmptyState } from '../types/state';
 import { sqrtBigint } from '../utils/sqrtBigint';
 import type { IMathWitnesses } from './interface';
@@ -30,7 +28,10 @@ export const MathContractPrivateState = {
  * @description Factory function creating witness implementations for Math module operations.
  * @returns An object implementing the IMathWitnesses interface for MathContractPrivateState.
  */
-export const MathWitnesses = (): IMathWitnesses<MathContractPrivateState> => ({
+export const MathWitnesses = (): IMathWitnesses<
+  Ledger,
+  MathContractPrivateState
+> => ({
   /**
    * @description Computes the square root of a Uint<128> value off-chain.
    * @param context - The witness context containing ledger and private state.
@@ -57,7 +58,7 @@ export const MathWitnesses = (): IMathWitnesses<MathContractPrivateState> => ({
     context: WitnessContext<Ledger, MathContractPrivateState>,
     dividend: bigint,
     divisor: bigint,
-  ): [MathContractPrivateState, Math_DivResult] {
+  ): [MathContractPrivateState, DivResult] {
     const quotient = dividend / divisor; // Integer division
     const remainder = dividend % divisor;
     return [

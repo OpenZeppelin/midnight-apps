@@ -1,49 +1,40 @@
 // SPDX-License-Identifier: MIT
 pragma language_version >= 0.14.0;
 
-// TODO: that is mainly designed for the DEX needed but it can be extended with more generic Uint types.
 /**
- * @description A utility module providing mathematical operations for Uint<128> types.
+ * @description A utility module providing mathematical operations for 128-bit unsigned integers
+ * (Uint<128>) in the range [0, 2^128 - 1]. The module supports arithmetic, division, square root,
+ * and utility functions. Operations are implemented with internal circuits for core logic and 
+ * exported circuits for public use, ensuring overflow and underflow checks where applicable.
+ *
+ * Supported Mathematical Operations:
+ * - Arithmetic:
+ *   - add(): Adds two Uint<128> numbers, checking for overflow.
+ *   - sub(): Subtracts one Uint<128> number from another, checking for underflow.
+ *   - mul(): Multiplies two Uint<128> numbers, returning a Uint<256> result.
+ * - Division:
+ *   - div(): Computes the quotient of dividing one Uint<128> number by another.
+ *   - rem(): Computes the remainder of dividing one Uint<128> number by another.
+ * - Square Root:
+ *   - sqrt(): Computes the floor of the square root of a Uint<128> number using the Newton-Raphson method.
+ * - Utility:
+ *   - isMultiple(): Checks if one Uint<128> number is a multiple of another.
+ *   - min(): Returns the smaller of two Uint<128> numbers.
+ *   - max(): Returns the larger of two Uint<128> numbers.
+ *
+ * TODO: Future Operations:
+ * - po(w: Compute the power of a Uint<128> number raised to a given exponent, returning a Uint<256>
+ *   result with overflow checking.
+ *
+ * @module Math
  */
 module Math {
     import CompactStandardLibrary;
 
-    export struct DivResult {
-        quotient: Uint<128>,
-        remainder: Uint<128>
-    }
+    import "./interface/IMath";
+    import "./interface/IMaxUint";
 
-    /** @description Maximum value for Uint<8> (2^8 - 1). */
-    export ledger MAX_U8: Uint<8>;
-
-    /** @description Maximum value for Uint<16> (2^16 - 1). */
-    export ledger MAX_U16: Uint<16>;
-
-    /** @description Maximum value for Uint<32> (2^32 - 1). */
-    export ledger MAX_U32: Uint<32>;
-
-    /** @description Maximum value for Uint<64> (2^64 - 1). */
-    export ledger MAX_U64: Uint<64>;
-
-    /** @description Maximum value for Uint<128> (2^128 - 1). */
-    export ledger MAX_U128: Uint<128>;
-
-    /**
-     * @description Computes the square root of a Uint<128> value locally (off-chain).
-     *
-     * @param radicand The number to compute the square root of.
-     * @returns Uint<128> The square root of radicand.
-     */
-    export witness sqrtLocally(radicand: Uint<128>): Uint<128>;
-
-    /**
-     * @description Computes division of two Uint<128> values locally (off-chain).
-     *
-     * @param dividend The number to divide.
-     * @param divisor The number to divide by.
-     * @returns DivResult The quotient and remainder of the division.
-     */
-    export witness divLocally(dividend: Uint<128>, divisor: Uint<128>): DivResult;
+    import MaxUint prefix MaxUint_;
 
     /**
      * @description Initializes the max value constants for common Uint types.
@@ -51,15 +42,27 @@ module Math {
      * @returns None
      */
     export circuit initialize(): [] {
-        MAX_U8   = 255; // 2^8 - 1
-        MAX_U16  = 65535; // 2^16 - 1
-        MAX_U32  = 4294967295; // 2^32 - 1
-        MAX_U64  = 18446744073709551615; // 2^64 - 1
-        MAX_U128 = 340282366920938463463374607431768211455; // 2^128 - 1
+        MaxUint_initialize();
     }
 
     /**
-     * @description Adds two Uint<128> numbers, checking for overflow.
+     * @description Internal implementation of addition for two Uint<128> numbers, checking for overflow.
+     *
+     * @param addend The first number to add.
+     * @param augend The second number to add.
+     * @returns Uint<128> The sum of addend and augend.
+     */
+    circuit _add(
+        addend: Uint<128>,
+        augend: Uint<128>
+    ): Uint<128> {
+        const result = addend + augend;
+        assert (result <= MAX_U128) "Math: addition overflow";
+        return result as Uint<128>;
+    }
+
+    /**
+     * @description Adds two Uint<128> numbers-den, checking for overflow.
      *
      * @param addend The first number to add.
      * @param augend The second number to add.
@@ -69,9 +72,22 @@ module Math {
         addend: Uint<128>,
         augend: Uint<128>
     ): Uint<128> {
-        const result = addend + augend;
-        assert (result <= MAX_U128) "Math: addition overflow";
-        return result as Uint<128>;
+        return _add(addend, augend);
+    }
+
+    /**
+     * @description Internal implementation of subtraction for Uint<128>, checking for underflow.
+     *
+     * @param minuend The number to subtract from.
+     * @param subtrahend The number to subtract.
+     * @returns Uint<128> The difference between minuend and subtrahend.
+     */
+    circuit _sub(
+        minuend: Uint<128>,
+        subtrahend: Uint<128>
+    ): Uint<128> {
+        assert (minuend >= subtrahend) "Math: subtraction underflow";
+        return minuend - subtrahend;
     }
 
     /**
@@ -85,8 +101,21 @@ module Math {
         minuend: Uint<128>,
         subtrahend: Uint<128>
     ): Uint<128> {
-        assert (minuend >= subtrahend) "Math: subtraction underflow";
-        return minuend - subtrahend;
+        return _sub(minuend, subtrahend);
+    }
+
+    /**
+     * @description Internal implementation of multiplication for two Uint<128> values, returning a Uint<256> result.
+     *
+     * @param multiplicand The first number to multiply.
+     * @param multiplier The second number to multiply.
+     * @returns Uint<256> The product of multiplicand and multiplier.
+     */
+    circuit _mul(
+        multiplicand: Uint<128>,
+        multiplier: Uint<128>
+    ): Uint<256> {
+        return multiplicand * multiplier;
     }
 
     /**
@@ -100,7 +129,7 @@ module Math {
         multiplicand: Uint<128>,
         multiplier: Uint<128>
     ): Uint<256> {
-        return multiplicand * multiplier;
+        return _mul(multiplicand, multiplier);
     }
 
     /**
@@ -108,7 +137,7 @@ module Math {
      *
      * @param dividend The number to divide.
      * @param divisor The number to divide by.
-     * @returns quotient The quotient of the division.
+     * @returns Uint<128> The quotient of the division.
      * @dev Uses a local division witness and verifies the result on-chain.
      */
     export circuit div(
@@ -138,7 +167,6 @@ module Math {
      * @param dividend The number to divide.
      * @param divisor The number to divide by.
      * @returns DivResult The quotient and remainder of the division.
-     *
      * @dev Uses a local division witness and verifies the result on-chain.
      */
     circuit _div(
@@ -149,9 +177,24 @@ module Math {
         const result = divLocally(dividend, divisor);
         assert (result.remainder < divisor) "Math: remainder error";
         assert (
-            (mul(result.quotient, divisor) + result.remainder) as Uint<128> == dividend
-            ) "Math: division invalid";
+            (_mul(result.quotient, divisor) + result.remainder) as Uint<128> == dividend
+        ) "Math: division invalid";
         return result;
+    }
+
+    /**
+     * @description Internal implementation of square root for a Uint<128> value, verified on-chain.
+     *
+     * @param radicand The number to compute the square root of.
+     * @returns Uint<128> The square root of radicand.
+     */
+    circuit _sqrt(
+        radicand: Uint<128>
+    ): Uint<128> {
+        const root = sqrtLocally(radicand);
+        assert (mul(root, root) as Field as Uint<222> <= radicand as Field as Uint<222>) "Math: sqrt overestimate (root² > radicand)";
+        assert (mul(add(root, 1), add(root, 1)) as Field as Uint<222> > radicand as Field as Uint<222>) "Math: sqrt underestimate (next root still ≤ radicand)";
+        return root;
     }
 
     /**
@@ -175,10 +218,22 @@ module Math {
     export circuit sqrt(
         radicand: Uint<128>
     ): Uint<128> {
-        const root = sqrtLocally(radicand);
-        assert (mul(root, root) as Field as Uint<222> <= radicand as Field as Uint<222>) "Math: sqrt overestimate (root² > radicand)";
-        assert (mul(add(root, 1) , add(root, 1)) as Field as Uint<222> > radicand as Field as Uint<222>) "Math: sqrt underestimate (next root still ≤ radicand)";
-        return root;
+        return _sqrt(radicand);
+    }
+
+    /**
+     * @description Internal implementation to check if a number is a multiple of another.
+     *
+     * @param value The number to check.
+     * @param divisor The divisor to test against.
+     * @returns Boolean True if value is a multiple of divisor, false otherwise.
+     */
+    circuit _isMultiple(
+        value: Uint<128>,
+        divisor: Uint<128>
+    ): Boolean {
+        assert (divisor > 0) "Math: division by zero";
+        return rem(value, divisor) == 0;
     }
 
     /**
@@ -192,8 +247,21 @@ module Math {
         value: Uint<128>,
         divisor: Uint<128>
     ): Boolean {
-        assert divisor > 0 "Math: division by zero";
-        return rem(value, divisor) == 0;
+        return _isMultiple(value, divisor);
+    }
+
+    /**
+     * @description Internal implementation to return the minimum of two Uint<128> values.
+     *
+     * @param a The first number.
+     * @param b The second number.
+     * @returns Uint<128> The smaller of a and b.
+     */
+    circuit _min(
+        a: Uint<128>,
+        b: Uint<128>
+    ): Uint<128> {
+        return a < b ? a : b;
     }
 
     /**
@@ -207,7 +275,21 @@ module Math {
         a: Uint<128>,
         b: Uint<128>
     ): Uint<128> {
-        return a < b ? a : b;
+        return _min(a, b);
+    }
+
+    /**
+     * @description Internal implementation to return the maximum of two Uint<128> values.
+     *
+     * @param a The first number.
+     * @param b The second number.
+     * @returns Uint<128> The larger of a and b.
+     */
+    circuit _max(
+        a: Uint<128>,
+        b: Uint<128>
+    ): Uint<128> {
+        return a > b ? a : b;
     }
 
     /**
@@ -221,6 +303,6 @@ module Math {
         a: Uint<128>,
         b: Uint<128>
     ): Uint<128> {
-        return a > b ? a : b;
+        return _max(a, b);
     }
 }

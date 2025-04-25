@@ -1,0 +1,12 @@
+pragma language_version >= 0.14.0;
+
+import "../../interface/IMaxUint";
+
+// Export Ledger
+export {
+    MAX_U8,
+    MAX_U16,
+    MAX_U32,
+    MAX_U64,
+    MAX_U128
+};
