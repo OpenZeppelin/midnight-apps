@@ -2,7 +2,7 @@ pragma language_version >= 0.14.0;
 
 import CompactStandardLibrary;
 
-import "../../interface/IMath";
+import "../../interfaces/IMath";
 
 import "../../Math" prefix Math_;
 

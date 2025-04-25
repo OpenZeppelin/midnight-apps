@@ -4,10 +4,10 @@ pragma language_version >= 0.14.0;
  * @module Index
  * @description Re-exports ledger-related types and state from Math.compact for use in contracts and TypeScript.
  */
-import "./interface/IUint256";
-import "./interface/IMaxUint";
-import "./interface/IMath";
-import "./interface/IMathU256";
+import "./interfaces/IUint256";
+import "./interfaces/IMaxUint";
+import "./interfaces/IMath";
+import "./interfaces/IMathU256";
 
 // Export IMaxUint interface
 export {

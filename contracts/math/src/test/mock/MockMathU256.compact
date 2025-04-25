@@ -2,9 +2,9 @@ pragma language_version >= 0.14.0;
 
 import CompactStandardLibrary;
 
-import "../../interface/IMath";
-import "../../interface/IMathU256";
-import "../../interface/IUint256";
+import "../../interfaces/IMath";
+import "../../interfaces/IMathU256";
+import "../../interfaces/IUint256";
 
 import "../../MathU256" prefix MathU256_;
 

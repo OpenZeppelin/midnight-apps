@@ -3,7 +3,7 @@ import type { DivResult } from '../artifacts/Index/contract/index.cjs';
 import type { Ledger } from '../artifacts/Math/contract/index.cjs';
 import type { EmptyState } from '../types/state';
 import { sqrtBigint } from '../utils/sqrtBigint';
-import type { IMathWitnesses } from './interface';
+import type { IMathWitnesses } from './interfaces';
 
 /**
  * @description Represents the private state of the Math module.

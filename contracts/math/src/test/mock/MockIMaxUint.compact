@@ -1,6 +1,6 @@
 pragma language_version >= 0.14.0;
 
-import "../../interface/IMaxUint";
+import "../../interfaces/IMaxUint";
 
 // Export Ledger
 export {

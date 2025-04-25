@@ -5,7 +5,7 @@ pragma language_version >= 0.14.0;
  * @description A module for MAX Uint values.
  */
 module MaxUint {
-    import "./interface/IMaxUint";
+    import "./interfaces/IMaxUint";
 
     /**
      * @description Initializes the max value constants for common Uint types.

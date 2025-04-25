@@ -39,9 +39,9 @@ pragma language_version >= 0.14.0;
 module MathU256 {
     import CompactStandardLibrary;
     
-    import "./interface/IMaxUint";
-    import "./interface/IUint256";
-    import "./interface/IMathU256";
+    import "./interfaces/IMaxUint";
+    import "./interfaces/IUint256";
+    import "./interfaces/IMathU256";
 
     import MaxUint prefix MaxUint_;
     import Uint256 prefix Uint256_;

@@ -6,7 +6,7 @@ import type {
 import type { Ledger } from '../artifacts/MathU256/contract/index.cjs';
 import type { EmptyState } from '../types/state';
 import { sqrtBigint } from '../utils/sqrtBigint';
-import type { IMathU256Witnesses } from './interface';
+import type { IMathU256Witnesses } from './interfaces';
 
 /**
  * @description Represents the private state of the MathU256 module.
