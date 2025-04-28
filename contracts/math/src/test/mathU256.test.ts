@@ -5,7 +5,6 @@ let mathU256Simulator: MathU256Simulator;
 
 const MAX_U128 = 2n ** 128n - 1n;
 const MAX_U256 = 2n ** 256n - 1n;
-//const TWO_POW_128 = 2n ** 128n;
 
 const setup = () => {
   mathU256Simulator = new MathU256Simulator();
