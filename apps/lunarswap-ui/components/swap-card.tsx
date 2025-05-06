@@ -22,8 +22,8 @@ export function SwapCard() {
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [selectingToken, setSelectingToken] = useState<'from' | 'to'>('from');
   const [fromToken, setFromToken] = useState({
-    symbol: 'ETH',
-    name: 'Ethereum',
+    symbol: 'NIGHT',
+    name: 'Midnight',
     logo: '/placeholder.svg?height=24&width=24',
     balance: '1.56',
   });
@@ -66,7 +66,7 @@ export function SwapCard() {
 
   return (
     <>
-      <Card className="bg-white/90 dark:bg-card/80 backdrop-blur-sm border border-gray-200 dark:border-blue-900/50 rounded-2xl overflow-hidden">
+      <Card className="bg-transparent border border-gray-200/50 dark:border-blue-900/30 rounded-2xl overflow-hidden">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <h2 className="text-xl font-bold">Swap</h2>
           <Button
@@ -129,7 +129,7 @@ export function SwapCard() {
           <TooltipProvider>
             <div className="flex items-center justify-center w-full text-xs text-gray-500 dark:text-gray-400">
               <Fuel className="h-3.5 w-3.5 mr-1 text-gray-400" />
-              <span>Average gas fee: {gasPrice} DUST</span>
+              <span>Average gas fee: {gasPrice}</span>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button

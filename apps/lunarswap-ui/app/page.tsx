@@ -1,11 +1,16 @@
-import { Header } from '@/components/header';
-import { StarsBackground } from '@/components/stars-background';
-import { SwapCard } from '@/components/swap-card';
-import { TokenStats } from '@/components/token-stats';
+import { Header } from "@/components/header"
+import { SwapCard } from "@/components/swap-card"
+import { TokenStats } from "@/components/token-stats"
+import { StarsBackground } from "@/components/stars-background"
+
+export const metadata = {
+  title: "LunarSwap | Swap",
+  description: "Swap tokens on the lunar surface with the most celestial DEX in the galaxy",
+}
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#0f172a] dark:via-[#1e293b] dark:to-[#0f172a] text-foreground">
+    <div className="min-h-screen bg-white dark:bg-gradient-to-b dark:from-[#0f172a] dark:via-[#1e293b] dark:to-[#0f172a] text-foreground">
       <StarsBackground />
       <Header />
       <main className="container mx-auto px-4 py-8 relative z-0 pt-24">
@@ -15,5 +20,5 @@ export default function Home() {
         </div>
       </main>
     </div>
-  );
+  )
 }

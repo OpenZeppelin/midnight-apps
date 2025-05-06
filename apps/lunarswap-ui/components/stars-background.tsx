@@ -79,13 +79,13 @@ export function StarsBackground() {
         ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
         ctx.fillStyle = isDark
           ? `rgba(255, 255, 255, ${star.opacity})`
-          : `rgba(0, 0, 50, ${star.opacity * 0.5})`;
+          : `rgba(0, 0, 50, ${star.opacity * 0.3})`;
         ctx.fill();
 
-        // Move stars
+        // Move star
         star.y += star.speed;
 
-        // Reset stars that go off screen
+        // Reset if off‐screen
         if (star.y > canvas.height) {
           star.y = 0;
           star.x = Math.random() * canvas.width;

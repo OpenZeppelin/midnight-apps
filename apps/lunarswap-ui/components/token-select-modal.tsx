@@ -12,8 +12,8 @@ import { useState } from 'react';
 
 const popularTokens = [
   {
-    symbol: 'ETH',
-    name: 'Ethereum',
+    symbol: 'NIGHT',
+    name: 'Midnight',
     logo: '/placeholder.svg?height=32&width=32',
     balance: '1.56',
   },
@@ -70,9 +70,10 @@ export function TokenSelectModal({
 
   return (
     <Dialog open={show} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-white/95 dark:bg-gray-800/90 backdrop-blur-md border-gray-200 dark:border-blue-900/50 text-foreground rounded-2xl">
+      <DialogContent className="sm:max-w-md bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-gray-200/50 dark:border-blue-900/30 text-foreground rounded-2xl">
         <DialogHeader className="flex flex-row items-center justify-between">
           <DialogTitle>Select a token</DialogTitle>
+          {/* Removed the duplicate close button that was here */}
         </DialogHeader>
         <div className="relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />

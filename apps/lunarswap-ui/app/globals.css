@@ -82,15 +82,15 @@
       );
   }
 
-  body.light {
+  body {
     background-image: radial-gradient(
         circle at 50% 50%,
-        rgba(59, 130, 246, 0.03) 0%,
+        rgba(59, 130, 246, 0.01) 0%,
         transparent 25%
       ),
       radial-gradient(
         circle at 80% 20%,
-        rgba(99, 102, 241, 0.03) 0%,
+        rgba(99, 102, 241, 0.01) 0%,
         transparent 35%
       );
   }
