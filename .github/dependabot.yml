@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"          
+    directory: "/"                    
+    schedule:
+      interval: "daily"               
+    open-pull-requests-limit: 5
+    rebase-strategy: "auto"
+    registries:
+      - github-private
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+registries:
+  github-private:
+    type: "npm-registry"
+    url: "https://npm.pkg.github.com"
+    # use the default DEPENDABOT_TOKEN, or create a PAT with read:packages
+    token: "${{ secrets.DEPENDABOT_TOKEN }}"
