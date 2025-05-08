@@ -38,7 +38,6 @@ module MathU128 {
 
     import Max prefix Max_;
     import Uint128 prefix Uint128_;
-    import Math prefix Math_;
 
     /**
      * @description Converts a Uint<128> value to a U128 struct by splitting into high and low parts.
@@ -110,28 +109,32 @@ module MathU128 {
     /**
      * @description Adds two U128 values, checking for overflow.
      */
-    circuit _add(a: U128, b: U128): U128 {
+    circuit _add(a: U128, b: U128): U256 {
+        // Add the low parts as Uint<128> to handle potential carry
         const lowSumFull = a.low + b.low;
+
+        // Split lowSumFull into high and low parts to get the carry
         const lowSumFullU128 = _toU128(lowSumFull);
-        const carry = lowSumFullU128.high;
+        const carry = lowSumFullU128.high; // 0 or 1, since lowSumFull <= 2^65 - 2
+
+        // Add the high parts plus the carry
         const highSumIntermediate = a.high + b.high;
         const highSumFull = highSumIntermediate + carry;
         const highSumFullU128 = _toU128(highSumFull);
-        assert (highSumFullU128.high == 0) "MathU128: addition overflow";
-        return U128 {
-            low: lowSumFullU128.low,
-            high: highSumFullU128.low
+
+        return U256 {
+            low: lowSumFullU128 
+            high: highSumFullU128
         };
     }
 
-    export circuit add(a: Uint<128>, b: Uint<128>): Uint<128> {
+    export circuit add(a: Uint<128>, b: Uint<128>): U256 {
         const aU128 = _toU128(a);
         const bU128 = _toU128(b);
-        const sumU128 = _add(aU128, bU128);
-        return _fromU128(sumU128);
+        return _add(aU128, bU128);
     }
 
-    export circuit addU128(a: U128, b: U128): U128 {
+    export circuit addU128(a: U128, b: U128): U256 {
         return _add(a, b);
     }
 
@@ -175,37 +178,35 @@ module MathU128 {
     /**
      * @description Multiplies two U128 values, checking for overflow.
      */
-    circuit _mul(a: U128, b: U128): U128 {
+    circuit _mul(a: U128, b: U128): U256 {
+        // Compute partial products
         const ll = a.low * b.low;
         const hl = a.high * b.low;
         const lh = a.low * b.high;
         const hh = a.high * b.high;
+
+        // Convert to U128 structs
         const llU128 = _toU128(ll);
         const hlU128 = _toU128(hl);
         const lhU128 = _toU128(lh);
         const hhU128 = _toU128(hh);
+
+        // Combine contributions 
         const crossSum = _add(hlU128, lhU128);
         const crossShifted = U128 { low: 0 as Uint<64>, high: crossSum.low };
         const lowAndCross = _add(llU128, crossShifted);
         const crossCarry = U128 { low: crossSum.high, high: 0 as Uint<64> };
         const hhShiftedU128 = _add(U128 { low: hhU128.low, high: hhU128.high }, crossCarry);
-        const resultU128 = _add(lowAndCross, hhShiftedU128);
-        assert (hhShiftedU128.low == 0 && hhShiftedU128.high == 0) "MathU128: multiplication overflow";
-        assert (
-            resultU128.high < Max_U64() ||
-            (resultU128.high == Max_U64() && resultU128.low <= Max_U64())
-        ) "MathU128: multiplication overflow";
-        return resultU128;
+        return _add(lowAndCross, hhShiftedU128);
     }
 
-    export circuit mul(a: Uint<128>, b: Uint<128>): Uint<128> {
+    export circuit mul(a: Uint<128>, b: Uint<128>): U256 {
         const aU128 = _toU128(a);
         const bU128 = _toU128(b);
-        const resultU128 = _mul(aU128, bU128);
-        return _fromU128(resultU128);
+        return _mul(aU128, bU128);
     }
 
-    export circuit mulU128(a: U128, b: U128): U128 {
+    export circuit mulU128(a: U128, b: U128): U256 {
         return _mul(a, b);
     }
 
@@ -214,14 +215,20 @@ module MathU128 {
      */
     circuit _div(dividend: U128, divisor: U128): DivResultU128 {
         assert (divisor.high > 0 || divisor.low > 0) "MathU128: division by zero";
+
         const dividendUint128 = _fromU128(dividend);
         const divisorUint128 = _fromU128(divisor);
         const result = divU128Locally(dividendUint128, divisorUint128);
+        
+        // Compare remainder < divisor using high and low parts
         const remainderU128 = result.remainder;
         assert (_le(remainderU128, divisor)) "MathU128: remainder error";
+        
+        // Verify: quotient * divisor + remainder == dividend
         const quotientU128 = result.quotient;
-        const product = _mul(quotientU128, divisor);
-        const sum = _add(product, remainderU128);
+        const productU256 = _mul(quotientU128, divisor);
+        const sum = _add(productU256, remainderU128);
+        
         assert (
             sum.high == dividend.high &&
             sum.low == dividend.low
