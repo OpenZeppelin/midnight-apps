@@ -20,10 +20,10 @@ module IMath {
     export witness divLocally(a: Uint<64>, b: Uint<64>): DivResult;
 
     /**
-     * @description Computes the square root of a Uint<64> value locally (off-chain).
+     * @description Computes the square root of a Uint<128> value locally (off-chain).
      *
      * @param radicand The number to compute the square root of.
      * @returns Uint<64> The square root of radicand.
      */
-    export witness sqrtLocally(radicand: Uint<64>): Uint<64>;
+    export witness sqrtLocally(radicand: Uint<128>): Uint<64>;
 }

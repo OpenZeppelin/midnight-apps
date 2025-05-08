@@ -2,24 +2,25 @@
 pragma language_version >= 0.14.0;
 
 /**
- * @description A utility module providing mathematical operations for 64-bit unsigned integers
- * (Uint<64>) in the range [0, 2^64 - 1]. The module supports arithmetic, division, square root,
- * and utility functions with overflow and underflow checks where applicable.
+ * @description A utility module providing mathematical operations for unsigned integers. Most functions operate on
+ * `Uint<64>` values in the range [0, 2^64 - 1], while the `sqrt` function accepts a `Uint<128>` input in the range
+ * [0, 2^128 - 1]. The module supports arithmetic, division, square root, and utility functions with overflow and
+ * underflow checks where applicable.
  *
  * Supported Mathematical Operations:
  * - Arithmetic:
- *   - add(): Adds two Uint<64> numbers, checking for overflow.
- *   - sub(): Subtracts one Uint<64> number from another, checking for underflow.
- *   - mul(): Multiplies two Uint<64> numbers, returning a Uint<128> result.
+ *   - add(): Adds two `Uint<64>` numbers, returning a `Uint<128>` result to handle potential overflow.
+ *   - sub(): Subtracts one `Uint<64>` number from another, checking for underflow.
+ *   - mul(): Multiplies two `Uint<64>` numbers, returning a `Uint<128>` result.
  * - Division:
- *   - div(): Computes the quotient of dividing one Uint<64> number by another.
- *   - rem(): Computes the remainder of dividing one Uint<64> number by another.
+ *   - div(): Computes the quotient of dividing one `Uint<64>` number by another.
+ *   - rem(): Computes the remainder of dividing one `Uint<64>` number by another.
  * - Square Root:
- *   - sqrt(): Computes the floor of the square root of a Uint<64> number using the Newton-Raphson method.
+ *   - sqrt(): Computes the floor of the square root of a `Uint<128>` number using the Newton-Raphson method.
  * - Utility:
- *   - isMultiple(): Checks if one Uint<64> number is a multiple of another.
- *   - min(): Returns the smaller of two Uint<64> numbers.
- *   - max(): Returns the larger of two Uint<64> numbers.
+ *   - isMultiple(): Checks if one `Uint<64>` number is a multiple of another.
+ *   - min(): Returns the smaller of two `Uint<64>` numbers.
+ *   - max(): Returns the larger of two `Uint<64>` numbers.
  */
 module Math {
     import CompactStandardLibrary;
@@ -29,16 +30,21 @@ module Math {
     import Max prefix Max_; 
 
     /**
-     * @description Adds two Uint<64> numbers, checking for overflow.
+     * @description Adds two `Uint<64>` numbers, returning a `Uint<128>` result to accommodate potential overflow.
+     * @param a - The first unsigned 64-bit integer.
+     * @param b - The second unsigned 64-bit integer.
+     * @returns The sum of `a` and `b` as a `Uint<128>` value.
      */
-    export circuit add(a: Uint<64>, b: Uint<64>): Uint<64> {
-        const result = a + b;
-        assert (result <= Max_U64()) "Math: addition overflow";
-        return result as Uint<64>;
+    export circuit add(a: Uint<64>, b: Uint<64>): Uint<128> {
+        return a + b;
     }
 
     /**
-     * @description Subtracts b from a, checking for underflow.
+     * @description Subtracts `b` from `a`, checking for underflow to ensure the result is non-negative.
+     * @param a - The unsigned 64-bit integer to subtract from (minuend).
+     * @param b - The unsigned 64-bit integer to subtract (subtrahend).
+     * @returns The difference `a - b` as a `Uint<64>` value.
+     * @throws If `b > a`, causing underflow.
      */
     export circuit sub(a: Uint<64>, b: Uint<64>): Uint<64> {
         assert (a >= b) "Math: subtraction underflow";
@@ -46,14 +52,22 @@ module Math {
     }
 
     /**
-     * @description Multiplies two Uint<64> values, returning a Uint<128> result.
+     * @description Multiplies two `Uint<64>` values, returning a `Uint<128>` result to handle large products.
+     * @param a - The first unsigned 64-bit integer (multiplicand).
+     * @param b - The second unsigned 64-bit integer (multiplier).
+     * @returns The product of `a` and `b` as a `Uint<128>` value.
      */
     export circuit mul(a: Uint<64>, b: Uint<64>): Uint<128> {
         return a * b;
     }
 
     /**
-     * @description Divides a Uint<64> a by b, returning quotient.
+     * @description Divides a `Uint<64>` number `a` by `b`, returning the quotient.
+     * @param a - The unsigned 64-bit integer to divide (dividend).
+     * @param b - The unsigned 64-bit integer to divide by (divisor).
+     * @returns The quotient of `a` divided by `b` as a `Uint<64>` value.
+     * @throws If `b` is zero, causing division by zero.
+     * @throws If the division result is invalid or the remainder is not less than `b`.
      */
     export circuit div(a: Uint<64>, b: Uint<64>): Uint<64> {
         assert (b > 0) "Math: division by zero";
@@ -64,7 +78,12 @@ module Math {
     }
 
     /**
-     * @description Computes the remainder of dividing a by b.
+     * @description Computes the remainder of dividing a `Uint<64>` number `a` by `b`.
+     * @param a - The unsigned 64-bit integer to divide (dividend).
+     * @param b - The unsigned 64-bit integer to divide by (divisor).
+     * @returns The remainder of `a` divided by `b` as a `Uint<64>` value.
+     * @throws If `b` is zero, causing division by zero.
+     * @throws If the division result is invalid or the remainder is not less than `b`.
      */
     export circuit rem(a: Uint<64>, b: Uint<64>): Uint<64> {
         assert (b > 0) "Math: division by zero";
@@ -75,17 +94,36 @@ module Math {
     }
 
     /**
-     * @description Computes the square root of a Uint<64> value, verified on-chain.
+     * @description Computes the square root of a `Uint<128>` value, verified on-chain. The function returns a `Uint<64>`
+     * result representing the largest integer whose square is less than or equal to the input.
+     *
+     * TODO: A workaround is used to avoid requiring `MathU128` for multiplying `next` (root + 1), 
+     * limiting the maximum accepted radicand to 340282366920938463426481119284349108225, which is slightly smaller than 
+     * the maximum `Uint<128>` value (2^128 - 1 = 340282366920938463463374607431768211455). 
+     * This ensures `next` does not exceed the `Uint<64>` limit (2^64 - 1 = 18446744073709551615).
+     *
+     * @param radicand - The unsigned 128-bit integer input to compute the square root of. Must be less than or equal to
+     * 340282366920938463426481119284349108225 to avoid overflow in the `next` candidate check.
+     * @returns The largest `Uint<64>` integer such that its square is less than or equal to the `radicand`.
+     * @throws If `root * root > radicand`, indicating an overestimate.
+     * @throws If `next > Max_U64()`, indicating an overflow in the `next` candidate.
+     * @throws If `(next * next) <= radicand`, indicating an underestimate.
      */
-    export circuit sqrt(radicand: Uint<64>): Uint<64> {
+    export circuit sqrt(radicand: Uint<128>): Uint<64> {
         const root = sqrtLocally(radicand);
         assert (mul(root, root) <= radicand) "Math: sqrt overestimate (root² > radicand)";
-        assert (mul(add(root, 1), add(root, 1)) as Field as Uint<128> > radicand as Field as Uint<128>) "Math: sqrt underestimate (next root still ≤ radicand)";
+        const next = add(root, 1);
+        assert (next <= Max_U64()) "Math: internal overflow, next candidate exceeds Uint<64> limit";
+        assert (mul(next as Uint<64>, next as Uint<64>) > radicand) "Math: sqrt underestimate (next root still ≤ radicand)";
         return root;
     }
 
     /**
-     * @description Checks if a number is a multiple of another.
+     * @description Checks if a `Uint<64>` number is a multiple of another.
+     * @param value - The unsigned 64-bit integer to check.
+     * @param b - The unsigned 64-bit integer divisor.
+     * @returns `true` if `value` is a multiple of `b`, `false` otherwise.
+     * @throws If `b` is zero, causing division by zero.
      */
     export circuit isMultiple(value: Uint<64>, b: Uint<64>): Boolean {
         assert (b > 0) "Math: division by zero";
@@ -93,14 +131,20 @@ module Math {
     }
 
     /**
-     * @description Returns the minimum of two Uint<64> values.
+     * @description Returns the minimum of two `Uint<64>` values.
+     * @param a - The first unsigned 64-bit integer.
+     * @param b - The second unsigned 64-bit integer.
+     * @returns The smaller of `a` and `b` as a `Uint<64>` value.
      */
     export circuit min(a: Uint<64>, b: Uint<64>): Uint<64> {
         return a < b ? a : b;
     }
 
     /**
-     * @description Returns the maximum of two Uint<64> values.
+     * @description Returns the maximum of two `Uint<64>` values.
+     * @param a - The first unsigned 64-bit integer.
+     * @param b - The second unsigned 64-bit integer.
+     * @returns The larger of `a` and `b` as a `Uint<64>` value.
      */
     export circuit max(a: Uint<64>, b: Uint<64>): Uint<64> {
         return a > b ? a : b;

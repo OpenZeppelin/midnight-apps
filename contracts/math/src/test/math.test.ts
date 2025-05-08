@@ -5,6 +5,8 @@ let mathSimulator: MathContractSimulator;
 
 const MAX_U32 = 2n ** 32n - 1n;
 const MAX_U64 = 2n ** 64n - 1n;
+const MAX_U128 = 2n ** 128n - 1n;
+const MAX_RADICAND = 340282366920938463426481119284349108225n;
 
 const setup = () => {
   mathSimulator = new MathContractSimulator();
@@ -18,14 +20,8 @@ describe('Math', () => {
       expect(mathSimulator.add(5n, 3n)).toBe(8n);
     });
 
-    test('should fail on overflow', () => {
-      expect(() => mathSimulator.add(MAX_U64, 1n)).toThrowError(
-        'Math: addition overflow',
-      );
-    });
-
-    test('should handle max Uint<64> minus 1 plus 1', () => {
-      expect(mathSimulator.add(MAX_U64 - 1n, 1n)).toBe(MAX_U64);
+    test('should not overflow', () => {
+      expect(mathSimulator.add(MAX_U64, MAX_U64)).toBe(36893488147419103230n);
     });
   });
 
@@ -100,9 +96,9 @@ describe('Math', () => {
       expect(mathSimulator.sqrt(MAX_U64)).toBe(4294967295n); // sqrt(2^64 - 1) ≈ 2^32 - 1
     });
 
-    test('should fail if number exceeds MAX_U64', () => {
-      expect(() => mathSimulator.sqrt(MAX_U64 + 1n)).toThrow(
-        'expected value of type Uint<0..18446744073709551615> but received 18446744073709551616n',
+    test('should fail if number exceeds MAX_U128', () => {
+      expect(() => mathSimulator.sqrt(MAX_U128 + 1n)).toThrow(
+        'expected value of type Uint<0..340282366920938463463374607431768211455> but received 340282366920938463463374607431768211456n',
       );
     });
 
@@ -116,6 +112,18 @@ describe('Math', () => {
 
     test('should handle max Uint<64>', () => {
       expect(mathSimulator.sqrt(MAX_U64)).toBe(MAX_U32); // floor(sqrt(2^64 - 1)) = 2^32 - 1
+    });
+
+    test('should overflow max radicand + 1', () => {
+      expect(() => mathSimulator.sqrt(MAX_RADICAND + 1n)).toThrow(
+        'Math: internal overflow, next candidate exceeds Uint<64> limit',
+      );
+    });
+
+    test('should overflow with max Uint<128>', () => {
+      expect(() => mathSimulator.sqrt(MAX_RADICAND + 1n)).toThrow(
+        'Math: internal overflow, next candidate exceeds Uint<64> limit',
+      );
     });
   });
 

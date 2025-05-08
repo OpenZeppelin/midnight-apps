@@ -8,7 +8,7 @@ import "../../Math" prefix Math_;
  * @description A mock contract for testing the Math module's circuits.
  */
 
-export circuit add(a: Uint<64>, b: Uint<64>): Uint<64> {
+export circuit add(a: Uint<64>, b: Uint<64>): Uint<128> {
     return Math_add(a, b);
 }
 
@@ -28,7 +28,7 @@ export circuit rem(a: Uint<64>, b: Uint<64>): Uint<64> {
     return disclose(Math_rem(a, b));
 }
 
-export circuit sqrt(radical: Uint<64>): Uint<64> {
+export circuit sqrt(radical: Uint<128>): Uint<64> {
     return disclose(Math_sqrt(radical));
 }
 
