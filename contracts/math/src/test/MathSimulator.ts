@@ -48,8 +48,6 @@ export class MathContractSimulator
       ),
     };
     // Call initialize to set ledger constants
-    const initResult = this.contract.circuits.initialize(this.circuitContext);
-    this.circuitContext = initResult.context;
     this.contractAddress = this.circuitContext.transactionContext.address;
   }
 
@@ -105,8 +103,8 @@ export class MathContractSimulator
     return result.result;
   }
 
-  public remainder(dividend: bigint, divisor: bigint): bigint {
-    const result = this.contract.circuits.remainder(
+  public rem(dividend: bigint, divisor: bigint): bigint {
+    const result = this.contract.circuits.rem(
       this.circuitContext,
       dividend,
       divisor,

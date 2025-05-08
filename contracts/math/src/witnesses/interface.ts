@@ -1,8 +1,5 @@
 import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
-import type {
-  Ledger,
-  Math_DivResult,
-} from '../artifacts/Index/contract/index.cjs';
+import type { DivResult, Ledger } from '../artifacts/Index/contract/index.cjs';
 
 export interface IMathWitnesses<P> {
   sqrtLocally(
@@ -14,5 +11,5 @@ export interface IMathWitnesses<P> {
     context: WitnessContext<Ledger, P>,
     dividend: bigint,
     divisor: bigint,
-  ): [P, Math_DivResult];
+  ): [P, DivResult];
 }

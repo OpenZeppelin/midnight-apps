@@ -1,13 +1,12 @@
 import { beforeEach, describe, expect, test } from 'vitest';
-import { MathContractSimulator } from './MathContractSimulator';
+import { MathContractSimulator } from './MathSimulator';
 
 let mathSimulator: MathContractSimulator;
 
-const MAX_U8 = 2n ** 8n - 1n;
-const MAX_U16 = 2n ** 16n - 1n;
 const MAX_U32 = 2n ** 32n - 1n;
 const MAX_U64 = 2n ** 64n - 1n;
 const MAX_U128 = 2n ** 128n - 1n;
+const MAX_RADICAND = 340282366920938463426481119284349108225n;
 
 const setup = () => {
   mathSimulator = new MathContractSimulator();
@@ -16,41 +15,13 @@ const setup = () => {
 describe('Math', () => {
   beforeEach(setup);
 
-  describe('Initialize', () => {
-    test('should set MAX_U8', () => {
-      expect(mathSimulator.getCurrentPublicState().mathMAXU8).toBe(MAX_U8);
-    });
-
-    test('should set MAX_U16', () => {
-      expect(mathSimulator.getCurrentPublicState().mathMAXU16).toBe(MAX_U16);
-    });
-
-    test('should set MAX_U32', () => {
-      expect(mathSimulator.getCurrentPublicState().mathMAXU32).toBe(MAX_U32);
-    });
-
-    test('should set MAX_U64', () => {
-      expect(mathSimulator.getCurrentPublicState().mathMAXU64).toBe(MAX_U64);
-    });
-
-    test('should set MAX_U128', () => {
-      expect(mathSimulator.getCurrentPublicState().mathMAXU128).toBe(MAX_U128);
-    });
-  });
-
   describe('Add', () => {
     test('should add two numbers', () => {
       expect(mathSimulator.add(5n, 3n)).toBe(8n);
     });
 
-    test('should fail on overflow', () => {
-      expect(() => mathSimulator.add(MAX_U128, 1n)).toThrowError(
-        'Math: addition overflow',
-      );
-    });
-
-    test('should handle max Uint<128> minus 1 plus 1', () => {
-      expect(mathSimulator.add(MAX_U128 - 1n, 1n)).toBe(MAX_U128);
+    test('should not overflow', () => {
+      expect(mathSimulator.add(MAX_U64, MAX_U64)).toBe(36893488147419103230n);
     });
   });
 
@@ -70,12 +41,12 @@ describe('Math', () => {
       );
     });
 
-    test('should subtract max Uint<128> minus 1', () => {
-      expect(mathSimulator.sub(MAX_U128, 1n)).toBe(MAX_U128 - 1n);
+    test('should subtract max Uint<64> minus 1', () => {
+      expect(mathSimulator.sub(MAX_U64, 1n)).toBe(MAX_U64 - 1n);
     });
 
-    test('should subtract max Uint<128> minus itself', () => {
-      expect(mathSimulator.sub(MAX_U128, MAX_U128)).toBe(0n);
+    test('should subtract max Uint<64> minus itself', () => {
+      expect(mathSimulator.sub(MAX_U64, MAX_U64)).toBe(0n);
     });
 
     test('should fail on underflow with small numbers', () => {
@@ -85,7 +56,7 @@ describe('Math', () => {
     });
 
     test('should fail on underflow with large numbers', () => {
-      expect(() => mathSimulator.sub(MAX_U128 - 10n, MAX_U128)).toThrowError(
+      expect(() => mathSimulator.sub(MAX_U64 - 10n, MAX_U64)).toThrowError(
         'Math: subtraction underflow',
       );
     });
@@ -122,8 +93,7 @@ describe('Math', () => {
 
     test('should handle powers of 2', () => {
       expect(mathSimulator.sqrt(2n ** 32n)).toBe(65536n); // sqrt(2^32) = 2^16
-      expect(mathSimulator.sqrt(2n ** 64n)).toBe(4294967296n); // sqrt(2^64) = 2^32
-      expect(mathSimulator.sqrt(MAX_U128)).toBe(18446744073709551615n); // sqrt(2^128) = 2^64
+      expect(mathSimulator.sqrt(MAX_U64)).toBe(4294967295n); // sqrt(2^64 - 1) ≈ 2^32 - 1
     });
 
     test('should fail if number exceeds MAX_U128', () => {
@@ -144,8 +114,16 @@ describe('Math', () => {
       expect(mathSimulator.sqrt(MAX_U64)).toBe(MAX_U32); // floor(sqrt(2^64 - 1)) = 2^32 - 1
     });
 
-    test('should handle max Uint<128>', () => {
-      expect(mathSimulator.sqrt(MAX_U128)).toBe(MAX_U64); // floor(sqrt(2^128 - 1)) = 2^64 - 1
+    test('should overflow max radicand + 1', () => {
+      expect(() => mathSimulator.sqrt(MAX_RADICAND + 1n)).toThrow(
+        'Math: radicand exceeds supported limit',
+      );
+    });
+
+    test('should overflow with max Uint<128>', () => {
+      expect(() => mathSimulator.sqrt(MAX_RADICAND + 1n)).toThrow(
+        'Math: radicand exceeds supported limit',
+      );
     });
   });
 
@@ -154,12 +132,12 @@ describe('Math', () => {
       expect(mathSimulator.mul(4n, 3n)).toBe(12n);
     });
 
-    test('should handle max Uint<128> times 1', () => {
-      expect(mathSimulator.mul(MAX_U128, 1n)).toBe(MAX_U128);
+    test('should handle max Uint<64> times 1', () => {
+      expect(mathSimulator.mul(MAX_U64, 1n)).toBe(MAX_U64);
     });
 
-    test('should handle max Uint<128> times max Uint<128> without overflow', () => {
-      expect(mathSimulator.mul(MAX_U128, MAX_U128)).toBe(MAX_U128 * MAX_U128);
+    test('should handle max Uint<64> times max Uint<64> without overflow', () => {
+      expect(mathSimulator.mul(MAX_U64, MAX_U64)).toBe(MAX_U64 * MAX_U64);
     });
   });
 
@@ -174,28 +152,28 @@ describe('Math', () => {
       );
     });
 
-    test('should divide max Uint<128> by 1', () => {
-      expect(mathSimulator.div(MAX_U128, 1n)).toBe(MAX_U128);
+    test('should divide max Uint<64> by 1', () => {
+      expect(mathSimulator.div(MAX_U64, 1n)).toBe(MAX_U64);
     });
 
-    test('should divide max Uint<128> by itself', () => {
-      expect(mathSimulator.div(MAX_U128, MAX_U128)).toBe(1n);
+    test('should divide max Uint<64> by itself', () => {
+      expect(mathSimulator.div(MAX_U64, MAX_U64)).toBe(1n);
     });
   });
 
   describe('Remainder', () => {
-    test('should compute remainder', () => {
-      expect(mathSimulator.remainder(10n, 3n)).toBe(1n);
+    test('should compute rem', () => {
+      expect(mathSimulator.rem(10n, 3n)).toBe(1n);
     });
 
     test('should fail on division by zero', () => {
-      expect(() => mathSimulator.remainder(5n, 0n)).toThrowError(
+      expect(() => mathSimulator.rem(5n, 0n)).toThrowError(
         'Math: division by zero',
       );
     });
 
-    test('should compute remainder of max Uint<128> by 2', () => {
-      expect(mathSimulator.remainder(MAX_U128, 2n)).toBe(1n);
+    test('should compute rem of max Uint<64> by 2', () => {
+      expect(mathSimulator.rem(MAX_U64, 2n)).toBe(1n);
     });
   });
 
@@ -210,8 +188,8 @@ describe('Math', () => {
       );
     });
 
-    test('should check max Uint<128> is multiple of 1', () => {
-      expect(mathSimulator.isMultiple(MAX_U128, 1n)).toBe(true);
+    test('should check max Uint<64> is multiple of 1', () => {
+      expect(mathSimulator.isMultiple(MAX_U64, 1n)).toBe(true);
     });
 
     test('should detect a failed case', () => {
@@ -228,8 +206,8 @@ describe('Math', () => {
       expect(mathSimulator.min(4n, 4n)).toBe(4n);
     });
 
-    test('should handle max Uint<128> and smaller value', () => {
-      expect(mathSimulator.min(MAX_U128, 1n)).toBe(1n);
+    test('should handle max Uint<64> and smaller value', () => {
+      expect(mathSimulator.min(MAX_U64, 1n)).toBe(1n);
     });
   });
 
@@ -242,8 +220,8 @@ describe('Math', () => {
       expect(mathSimulator.max(4n, 4n)).toBe(4n);
     });
 
-    test('should handle max Uint<128> and smaller value', () => {
-      expect(mathSimulator.max(MAX_U128, 1n)).toBe(MAX_U128);
+    test('should handle max Uint<64> and smaller value', () => {
+      expect(mathSimulator.max(MAX_U64, 1n)).toBe(MAX_U64);
     });
   });
 });
