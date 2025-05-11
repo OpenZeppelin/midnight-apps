@@ -1,0 +1,31 @@
+// SPDX-License-Identifier: MIT
+pragma language_version >= 0.14.0;
+
+/**
+ * @description An interface module for the MathU128 module.
+ */
+module IMathU128 {
+    import IUint128;
+
+    export struct DivResultU128 {
+        quotient: U128,
+        remainder: U128
+    } 
+
+    /**
+     * @description Computes division of two Uint<128> values locally (off-chain).
+     *
+     * @param dividend The number to divide.
+     * @param divisor The number to divide by.
+     * @returns DivResultU128 The quotient and remainder of the division as U128 structs.
+     */
+    export witness divU128Locally(dividend: Uint<128>, divisor: Uint<128>): DivResultU128;
+
+    /**
+     * @description Computes the square root of a Uint<128> value locally (off-chain).
+     *
+     * @param radicand The number to compute the square root of.
+     * @returns Uint<128> The square root of radicand.
+     */
+    export witness sqrtU128Locally(radicand: Uint<128>): Uint<64>;
+}

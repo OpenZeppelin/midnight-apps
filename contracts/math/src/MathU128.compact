@@ -1,0 +1,385 @@
+// SPDX-License-Identifier: MIT
+pragma language_version >= 0.14.0;
+
+/**
+ * @description A utility module providing mathematical operations for 128-bit unsigned integers
+ * using the U128 struct, which represents numbers as high * 2^64 + low, where high and low are
+ * 64-bit unsigned integers (Uint<64>) in [0, 2^64 - 1]. The module supports conversions,
+ * comparisons, arithmetic, division, square root, and utility functions. Operations are provided
+ * in dual forms: one for Uint<128> inputs with conversions to/from U128, and another for direct
+ * U128 inputs.
+ *
+ * Supported Mathematical Operations:
+ * - Conversions:
+ *   - toU128(): Converts a Uint<128> to a U128 struct by splitting into high and low 64-bit parts.
+ *   - fromU128(): Converts a U128 struct to a Uint<128> by combining high and low parts.
+ * - Comparisons:
+ *   - le(), leU128(): Checks if one 128-bit number is less than another.
+ *   - gt(), gtU128(): Checks if one 128-bit number is greater than another.
+ * - Arithmetic:
+ *   - add(), addU128(): Adds two 128-bit numbers, checking for overflow.
+ *   - sub(), subU128(): Subtracts one 128-bit number from another, checking for underflow.
+ *   - mul(), mulU128(): Multiplies two 128-bit numbers, checking for overflow.
+ * - Division:
+ *   - div(), divU128(): Computes the quotient of dividing one 128-bit number by another.
+ *   - rem(), remU128(): Computes the remainder of dividing one 128-bit number by another.
+ * - Square Root:
+ *   - sqrt(), sqrtU128(): Computes the floor of the square root of a 128-bit number.
+ * - Utility:
+ *   - min(), minU128(): Returns the smaller of two 128-bit numbers.
+ *   - max(), maxU128(): Returns the larger of two 128-bit numbers.
+ *   - isMultiple(), isMultipleU128(): Checks if one 128-bit number is a multiple of another.
+ */
+module MathU128 {
+    import CompactStandardLibrary;
+
+    import "./interfaces/IUint128";
+    import "./interfaces/IUint256";
+    import "./interfaces/IMathU128";
+
+    import Max prefix Max_;
+
+    /**
+     * @description A pure circuit that returns the modulus value of U128.
+     *
+     * @returns None
+     */
+    export pure circuit MODULES(): Uint<65> {
+        // pow() is not supported yet so we hardcode this value.
+        // MODULES value 2^64
+        return 18446744073709551616;
+    }
+
+    export circuit toU128(value: Uint<128>): U128 {
+        const result = divRem(value, MODULES());
+        return U128 {
+            low: result.remainder.low,
+            high: result.quotient.low
+        };
+    }
+
+    export circuit fromU128(value: U128): Uint<128> {
+        const highShifted = (value.high as Uint<128>) * MODULES();
+        const result = highShifted + (value.low as Uint<128>);
+        return result as Uint<128>;
+    }
+
+    /**
+     * @description Compares two U128 values to check if a < b.
+     */
+    circuit _le(a: U128, b: U128): Boolean {
+        return a.high < b.high || (a.high == b.high && a.low < b.low);
+    }
+
+    export circuit leU128(a: U128, b: U128): Boolean {
+        return _le(a, b);
+    }
+
+    export circuit le(a: Uint<128>, b: Uint<128>): Boolean {
+        const aU128 = toU128(a);
+        const bU128 = toU128(b);
+        return _le(aU128, bU128);
+    }
+
+    /**
+     * @description Compares two U128 values to check if a > b.
+     */
+    circuit _gt(a: U128, b: U128): Boolean {
+        return a.high > b.high || (a.high == b.high && a.low > b.low);
+    }
+
+    export circuit gtU128(a: U128, b: U128): Boolean {
+        return _gt(a, b);
+    }
+
+    export circuit gt(a: Uint<128>, b: Uint<128>): Boolean {
+        const aU128 = toU128(a);
+        const bU128 = toU128(b);
+        return _gt(aU128, bU128);
+    }
+
+    /**
+     * @description Adds two U128 values, checking for overflow.
+     */
+    circuit _add(a: U128, b: U128): U256 {
+        // Add the low parts as Uint<128> to handle potential carry
+        const lowSumFull = a.low + b.low;
+
+        // Split lowSumFull into high and low parts to get the carry
+        const lowSumFullU128 = toU128(lowSumFull);
+        const carry = lowSumFullU128.high; // 0 or 1, since lowSumFull <= 2^65 - 2
+
+        // Add the high parts plus the carry
+        const highSumIntermediate = a.high + b.high;
+        const highSumFull = highSumIntermediate + carry;
+        const highSumFullU128 = toU128(highSumFull);
+
+        return U256 {
+            low: lowSumFullU128, 
+            high: highSumFullU128
+        };
+    }
+
+    export circuit add(a: Uint<128>, b: Uint<128>): U256 {
+        const aU128 = toU128(a);
+        const bU128 = toU128(b);
+        return _add(aU128, bU128);
+    }
+
+    export circuit addU128(a: U128, b: U128): U256 {
+        return _add(a, b);
+    }
+
+    /**
+     * @description Subtracts one U128 value from another, checking for underflow.
+     */
+    circuit _sub(a: U128, b: U128): U128 {
+        assert (!_le(a, b)) "MathU128: subtraction underflow";
+
+        // Handle low part subtraction with borrow
+        const borrow = a.low < b.low ? 1 as Uint<64> : 0 as Uint<64>;
+        const highWithBorrow = b.high + borrow;
+        const highDiff = a.high - highWithBorrow;
+        
+        if (borrow == 0) {
+            const lowDiff = a.low - b.low;
+            return U128 {
+                low: lowDiff,
+                high: highDiff
+            };
+        } else {
+            const lowDiff = a.low + MODULES() - b.low;
+            return U128 {
+                low: lowDiff as Uint<64>,
+                high: highDiff
+            };
+        } 
+    }
+
+    export circuit sub(a: Uint<128>, b: Uint<128>): Uint<128> {
+        const aU128 = toU128(a);
+        const bU128 = toU128(b);
+        const diffU128 = _sub(aU128, bU128);
+        return fromU128(diffU128);
+    }
+
+    export circuit subU128(a: U128, b: U128): U128 {
+        return _sub(a, b);
+    }
+
+    /**
+     * @description Multiplies two U128 values, returning the full 256-bit result as a U256 struct.
+     *
+     * @param a The first U128 value to multiply.
+     * @param b The second U128 value to multiply.
+     * @returns U256 The full product of a and b as a U256 struct (low and high 128 bits).
+     */
+    circuit _mul(a: U128, b: U128): U256 {
+        // Compute partial products (each is Uint<128>)
+        const ll = a.low * b.low; // Bits 0-127
+        const hl = a.high * b.low; // Bits 64-191
+        const lh = a.low * b.high; // Bits 64-191
+        const hh = a.high * b.high; // Bits 128-255
+
+        // Convert partial products to U128 structs
+        const llU128 = toU128(ll);
+        const hlU128 = toU128(hl);
+        const lhU128 = toU128(lh);
+        const hhU128 = toU128(hh);
+
+        // Combine hl and lh (bits 64-191) using _add, which returns a U256
+        const crossSum = _add(hlU128, lhU128); // U256 { low: bits 64-191, high: bits 192-319 }
+
+        // Extract bits 64-127 (crossSum.low.low) for crossShifted
+        const crossShifted = U128 { low: 0 as Uint<64>, high: crossSum.low.low }; // Bits 64-127
+
+        // Add crossShifted to ll to get bits 0-127 of the final result
+        const lowAndCross = _add(llU128, crossShifted); // U256 { low: bits 0-127, high: bits 128-255 }
+
+        // Extract the carry from crossSum (bits 128-191 are in crossSum.low.high, bits 192-255 in crossSum.high.low)
+        const crossCarry = U128 { low: crossSum.low.high, high: crossSum.high.low }; // Bits 128-191, 192-255
+
+        // Add crossCarry to hh to form the high part (bits 128-255)
+        const highPartU256 = _add(hhU128, crossCarry); // U256 { low: bits 128-255, high: bits 256-383 }
+
+        // Construct the final U256 result
+        // lowAndCross.low contains bits 0-127
+        // lowAndCross.high contains bits 128-255 (first part of the high bits)
+        // highPartU256.low contains bits 128-255 (second part, needs to be combined)
+        // highPartU256.high contains bits 256-383 (should be 0, as the product fits in 256 bits)
+        const finalLow = lowAndCross.low; // Bits 0-127
+        const finalHigh = _add(lowAndCross.high, highPartU256.low); // Combine bits 128-255
+
+        return U256 {
+            low: finalLow, // Bits 0-127
+            high: finalHigh.low // Bits 128-255
+        };
+    }
+
+    export circuit mul(a: Uint<128>, b: Uint<128>): U256 {
+        const aU128 = toU128(a);
+        const bU128 = toU128(b);
+        return _mul(aU128, bU128);
+    }
+
+    export circuit mulU128(a: U128, b: U128): U256 {
+        return _mul(a, b);
+    }
+
+    /**
+     * @description Divides a U128 dividend by a U128 divisor, returning quotient and remainder.
+     */
+    circuit _div(dividend: U128, divisor: U128): DivResultU128 {
+        assert (divisor.high > 0 || divisor.low > 0) "MathU128: division by zero";
+
+        const dividendUint128 = fromU128(dividend);
+        const divisorUint128 = fromU128(divisor);
+        const result = divU128Locally(dividendUint128, divisorUint128);
+        
+        // Compare remainder < divisor using high and low parts
+        const remainderU128 = result.remainder;
+        assert (_le(remainderU128, divisor)) "MathU128: remainder error";
+        
+        // Verify: quotient * divisor + remainder == dividend
+        const quotientU128 = result.quotient;
+        const productU256 = _mul(quotientU128, divisor);
+        const sum = _add(productU256, remainderU128);
+        
+        assert (
+            sum.high == dividend.high &&
+            sum.low == dividend.low
+        ) "MathU128: division invalid";
+        return result;
+    }
+
+    export circuit div(dividend: Uint<128>, divisor: Uint<128>): Uint<128> {
+        const dividendU128 = toU128(dividend);
+        const divisorU128 = toU128(divisor);
+        const result = _div(dividendU128, divisorU128);
+        return fromU128(result.quotient);
+    }
+
+    export circuit divU128(dividend: U128, divisor: U128): U128 {
+        return _div(dividend, divisor).quotient;
+    }
+
+    export circuit rem(dividend: Uint<128>, divisor: Uint<128>): Uint<128> {
+        const dividendU128 = toU128(dividend);
+        const divisorU128 = toU128(divisor);
+        const result = _div(dividendU128, divisorU128);
+        return fromU128(result.remainder);
+    }
+
+    export circuit remU128(dividend: U128, divisor: U128): U128 {
+        return _div(dividend, divisor).remainder;
+    }
+    
+    export circuit divRem(dividend: Uint<128>, divisor: Uint<128>): DivResultU128 {
+        const dividendU128 = toU128(dividend);
+        const divisorU128 = toU128(divisor);
+        return _div(dividendU128, divisorU128);
+    }
+
+    export circuit divRemU128(dividend: U128, divisor: U128): DivResultU128 {
+        return _div(dividend, divisor);
+    }
+
+    /**
+     * @description Computes the square root of a U128 value.
+     */
+    circuit _sqrt(radicand: U128): Uint<64> {
+        if (radicand.high == 0 && radicand.low == 0) {
+            return 0 as Uint<64>;
+        }
+        if (radicand.high == 0 && radicand.low == 1) {
+            return 1 as Uint<64>;
+        }
+        if (radicand.high == 0 && radicand.low == Max_U8()) {
+            return 15 as Uint<64>;
+        }
+        if (radicand.high == 0 && radicand.low == Max_U16()) {
+            return 255 as Uint<64>;
+        }
+        if (radicand.high == 0 && radicand.low == Max_U32()) {
+            return 65535 as Uint<64>;
+        }
+        if (radicand.high == 0 && radicand.low == Max_U64()) {
+            return 4294967295 as Uint<64>;
+        }
+        if (radicand.high == Max_U64() && radicand.low == Max_U64()) {
+            return Max_U64();
+        }
+        const radicandUint128 = fromU128(radicand);
+        const root = sqrtU128Locally(radicandUint128);
+        const rootSquareU128 = _mul(U128 { low: root, high: 0 }, U128 { low: root, high: 0 });
+        const next = root + 1 as Uint<64>;
+        const nextSquareU128 = _mul(U128 { low: next, high: 0 }, U128 { low: next, high: 0 });
+        assert (!_gt(rootSquareU128, radicand)) "MathU128: sqrt overestimate";
+        assert (_gt(nextSquareU128, radicand)) "MathU128: sqrt underestimate";
+        return root;
+    }
+
+    export circuit sqrt(radicand: Uint<128>): Uint<64> {
+        const radicandU128 = toU128(radicand);
+        return _sqrt(radicandU128);
+    }
+
+    export circuit sqrtU128(radicand: U128): Uint<64> {
+        return _sqrt(radicand);
+    }
+
+    /**
+     * @description Returns the minimum of two U128 values.
+     */
+    circuit _min(a: U128, b: U128): U128 {
+        return _le(a, b) ? a : b;
+    }
+
+    export circuit min(a: Uint<128>, b: Uint<128>): Uint<128> {
+        const aU128 = toU128(a);
+        const bU128 = toU128(b);
+        const minU128 = _min(aU128, bU128);
+        return fromU128(minU128);
+    }
+
+    export circuit minU128(a: U128, b: U128): U128 {
+        return _min(a, b);
+    }
+
+    /**
+     * @description Returns the maximum of two U128 values.
+     */
+    circuit _max(a: U128, b: U128): U128 {
+        return _le(a, b) ? b : a;
+    }
+
+    export circuit max(a: Uint<128>, b: Uint<128>): Uint<128> {
+        const aU128 = toU128(a);
+        const bU128 = toU128(b);
+        const maxU128 = _max(aU128, bU128);
+        return fromU128(maxU128);
+    }
+
+    export circuit maxU128(a: U128, b: U128): U128 {
+        return _max(a, b);
+    }
+
+    /**
+     * @description Checks if a U128 value is a multiple of another.
+     */
+    circuit _isMultiple(value: U128, divisor: U128): Boolean {
+        assert (divisor.high > 0 || divisor.low > 0) "MathU128: division by zero";
+        const result = _div(value, divisor);
+        return result.remainder.high == 0 && result.remainder.low == 0;
+    }
+
+    export circuit isMultiple(value: Uint<128>, divisor: Uint<128>): Boolean {
+        const valueU128 = toU128(value);
+        const divisorU128 = toU128(divisor);
+        return _isMultiple(valueU128, divisorU128);
+    }
+
+    export circuit isMultipleU128(value: U128, divisor: U128): Boolean {
+        return _isMultiple(value, divisor);
+    }
+}

@@ -1,0 +1,12 @@
+// SPDX-License-Identifier: MIT
+pragma language_version >= 0.14.0;
+
+/**
+ * @description An interface module for Uint<128> types using U128 struct.
+ */
+module IUint128 {    
+    export struct U128 {
+        low: Uint<64>,
+        high: Uint<64>
+    } 
+}

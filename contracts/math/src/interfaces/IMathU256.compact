@@ -1,0 +1,31 @@
+// SPDX-License-Identifier: MIT
+pragma language_version >= 0.14.0;
+
+/**
+ * @description An interface module for the MathU256 module.
+ */
+module IMathU256 {
+    import IUint256;
+
+    export struct DivResultU256 {
+        quotient: U256,
+        remainder: U256
+    } 
+
+    /**
+     * @description Computes division of two U256 values locally (off-chain).
+     *
+     * @param dividend The number to divide.
+     * @param divisor The number to divide by.
+     * @returns DivResultU256 The quotient and remainder of the division as U256 structs.
+     */
+    export witness divU256Locally(dividend: U256, divisor: U256): DivResultU256;
+
+    /**
+     * @description Computes the square root of a U256 value locally (off-chain).
+     *
+     * @param radicand The number to compute the square root of.
+     * @returns Uint<128> The square root of radicand.
+     */
+    export witness sqrtU256Locally(radicand: U256): Uint<128>;
+}
