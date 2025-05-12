@@ -17,7 +17,7 @@ module IMathU128 {
      *
      * @param dividend The number to divide.
      * @param divisor The number to divide by.
-     * @returns DivResultU128 The quotient and remainder of the division as U128 structs.
+     * @returns DivResultU128 The quotient and remainder of the division as Uint<64>.
      */
     export witness divU128Locally(dividend: Uint<128>, divisor: Uint<128>): DivResultU128;
 
@@ -25,7 +25,7 @@ module IMathU128 {
      * @description Computes the square root of a Uint<128> value locally (off-chain).
      *
      * @param radicand The number to compute the square root of.
-     * @returns Uint<128> The square root of radicand.
+     * @returns Uint<64> The square root of radicand.
      */
     export witness sqrtU128Locally(radicand: Uint<128>): Uint<64>;
 }

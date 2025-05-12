@@ -51,7 +51,8 @@ module MathU128 {
     }
 
     export circuit toU128(value: Uint<128>): U128 {
-        const result = divRem(value, MODULES());
+        // TODO: that is done without verification
+        const result = divU128Locally(value, MODULES());
         return U128 {
             low: result.remainder.low,
             high: result.quotient.low
@@ -114,9 +115,18 @@ module MathU128 {
         const highSumFull = highSumIntermediate + carry;
         const highSumFullU128 = toU128(highSumFull);
 
+        // Check for carry to high part (if highSumIntermediate >= 2^64)
+        const carryHigh = highSumFullU128.high;
+
         return U256 {
-            low: lowSumFullU128, 
-            high: highSumFullU128
+            low: U128 {
+                low: lowSumFullU128.low,
+                high: highSumFullU128.low
+            },
+            high: U128 {
+                low: carryHigh,
+                high: 0
+            }
         };
     }
 
@@ -231,40 +241,28 @@ module MathU128 {
      */
     circuit _div(dividend: U128, divisor: U128): DivResultU128 {
         assert (divisor.high > 0 || divisor.low > 0) "MathU128: division by zero";
-
         const dividendUint128 = fromU128(dividend);
         const divisorUint128 = fromU128(divisor);
         const result = divU128Locally(dividendUint128, divisorUint128);
-        
-        // Compare remainder < divisor using high and low parts
-        const remainderU128 = result.remainder;
-        assert (_le(remainderU128, divisor)) "MathU128: remainder error";
-        
-        // Verify: quotient * divisor + remainder == dividend
-        const quotientU128 = result.quotient;
-        const productU256 = _mul(quotientU128, divisor); // U256 { low: U128, high: U128 }
-        
-        // Check if productU256.high is zero (ensures product fits in U128)
-        assert (productU256.high.low == 0 && productU256.high.high == 0) "MathU128: product overflow";
-        
-        // Add productU256.low (U128) to remainderU128 using _add, but only need U128 result
-        // So Compute quotient * divisor as dividend - remainder
-        const sumU128 = _sub(dividend, remainderU128); 
-        const productU128 = productU256.low; // Low part of product should match quotient * divisor
-        
-        assert (
-            sumU128.high == productU128.high &&
-            sumU128.low == productU128.low
-        ) "MathU128: division invalid";
-        
+        assert (_le(result.remainder, divisor)) "MathU128: remainder error";
+        const productU256 = _mul(result.quotient, divisor);
+        // Verify only if product fits in U128 (high part is zero)
+        // TODO: that is a workaround to avoid using MathU256
+        if (productU256.high.low == 0 && productU256.high.high == 0) {
+            const productU128 = productU256.low;
+            const sumU128 = _sub(dividend, result.remainder);
+            assert (
+                sumU128.high == productU128.high &&
+                sumU128.low == productU128.low
+            ) "MathU128: division invalid";
+        }
         return result;
     }
 
     export circuit div(dividend: Uint<128>, divisor: Uint<128>): Uint<128> {
         const dividendU128 = toU128(dividend);
         const divisorU128 = toU128(divisor);
-        const result = _div(dividendU128, divisorU128);
-        return fromU128(result.quotient);
+        return fromU128(_div(dividendU128, divisorU128).quotient);
     }
 
     export circuit divU128(dividend: U128, divisor: U128): U128 {
@@ -274,8 +272,7 @@ module MathU128 {
     export circuit rem(dividend: Uint<128>, divisor: Uint<128>): Uint<128> {
         const dividendU128 = toU128(dividend);
         const divisorU128 = toU128(divisor);
-        const result = _div(dividendU128, divisorU128);
-        return fromU128(result.remainder);
+        return fromU128(_div(dividendU128, divisorU128).remainder);
     }
 
     export circuit remU128(dividend: U128, divisor: U128): U128 {

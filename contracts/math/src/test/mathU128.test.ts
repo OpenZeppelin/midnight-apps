@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from 'vitest';
-import type { U128 } from '../artifacts/Index/contract/index.d.cts';
+import type { U128, U256 } from '../artifacts/Index/contract/index.d.cts';
 import { MathU128Simulator } from './MathU128Simulator';
 
 let mathSimulator: MathU128Simulator;
@@ -125,22 +125,32 @@ describe('MathU128', () => {
 
   describe('add', () => {
     test('should add two small numbers', () => {
-      expect(mathSimulator.add(5n, 3n)).toBe(8n);
+      const result: U256 = mathSimulator.add(5n, 3n);
+      expect(result.low.low).toBe(8n);
+      expect(result.low.high).toBe(0n);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(0n);
     });
 
     test('should add max Uint<128> minus 1 plus 1', () => {
-      expect(mathSimulator.add(MAX_U128 - 1n, 1n)).toBe(MAX_U128);
-    });
-
-    test('should fail on overflow', () => {
-      expect(() => mathSimulator.add(MAX_U128, 1n)).toThrowError(
-        'MathU128: addition overflow',
-      );
+      const result: U256 = mathSimulator.add(MAX_U128 - 1n, 1n);
+      expect(result.low.low).toBe(MAX_U64);
+      expect(result.low.high).toBe(MAX_U64);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(0n);
     });
 
     test('should handle zero', () => {
-      expect(mathSimulator.add(0n, 0n)).toBe(0n);
-      expect(mathSimulator.add(5n, 0n)).toBe(5n);
+      const result: U256 = mathSimulator.add(0n, 0n);
+      expect(result.low.low).toBe(0n);
+      expect(result.low.high).toBe(0n);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(0n);
+      const result2: U256 = mathSimulator.add(5n, 0n);
+      expect(result2.low.low).toBe(5n);
+      expect(result2.low.high).toBe(0n);
+      expect(result2.high.low).toBe(0n);
+      expect(result2.high.high).toBe(0n);
     });
   });
 
@@ -148,25 +158,31 @@ describe('MathU128', () => {
     test('should add two small U128 numbers', () => {
       const a: U128 = { low: 5n, high: 0n };
       const b: U128 = { low: 3n, high: 0n };
-      const result = mathSimulator.addU128(a, b);
-      expect(result.low).toBe(8n);
-      expect(result.high).toBe(0n);
+      const result: U256 = mathSimulator.addU128(a, b);
+      expect(result.low.low).toBe(8n);
+      expect(result.low.high).toBe(0n);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(0n);
     });
 
     test('should add with carry', () => {
       const a: U128 = { low: MAX_U64, high: 0n };
       const b: U128 = { low: 1n, high: 0n };
-      const result = mathSimulator.addU128(a, b);
-      expect(result.low).toBe(0n);
-      expect(result.high).toBe(1n);
+      const result: U256 = mathSimulator.addU128(a, b);
+      expect(result.low.low).toBe(0n);
+      expect(result.low.high).toBe(1n);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(0n);
     });
 
-    test('should fail on overflow', () => {
+    test('should handle large addition', () => {
       const a: U128 = { low: MAX_U64, high: MAX_U64 };
       const b: U128 = { low: 1n, high: 0n };
-      expect(() => mathSimulator.addU128(a, b)).toThrowError(
-        'MathU128: addition overflow',
-      );
+      const result: U256 = mathSimulator.addU128(a, b);
+      expect(result.low.low).toBe(0n);
+      expect(result.low.high).toBe(0n);
+      expect(result.high.low).toBe(1n);
+      expect(result.high.high).toBe(0n);
     });
   });
 
@@ -221,22 +237,40 @@ describe('MathU128', () => {
 
   describe('mul', () => {
     test('should multiply small numbers', () => {
-      expect(mathSimulator.mul(4n, 3n)).toBe(12n);
+      const result: U256 = mathSimulator.mul(4n, 3n);
+      expect(result.low.low).toBe(12n);
+      expect(result.low.high).toBe(0n);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(0n);
     });
 
     test('should multiply max Uint<128> by 1', () => {
-      expect(mathSimulator.mul(MAX_U128, 1n)).toBe(MAX_U128);
+      const result: U256 = mathSimulator.mul(MAX_U128, 1n);
+      expect(result.low.low).toBe(MAX_U64);
+      expect(result.low.high).toBe(MAX_U64);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(0n);
     });
 
-    test('should fail on overflow', () => {
-      expect(() => mathSimulator.mul(MAX_U128, 2n)).toThrowError(
-        'MathU128: multiplication overflow',
-      );
+    test('should handle large multiplication', () => {
+      const result: U256 = mathSimulator.mul(MAX_U128, 2n);
+      expect(result.low.low).toBe(MAX_U64 - 1n);
+      expect(result.low.high).toBe(MAX_U64);
+      expect(result.high.low).toBe(1n);
+      expect(result.high.high).toBe(0n);
     });
 
     test('should handle zero', () => {
-      expect(mathSimulator.mul(5n, 0n)).toBe(0n);
-      expect(mathSimulator.mul(0n, MAX_U128)).toBe(0n);
+      const result: U256 = mathSimulator.mul(5n, 0n);
+      expect(result.low.low).toBe(0n);
+      expect(result.low.high).toBe(0n);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(0n);
+      const result2: U256 = mathSimulator.mul(0n, MAX_U128);
+      expect(result2.low.low).toBe(0n);
+      expect(result2.low.high).toBe(0n);
+      expect(result2.high.low).toBe(0n);
+      expect(result2.high.high).toBe(0n);
     });
   });
 
@@ -244,25 +278,31 @@ describe('MathU128', () => {
     test('should multiply small U128 numbers', () => {
       const a: U128 = { low: 4n, high: 0n };
       const b: U128 = { low: 3n, high: 0n };
-      const result = mathSimulator.mulU128(a, b);
-      expect(result.low).toBe(12n);
-      expect(result.high).toBe(0n);
+      const result: U256 = mathSimulator.mulU128(a, b);
+      expect(result.low.low).toBe(12n);
+      expect(result.low.high).toBe(0n);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(0n);
     });
 
     test('should multiply with high part contribution', () => {
       const a: U128 = { low: 0n, high: 1n };
       const b: U128 = { low: 1n, high: 0n };
-      const result = mathSimulator.mulU128(a, b);
-      expect(result.low).toBe(0n);
-      expect(result.high).toBe(1n);
+      const result: U256 = mathSimulator.mulU128(a, b);
+      expect(result.low.low).toBe(0n);
+      expect(result.low.high).toBe(1n);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(0n);
     });
 
-    test('should fail on overflow', () => {
+    test('should handle large multiplication', () => {
       const a: U128 = { low: MAX_U64, high: MAX_U64 };
       const b: U128 = { low: 2n, high: 0n };
-      expect(() => mathSimulator.mulU128(a, b)).toThrowError(
-        'MathU128: multiplication overflow',
-      );
+      const result: U256 = mathSimulator.mulU128(a, b);
+      expect(result.low.low).toBe(MAX_U64 - 1n);
+      expect(result.low.high).toBe(MAX_U64);
+      expect(result.high.low).toBe(1n);
+      expect(result.high.high).toBe(0n);
     });
   });
 
@@ -291,8 +331,8 @@ describe('MathU128', () => {
       const a: U128 = { low: 10n, high: 0n };
       const b: U128 = { low: 3n, high: 0n };
       const result = mathSimulator.divU128(a, b);
-      expect(result.low).toBe(3n);
-      expect(result.high).toBe(0n);
+      expect(result.low).toStrictEqual(3n);
+      expect(result.high).toStrictEqual(0n);
     });
 
     test('should divide large U128 numbers', () => {

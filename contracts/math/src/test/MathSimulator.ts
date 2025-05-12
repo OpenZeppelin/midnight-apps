@@ -17,7 +17,7 @@ import type { IContractSimulator } from '../types/test';
 import {
   MathContractPrivateState,
   MathWitnesses,
-} from '../witnesses/MathWitnesses';
+} from '../witnesses/Math';
 
 export class MathContractSimulator
   implements IContractSimulator<MathContractPrivateState, Ledger>

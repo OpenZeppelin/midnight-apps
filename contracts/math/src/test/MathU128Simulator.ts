@@ -8,7 +8,7 @@ import {
     sampleCoinPublicKey,
     sampleContractAddress,
   } from '@midnight-ntwrk/zswap';
-  import type { U128 } from '../artifacts/Index/contract/index.d.cts';
+  import type { U128, U256 } from '../artifacts/Index/contract/index.d.cts';
   import {
     Contract,
     type Ledger,
@@ -18,7 +18,7 @@ import {
   import {
     MathU128ContractPrivateState,
     MathU128Witnesses,
-  } from '../witnesses/MathU128Witnesses';
+  } from '../witnesses/MathU128';
   
   export class MathU128Simulator
     implements IContractSimulator<MathU128ContractPrivateState, Ledger>
@@ -104,13 +104,13 @@ import {
       return result.result;
     }
   
-    public add(a: bigint, b: bigint): bigint {
+    public add(a: bigint, b: bigint): U256 {
       const result = this.contract.circuits.add(this.circuitContext, a, b);
       this.circuitContext = result.context;
       return result.result;
     }
   
-    public addU128(a: U128, b: U128): U128 {
+    public addU128(a: U128, b: U128): U256 {
       const result = this.contract.circuits.addU128(this.circuitContext, a, b);
       this.circuitContext = result.context;
       return result.result;
@@ -128,13 +128,13 @@ import {
       return result.result;
     }
   
-    public mul(a: bigint, b: bigint): bigint {
+    public mul(a: bigint, b: bigint): U256 {
       const result = this.contract.circuits.mul(this.circuitContext, a, b);
       this.circuitContext = result.context;
       return result.result;
     }
   
-    public mulU128(a: U128, b: U128): U128 {
+    public mulU128(a: U128, b: U128): U256 {
       const result = this.contract.circuits.mulU128(this.circuitContext, a, b);
       this.circuitContext = result.context;
       return result.result;

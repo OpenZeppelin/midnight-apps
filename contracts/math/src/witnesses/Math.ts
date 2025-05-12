@@ -2,7 +2,7 @@ import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
 import type { DivResult, Ledger } from '../artifacts/Index/contract/index.cjs'; // Adjust path to your generated artifacts
 import type { EmptyState } from '../types/state';
 import { sqrtBigint } from '../utils/sqrtBigint';
-import type { IMathWitnesses } from './interface';
+import type { IMathWitnesses } from './interfaces';
 
 /**
  * @description Represents the private state of the Math module.
