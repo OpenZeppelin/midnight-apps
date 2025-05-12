@@ -242,13 +242,21 @@ module MathU128 {
         
         // Verify: quotient * divisor + remainder == dividend
         const quotientU128 = result.quotient;
-        const productU256 = _mul(quotientU128, divisor);
-        const sum = _add(productU256, remainderU128);
+        const productU256 = _mul(quotientU128, divisor); // U256 { low: U128, high: U128 }
+        
+        // Check if productU256.high is zero (ensures product fits in U128)
+        assert (productU256.high.low == 0 && productU256.high.high == 0) "MathU128: product overflow";
+        
+        // Add productU256.low (U128) to remainderU128 using _add, but only need U128 result
+        // So Compute quotient * divisor as dividend - remainder
+        const sumU128 = _sub(dividend, remainderU128); 
+        const productU128 = productU256.low; // Low part of product should match quotient * divisor
         
         assert (
-            sum.high == dividend.high &&
-            sum.low == dividend.low
+            sumU128.high == productU128.high &&
+            sumU128.low == productU128.low
         ) "MathU128: division invalid";
+        
         return result;
     }
 
@@ -311,10 +319,16 @@ module MathU128 {
         }
         const radicandUint128 = fromU128(radicand);
         const root = sqrtU128Locally(radicandUint128);
-        const rootSquareU128 = _mul(U128 { low: root, high: 0 }, U128 { low: root, high: 0 });
-        const next = root + 1 as Uint<64>;
-        const nextSquareU128 = _mul(U128 { low: next, high: 0 }, U128 { low: next, high: 0 });
+        const rootU128 = U128 { low: root, high: 0 };
+        const rootSquareU256 = _mul(rootU128, rootU128); // U256 { low: U128, high: U128 }
+        assert (rootSquareU256.high.low == 0 && rootSquareU256.high.high == 0) "MathU128: sqrt root^2 overflow";
+        const rootSquareU128 = rootSquareU256.low; // U128
         assert (!_gt(rootSquareU128, radicand)) "MathU128: sqrt overestimate";
+        const next = root + 1 as Uint<64>;
+        const nextU128 = U128 { low: next, high: 0 };
+        const nextSquareU256 = _mul(nextU128, nextU128); // U256 { low: U128, high: U128 }
+        assert (nextSquareU256.high.low == 0 && nextSquareU256.high.high == 0) "MathU128: sqrt next overflow";
+        const nextSquareU128 = nextSquareU256.low; // U128
         assert (_gt(nextSquareU128, radicand)) "MathU128: sqrt underestimate";
         return root;
     }

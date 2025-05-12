@@ -44,18 +44,7 @@ module MathU256 {
     import "./interfaces/IMathU256";
 
     import Max prefix Max_;
-    import Math prefix Math_;
-
-    /**
-     * @description A pure circuit that returns the modulus value of U256.
-     *
-     * @returns None
-     */
-    export pure circuit MODULUS(): Field {
-        // pow() is not supported yet so we hardcode this value.
-        // Uint256_MODULUS as a modulus value
-        return 340282366920938463463374607431768211456;
-    }
+    import Math prefix Math_; 
 
     /**
      * @description Compares two U256 values to check if a < b.
@@ -92,7 +81,7 @@ module MathU256 {
      * @returns Boolean True if a > b, false otherwise.
      */
     export circuit gt(a: U256, b: U256): Boolean {
-        return a.high > b.high || (a.high == b.high && a.low > b.low);
+        return leU128(a.high, b.high) || (a.high.low == b.high.low && a.high.high == b.high.high && leU128(a.low, b.low));
     }
 
     /**
