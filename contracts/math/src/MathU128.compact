@@ -50,6 +50,17 @@ module MathU128 {
         return 18446744073709551616;
     }
 
+    export pure circuit ZERO_U128(): U128 {
+        return U128 { low: 0, high: 0 };
+    }
+
+    export pure circuit MAX_U128(): U128 {
+        return U128 {
+            low:  Max_U64(),
+            high: Max_U64(),
+        };
+    }
+
     export circuit toU128(value: Uint<128>): U128 {
         // TODO: that is done without verification
         const result = divU128Locally(value, MODULES());
@@ -65,11 +76,15 @@ module MathU128 {
         return result as Uint<128>;
     }
 
+    circuit _eq(a: U128, b: U128): Boolean {
+        return a.high == b.high && a.low == b.low;
+    }
+
     /**
      * @description Compares two U128 values to check if a < b.
      */
     circuit _le(a: U128, b: U128): Boolean {
-        return a.high < b.high || (a.high == b.high && a.low < b.low);
+        return a.high < b.high || (a.high == b.high && a.low <= b.low);
     }
 
     export circuit leU128(a: U128, b: U128): Boolean {
@@ -239,54 +254,59 @@ module MathU128 {
     /**
      * @description Divides a U128 dividend by a U128 divisor, returning quotient and remainder.
      */
-    circuit _div(dividend: U128, divisor: U128): DivResultU128 {
+    circuit _unsafe_div(dividend: U128, divisor: U128): DivResultU128 {
         assert (divisor.high > 0 || divisor.low > 0) "MathU128: division by zero";
         const dividendUint128 = fromU128(dividend);
         const divisorUint128 = fromU128(divisor);
         const result = divU128Locally(dividendUint128, divisorUint128);
         assert (_le(result.remainder, divisor)) "MathU128: remainder error";
+        
+        // quotient * divisor + remainder == dividend
+        // Compute sumU256 = productU256 + remainderU256
         const productU256 = _mul(result.quotient, divisor);
-        // Verify only if product fits in U128 (high part is zero)
-        // TODO: that is a workaround to avoid using MathU256
-        if (productU256.high.low == 0 && productU256.high.high == 0) {
-            const productU128 = productU256.low;
-            const sumU128 = _sub(dividend, result.remainder);
-            assert (
-                sumU128.high == productU128.high &&
-                sumU128.low == productU128.low
-            ) "MathU128: division invalid";
-        }
+        const remainderU256 = U256 { low: result.remainder, high: ZERO_U128() };
+        const lowSumU256 = _add(productU256.low, result.remainder); // U256 result
+        const highSumU256 = _add(productU256.high, lowSumU256.high); // Add carry to high part
+        
+        // Verify that sumU256.low == dividend and sumU256.high == 0
+        assert (
+            _eq(highSumU256.low, ZERO_U128()) && 
+            _eq(highSumU256.high, ZERO_U128()) && // High 128 bits are zero
+            lowSumU256.low.high == dividend.high &&
+            lowSumU256.low.low == dividend.low
+        ) "MathU128: division invalid";
+        
         return result;
     }
 
     export circuit div(dividend: Uint<128>, divisor: Uint<128>): Uint<128> {
         const dividendU128 = toU128(dividend);
         const divisorU128 = toU128(divisor);
-        return fromU128(_div(dividendU128, divisorU128).quotient);
+        return fromU128(_unsafe_div(dividendU128, divisorU128).quotient);
     }
 
     export circuit divU128(dividend: U128, divisor: U128): U128 {
-        return _div(dividend, divisor).quotient;
+        return _unsafe_div(dividend, divisor).quotient;
     }
 
     export circuit rem(dividend: Uint<128>, divisor: Uint<128>): Uint<128> {
         const dividendU128 = toU128(dividend);
         const divisorU128 = toU128(divisor);
-        return fromU128(_div(dividendU128, divisorU128).remainder);
+        return fromU128(_unsafe_div(dividendU128, divisorU128).remainder);
     }
 
     export circuit remU128(dividend: U128, divisor: U128): U128 {
-        return _div(dividend, divisor).remainder;
+        return _unsafe_div(dividend, divisor).remainder;
     }
     
     export circuit divRem(dividend: Uint<128>, divisor: Uint<128>): DivResultU128 {
         const dividendU128 = toU128(dividend);
         const divisorU128 = toU128(divisor);
-        return _div(dividendU128, divisorU128);
+        return _unsafe_div(dividendU128, divisorU128);
     }
 
     export circuit divRemU128(dividend: U128, divisor: U128): DivResultU128 {
-        return _div(dividend, divisor);
+        return _unsafe_div(dividend, divisor);
     }
 
     /**
@@ -380,7 +400,7 @@ module MathU128 {
      */
     circuit _isMultiple(value: U128, divisor: U128): Boolean {
         assert (divisor.high > 0 || divisor.low > 0) "MathU128: division by zero";
-        const result = _div(value, divisor);
+        const result = _unsafe_div(value, divisor);
         return result.remainder.high == 0 && result.remainder.low == 0;
     }
 
