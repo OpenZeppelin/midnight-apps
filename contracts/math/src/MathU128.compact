@@ -74,15 +74,47 @@ module MathU128 {
     /**
      * @description Converts a Uint<128> to a U128 struct.
      *
+     * This circuit converts a 128-bit unsigned integer (`value`) to a U128 struct
+     * (`{ low: Uint<64>, high: Uint<64> }`), where `low` holds the lower 64 bits and `high` holds the
+     * upper 64 bits of `value`. The conversion is verified to ensure correctness.
+     *
+     * **Theoretical Description**:
+     * The circuit splits a 128-bit unsigned integer value into two 64-bit unsigned integers,
+     * value = high * 2^64 + low, where high, low are in [0, 2^64 - 1]. The result is a U128 struct
+     * with low = value mod 2^64 and high = floor(value / 2^64).
+     *
+     * **Mathematical Steps**:
+     * 1. **Propose Low and High Parts**:
+     *    - Compute low = value mod 2^64, the least significant 64 bits of value.
+     *    - Compute high = floor(value / 2^64), the most significant 64 bits of value.
+     * 2. **Verification**:
+     *    - Reconstruct reconstructed = high * 2^64 + low, a 128-bit unsigned integer.
+     *    - Verify that reconstructed = value to ensure the conversion is correct.
+     * 3. **Result Construction**:
+     *    - Return (low, high), a U128 struct satisfying value = high * 2^64 + low.
+     *
+     * The circuit ensures correctness by verifying the reconstructed value matches the input, using
+     * arithmetic operations within the 128-bit domain.
+     *
      * @param value The Uint<128> value to convert.
      * @returns U128 A U128 struct with low and high fields representing the lower and upper 64 bits.
+     * @throws MathU128: conversion invalid If the reconstructed value does not match the input.
      */
     export circuit toU128(value: Uint<128>): U128 {
-        // TODO: that is done without verification
         const result = divU128Locally(value, MODULES());
+        const high = result.quotient.low;
+        const low = result.remainder.low;
+
+        // Verify that value = high * 2^64 + low
+        const highShifted = (high as Uint<128>) * MODULES(); // high * 2^64
+        const reconstructed = highShifted + (low as Uint<128>); // high * 2^64 + low
+
+        // Verify reconstruction matches value
+        assert (reconstructed == value) "MathU128: conversion invalid";
+
         return U128 {
-            low: result.remainder.low,
-            high: result.quotient.low
+            low: low,
+            high: high
         };
     }
 
@@ -141,7 +173,7 @@ module MathU128 {
      * @returns Boolean True if a is less than b, false otherwise.
      */
     circuit _le(a: U128, b: U128): Boolean {
-        return a.high < b.high || (a.high == b.high && a.low < b.low);
+        return a.high < b.high || (a.high == b.high && a.low <= b.low);
     }
 
     /**
@@ -600,7 +632,9 @@ module MathU128 {
      */
     circuit _div(a: U128, b: U128): DivResultU128 {
         assert (b.high > 0 || b.low > 0) "MathU128: division by zero";
-        const result = divU128Locally(a, b);
+        const aValue = fromU128(a);
+        const bValue = fromU128(b);
+        const result = divU128Locally(aValue, bValue);
         assert (_le(result.remainder, b)) "MathU128: remainder error";
         
         // quotient * b + remainder == a
