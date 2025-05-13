@@ -144,17 +144,6 @@ module MathU128 {
     /**
      * @description Compares two U128 values for equality.
      *
-     * @param a The first U128 value.
-     * @param b The second U128 value.
-     * @returns Boolean True if a is equal b, false otherwise.
-     */
-    export circuit eq(a: U128, b: U128): Boolean {
-        return _eq(a, b);
-    }
-
-    /**
-     * @description Compares two U128 values for equality.
-     *
      * @param a The first Uint<128> value.
      * @param b The second Uint<128> value.
      * @returns Boolean True if a is equal than b, false otherwise.
@@ -163,6 +152,17 @@ module MathU128 {
         const aU128 = toU128(a);
         const bU128 = toU128(b);
         return _eq(aU128, bU128);
+    }
+
+    /**
+     * @description Compares two U128 values for equality.
+     *
+     * @param a The first U128 value.
+     * @param b The second U128 value.
+     * @returns Boolean True if a is equal b, false otherwise.
+     */
+    export circuit eqU128(a: U128, b: U128): Boolean {
+        return _eq(a, b);
     }
 
     /**
