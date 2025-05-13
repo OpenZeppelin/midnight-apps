@@ -59,17 +59,17 @@ describe('MathU128', () => {
     test('should compare small numbers', () => {
       expect(mathSimulator.le(5n, 10n)).toBe(true);
       expect(mathSimulator.le(10n, 5n)).toBe(false);
-      expect(mathSimulator.le(5n, 5n)).toBe(false);
+      expect(mathSimulator.le(5n, 5n)).toBe(true);
     });
 
     test('should compare max Uint<128>', () => {
-      expect(mathSimulator.le(MAX_U128, MAX_U128)).toBe(false);
+      expect(mathSimulator.le(MAX_U128, MAX_U128)).toBe(true);
       expect(mathSimulator.le(MAX_U128 - 1n, MAX_U128)).toBe(true);
     });
 
     test('should handle zero', () => {
       expect(mathSimulator.le(0n, 1n)).toBe(true);
-      expect(mathSimulator.le(0n, 0n)).toBe(false);
+      expect(mathSimulator.le(0n, 0n)).toBe(true);
     });
   });
 
@@ -79,7 +79,7 @@ describe('MathU128', () => {
       const b: U128 = { low: 10n, high: 0n };
       expect(mathSimulator.leU128(a, b)).toBe(true);
       expect(mathSimulator.leU128(b, a)).toBe(false);
-      expect(mathSimulator.leU128(a, a)).toBe(false);
+      expect(mathSimulator.leU128(a, a)).toBe(true);
     });
 
     test('should compare U128 with high parts', () => {
