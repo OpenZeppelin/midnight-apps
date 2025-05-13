@@ -40,6 +40,7 @@ pragma language_version >= 0.14.0;
 module MathU256 {
     import CompactStandardLibrary;
     
+    import "./interfaces/IUint128";
     import "./interfaces/IUint256";
     import "./interfaces/IMathU256";
 
@@ -99,10 +100,13 @@ module MathU256 {
      * @returns Boolean True if a <= b, false otherwise.
      */
     export circuit le(a: U256, b: U256): Boolean {
-        return MathU128_leU128(a.high, b.high) || 
-            (a.high.low == b.high.low && 
-                a.high.high == b.high.high && 
-                MathU128_leU128(a.low, b.low));
+        if (!MathU128_leU128(a.high, b.high)) {
+            return false;
+        }
+        if (MathU128_eqU128(a.high, b.high)) {
+            return MathU128_leU128(a.low, b.low);
+        }
+        return true;
     }
 
     /**
@@ -212,18 +216,30 @@ module MathU256 {
      */
     export circuit sub(a: U256, b: U256): U256 {
         // Check for underflow: a must be >= b
-        assert (!le(a, b)) "MathU256: subtraction underflow";
+        assert (gt(a, b) || eq(a, b)) "MathU256: subtraction underflow";
         
         // Handle low part subtraction with borrow
         const borrow = MathU128_leU128(a.low, b.low) ? 1 : 0;
-        const lowDiff = MathU128_subU128(a.low, b.low);
         const highWithBorrow = MathU128_addU128(b.high, MathU128_toU128(borrow)).low;
         const highDiff = MathU128_subU128(a.high, highWithBorrow);
 
-        return U256 {
-            low: lowDiff,
-            high: highDiff
-        };
+        if (borrow == 0) {
+            const lowDiff = MathU128_subU128(a.low, b.low);
+            return U256 {
+                low: lowDiff,
+                high: highDiff
+            };
+        } else {
+            const low = a.low.low + MathU128_MODULES() - b.low.low;
+            const lowDiff = U128 {
+                low: low as Uint<64>,
+                high: a.low.high
+            };
+            return U256 {
+                low: lowDiff,
+                high: highDiff
+            };
+        }
     }
 
    
