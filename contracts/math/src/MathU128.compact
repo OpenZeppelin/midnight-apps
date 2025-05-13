@@ -388,7 +388,7 @@ module MathU128 {
      * @throws MathU128: subtraction underflow If a < b.
      */
     circuit _sub(a: U128, b: U128): U128 {
-        assert (!_le(a, b)) "MathU128: subtraction underflow";
+        assert (_gt(a, b) || _eq(a, b)) "MathU128: subtraction underflow";
 
         // Handle low part subtraction with borrow
         const borrow = a.low < b.low ? 1 as Uint<64> : 0 as Uint<64>;

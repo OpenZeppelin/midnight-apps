@@ -188,6 +188,10 @@ describe('MathU128', () => {
 
   describe('sub', () => {
     test('should subtract two small numbers', () => {
+      expect(mathSimulator.sub(4n, 4n)).toBe(0n);
+    });
+
+    test('should subtract two small numbers', () => {
       expect(mathSimulator.sub(10n, 4n)).toBe(6n);
     });
 
