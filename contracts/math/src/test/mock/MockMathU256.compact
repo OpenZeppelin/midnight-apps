@@ -9,16 +9,28 @@ import "../../interfaces/IMathU256";
 
 import "../../MathU256" prefix MathU256_;
 
+export circuit isZero(a: U256): Boolean {
+    return MathU256_isZero(a);
+}
+
+export circuit ZERO_U256(): U256 {
+    return MathU256_ZERO_U256();
+}
+
+export circuit MAX_U256(): U256 {
+    return MathU256_MAX_U256();
+}
+
 export circuit eq(a: U256, b: U256): Boolean {
-    return disclose(MathU256_eq(a, b));
+    return MathU256_eq(a, b);
 }
 
 export circuit le(a: U256, b: U256): Boolean {
-    return disclose(MathU256_le(a, b));
+    return MathU256_le(a, b);
 }
 
 export circuit gt(a: U256, b: U256): Boolean {
-    return disclose(MathU256_gt(a, b));
+    return MathU256_gt(a, b);
 }
 
 export circuit add(a: U256, b: U256): U256 {
