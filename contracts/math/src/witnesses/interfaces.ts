@@ -1,17 +1,23 @@
 import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
-import type { DivResult, DivResultU128, DivResultU256, Ledger, U256 } from '../artifacts/Index/contract/index.cjs';
+import type {
+  DivResultU64,
+  DivResultU128,
+  DivResultU256,
+  Ledger,
+  U256,
+} from '../artifacts/Index/contract/index.cjs';
 
-export interface IMathWitnesses<P> {
-  sqrtLocally(
+export interface IMathU64Witnesses<P> {
+  sqrtU64Locally(
     context: WitnessContext<Ledger, P>,
     radicand: bigint,
   ): [P, bigint];
 
-  divLocally(
+  divU64Locally(
     context: WitnessContext<Ledger, P>,
     a: bigint,
     b: bigint,
-  ): [P, DivResult];
+  ): [P, DivResultU64];
 }
 
 export interface IMathU128Witnesses<L, P> {

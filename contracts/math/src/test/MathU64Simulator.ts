@@ -8,33 +8,36 @@ import {
   sampleCoinPublicKey,
   sampleContractAddress,
 } from '@midnight-ntwrk/zswap';
+import type { DivResultU64 } from '../artifacts/Index/contract/index.cjs';
 import {
   Contract,
   type Ledger,
   ledger,
-} from '../artifacts/MockMath/contract/index.cjs';
+} from '../artifacts/MockMathU64/contract/index.cjs';
 import type { IContractSimulator } from '../types/test';
 import {
-  MathContractPrivateState,
-  MathWitnesses,
-} from '../witnesses/Math';
+  MathU64ContractPrivateState,
+  MathU64Witnesses,
+} from '../witnesses/MathU64';
 
 export class MathContractSimulator
-  implements IContractSimulator<MathContractPrivateState, Ledger>
+  implements IContractSimulator<MathU64ContractPrivateState, Ledger>
 {
-  readonly contract: Contract<MathContractPrivateState>;
+  readonly contract: Contract<MathU64ContractPrivateState>;
   readonly contractAddress: string;
-  circuitContext: CircuitContext<MathContractPrivateState>;
+  circuitContext: CircuitContext<MathU64ContractPrivateState>;
 
   constructor() {
-    this.contract = new Contract<MathContractPrivateState>(MathWitnesses());
+    this.contract = new Contract<MathU64ContractPrivateState>(
+      MathU64Witnesses(),
+    );
     const {
       currentPrivateState,
       currentContractState,
       currentZswapLocalState,
     } = this.contract.initialState(
       constructorContext(
-        MathContractPrivateState.generate(),
+        MathU64ContractPrivateState.generate(),
         sampleCoinPublicKey(),
       ),
     );
@@ -55,7 +58,7 @@ export class MathContractSimulator
     return ledger(this.circuitContext.transactionContext.state);
   }
 
-  public getCurrentPrivateState(): MathContractPrivateState {
+  public getCurrentPrivateState(): MathU64ContractPrivateState {
     return this.circuitContext.currentPrivateState;
   }
 
@@ -105,6 +108,16 @@ export class MathContractSimulator
 
   public rem(dividend: bigint, divisor: bigint): bigint {
     const result = this.contract.circuits.rem(
+      this.circuitContext,
+      dividend,
+      divisor,
+    );
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public divRem(dividend: bigint, divisor: bigint): DivResultU64 {
+    const result = this.contract.circuits.divRem(
       this.circuitContext,
       dividend,
       divisor,

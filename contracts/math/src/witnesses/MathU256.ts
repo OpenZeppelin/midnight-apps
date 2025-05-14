@@ -1,5 +1,9 @@
 import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
-import type { DivResultU128, DivResultU256, U256 } from '../artifacts/Index/contract/index.cjs';
+import type {
+  DivResultU128,
+  DivResultU256,
+  U256,
+} from '../artifacts/Index/contract/index.cjs';
 import type { Ledger } from '../artifacts/MathU256/contract/index.cjs';
 import type { EmptyState } from '../types/state';
 import { sqrtBigint } from '../utils/sqrtBigint';
@@ -48,10 +52,10 @@ export const MathU256Witnesses = (): IMathU256Witnesses<
       (BigInt(radicand.high.low) << 128n) +
       (BigInt(radicand.low.high) << 64n) +
       BigInt(radicand.low.low);
-    
+
     // Compute square root using sqrtBigint, ensuring result fits in Uint<128>
     const root = sqrtBigint(radicandBigInt);
-    
+
     return [context.privateState, root];
   },
 
@@ -78,11 +82,11 @@ export const MathU256Witnesses = (): IMathU256Witnesses<
       (BigInt(b.high.low) << 128n) +
       (BigInt(b.low.high) << 64n) +
       BigInt(b.low.low);
-    
+
     // Compute quotient and remainder
     const quotient = aBigInt / bBigInt; // Integer division
     const remainder = aBigInt - quotient * bBigInt;
-    
+
     // Convert quotient to U256
     const quotientLowBigInt = quotient & ((1n << 128n) - 1n);
     const quotientHighBigInt = quotient >> 128n;
@@ -96,7 +100,7 @@ export const MathU256Witnesses = (): IMathU256Witnesses<
         high: quotientHighBigInt >> 64n,
       },
     };
-    
+
     // Convert remainder to U256
     const remainderLowBigInt = remainder & ((1n << 128n) - 1n);
     const remainderHighBigInt = remainder >> 128n;
@@ -110,7 +114,7 @@ export const MathU256Witnesses = (): IMathU256Witnesses<
         high: remainderHighBigInt >> 64n,
       },
     };
-    
+
     return [
       context.privateState,
       {
@@ -119,14 +123,14 @@ export const MathU256Witnesses = (): IMathU256Witnesses<
       },
     ];
   },
-   /**
+  /**
    * @description Computes division of two Uint<128> values off-chain.
    * @param context - The witness context containing ledger and private state.
    * @param dividend - The number to divide.
    * @param divisor - The number to divide by.
-   * @returns A tuple of the unchanged private state and a DivResult with quotient and remainder.
+   * @returns A tuple of the unchanged private state and a DivResultU64 with quotient and remainder.
    */
-   divU128Locally(
+  divU128Locally(
     context: WitnessContext<Ledger, MathU256ContractPrivateState>,
     dividend: bigint,
     divisor: bigint,

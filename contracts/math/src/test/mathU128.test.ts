@@ -132,15 +132,7 @@ describe('MathU128', () => {
       expect(result.high.high).toBe(0n);
     });
 
-    test('should add max Uint<128> minus 1 plus 1', () => {
-      const result: U256 = mathSimulator.add(MAX_U128 - 1n, 1n);
-      expect(result.low.low).toBe(MAX_U64);
-      expect(result.low.high).toBe(MAX_U64);
-      expect(result.high.low).toBe(0n);
-      expect(result.high.high).toBe(0n);
-    });
-
-    test('should handle zero', () => {
+    test('should handle zero addition', () => {
       const result: U256 = mathSimulator.add(0n, 0n);
       expect(result.low.low).toBe(0n);
       expect(result.low.high).toBe(0n);
@@ -151,6 +143,35 @@ describe('MathU128', () => {
       expect(result2.low.high).toBe(0n);
       expect(result2.high.low).toBe(0n);
       expect(result2.high.high).toBe(0n);
+      const result3: U256 = mathSimulator.add(0n, 5n);
+      expect(result3.low.low).toBe(5n);
+      expect(result3.low.high).toBe(0n);
+      expect(result3.high.low).toBe(0n);
+      expect(result3.high.high).toBe(0n);
+    });
+
+    test('should handle equal values', () => {
+      const result: U256 = mathSimulator.add(5n, 5n);
+      expect(result.low.low).toBe(10n);
+      expect(result.low.high).toBe(0n);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(0n);
+    });
+
+    test('should handle max U128 minus 1 plus 1', () => {
+      const result: U256 = mathSimulator.add(MAX_U128 - 1n, 1n);
+      expect(result.low.low).toBe(MAX_U64);
+      expect(result.low.high).toBe(MAX_U64);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(0n);
+    });
+
+    test('should handle max U128 plus 1', () => {
+      const result: U256 = mathSimulator.add(MAX_U128, 1n);
+      expect(result.low.low).toBe(0n);
+      expect(result.low.high).toBe(0n);
+      expect(result.high.low).toBe(1n);
+      expect(result.high.high).toBe(0n);
     });
   });
 
@@ -165,17 +186,38 @@ describe('MathU128', () => {
       expect(result.high.high).toBe(0n);
     });
 
-    test('should add with carry', () => {
-      const a: U128 = { low: MAX_U64, high: 0n };
-      const b: U128 = { low: 1n, high: 0n };
-      const result: U256 = mathSimulator.addU128(a, b);
+    test('should handle zero addition', () => {
+      const zero: U128 = { low: 0n, high: 0n };
+      const five: U128 = { low: 5n, high: 0n };
+      const result: U256 = mathSimulator.addU128(zero, zero);
       expect(result.low.low).toBe(0n);
-      expect(result.low.high).toBe(1n);
+      expect(result.low.high).toBe(0n);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(0n);
+
+      const result2: U256 = mathSimulator.addU128(five, zero);
+      expect(result2.low.low).toBe(5n);
+      expect(result2.low.high).toBe(0n);
+      expect(result2.high.low).toBe(0n);
+      expect(result2.high.high).toBe(0n);
+
+      const result3: U256 = mathSimulator.addU128(zero, five);
+      expect(result3.low.low).toBe(5n);
+      expect(result3.low.high).toBe(0n);
+      expect(result3.high.low).toBe(0n);
+      expect(result3.high.high).toBe(0n);
+    });
+
+    test('should handle equal U128 values', () => {
+      const a: U128 = { low: 5n, high: 0n };
+      const result: U256 = mathSimulator.addU128(a, a);
+      expect(result.low.low).toBe(10n);
+      expect(result.low.high).toBe(0n);
       expect(result.high.low).toBe(0n);
       expect(result.high.high).toBe(0n);
     });
 
-    test('should handle large addition', () => {
+    test('should handle max U128 plus one', () => {
       const a: U128 = { low: MAX_U64, high: MAX_U64 };
       const b: U128 = { low: 1n, high: 0n };
       const result: U256 = mathSimulator.addU128(a, b);
@@ -184,29 +226,43 @@ describe('MathU128', () => {
       expect(result.high.low).toBe(1n);
       expect(result.high.high).toBe(0n);
     });
+
+    test('should handle addition with carry', () => {
+      const a: U128 = { low: MAX_U64, high: 0n };
+      const b: U128 = { low: 1n, high: 0n };
+      const result: U256 = mathSimulator.addU128(a, b);
+      expect(result.low.low).toBe(0n);
+      expect(result.low.high).toBe(1n);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(0n);
+    });
   });
 
   describe('sub', () => {
     test('should subtract two small numbers', () => {
-      expect(mathSimulator.sub(4n, 4n)).toBe(0n);
+      const result = mathSimulator.sub(10n, 4n);
+      expect(result).toBe(6n);
     });
 
-    test('should subtract two small numbers', () => {
-      expect(mathSimulator.sub(10n, 4n)).toBe(6n);
+    test('should handle equal values', () => {
+      const result = mathSimulator.sub(4n, 4n);
+      expect(result).toBe(0n);
     });
 
-    test('should subtract max Uint<128> minus 1', () => {
-      expect(mathSimulator.sub(MAX_U128, 1n)).toBe(MAX_U128 - 1n);
+    test('should handle zero subtraction', () => {
+      const result = mathSimulator.sub(5n, 0n);
+      expect(result).toBe(5n);
+    });
+
+    test('should handle max U128 minus one', () => {
+      const result = mathSimulator.sub(MAX_U128, 1n);
+      expect(result).toBe(MAX_U128 - 1n);
     });
 
     test('should fail on underflow', () => {
       expect(() => mathSimulator.sub(3n, 5n)).toThrowError(
         'MathU128: subtraction underflow',
       );
-    });
-
-    test('should handle zero', () => {
-      expect(mathSimulator.sub(5n, 0n)).toBe(5n);
       expect(() => mathSimulator.sub(0n, 1n)).toThrowError(
         'MathU128: subtraction underflow',
       );
@@ -220,6 +276,29 @@ describe('MathU128', () => {
       const result = mathSimulator.subU128(a, b);
       expect(result.low).toBe(6n);
       expect(result.high).toBe(0n);
+    });
+
+    test('should handle equal U128 values', () => {
+      const a: U128 = { low: 4n, high: 0n };
+      const result = mathSimulator.subU128(a, a);
+      expect(result.low).toBe(0n);
+      expect(result.high).toBe(0n);
+    });
+
+    test('should handle zero subtraction', () => {
+      const a: U128 = { low: 5n, high: 0n };
+      const b: U128 = { low: 0n, high: 0n };
+      const result = mathSimulator.subU128(a, b);
+      expect(result.low).toBe(5n);
+      expect(result.high).toBe(0n);
+    });
+
+    test('should handle max U128 minus one', () => {
+      const a: U128 = { low: MAX_U64, high: MAX_U64 };
+      const b: U128 = { low: 1n, high: 0n };
+      const result = mathSimulator.subU128(a, b);
+      expect(result.low).toBe(MAX_U64 - 1n);
+      expect(result.high).toBe(MAX_U64);
     });
 
     test('should subtract with borrow', () => {
@@ -248,7 +327,43 @@ describe('MathU128', () => {
       expect(result.high.high).toBe(0n);
     });
 
-    test('should multiply max Uint<128> by 1', () => {
+    test('should handle zero multiplication', () => {
+      const result: U256 = mathSimulator.mul(5n, 0n);
+      expect(result.low.low).toBe(0n);
+      expect(result.low.high).toBe(0n);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(0n);
+
+      const result2: U256 = mathSimulator.mul(0n, MAX_U128);
+      expect(result2.low.low).toBe(0n);
+      expect(result2.low.high).toBe(0n);
+      expect(result2.high.low).toBe(0n);
+      expect(result2.high.high).toBe(0n);
+    });
+
+    test('should handle multiplication by one', () => {
+      const result: U256 = mathSimulator.mul(1n, 5n);
+      expect(result.low.low).toBe(5n);
+      expect(result.low.high).toBe(0n);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(0n);
+
+      const result2: U256 = mathSimulator.mul(5n, 1n);
+      expect(result2.low.low).toBe(5n);
+      expect(result2.low.high).toBe(0n);
+      expect(result2.high.low).toBe(0n);
+      expect(result2.high.high).toBe(0n);
+    });
+
+    test('should handle equal values', () => {
+      const result: U256 = mathSimulator.mul(5n, 5n);
+      expect(result.low.low).toBe(25n);
+      expect(result.low.high).toBe(0n);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(0n);
+    });
+
+    test('should handle max U128 by one', () => {
       const result: U256 = mathSimulator.mul(MAX_U128, 1n);
       expect(result.low.low).toBe(MAX_U64);
       expect(result.low.high).toBe(MAX_U64);
@@ -256,25 +371,12 @@ describe('MathU128', () => {
       expect(result.high.high).toBe(0n);
     });
 
-    test('should handle large multiplication', () => {
+    test('should handle max U128 by two', () => {
       const result: U256 = mathSimulator.mul(MAX_U128, 2n);
       expect(result.low.low).toBe(MAX_U64 - 1n);
       expect(result.low.high).toBe(MAX_U64);
       expect(result.high.low).toBe(1n);
       expect(result.high.high).toBe(0n);
-    });
-
-    test('should handle zero', () => {
-      const result: U256 = mathSimulator.mul(5n, 0n);
-      expect(result.low.low).toBe(0n);
-      expect(result.low.high).toBe(0n);
-      expect(result.high.low).toBe(0n);
-      expect(result.high.high).toBe(0n);
-      const result2: U256 = mathSimulator.mul(0n, MAX_U128);
-      expect(result2.low.low).toBe(0n);
-      expect(result2.low.high).toBe(0n);
-      expect(result2.high.low).toBe(0n);
-      expect(result2.high.high).toBe(0n);
     });
   });
 
@@ -289,17 +391,48 @@ describe('MathU128', () => {
       expect(result.high.high).toBe(0n);
     });
 
-    test('should multiply with high part contribution', () => {
-      const a: U128 = { low: 0n, high: 1n };
-      const b: U128 = { low: 1n, high: 0n };
-      const result: U256 = mathSimulator.mulU128(a, b);
+    test('should handle zero multiplication', () => {
+      const zero: U128 = { low: 0n, high: 0n };
+      const five: U128 = { low: 5n, high: 0n };
+      const result: U256 = mathSimulator.mulU128(five, zero);
       expect(result.low.low).toBe(0n);
-      expect(result.low.high).toBe(1n);
+      expect(result.low.high).toBe(0n);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(0n);
+
+      const result2: U256 = mathSimulator.mulU128(zero, five);
+      expect(result2.low.low).toBe(0n);
+      expect(result2.low.high).toBe(0n);
+      expect(result2.high.low).toBe(0n);
+      expect(result2.high.high).toBe(0n);
+    });
+
+    test('should handle multiplication by one', () => {
+      const one: U128 = { low: 1n, high: 0n };
+      const five: U128 = { low: 5n, high: 0n };
+      const result: U256 = mathSimulator.mulU128(one, five);
+      expect(result.low.low).toBe(5n);
+      expect(result.low.high).toBe(0n);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(0n);
+
+      const result2: U256 = mathSimulator.mulU128(five, one);
+      expect(result2.low.low).toBe(5n);
+      expect(result2.low.high).toBe(0n);
+      expect(result2.high.low).toBe(0n);
+      expect(result2.high.high).toBe(0n);
+    });
+
+    test('should handle equal U128 values', () => {
+      const a: U128 = { low: 5n, high: 0n };
+      const result: U256 = mathSimulator.mulU128(a, a);
+      expect(result.low.low).toBe(25n);
+      expect(result.low.high).toBe(0n);
       expect(result.high.low).toBe(0n);
       expect(result.high.high).toBe(0n);
     });
 
-    test('should handle large multiplication', () => {
+    test('should handle max U128 by two', () => {
       const a: U128 = { low: MAX_U64, high: MAX_U64 };
       const b: U128 = { low: 2n, high: 0n };
       const result: U256 = mathSimulator.mulU128(a, b);
@@ -308,25 +441,58 @@ describe('MathU128', () => {
       expect(result.high.low).toBe(1n);
       expect(result.high.high).toBe(0n);
     });
+
+    test('should handle multiplication with high part contribution', () => {
+      const a: U128 = { low: 0n, high: 1n };
+      const b: U128 = { low: 1n, high: 0n };
+      const result: U256 = mathSimulator.mulU128(a, b);
+      expect(result.low.low).toBe(0n);
+      expect(result.low.high).toBe(1n);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(0n);
+    });
   });
 
   describe('div', () => {
     test('should divide small numbers', () => {
-      expect(mathSimulator.div(10n, 3n)).toBe(3n);
+      const result = mathSimulator.div(10n, 3n);
+      expect(result).toBe(3n);
     });
 
-    test('should divide max Uint<128> by 1', () => {
-      expect(mathSimulator.div(MAX_U128, 1n)).toBe(MAX_U128);
+    test('should handle dividend is zero', () => {
+      const result = mathSimulator.div(0n, 5n);
+      expect(result).toBe(0n);
+    });
+
+    test('should handle divisor is one', () => {
+      const result = mathSimulator.div(10n, 1n);
+      expect(result).toBe(10n);
+    });
+
+    test('should handle dividend equals divisor', () => {
+      const result = mathSimulator.div(5n, 5n);
+      expect(result).toBe(1n);
+    });
+
+    test('should handle dividend less than divisor', () => {
+      const result = mathSimulator.div(3n, 5n);
+      expect(result).toBe(0n);
+    });
+
+    test('should handle max U128 by one', () => {
+      const result = mathSimulator.div(MAX_U128, 1n);
+      expect(result).toBe(MAX_U128);
+    });
+
+    test('should handle division with remainder', () => {
+      const result = mathSimulator.div(100n, 7n);
+      expect(result).toBe(14n);
     });
 
     test('should fail on division by zero', () => {
       expect(() => mathSimulator.div(5n, 0n)).toThrowError(
         'MathU128: division by zero',
       );
-    });
-
-    test('should handle division with remainder', () => {
-      expect(mathSimulator.div(100n, 7n)).toBe(14n);
     });
   });
 
@@ -335,11 +501,43 @@ describe('MathU128', () => {
       const a: U128 = { low: 10n, high: 0n };
       const b: U128 = { low: 3n, high: 0n };
       const result = mathSimulator.divU128(a, b);
-      expect(result.low).toStrictEqual(3n);
-      expect(result.high).toStrictEqual(0n);
+      expect(result.low).toBe(3n);
+      expect(result.high).toBe(0n);
     });
 
-    test('should divide large U128 numbers', () => {
+    test('should handle dividend is zero', () => {
+      const a: U128 = { low: 0n, high: 0n };
+      const b: U128 = { low: 5n, high: 0n };
+      const result = mathSimulator.divU128(a, b);
+      expect(result.low).toBe(0n);
+      expect(result.high).toBe(0n);
+    });
+
+    test('should handle divisor is one', () => {
+      const a: U128 = { low: 10n, high: 0n };
+      const b: U128 = { low: 1n, high: 0n };
+      const result = mathSimulator.divU128(a, b);
+      expect(result.low).toBe(10n);
+      expect(result.high).toBe(0n);
+    });
+
+    test('should handle dividend equals divisor', () => {
+      const a: U128 = { low: 5n, high: 0n };
+      const b: U128 = { low: 5n, high: 0n };
+      const result = mathSimulator.divU128(a, b);
+      expect(result.low).toBe(1n);
+      expect(result.high).toBe(0n);
+    });
+
+    test('should handle dividend less than divisor', () => {
+      const a: U128 = { low: 3n, high: 0n };
+      const b: U128 = { low: 5n, high: 0n };
+      const result = mathSimulator.divU128(a, b);
+      expect(result.low).toBe(0n);
+      expect(result.high).toBe(0n);
+    });
+
+    test('should handle max U128 by one', () => {
       const a: U128 = { low: MAX_U64, high: MAX_U64 };
       const b: U128 = { low: 1n, high: 0n };
       const result = mathSimulator.divU128(a, b);
@@ -358,21 +556,44 @@ describe('MathU128', () => {
 
   describe('rem', () => {
     test('should compute remainder of small numbers', () => {
-      expect(mathSimulator.rem(10n, 3n)).toBe(1n);
+      const remainder = mathSimulator.rem(10n, 3n);
+      expect(remainder).toBe(1n);
     });
 
-    test('should compute remainder of max Uint<128> by 2', () => {
-      expect(mathSimulator.rem(MAX_U128, 2n)).toBe(1n);
+    test('should handle dividend is zero', () => {
+      const remainder = mathSimulator.rem(0n, 5n);
+      expect(remainder).toBe(0n);
+    });
+
+    test('should handle divisor is one', () => {
+      const remainder = mathSimulator.rem(10n, 1n);
+      expect(remainder).toBe(0n);
+    });
+
+    test('should handle dividend equals divisor', () => {
+      const remainder = mathSimulator.rem(5n, 5n);
+      expect(remainder).toBe(0n);
+    });
+
+    test('should handle dividend less than divisor', () => {
+      const remainder = mathSimulator.rem(3n, 5n);
+      expect(remainder).toBe(3n);
+    });
+
+    test('should compute remainder of max U128 by 2', () => {
+      const remainder = mathSimulator.rem(MAX_U128, 2n);
+      expect(remainder).toBe(1n);
+    });
+
+    test('should handle zero remainder', () => {
+      const remainder = mathSimulator.rem(6n, 3n);
+      expect(remainder).toBe(0n);
     });
 
     test('should fail on division by zero', () => {
       expect(() => mathSimulator.rem(5n, 0n)).toThrowError(
         'MathU128: division by zero',
       );
-    });
-
-    test('should handle zero remainder', () => {
-      expect(mathSimulator.rem(6n, 3n)).toBe(0n);
     });
   });
 
@@ -385,7 +606,39 @@ describe('MathU128', () => {
       expect(result.high).toBe(0n);
     });
 
-    test('should compute remainder of large U128 numbers', () => {
+    test('should handle dividend is zero', () => {
+      const a: U128 = { low: 0n, high: 0n };
+      const b: U128 = { low: 5n, high: 0n };
+      const result = mathSimulator.remU128(a, b);
+      expect(result.low).toBe(0n);
+      expect(result.high).toBe(0n);
+    });
+
+    test('should handle divisor is one', () => {
+      const a: U128 = { low: 10n, high: 0n };
+      const b: U128 = { low: 1n, high: 0n };
+      const result = mathSimulator.remU128(a, b);
+      expect(result.low).toBe(0n);
+      expect(result.high).toBe(0n);
+    });
+
+    test('should handle dividend equals divisor', () => {
+      const a: U128 = { low: 5n, high: 0n };
+      const b: U128 = { low: 5n, high: 0n };
+      const result = mathSimulator.remU128(a, b);
+      expect(result.low).toBe(0n);
+      expect(result.high).toBe(0n);
+    });
+
+    test('should handle dividend less than divisor', () => {
+      const a: U128 = { low: 3n, high: 0n };
+      const b: U128 = { low: 5n, high: 0n };
+      const result = mathSimulator.remU128(a, b);
+      expect(result.low).toBe(3n);
+      expect(result.high).toBe(0n);
+    });
+
+    test('should compute remainder of max U128 by 2', () => {
       const a: U128 = { low: MAX_U64, high: MAX_U64 };
       const b: U128 = { low: 2n, high: 0n };
       const result = mathSimulator.remU128(a, b);
@@ -403,21 +656,27 @@ describe('MathU128', () => {
   });
 
   describe('sqrt', () => {
-    test('should compute square root of small perfect squares', () => {
-      expect(mathSimulator.sqrt(4n)).toBe(2n);
-      expect(mathSimulator.sqrt(9n)).toBe(3n);
-      expect(mathSimulator.sqrt(16n)).toBe(4n);
+    test('should handle zero', () => {
+      expect(mathSimulator.sqrt(0n)).toBe(0n);
     });
 
-    test('should compute square root of small imperfect squares', () => {
+    test('should handle one', () => {
+      expect(mathSimulator.sqrt(1n)).toBe(1n);
+    });
+
+    test('should handle small non-perfect squares', () => {
       expect(mathSimulator.sqrt(2n)).toBe(1n); // floor(sqrt(2)) ≈ 1.414
       expect(mathSimulator.sqrt(3n)).toBe(1n); // floor(sqrt(3)) ≈ 1.732
       expect(mathSimulator.sqrt(5n)).toBe(2n); // floor(sqrt(5)) ≈ 2.236
     });
 
-    test('should handle special cases', () => {
-      expect(mathSimulator.sqrt(0n)).toBe(0n);
-      expect(mathSimulator.sqrt(1n)).toBe(1n);
+    test('should handle small perfect squares', () => {
+      expect(mathSimulator.sqrt(4n)).toBe(2n);
+      expect(mathSimulator.sqrt(9n)).toBe(3n);
+      expect(mathSimulator.sqrt(16n)).toBe(4n);
+    });
+
+    test('should handle maximum values', () => {
       expect(mathSimulator.sqrt(MAX_U8)).toBe(15n);
       expect(mathSimulator.sqrt(MAX_U16)).toBe(255n);
       expect(mathSimulator.sqrt(MAX_U32)).toBe(65535n);
@@ -425,28 +684,65 @@ describe('MathU128', () => {
       expect(mathSimulator.sqrt(MAX_U128)).toBe(MAX_U64);
     });
 
-    test('should compute square root of large numbers', () => {
+    test('should handle large perfect square', () => {
       expect(mathSimulator.sqrt(1000000n)).toBe(1000n);
+    });
+
+    test('should handle large non-perfect square', () => {
       expect(mathSimulator.sqrt(100000001n)).toBe(10000n); // floor(sqrt(100000001)) ≈ 10000.00005
     });
   });
 
   describe('sqrtU128', () => {
-    test('should compute square root of small perfect U128 squares', () => {
-      const radicand: U128 = { low: 16n, high: 0n };
-      expect(mathSimulator.sqrtU128(radicand)).toBe(4n);
-    });
-
-    test('should compute square root of large U128 numbers', () => {
-      const radicand: U128 = { low: MAX_U64, high: MAX_U64 };
-      expect(mathSimulator.sqrtU128(radicand)).toBe(MAX_U64);
-    });
-
-    test('should handle special U128 cases', () => {
+    test('should handle zero', () => {
       const zero: U128 = { low: 0n, high: 0n };
-      const one: U128 = { low: 1n, high: 0n };
       expect(mathSimulator.sqrtU128(zero)).toBe(0n);
+    });
+
+    test('should handle one', () => {
+      const one: U128 = { low: 1n, high: 0n };
       expect(mathSimulator.sqrtU128(one)).toBe(1n);
+    });
+
+    test('should handle small non-perfect squares', () => {
+      const two: U128 = { low: 2n, high: 0n };
+      const three: U128 = { low: 3n, high: 0n };
+      const five: U128 = { low: 5n, high: 0n };
+      expect(mathSimulator.sqrtU128(two)).toBe(1n); // floor(sqrt(2)) ≈ 1.414
+      expect(mathSimulator.sqrtU128(three)).toBe(1n); // floor(sqrt(3)) ≈ 1.732
+      expect(mathSimulator.sqrtU128(five)).toBe(2n); // floor(sqrt(5)) ≈ 2.236
+    });
+
+    test('should handle small perfect squares', () => {
+      const four: U128 = { low: 4n, high: 0n };
+      const nine: U128 = { low: 9n, high: 0n };
+      const sixteen: U128 = { low: 16n, high: 0n };
+      expect(mathSimulator.sqrtU128(four)).toBe(2n);
+      expect(mathSimulator.sqrtU128(nine)).toBe(3n);
+      expect(mathSimulator.sqrtU128(sixteen)).toBe(4n);
+    });
+
+    test('should handle maximum values', () => {
+      const maxU8: U128 = { low: MAX_U8, high: 0n };
+      const maxU16: U128 = { low: MAX_U16, high: 0n };
+      const maxU32: U128 = { low: MAX_U32, high: 0n };
+      const maxU64: U128 = { low: MAX_U64, high: 0n };
+      const maxU128: U128 = { low: MAX_U64, high: MAX_U64 };
+      expect(mathSimulator.sqrtU128(maxU8)).toBe(15n);
+      expect(mathSimulator.sqrtU128(maxU16)).toBe(255n);
+      expect(mathSimulator.sqrtU128(maxU32)).toBe(65535n);
+      expect(mathSimulator.sqrtU128(maxU64)).toBe(4294967295n);
+      expect(mathSimulator.sqrtU128(maxU128)).toBe(MAX_U64);
+    });
+
+    test('should handle large perfect square', () => {
+      const large: U128 = { low: 1000000n, high: 0n };
+      expect(mathSimulator.sqrtU128(large)).toBe(1000n);
+    });
+
+    test('should handle large non-perfect square', () => {
+      const large: U128 = { low: 100000001n, high: 0n };
+      expect(mathSimulator.sqrtU128(large)).toBe(10000n); // floor(sqrt(100000001)) ≈ 10000.00005
     });
   });
 

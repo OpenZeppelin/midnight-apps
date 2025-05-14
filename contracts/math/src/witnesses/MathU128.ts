@@ -52,7 +52,7 @@ export const MathU128Witnesses = (): IMathU128Witnesses<
    * @param context - The witness context containing ledger and private state.
    * @param dividend - The number to divide.
    * @param divisor - The number to divide by.
-   * @returns A tuple of the unchanged private state and a DivResult with quotient and remainder.
+   * @returns A tuple of the unchanged private state and a DivResultU64 with quotient and remainder.
    */
   divU128Locally(
     context: WitnessContext<Ledger, MathU128ContractPrivateState>,

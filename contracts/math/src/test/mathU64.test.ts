@@ -1,18 +1,17 @@
 import { beforeEach, describe, expect, test } from 'vitest';
-import { MathContractSimulator } from './MathSimulator';
+import { MathContractSimulator } from './MathU64Simulator';
 
 let mathSimulator: MathContractSimulator;
 
 const MAX_U32 = 2n ** 32n - 1n;
 const MAX_U64 = 2n ** 64n - 1n;
 const MAX_U128 = 2n ** 128n - 1n;
-const MAX_RADICAND = 340282366920938463426481119284349108225n;
 
 const setup = () => {
   mathSimulator = new MathContractSimulator();
 };
 
-describe('Math', () => {
+describe('MathU64', () => {
   beforeEach(setup);
 
   describe('Add', () => {
@@ -62,6 +61,138 @@ describe('Math', () => {
     });
   });
 
+  describe('Mul', () => {
+    test('should multiply two numbers', () => {
+      expect(mathSimulator.mul(4n, 3n)).toBe(12n);
+    });
+
+    test('should handle max Uint<64> times 1', () => {
+      expect(mathSimulator.mul(MAX_U64, 1n)).toBe(MAX_U64);
+    });
+
+    test('should handle max Uint<64> times max Uint<64> without overflow', () => {
+      expect(mathSimulator.mul(MAX_U64, MAX_U64)).toBe(MAX_U64 * MAX_U64);
+    });
+  });
+
+  describe('div', () => {
+    test('should divide small numbers', () => {
+      expect(mathSimulator.div(10n, 3n)).toBe(3n);
+    });
+
+    test('should handle dividend is zero', () => {
+      expect(mathSimulator.div(0n, 5n)).toBe(0n);
+    });
+
+    test('should handle divisor is one', () => {
+      expect(mathSimulator.div(10n, 1n)).toBe(10n);
+    });
+
+    test('should handle dividend equals divisor', () => {
+      expect(mathSimulator.div(5n, 5n)).toBe(1n);
+    });
+
+    test('should handle dividend less than divisor', () => {
+      expect(mathSimulator.div(3n, 5n)).toBe(0n);
+    });
+
+    test('should handle large division', () => {
+      expect(mathSimulator.div(MAX_U64, 2n)).toBe(MAX_U64 / 2n);
+    });
+
+    test('should fail on division by zero', () => {
+      expect(() => mathSimulator.div(5n, 0n)).toThrowError(
+        'Math: division by zero',
+      );
+    });
+  });
+
+  describe('rem', () => {
+    test('should compute remainder of small numbers', () => {
+      expect(mathSimulator.rem(10n, 3n)).toBe(1n);
+    });
+
+    test('should handle dividend is zero', () => {
+      expect(mathSimulator.rem(0n, 5n)).toBe(0n);
+    });
+
+    test('should handle divisor is one', () => {
+      expect(mathSimulator.rem(10n, 1n)).toBe(0n);
+    });
+
+    test('should handle dividend equals divisor', () => {
+      expect(mathSimulator.rem(5n, 5n)).toBe(0n);
+    });
+
+    test('should handle dividend less than divisor', () => {
+      expect(mathSimulator.rem(3n, 5n)).toBe(3n);
+    });
+
+    test('should compute remainder of max U64 by 2', () => {
+      expect(mathSimulator.rem(MAX_U64, 2n)).toBe(1n);
+    });
+
+    test('should handle zero remainder', () => {
+      expect(mathSimulator.rem(6n, 3n)).toBe(0n);
+    });
+
+    test('should fail on division by zero', () => {
+      expect(() => mathSimulator.rem(5n, 0n)).toThrowError(
+        'Math: division by zero',
+      );
+    });
+  });
+
+  describe('divRem', () => {
+    test('should compute quotient and remainder of small numbers', () => {
+      const result = mathSimulator.divRem(10n, 3n);
+      expect(result.quotient).toBe(3n);
+      expect(result.remainder).toBe(1n);
+    });
+
+    test('should handle dividend is zero', () => {
+      const result = mathSimulator.divRem(0n, 5n);
+      expect(result.quotient).toBe(0n);
+      expect(result.remainder).toBe(0n);
+    });
+
+    test('should handle divisor is one', () => {
+      const result = mathSimulator.divRem(10n, 1n);
+      expect(result.quotient).toBe(10n);
+      expect(result.remainder).toBe(0n);
+    });
+
+    test('should handle dividend equals divisor', () => {
+      const result = mathSimulator.divRem(5n, 5n);
+      expect(result.quotient).toBe(1n);
+      expect(result.remainder).toBe(0n);
+    });
+
+    test('should handle dividend less than divisor', () => {
+      const result = mathSimulator.divRem(3n, 5n);
+      expect(result.quotient).toBe(0n);
+      expect(result.remainder).toBe(3n);
+    });
+
+    test('should compute quotient and remainder of max U64 by 2', () => {
+      const result = mathSimulator.divRem(MAX_U64, 2n);
+      expect(result.quotient).toBe(MAX_U64 / 2n);
+      expect(result.remainder).toBe(1n);
+    });
+
+    test('should handle zero remainder', () => {
+      const result = mathSimulator.divRem(6n, 3n);
+      expect(result.quotient).toBe(2n);
+      expect(result.remainder).toBe(0n);
+    });
+
+    test('should fail on division by zero', () => {
+      expect(() => mathSimulator.divRem(5n, 0n)).toThrowError(
+        'Math: division by zero',
+      );
+    });
+  });
+
   describe('Sqrt', () => {
     test('should compute square root of small perfect squares', () => {
       expect(mathSimulator.sqrt(4n)).toBe(2n);
@@ -98,7 +229,7 @@ describe('Math', () => {
 
     test('should fail if number exceeds MAX_U128', () => {
       expect(() => mathSimulator.sqrt(MAX_U128 + 1n)).toThrow(
-        'expected value of type Uint<0..340282366920938463463374607431768211455> but received 340282366920938463463374607431768211456n',
+        'expected value of type Uint<0..18446744073709551615> but received 340282366920938463463374607431768211456n',
       );
     });
 
@@ -112,68 +243,6 @@ describe('Math', () => {
 
     test('should handle max Uint<64>', () => {
       expect(mathSimulator.sqrt(MAX_U64)).toBe(MAX_U32); // floor(sqrt(2^64 - 1)) = 2^32 - 1
-    });
-
-    test('should overflow max radicand + 1', () => {
-      expect(() => mathSimulator.sqrt(MAX_RADICAND + 1n)).toThrow(
-        'Math: radicand exceeds supported limit',
-      );
-    });
-
-    test('should overflow with max Uint<128>', () => {
-      expect(() => mathSimulator.sqrt(MAX_RADICAND + 1n)).toThrow(
-        'Math: radicand exceeds supported limit',
-      );
-    });
-  });
-
-  describe('Mul', () => {
-    test('should multiply two numbers', () => {
-      expect(mathSimulator.mul(4n, 3n)).toBe(12n);
-    });
-
-    test('should handle max Uint<64> times 1', () => {
-      expect(mathSimulator.mul(MAX_U64, 1n)).toBe(MAX_U64);
-    });
-
-    test('should handle max Uint<64> times max Uint<64> without overflow', () => {
-      expect(mathSimulator.mul(MAX_U64, MAX_U64)).toBe(MAX_U64 * MAX_U64);
-    });
-  });
-
-  describe('Div', () => {
-    test('should divide two numbers', () => {
-      expect(mathSimulator.div(10n, 3n)).toBe(3n);
-    });
-
-    test('should fail on division by zero', () => {
-      expect(() => mathSimulator.div(5n, 0n)).toThrowError(
-        'Math: division by zero',
-      );
-    });
-
-    test('should divide max Uint<64> by 1', () => {
-      expect(mathSimulator.div(MAX_U64, 1n)).toBe(MAX_U64);
-    });
-
-    test('should divide max Uint<64> by itself', () => {
-      expect(mathSimulator.div(MAX_U64, MAX_U64)).toBe(1n);
-    });
-  });
-
-  describe('Remainder', () => {
-    test('should compute rem', () => {
-      expect(mathSimulator.rem(10n, 3n)).toBe(1n);
-    });
-
-    test('should fail on division by zero', () => {
-      expect(() => mathSimulator.rem(5n, 0n)).toThrowError(
-        'Math: division by zero',
-      );
-    });
-
-    test('should compute rem of max Uint<64> by 2', () => {
-      expect(mathSimulator.rem(MAX_U64, 2n)).toBe(1n);
     });
   });
 

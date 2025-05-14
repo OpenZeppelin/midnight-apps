@@ -4,8 +4,8 @@ pragma language_version >= 0.14.0;
 /**
  * @description An interface module for the Math module.
  */
-module IMath {
-    export struct DivResult {
+module IMathU64 {
+    export struct DivResultU64 {
         quotient: Uint<64>,
         remainder: Uint<64>
     }
@@ -15,9 +15,9 @@ module IMath {
      *
      * @param a The number to divide.
      * @param b The number to divide by.
-     * @returns DivResult The quotient and remainder of the division.
+     * @returns DivResultU64 The quotient and remainder of the division.
      */
-    export witness divLocally(a: Uint<64>, b: Uint<64>): DivResult;
+    export witness divU64Locally(a: Uint<64>, b: Uint<64>): DivResultU64;
 
     /**
      * @description Computes the square root of a Uint<128> value locally (off-chain).
@@ -25,5 +25,5 @@ module IMath {
      * @param radicand The number to compute the square root of.
      * @returns Uint<64> The square root of radicand.
      */
-    export witness sqrtLocally(radicand: Uint<128>): Uint<64>;
+    export witness sqrtU64Locally(radicand: Uint<64>): Uint<32>;
 }

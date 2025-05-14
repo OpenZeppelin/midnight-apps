@@ -6,7 +6,7 @@ pragma language_version >= 0.14.0;
  */
 import "./interfaces/IUint128";
 import "./interfaces/IUint256";
-import "./interfaces/IMath";
+import "./interfaces/IMathU64";
 import "./interfaces/IMathU128";
 import "./interfaces/IMathU256";
 
@@ -15,9 +15,11 @@ import Max prefix Max_;
 /**
  * @description Exports public ledger state and types from Math for contract and TypeScript integration.
  */
+
 export {
-    DivResult 
-};
+    U128,
+    U256
+}
 
 export {
     Max_U8,
@@ -28,17 +30,7 @@ export {
 }
 
 export {
-    DivResultU128
-}
-
-export {
+    DivResultU64,
+    DivResultU128,
     DivResultU256
-}
-
-export {
-    U128
-}
-
-export {
-    U256 
-}
+};

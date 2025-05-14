@@ -2,44 +2,50 @@ pragma language_version >= 0.14.0;
 
 import CompactStandardLibrary;
 
-import "../../Math" prefix Math_;
+import "../../interfaces/IMathU64";
+
+import "../../MathU64" prefix MathU64_;
 
 /**
  * @description A mock contract for testing the Math module's circuits.
  */
 
 export circuit add(a: Uint<64>, b: Uint<64>): Uint<128> {
-    return Math_add(a, b);
+    return MathU64_add(a, b);
 }
 
 export circuit sub(a: Uint<64>, b: Uint<64>): Uint<64> {
-    return Math_sub(a, b);
+    return MathU64_sub(a, b);
 }
 
 export circuit mul(a: Uint<64>, b: Uint<64>): Uint<128> {
-    return Math_mul(a, b);
+    return MathU64_mul(a, b);
 }
 
 export circuit div(a: Uint<64>, b: Uint<64>): Uint<64> {
-    return disclose(Math_div(a, b));
+    return disclose(MathU64_div(a, b));
 }
 
 export circuit rem(a: Uint<64>, b: Uint<64>): Uint<64> {
-    return disclose(Math_rem(a, b));
+    return disclose(MathU64_rem(a, b));
 }
 
-export circuit sqrt(radical: Uint<128>): Uint<64> {
-    return disclose(Math_sqrt(radical));
+export circuit divRem(a: Uint<64>, b: Uint<64>): DivResultU64 {
+    return disclose(MathU64_divRem(a, b));
+}
+
+export circuit sqrt(radical: Uint<64>): Uint<32> {
+    return disclose(MathU64_sqrt(radical));
 }
 
 export circuit isMultiple(value: Uint<64>, b: Uint<64>): Boolean {
-    return disclose(Math_isMultiple(value, b));
+    return disclose(MathU64_isMultiple(value, b));
 }
 
 export circuit min(a: Uint<64>, b: Uint<64>): Uint<64> {
-    return Math_min(a, b);
+    return MathU64_min(a, b);
 }
 
 export circuit max(a: Uint<64>, b: Uint<64>): Uint<64> {
-    return Math_max(a, b);
+    return MathU64_max(a, b);
 }
