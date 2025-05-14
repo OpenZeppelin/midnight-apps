@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from 'vitest';
-import type { U128, U256, DivResultU256 } from '../artifacts/Index/contract/index.d.cts';
+import type { U256 } from '../artifacts/Index/contract/index.d.cts';
 import { MathU256Simulator } from './MathU256Simulator';
 
 let mathSimulator: MathU256Simulator;
@@ -38,6 +38,36 @@ const fromU256 = (value: U256): bigint => {
 describe('MathU256', () => {
   beforeEach(setup);
 
+  describe('Utility Functions', () => {
+    test('isZero should return true for zero', () => {
+      const zero = mathSimulator.ZERO_U256();
+      expect(mathSimulator.isZero(zero)).toBe(true);
+    });
+
+    test('isZero should return false for non-zero', () => {
+      const one = toU256(1n);
+      expect(mathSimulator.isZero(one)).toBe(false);
+      const max = mathSimulator.MAX_U256();
+      expect(mathSimulator.isZero(max)).toBe(false);
+    });
+
+    test('ZERO_U256 should return zero struct', () => {
+      const result = mathSimulator.ZERO_U256();
+      expect(result.low.low).toBe(0n);
+      expect(result.low.high).toBe(0n);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(0n);
+    });
+
+    test('MAX_U256 should return max struct', () => {
+      const result = mathSimulator.MAX_U256();
+      expect(result.low.low).toBe(MAX_U64);
+      expect(result.low.high).toBe(MAX_U64);
+      expect(result.high.low).toBe(MAX_U64);
+      expect(result.high.high).toBe(MAX_U64);
+    });
+  });
+
   describe('eq', () => {
     test('should compare equal values', () => {
       const a = toU256(123n);
@@ -52,13 +82,22 @@ describe('MathU256', () => {
     });
 
     test('should compare different high parts', () => {
-      const a: U256 = { low: { low: 123n, high: 0n }, high: { low: 456n, high: 0n } };
-      const b: U256 = { low: { low: 123n, high: 0n }, high: { low: 457n, high: 0n } };
+      const a: U256 = {
+        low: { low: 123n, high: 0n },
+        high: { low: 456n, high: 0n },
+      };
+      const b: U256 = {
+        low: { low: 123n, high: 0n },
+        high: { low: 457n, high: 0n },
+      };
       expect(mathSimulator.eq(a, b)).toBe(false);
     });
 
     test('should compare zero values', () => {
-      const zero: U256 = { low: { low: 0n, high: 0n }, high: { low: 0n, high: 0n } };
+      const zero: U256 = {
+        low: { low: 0n, high: 0n },
+        high: { low: 0n, high: 0n },
+      };
       expect(mathSimulator.eq(zero, zero)).toBe(true);
     });
 
@@ -94,8 +133,14 @@ describe('MathU256', () => {
     });
 
     test('should compare with high parts', () => {
-      const a: U256 = { low: { low: MAX_U64, high: MAX_U64 }, high: { low: 0n, high: 0n } };
-      const b: U256 = { low: { low: MAX_U64, high: MAX_U64 }, high: { low: 1n, high: 0n } };
+      const a: U256 = {
+        low: { low: MAX_U64, high: MAX_U64 },
+        high: { low: 0n, high: 0n },
+      };
+      const b: U256 = {
+        low: { low: MAX_U64, high: MAX_U64 },
+        high: { low: 1n, high: 0n },
+      };
       expect(mathSimulator.le(a, b)).toBe(true);
       expect(mathSimulator.le(b, a)).toBe(false);
     });
@@ -127,8 +172,14 @@ describe('MathU256', () => {
     });
 
     test('should compare with high parts', () => {
-      const a: U256 = { low: { low: MAX_U64, high: MAX_U64 }, high: { low: 1n, high: 0n } };
-      const b: U256 = { low: { low: MAX_U64, high: MAX_U64 }, high: { low: 0n, high: 0n } };
+      const a: U256 = {
+        low: { low: MAX_U64, high: MAX_U64 },
+        high: { low: 1n, high: 0n },
+      };
+      const b: U256 = {
+        low: { low: MAX_U64, high: MAX_U64 },
+        high: { low: 0n, high: 0n },
+      };
       expect(mathSimulator.gt(a, b)).toBe(true);
       expect(mathSimulator.gt(b, a)).toBe(false);
     });
@@ -158,15 +209,44 @@ describe('MathU256', () => {
       expect(fromU256(result2)).toBe(5n);
     });
 
+    test('should handle zero addition (a = 0)', () => {
+      const a = mathSimulator.ZERO_U256();
+      const b = toU256(5n);
+      const result = mathSimulator.add(a, b);
+      expect(fromU256(result)).toBe(5n);
+    });
+
+    test('should handle zero addition (b = 0)', () => {
+      const a = toU256(5n);
+      const b = mathSimulator.ZERO_U256();
+      const result = mathSimulator.add(a, b);
+      expect(fromU256(result)).toBe(5n);
+    });
+
+    test('should handle equal values', () => {
+      const a = toU256(5n);
+      const b = toU256(5n);
+      const result = mathSimulator.add(a, b);
+      expect(fromU256(result)).toBe(10n);
+    });
+
     test('should throw on overflow', () => {
       const max = toU256(MAX_U256);
       const one = toU256(1n);
-      expect(() => mathSimulator.add(max, one)).toThrowError('MathU256: addition overflow');
+      expect(() => mathSimulator.add(max, one)).toThrowError(
+        'MathU256: addition overflow',
+      );
     });
 
     test('should handle carry from low to high', () => {
-      const a: U256 = { low: { low: MAX_U64, high: MAX_U64 }, high: { low: 0n, high: 0n } };
-      const b: U256 = { low: { low: 1n, high: 0n }, high: { low: 0n, high: 0n } };
+      const a: U256 = {
+        low: { low: MAX_U64, high: MAX_U64 },
+        high: { low: 0n, high: 0n },
+      };
+      const b: U256 = {
+        low: { low: 1n, high: 0n },
+        high: { low: 0n, high: 0n },
+      };
       const result = mathSimulator.add(a, b);
       expect(result.low.low).toBe(0n);
       expect(result.low.high).toBe(0n);
@@ -193,7 +273,9 @@ describe('MathU256', () => {
     test('should throw on underflow', () => {
       const a = toU256(3n);
       const b = toU256(5n);
-      expect(() => mathSimulator.sub(a, b)).toThrowError('MathU256: subtraction underflow');
+      expect(() => mathSimulator.sub(a, b)).toThrowError(
+        'MathU256: subtraction underflow',
+      );
     });
 
     test('should handle zero', () => {
@@ -201,17 +283,40 @@ describe('MathU256', () => {
       const zero = toU256(0n);
       const result = mathSimulator.sub(five, zero);
       expect(fromU256(result)).toBe(5n);
-      expect(() => mathSimulator.sub(zero, five)).toThrowError('MathU256: subtraction underflow');
+      expect(() => mathSimulator.sub(zero, five)).toThrowError(
+        'MathU256: subtraction underflow',
+      );
     });
 
     test('should handle borrow from high', () => {
-      const a: U256 = { low: { low: 0n, high: 0n }, high: { low: 1n, high: 0n } };
-      const b: U256 = { low: { low: 1n, high: 0n }, high: { low: 0n, high: 0n } };
+      const a: U256 = {
+        low: { low: 0n, high: 0n },
+        high: { low: 1n, high: 0n },
+      };
+      const b: U256 = {
+        low: { low: 1n, high: 0n },
+        high: { low: 0n, high: 0n },
+      };
       const result = mathSimulator.sub(a, b);
       expect(result.low.low).toBe(MAX_U64);
       expect(result.low.high).toBe(MAX_U64);
       expect(result.high.low).toBe(0n);
       expect(result.high.high).toBe(0n);
+    });
+
+    test('should handle zero subtraction', () => {
+      const a = toU256(5n);
+      const b = mathSimulator.ZERO_U256();
+      const result = mathSimulator.sub(a, b);
+      expect(fromU256(result)).toBe(5n);
+    });
+
+    test('should handle equal values', () => {
+      const a = toU256(5n);
+      const b = toU256(5n);
+      const result = mathSimulator.sub(a, b);
+      expect(fromU256(result)).toBe(0n);
+      expect(mathSimulator.isZero(result)).toBe(true);
     });
   });
 
@@ -246,10 +351,54 @@ describe('MathU256', () => {
       expect(fromU256(result2)).toBe(0n);
     });
 
+    test('should handle zero multiplication (a = 0)', () => {
+      const a = mathSimulator.ZERO_U256();
+      const b = toU256(5n);
+      const result = mathSimulator.mul(a, b);
+      expect(mathSimulator.isZero(result)).toBe(true);
+    });
+
+    test('should handle zero multiplication (b = 0)', () => {
+      const a = toU256(5n);
+      const b = mathSimulator.ZERO_U256();
+      const result = mathSimulator.mul(a, b);
+      expect(mathSimulator.isZero(result)).toBe(true);
+    });
+
+    test('should handle multiplication by one (a = 1)', () => {
+      const a = toU256(1n);
+      const b = toU256(5n);
+      const result = mathSimulator.mul(a, b);
+      expect(fromU256(result)).toBe(5n);
+    });
+
+    test('should handle multiplication by one (b = 1)', () => {
+      const a = toU256(5n);
+      const b = toU256(1n);
+      const result = mathSimulator.mul(a, b);
+      expect(fromU256(result)).toBe(5n);
+    });
+
+    test('should handle equal values', () => {
+      const a = toU256(5n);
+      const b = toU256(5n);
+      const result = mathSimulator.mul(a, b);
+      expect(fromU256(result)).toBe(25n);
+    });
+
+    test('should handle general multiplication with carry', () => {
+      const a = toU256(MAX_U128);
+      const b = toU256(2n);
+      const result = mathSimulator.mul(a, b);
+      expect(fromU256(result)).toBe(MAX_U128 * 2n);
+    });
+
     test('should throw on overflow', () => {
       const a = toU256(MAX_U256);
       const b = toU256(2n);
-      expect(() => mathSimulator.mul(a, b)).toThrowError('MathU256: multiplication overflow');
+      expect(() => mathSimulator.mul(a, b)).toThrowError(
+        'MathU256: multiplication overflow',
+      );
     });
   });
 
@@ -257,28 +406,37 @@ describe('MathU256', () => {
     test('should divide small numbers', () => {
       const a = toU256(10n);
       const b = toU256(3n);
-      const result = mathSimulator.div(a, b);
-      expect(fromU256(result)).toBe(3n);
+      const quotient = mathSimulator.div(a, b);
+      expect(fromU256(quotient)).toBe(3n);
     });
 
     test('should divide max U256 by 1', () => {
       const a = toU256(MAX_U256);
       const b = toU256(1n);
-      const result = mathSimulator.div(a, b);
-      expect(fromU256(result)).toBe(MAX_U256);
+      const quotient = mathSimulator.div(a, b);
+      expect(fromU256(quotient)).toBe(MAX_U256);
     });
 
     test('should throw on division by zero', () => {
       const a = toU256(5n);
-      const b = toU256(0n);
-      expect(() => mathSimulator.div(a, b)).toThrowError('MathU256: division by zero');
+      const b = mathSimulator.ZERO_U256();
+      expect(() => mathSimulator.div(a, b)).toThrowError(
+        'MathU256: division by zero',
+      );
+    });
+
+    test('should handle dividend is zero', () => {
+      const a = mathSimulator.ZERO_U256();
+      const b = toU256(5n);
+      const quotient = mathSimulator.div(a, b);
+      expect(mathSimulator.isZero(quotient)).toBe(true);
     });
 
     test('should handle division with remainder', () => {
       const a = toU256(100n);
       const b = toU256(7n);
-      const result = mathSimulator.div(a, b);
-      expect(fromU256(result)).toBe(14n);
+      const quotient = mathSimulator.div(a, b);
+      expect(fromU256(quotient)).toBe(14n);
     });
   });
 
@@ -286,28 +444,58 @@ describe('MathU256', () => {
     test('should compute remainder of small numbers', () => {
       const a = toU256(10n);
       const b = toU256(3n);
-      const result = mathSimulator.rem(a, b);
-      expect(fromU256(result)).toBe(1n);
+      const remainder = mathSimulator.rem(a, b);
+      expect(fromU256(remainder)).toBe(1n);
     });
 
     test('should compute remainder of max U256 by 2', () => {
-      const a = toU256(MAX_U256);
+      const a = mathSimulator.MAX_U256();
       const b = toU256(2n);
-      const result = mathSimulator.rem(a, b);
-      expect(fromU256(result)).toBe(1n);
+      const remainder = mathSimulator.rem(a, b);
+      expect(fromU256(remainder)).toBe(1n);
     });
 
     test('should throw on division by zero', () => {
       const a = toU256(5n);
-      const b = toU256(0n);
-      expect(() => mathSimulator.rem(a, b)).toThrowError('MathU256: division by zero');
+      const b = mathSimulator.ZERO_U256();
+      expect(() => mathSimulator.rem(a, b)).toThrowError(
+        'MathU256: division by zero',
+      );
     });
 
     test('should handle zero remainder', () => {
       const a = toU256(6n);
       const b = toU256(3n);
-      const result = mathSimulator.rem(a, b);
-      expect(fromU256(result)).toBe(0n);
+      const remainder = mathSimulator.rem(a, b);
+      expect(fromU256(remainder)).toBe(0n);
+    });
+
+    test('should handle dividend is zero', () => {
+      const a = mathSimulator.ZERO_U256();
+      const b = toU256(5n);
+      const remainder = mathSimulator.rem(a, b);
+      expect(mathSimulator.isZero(remainder)).toBe(true);
+    });
+
+    test('should handle divisor is one', () => {
+      const a = toU256(10n);
+      const b = toU256(1n);
+      const remainder = mathSimulator.rem(a, b);
+      expect(mathSimulator.isZero(remainder)).toBe(true);
+    });
+
+    test('should handle dividend equals divisor', () => {
+      const a = toU256(5n);
+      const b = toU256(5n);
+      const remainder = mathSimulator.rem(a, b);
+      expect(mathSimulator.isZero(remainder)).toBe(true);
+    });
+
+    test('should handle dividend less than divisor', () => {
+      const a = toU256(3n);
+      const b = toU256(5n);
+      const remainder = mathSimulator.rem(a, b);
+      expect(fromU256(remainder)).toBe(3n);
     });
   });
 
@@ -321,7 +509,7 @@ describe('MathU256', () => {
     });
 
     test('should compute quotient and remainder of max U256 by 2', () => {
-      const a = toU256(MAX_U256);
+      const a = mathSimulator.MAX_U256();
       const b = toU256(2n);
       const result = mathSimulator.divRem(a, b);
       expect(fromU256(result.quotient)).toBe(MAX_U256 / 2n);
@@ -330,8 +518,10 @@ describe('MathU256', () => {
 
     test('should throw on division by zero', () => {
       const a = toU256(5n);
-      const b = toU256(0n);
-      expect(() => mathSimulator.divRem(a, b)).toThrowError('MathU256: division by zero');
+      const b = mathSimulator.ZERO_U256();
+      expect(() => mathSimulator.divRem(a, b)).toThrowError(
+        'MathU256: division by zero',
+      );
     });
 
     test('should handle zero remainder', () => {
@@ -341,34 +531,77 @@ describe('MathU256', () => {
       expect(fromU256(result.quotient)).toBe(2n);
       expect(fromU256(result.remainder)).toBe(0n);
     });
+
+    test('should handle dividend is zero', () => {
+      const a = mathSimulator.ZERO_U256();
+      const b = toU256(5n);
+      const result = mathSimulator.divRem(a, b);
+      expect(mathSimulator.isZero(result.quotient)).toBe(true);
+      expect(mathSimulator.isZero(result.remainder)).toBe(true);
+    });
+
+    test('should handle divisor is one', () => {
+      const a = toU256(10n);
+      const b = toU256(1n);
+      const result = mathSimulator.divRem(a, b);
+      expect(fromU256(result.quotient)).toBe(10n);
+      expect(mathSimulator.isZero(result.remainder)).toBe(true);
+    });
+
+    test('should handle dividend equals divisor', () => {
+      const a = toU256(5n);
+      const b = toU256(5n);
+      const result = mathSimulator.divRem(a, b);
+      expect(fromU256(result.quotient)).toBe(1n);
+      expect(mathSimulator.isZero(result.remainder)).toBe(true);
+    });
+
+    test('should handle dividend less than divisor', () => {
+      const a = toU256(3n);
+      const b = toU256(5n);
+      const result = mathSimulator.divRem(a, b);
+      expect(mathSimulator.isZero(result.quotient)).toBe(true);
+      expect(fromU256(result.remainder)).toBe(3n);
+    });
   });
 
   describe('sqrt', () => {
-    test('should compute square root of small perfect squares', () => {
+    test('should handle zero', () => {
+      const zero = mathSimulator.ZERO_U256();
+      expect(mathSimulator.sqrt(zero)).toBe(0n);
+    });
+
+    test('should handle one', () => {
+      expect(mathSimulator.sqrt(toU256(1n))).toBe(1n);
+    });
+
+    test('should handle small non-perfect squares', () => {
+      expect(mathSimulator.sqrt(toU256(2n))).toBe(1n); // floor(sqrt(2)) ≈ 1.414
+      expect(mathSimulator.sqrt(toU256(3n))).toBe(1n); // floor(sqrt(3)) ≈ 1.732
+    });
+
+    test('should handle small perfect squares', () => {
       expect(mathSimulator.sqrt(toU256(4n))).toBe(2n);
       expect(mathSimulator.sqrt(toU256(9n))).toBe(3n);
       expect(mathSimulator.sqrt(toU256(16n))).toBe(4n);
     });
 
-    test('should compute square root of small imperfect squares', () => {
-      expect(mathSimulator.sqrt(toU256(2n))).toBe(1n); // floor(sqrt(2)) ≈ 1.414
-      expect(mathSimulator.sqrt(toU256(3n))).toBe(1n); // floor(sqrt(3)) ≈ 1.732
-      expect(mathSimulator.sqrt(toU256(5n))).toBe(2n); // floor(sqrt(5)) ≈ 2.236
-    });
-
-    test('should handle special cases', () => {
-      expect(mathSimulator.sqrt(toU256(0n))).toBe(0n);
-      expect(mathSimulator.sqrt(toU256(1n))).toBe(1n);
+    test('should handle maximum values', () => {
       expect(mathSimulator.sqrt(toU256(MAX_U8))).toBe(15n);
       expect(mathSimulator.sqrt(toU256(MAX_U16))).toBe(255n);
       expect(mathSimulator.sqrt(toU256(MAX_U32))).toBe(65535n);
       expect(mathSimulator.sqrt(toU256(MAX_U64))).toBe(4294967295n);
       expect(mathSimulator.sqrt(toU256(MAX_U128))).toBe(18446744073709551615n);
-      expect(mathSimulator.sqrt(toU256(MAX_U256))).toBe(340282366920938463463374607431768211455n);
+      expect(mathSimulator.sqrt(mathSimulator.MAX_U256())).toBe(
+        340282366920938463463374607431768211455n,
+      );
     });
 
-    test('should compute square root of large numbers', () => {
+    test('should handle large perfect square', () => {
       expect(mathSimulator.sqrt(toU256(1000000n))).toBe(1000n);
+    });
+
+    test('should handle large non-perfect square', () => {
       expect(mathSimulator.sqrt(toU256(100000001n))).toBe(10000n); // floor(sqrt(100000001)) ≈ 10000.00005
     });
   });
@@ -442,7 +675,9 @@ describe('MathU256', () => {
     test('should throw on division by zero', () => {
       const five = toU256(5n);
       const zero = toU256(0n);
-      expect(() => mathSimulator.isMultiple(five, zero)).toThrowError('MathU256: division by zero');
+      expect(() => mathSimulator.isMultiple(five, zero)).toThrowError(
+        'MathU256: division by zero',
+      );
     });
 
     test('should handle large divisors', () => {
