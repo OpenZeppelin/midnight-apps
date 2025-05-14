@@ -122,41 +122,20 @@ module MathU256 {
     /**
      * @description Compares two U256 values to check if a <= b.
      *
+     * Theoretical Description:
      * This circuit compares two 256-bit numbers A = a.high * 2^128 + a.low and
      * B = b.high * 2^128 + b.low, where a.high, a.low, b.high, b.low are in [0, 2^128 - 1],
      * to determine if A <= B. It performs a lexicographical comparison by checking the high
      * parts first, then the low parts if the high parts are equal, returning true if A <= B,
-     * false otherwise. No arithmetic operations are performed, only comparisons and logical
-     * operations (OR, AND).
-     *
-     * Theoretical Description:
-     * The circuit checks if A <= B by evaluating:
-     * - A.high < B.high (using MathU128_leU128), or
-     * - A.high = B.high (i.e., A.high.low = B.high.low and A.high.high = B.high.high) and
-     *   A.low <= B.low (using MathU128_leU128).
-     *
-     * Mathematical Steps:
-     * 1. Compare High Parts:
-     *    - If A.high < B.high, return true.
-     * 2. Check Equality of High Parts:
-     *    - If A.high.low = B.high.low and A.high.high = B.high.high, proceed to low parts.
-     * 3. Compare Low Parts:
-     *    - If A.low <= B.low, return true.
-     * 4. Return Result:
-     *    - Otherwise, return false.
+     * false otherwise.
      *
      * @param a The first U256 value.
      * @param b The second U256 value.
      * @returns Boolean True if a <= b, false otherwise.
      */
     export circuit le(a: U256, b: U256): Boolean {
-        if (!MathU128_leU128(a.high, b.high)) {
-            return false;
-        } else if (MathU128_eqU128(a.high, b.high)) {
-            return MathU128_leU128(a.low, b.low);
-        } else {
-            return true;
-        }
+        return MathU128_leU128(a.high, b.high) && 
+           (!MathU128_eqU128(a.high, b.high) || MathU128_leU128(a.low, b.low));
     }
 
     /**
