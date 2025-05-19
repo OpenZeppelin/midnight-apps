@@ -8,7 +8,7 @@ import { sqrtBigint } from '../utils/sqrtBigint';
 import type { IMathU64Witnesses } from './interfaces';
 
 /**
- * @description Represents the private state of the Math module.
+ * @description Represents the private state of the MathU64 module.
  * @remarks No persistent state is needed beyond what’s computed on-demand, so this is minimal.
  */
 export type MathU64ContractPrivateState = EmptyState;
