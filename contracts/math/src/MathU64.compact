@@ -57,10 +57,8 @@ module MathU64 {
      * @throws Math: division invalid If quotient * b + remainder does not equal a.
      */
     circuit _div(a: Uint<64>, b: Uint<64>): DivResultU64 {
-        if (b == 0) {
-            assert false "Math: division by zero";
-            return DivResultU64 { quotient: 0 as Uint<64>, remainder: 0 as Uint<64> };
-        } else if (a == 0) {
+        assert b != 0 "Math: division by zero";
+        if (a == 0) {
             return DivResultU64 { quotient: 0 as Uint<64>, remainder: 0 as Uint<64> };
         } else if (b == 1) {
             return DivResultU64 { quotient: a, remainder: 0 as Uint<64> };
@@ -160,7 +158,6 @@ module MathU64 {
      * @throws If `b` is zero, causing division by zero.
      */
     export circuit isMultiple(value: Uint<64>, b: Uint<64>): Boolean {
-        assert (b > 0) "Math: division by zero";
         return rem(value, b) == 0;
     }
 

@@ -5,7 +5,6 @@ let mathSimulator: MathContractSimulator;
 
 const MAX_U32 = 2n ** 32n - 1n;
 const MAX_U64 = 2n ** 64n - 1n;
-const MAX_U128 = 2n ** 128n - 1n;
 
 const setup = () => {
   mathSimulator = new MathContractSimulator();
@@ -166,9 +165,9 @@ describe('MathU64', () => {
       expect(mathSimulator.sqrt(MAX_U64)).toBe(4294967295n); // sqrt(2^64 - 1) ≈ 2^32 - 1
     });
 
-    test('should fail if number exceeds MAX_U128', () => {
-      expect(() => mathSimulator.sqrt(MAX_U128 + 1n)).toThrow(
-        'expected value of type Uint<0..18446744073709551615> but received 340282366920938463463374607431768211456n',
+    test('should fail if number exceeds MAX_64', () => {
+      expect(() => mathSimulator.sqrt(MAX_U64 + 1n)).toThrow(
+        'expected value of type Uint<0..18446744073709551615> but received 18446744073709551616',
       );
     });
 

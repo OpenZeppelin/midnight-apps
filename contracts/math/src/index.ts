@@ -5,8 +5,8 @@
 
 // biome-ignore lint/performance/noBarrelFile: entrypoint module
 export {
-  type MathU64ContractPrivateState as MathContractPrivateState,
-  MathU64Witnesses as MathWitnesses,
+  type MathU64ContractPrivateState,
+  MathU64Witnesses,
 } from './witnesses/MathU64';
 export { sqrtBigint } from './utils/sqrtBigint';
 export type { IContractSimulator } from './types/test';
