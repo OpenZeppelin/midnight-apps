@@ -33,7 +33,7 @@ export const MathU64ContractPrivateState = {
 export const MathU64Witnesses =
   (): IMathU64Witnesses<MathU64ContractPrivateState> => ({
     /**
-     * @description Computes the square root of a Uint<128> value off-chain.
+     * @description Computes the square root of a Uint<64> value off-chain.
      * @param context - The witness context containing ledger and private state.
      * @param radicand - The number to compute the square root of.
      * @returns A tuple of the unchanged private state and the square root as a bigint.
