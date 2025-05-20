@@ -2,6 +2,7 @@ import {
   type CircuitContext,
   type ContractState,
   QueryContext,
+  type WitnessContext,
   constructorContext,
 } from '@midnight-ntwrk/compact-runtime';
 import {
@@ -153,4 +154,64 @@ export class MathContractSimulator
     this.circuitContext = result.context;
     return result.result;
   }
+}
+
+export function createMilecuiousSimulator({
+  mockSqrt,
+  mockDiv,
+}: {
+  mockSqrt?: (radicand: bigint) => bigint;
+  mockDiv?: (a: bigint, b: bigint) => { quotient: bigint; remainder: bigint };
+}): MathContractSimulator {
+  const baseWitnesses = MathU64Witnesses();
+
+  const witnesses = (): ReturnType<typeof MathU64Witnesses> => ({
+    ...baseWitnesses,
+    ...(mockSqrt && {
+      sqrtU64Locally(
+        context: WitnessContext<Ledger, MathU64ContractPrivateState>,
+        radicand: bigint,
+      ): [MathU64ContractPrivateState, bigint] {
+        return [context.privateState, mockSqrt(radicand)];
+      },
+    }),
+    ...(mockDiv && {
+      divU64Locally(
+        context: WitnessContext<Ledger, MathU64ContractPrivateState>,
+        a: bigint,
+        b: bigint,
+      ): [
+        MathU64ContractPrivateState,
+        { quotient: bigint; remainder: bigint },
+      ] {
+        return [context.privateState, mockDiv(a, b)];
+      },
+    }),
+  });
+
+  const contract = new Contract<MathU64ContractPrivateState>(witnesses());
+
+  const { currentPrivateState, currentContractState, currentZswapLocalState } =
+    contract.initialState(
+      constructorContext(
+        MathU64ContractPrivateState.generate(),
+        sampleCoinPublicKey(),
+      ),
+    );
+
+  const badSimulator = new MathContractSimulator();
+  Object.defineProperty(badSimulator, 'contract', {
+    value: contract,
+    writable: false,
+    configurable: true,
+  });
+
+  badSimulator.circuitContext = {
+    currentPrivateState,
+    currentZswapLocalState,
+    originalState: currentContractState,
+    transactionContext: badSimulator.circuitContext.transactionContext,
+  };
+
+  return badSimulator;
 }

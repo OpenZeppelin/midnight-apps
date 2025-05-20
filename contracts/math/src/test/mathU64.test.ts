@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, test } from 'vitest';
-import { MathContractSimulator } from './MathU64Simulator';
+import {
+  MathContractSimulator,
+  createMilecuiousSimulator,
+} from './MathU64Simulator';
 
 let mathSimulator: MathContractSimulator;
 
@@ -104,6 +107,20 @@ describe('MathU64', () => {
         'Math: division by zero',
       );
     });
+
+    test('should fail when remainder >= divisor', () => {
+      const badSimulator = createMilecuiousSimulator({
+        mockDiv: () => ({ quotient: 1n, remainder: 10n }), // 10n >= 5n
+      });
+      expect(() => badSimulator.div(10n, 5n)).toThrow('Math: remainder error');
+    });
+
+    test('should fail when quotient * b + remainder != a', () => {
+      const badSimulator = createMilecuiousSimulator({
+        mockDiv: () => ({ quotient: 1n, remainder: 1n }), // 1*5 + 1 = 6 ≠ 10
+      });
+      expect(() => badSimulator.div(10n, 5n)).toThrow('Math: division invalid');
+    });
   });
 
   describe('rem', () => {
@@ -139,6 +156,20 @@ describe('MathU64', () => {
       expect(() => mathSimulator.rem(5n, 0n)).toThrowError(
         'Math: division by zero',
       );
+    });
+
+    test('should fail when remainder >= divisor', () => {
+      const badSimulator = createMilecuiousSimulator({
+        mockDiv: () => ({ quotient: 1n, remainder: 5n }), // 5n >= 5n
+      });
+      expect(() => badSimulator.rem(10n, 5n)).toThrow('Math: remainder error');
+    });
+
+    test('should fail when quotient * b + remainder != a', () => {
+      const badSimulator = createMilecuiousSimulator({
+        mockDiv: () => ({ quotient: 0n, remainder: 2n }), // 0*5 + 2 = 2 ≠ 10
+      });
+      expect(() => badSimulator.rem(10n, 5n)).toThrow('Math: division invalid');
     });
   });
 
@@ -189,6 +220,24 @@ describe('MathU64', () => {
       expect(() => mathSimulator.divRem(5n, 0n)).toThrowError(
         'Math: division by zero',
       );
+    });
+
+    test('should fail when remainder >= divisor', () => {
+      const badSimulator = createMilecuiousSimulator({
+        mockDiv: () => ({ quotient: 1n, remainder: 5n }), // 5n >= 5n
+      });
+      expect(() => badSimulator.divRem(10n, 5n)).toThrow(
+        'Math: remainder error',
+      );
+    });
+
+    test('should fail when quotient * b + remainder != a', () => {
+      const badSimulator = createMilecuiousSimulator({
+        mockDiv: () => ({ quotient: 2n, remainder: 0n }), // 2*5 = 10 OK, change to fail
+      });
+      expect(() => badSimulator.divRem(11n, 5n)).toThrow(
+        'Math: division invalid',
+      ); // 2*5 + 0 = 10 ≠ 11
     });
   });
 
@@ -242,6 +291,24 @@ describe('MathU64', () => {
 
     test('should handle max Uint<64>', () => {
       expect(mathSimulator.sqrt(MAX_U64)).toBe(MAX_U32); // floor(sqrt(2^64 - 1)) = 2^32 - 1
+    });
+
+    test('sqrt fails with overestimated root', () => {
+      const badSimulator = createMilecuiousSimulator({
+        mockSqrt: () => 5n, // 5^2 = 25 > 10
+      });
+
+      expect(() => badSimulator.sqrt(10n)).toThrow('Math: sqrt overestimate');
+    });
+
+    test('div fails with incorrect remainder', () => {
+      const badSimulator = createMilecuiousSimulator({
+        mockDiv: () => ({ quotient: 1n, remainder: 10n }), // 10n not < 5n
+      });
+
+      expect(() => badSimulator.divRem(10n, 5n)).toThrow(
+        'Math: remainder error',
+      );
     });
   });
 
