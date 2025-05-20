@@ -26,7 +26,7 @@
     "@midnight-dapps/biome-config": "workspace:^",
     "@midnight-dapps/compact": "workspace:^",
     "@midnight-ntwrk/compact-runtime": "^0.7.0",
-    "@midnight-ntwrk/midnight-js-network-id": "^0.2.5",
+    "@midnight-ntwrk/midnight-js-network-id": "^2.0.0",
     "@midnight-ntwrk/zswap": "^3.0.6"
   }
 }
