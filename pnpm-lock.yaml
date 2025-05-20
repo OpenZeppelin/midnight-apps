@@ -247,8 +247,8 @@ importers:
         specifier: ^0.7.0
         version: 0.7.0
       '@midnight-ntwrk/midnight-js-network-id':
-        specifier: ^0.2.5
-        version: 0.2.5
+        specifier: ^2.0.0
+        version: 2.0.0
       '@midnight-ntwrk/zswap':
         specifier: ^3.0.6
         version: 3.0.6
@@ -275,8 +275,8 @@ importers:
         specifier: ^0.7.0
         version: 0.7.0
       '@midnight-ntwrk/midnight-js-network-id':
-        specifier: ^0.2.5
-        version: 0.2.5
+        specifier: ^2.0.0
+        version: 2.0.0
       '@midnight-ntwrk/zswap':
         specifier: ^3.0.6
         version: 3.0.6
@@ -300,8 +300,8 @@ importers:
         specifier: ^0.7.0
         version: 0.7.0
       '@midnight-ntwrk/midnight-js-network-id':
-        specifier: ^0.2.5
-        version: 0.2.5
+        specifier: ^2.0.0
+        version: 2.0.0
       '@midnight-ntwrk/zswap':
         specifier: ^3.0.6
         version: 3.0.6
@@ -355,8 +355,8 @@ importers:
         specifier: ^0.7.0
         version: 0.7.0
       '@midnight-ntwrk/midnight-js-network-id':
-        specifier: ^0.2.5
-        version: 0.2.5
+        specifier: ^2.0.0
+        version: 2.0.0
       '@midnight-ntwrk/zswap':
         specifier: ^3.0.6
         version: 3.0.6
@@ -846,8 +846,8 @@ packages:
   '@midnight-ntwrk/compact-runtime@0.7.0':
     resolution: {integrity: sha512-ZyLiFi/TjCTDoA0+eVdnI8OG+0xzJqG/quiafz8cbTp9emEIc1W4QmYvrdjNmJDTbmvwGt1gMZjs1KgF1yUh8Q==}
 
-  '@midnight-ntwrk/midnight-js-network-id@0.2.5':
-    resolution: {integrity: sha512-ThVIzpZRoZ/lvHwkb+Dw7fXm9ntzvoYOTd49Ph2YleVz6lwEk+3hBOxcgBEUGF9EExSiUvi+eQzT/vx0KOjAWg==}
+  '@midnight-ntwrk/midnight-js-network-id@2.0.0':
+    resolution: {integrity: sha512-yzgyvIaq+tu820a5VpsTwH8z4g+wzeW3nIIw6pnJBjW39mtIcs/38xrJ8+FDMEOcBD8jXZrjuySNeo9EnJMpRg==}
 
   '@midnight-ntwrk/onchain-runtime@0.2.6':
     resolution: {integrity: sha512-i/I1H/zQVFcjzCTD3ENa9OT2z7MvIHeqiY7/biBO7YQk/Dme5aYeQUczs/79sDih4fRQoeHNtaNVyZNzN6OBLg==}
@@ -3789,7 +3789,7 @@ snapshots:
       '@types/object-inspect': 1.13.0
       object-inspect: 1.13.4
 
-  '@midnight-ntwrk/midnight-js-network-id@0.2.5': {}
+  '@midnight-ntwrk/midnight-js-network-id@2.0.0': {}
 
   '@midnight-ntwrk/onchain-runtime@0.2.6': {}
 
