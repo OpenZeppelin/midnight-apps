@@ -28,7 +28,7 @@
   "devDependencies": {
     "@midnight-dapps/biome-config": "workspace:^",
     "@types/node": "^22.13.10",
-    "typescript": "^5.8.2",
+    "typescript": "^5.8.3",
     "vitest": "^3.0.9"
   },
   "dependencies": {
