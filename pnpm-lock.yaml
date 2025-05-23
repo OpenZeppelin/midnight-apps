@@ -21,8 +21,8 @@ importers:
         specifier: ^19.8.1
         version: 19.8.1
       '@midnight-ntwrk/compact-runtime':
-        specifier: ^0.7.0
-        version: 0.7.0
+        specifier: ^0.8.1
+        version: 0.8.1
       '@tailwindcss/vite':
         specifier: ^4.0.6
         version: 4.0.7(vite@6.2.5(@types/node@22.14.0)(jiti@2.4.2)(lightningcss@1.29.1)(yaml@2.8.0))
@@ -244,8 +244,8 @@ importers:
         specifier: workspace:^
         version: link:../../packages/compact-std
       '@midnight-ntwrk/compact-runtime':
-        specifier: ^0.7.0
-        version: 0.7.0
+        specifier: ^0.8.1
+        version: 0.8.1
       '@midnight-ntwrk/midnight-js-network-id':
         specifier: ^2.0.0
         version: 2.0.0
@@ -272,8 +272,8 @@ importers:
         specifier: workspace:^
         version: link:../../packages/compact
       '@midnight-ntwrk/compact-runtime':
-        specifier: ^0.7.0
-        version: 0.7.0
+        specifier: ^0.8.1
+        version: 0.8.1
       '@midnight-ntwrk/midnight-js-network-id':
         specifier: ^2.0.0
         version: 2.0.0
@@ -297,8 +297,8 @@ importers:
         specifier: workspace:^
         version: link:../../packages/compact
       '@midnight-ntwrk/compact-runtime':
-        specifier: ^0.7.0
-        version: 0.7.0
+        specifier: ^0.8.1
+        version: 0.8.1
       '@midnight-ntwrk/midnight-js-network-id':
         specifier: ^2.0.0
         version: 2.0.0
@@ -352,8 +352,8 @@ importers:
         specifier: workspace:^
         version: link:../compact
       '@midnight-ntwrk/compact-runtime':
-        specifier: ^0.7.0
-        version: 0.7.0
+        specifier: ^0.8.1
+        version: 0.8.1
       '@midnight-ntwrk/midnight-js-network-id':
         specifier: ^2.0.0
         version: 2.0.0
@@ -851,14 +851,14 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
-  '@midnight-ntwrk/compact-runtime@0.7.0':
-    resolution: {integrity: sha512-ZyLiFi/TjCTDoA0+eVdnI8OG+0xzJqG/quiafz8cbTp9emEIc1W4QmYvrdjNmJDTbmvwGt1gMZjs1KgF1yUh8Q==}
+  '@midnight-ntwrk/compact-runtime@0.8.1':
+    resolution: {integrity: sha512-ZXG/iprEqTCxQC/P1oETGOR5CnsoemPsfb17eSANPRsm+11AcIOP0Tp8KJipN+GbycgxOA+fAVwLFqA1hDCgbw==}
 
   '@midnight-ntwrk/midnight-js-network-id@2.0.0':
     resolution: {integrity: sha512-yzgyvIaq+tu820a5VpsTwH8z4g+wzeW3nIIw6pnJBjW39mtIcs/38xrJ8+FDMEOcBD8jXZrjuySNeo9EnJMpRg==}
 
-  '@midnight-ntwrk/onchain-runtime@0.2.6':
-    resolution: {integrity: sha512-i/I1H/zQVFcjzCTD3ENa9OT2z7MvIHeqiY7/biBO7YQk/Dme5aYeQUczs/79sDih4fRQoeHNtaNVyZNzN6OBLg==}
+  '@midnight-ntwrk/onchain-runtime@0.3.0':
+    resolution: {integrity: sha512-vZWPoz7MhXO5UgWZET50g7APOcT5dbAfADDcrSreeOagV8lj7JJzlnYIIhrcUaMOv+NHWxPaUcJUYUkmu9LoTA==}
 
   '@midnight-ntwrk/zswap@3.0.6':
     resolution: {integrity: sha512-OtJxo8Y4uW4SM13wcGmWpXEqsfyiIUeLqZgMBiNmRZ6ZwMHlytunohN/cRb2cSh62lq2eEw/NdVxIFYI25y88A==}
@@ -4136,15 +4136,15 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  '@midnight-ntwrk/compact-runtime@0.7.0':
+  '@midnight-ntwrk/compact-runtime@0.8.1':
     dependencies:
-      '@midnight-ntwrk/onchain-runtime': 0.2.6
+      '@midnight-ntwrk/onchain-runtime': 0.3.0
       '@types/object-inspect': 1.13.0
       object-inspect: 1.13.4
 
   '@midnight-ntwrk/midnight-js-network-id@2.0.0': {}
 
-  '@midnight-ntwrk/onchain-runtime@0.2.6': {}
+  '@midnight-ntwrk/onchain-runtime@0.3.0': {}
 
   '@midnight-ntwrk/zswap@3.0.6': {}
 
