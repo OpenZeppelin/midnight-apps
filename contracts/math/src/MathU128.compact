@@ -141,7 +141,7 @@ module MathU128 {
      * @param value The U128 struct to convert.
      * @returns Uint<128> The 128-bit value represented by high * 2^64 + low.
      */
-    export circuit fromU128(value: U128): Uint<128> {
+    export pure circuit fromU128(value: U128): Uint<128> {
         const highShifted = (value.high as Uint<128>) * MODULES();
         const result = highShifted + (value.low as Uint<128>);
         return result as Uint<128>;
@@ -174,7 +174,7 @@ module MathU128 {
      * @param b The second Uint<128> value.
      * @returns Boolean True if a is equal than b, false otherwise.
      */
-    export circuit eq(a: Uint<128>, b: Uint<128>): Boolean {
+    export pure circuit eq(a: Uint<128>, b: Uint<128>): Boolean {
         return a == b;
     }
 
@@ -185,7 +185,7 @@ module MathU128 {
      * @param b The second U128 value.
      * @returns Boolean True if a is equal b, false otherwise.
      */
-    export circuit eqU128(a: U128, b: U128): Boolean {
+    export pure circuit eqU128(a: U128, b: U128): Boolean {
         return a.low == b.low && a.high == b.high;
     }
 
@@ -196,7 +196,7 @@ module MathU128 {
      * @param b The second Uint<128> value.
      * @returns Boolean True if a is less than or equal b, false otherwise.
      */
-    export circuit le(a: Uint<128>, b: Uint<128>): Boolean {
+    export pure circuit le(a: Uint<128>, b: Uint<128>): Boolean {
         return a <= b;
     }
 
@@ -207,7 +207,7 @@ module MathU128 {
      * @param b The second U128 value.
      * @returns Boolean True if a is less than or equal b, false otherwise.
      */
-    export circuit leU128(a: U128, b: U128): Boolean {
+    export pure circuit leU128(a: U128, b: U128): Boolean {
         return a.high < b.high || (a.high == b.high && a.low <= b.low);
     }
 
@@ -218,7 +218,7 @@ module MathU128 {
      * @param b The second Uint<128> value.
      * @returns Boolean True if a is greater than b, false otherwise.
      */
-    export circuit gt(a: Uint<128>, b: Uint<128>): Boolean {
+    export pure circuit gt(a: Uint<128>, b: Uint<128>): Boolean {
         return a > b;
     }
 
@@ -229,7 +229,7 @@ module MathU128 {
      * @param b The second U128 value.
      * @returns Boolean True if a is greater than b, false otherwise.
      */
-    export circuit gtU128(a: U128, b: U128): Boolean {
+    export pure circuit gtU128(a: U128, b: U128): Boolean {
         return a.high > b.high || (a.high == b.high && a.low > b.low);
     }
 
@@ -343,7 +343,7 @@ module MathU128 {
      * @returns Uint<128> The difference between a and b.
      * @throws MathU128: subtraction underflow If a < b.
      */
-    export circuit sub(a: Uint<128>, b: Uint<128>): Uint<128> {
+    export pure circuit sub(a: Uint<128>, b: Uint<128>): Uint<128> {
         assert (a >= b) "MathU128: subtraction underflow";
         return a - b;
     }
@@ -383,7 +383,7 @@ module MathU128 {
      * @returns U128 The difference a - b as a U128 struct.
      * @throws MathU128: subtraction underflow If a < b.
      */
-    export circuit subU128(a: U128, b: U128): U128 {
+    export pure circuit subU128(a: U128, b: U128): U128 {
         if (isZeroU128(b)) {
             // Special case: b = 0, return a
             return a;
@@ -871,7 +871,7 @@ module MathU128 {
      * @param b The second Uint<128> value.
      * @returns Uint<128> The smaller of a and b.
      */
-    export circuit min(a: Uint<128>, b: Uint<128>): Uint<128> {
+    export pure circuit min(a: Uint<128>, b: Uint<128>): Uint<128> {
         return le(a, b) ? a : b;
     }
 
@@ -883,7 +883,7 @@ module MathU128 {
      * @param b The second U128 value.
      * @returns U128 The smaller of a and b.
      */
-    export circuit minU128(a: U128, b: U128): U128 {
+    export pure circuit minU128(a: U128, b: U128): U128 {
         return leU128(a, b) ? a : b;
     }
 
@@ -895,7 +895,7 @@ module MathU128 {
      * @param b The second Uint<128> value.
      * @returns Uint<128> The larger of a and b.
      */
-    export circuit max(a: Uint<128>, b: Uint<128>): Uint<128> {
+    export pure circuit max(a: Uint<128>, b: Uint<128>): Uint<128> {
         return gt(a, b) ? a : b;
     }
 
@@ -907,7 +907,7 @@ module MathU128 {
      * @param b The second U128 value.
      * @returns U128 The larger of a and b.
      */
-    export circuit maxU128(a: U128, b: U128): U128 {
+    export pure circuit maxU128(a: U128, b: U128): U128 {
         return gtU128(a, b) ? a : b;
     }
 
