@@ -290,13 +290,40 @@ export function createMaliciousSimulator({
     ...(mockSqrt && {
       sqrtU128Locally(
         context: WitnessContext<Ledger, MathU128ContractPrivateState>,
-        radicand: bigint,
+        radicand: U128,
       ): [MathU128ContractPrivateState, bigint] {
-        return [context.privateState, mockSqrt(radicand)];
+        return [
+          context.privateState,
+          mockSqrt(BigInt(radicand.high) * 2n ** 64n + BigInt(radicand.low)),
+        ];
       },
     }),
     ...(mockDiv && {
       divU128Locally(
+        context: WitnessContext<Ledger, MathU128ContractPrivateState>,
+        a: U128,
+        b: U128,
+      ): [MathU128ContractPrivateState, DivResultU128] {
+        const aValue = (BigInt(a.high) << 64n) + BigInt(a.low);
+        const bValue = (BigInt(b.high) << 64n) + BigInt(b.low);
+        const { quotient, remainder } = mockDiv(aValue, bValue);
+        return [
+          context.privateState,
+          {
+            quotient: {
+              low: quotient & MAX_U64,
+              high: quotient >> 64n,
+            },
+            remainder: {
+              low: remainder & MAX_U64,
+              high: remainder >> 64n,
+            },
+          },
+        ];
+      },
+    }),
+    ...(mockDiv && {
+      divUint128Locally(
         context: WitnessContext<Ledger, MathU128ContractPrivateState>,
         a: bigint,
         b: bigint,

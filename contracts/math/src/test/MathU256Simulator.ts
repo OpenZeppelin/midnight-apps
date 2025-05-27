@@ -260,6 +260,13 @@ export function createMaliciousSimulator({
         ];
       },
     }),
+    divUint128Locally(
+      context: WitnessContext<Ledger, MathU256ContractPrivateState>,
+      a: bigint,
+      b: bigint,
+    ): [MathU256ContractPrivateState, DivResultU128] {
+      return baseWitnesses.divUint128Locally(context, a, b);
+    },
   };
 
   const contract = new Contract<MathU256ContractPrivateState>(witnesses);

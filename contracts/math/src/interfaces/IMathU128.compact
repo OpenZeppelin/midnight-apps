@@ -27,19 +27,28 @@ module IMathU128 {
     } 
 
     /**
+     * @description Computes division of two U128 values locally (off-chain).
+     *
+     * @param a The number to divide.
+     * @param b The number to divide by.
+     * @returns DivResultU128 The quotient and remainder of the division as U128 values.
+     */
+    export witness divU128Locally(a: U128, b: U128): DivResultU128;
+
+    /**
      * @description Computes division of two Uint<128> values locally (off-chain).
      *
      * @param a The number to divide.
      * @param b The number to divide by.
-     * @returns DivResultU128 The quotient and remainder of the division as Uint<64>.
+     * @returns DivResultU128 The quotient and remainder of the division as U128 values.
      */
-    export witness divU128Locally(a: Uint<128>, b: Uint<128>): DivResultU128;
+    export witness divUint128Locally(a: Uint<128>, b: Uint<128>): DivResultU128;
 
     /**
-     * @description Computes the square root of a Uint<128> value locally (off-chain).
+     * @description Computes the square root of a U128 value locally (off-chain).
      *
-     * @param radicand The number to compute the square root of.
+     * @param radicand The U128 value to compute the square root of.
      * @returns Uint<64> The square root of radicand.
      */
-    export witness sqrtU128Locally(radicand: Uint<128>): Uint<64>;
+    export witness sqrtU128Locally(radicand: U128): Uint<64>;
 }

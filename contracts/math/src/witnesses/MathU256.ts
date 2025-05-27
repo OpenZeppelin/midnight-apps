@@ -2,6 +2,7 @@ import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
 import type {
   DivResultU128,
   DivResultU256,
+  U128,
   U256,
 } from '../artifacts/Index/contract/index.cjs';
 import type { Ledger } from '../artifacts/MathU256/contract/index.cjs';
@@ -11,7 +12,7 @@ import type { IMathU256Witnesses } from './interfaces';
 
 /**
  * @description Represents the private state of the MathU256 module.
- * @remarks No persistent state is needed beyond what’s computed on-demand, so this is minimal.
+ * @remarks No persistent state is needed beyond what's computed on-demand, so this is minimal.
  */
 export type MathU256ContractPrivateState = EmptyState;
 
@@ -123,6 +124,7 @@ export const MathU256Witnesses = (): IMathU256Witnesses<
       },
     ];
   },
+
   /**
    * @description Computes division of two Uint<128> values off-chain.
    * @param context - The witness context containing ledger and private state.
@@ -132,21 +134,45 @@ export const MathU256Witnesses = (): IMathU256Witnesses<
    */
   divU128Locally(
     context: WitnessContext<Ledger, MathU256ContractPrivateState>,
-    dividend: bigint,
-    divisor: bigint,
+    a: U128,
+    b: U128,
   ): [MathU256ContractPrivateState, DivResultU128] {
-    const quotient = dividend / divisor; // Integer division
-    const remainder = dividend - quotient * divisor;
+    const aBigInt = (BigInt(a.high) << 64n) + BigInt(a.low);
+    const bBigInt = (BigInt(b.high) << 64n) + BigInt(b.low);
+    const quotient = aBigInt / bBigInt;
+    const remainder = aBigInt - quotient * bBigInt;
     return [
       context.privateState,
       {
         quotient: {
-          low: quotient & BigInt('0xFFFFFFFFFFFFFFFF'), // Lower 64 bits
-          high: quotient >> BigInt(64), // Upper 64 bits
+          low: quotient & BigInt('0xFFFFFFFFFFFFFFFF'),
+          high: quotient >> BigInt(64),
         },
         remainder: {
-          low: remainder & BigInt('0xFFFFFFFFFFFFFFFF'), // Lower 64 bits
-          high: remainder >> BigInt(64), // Upper 64 bits
+          low: remainder & BigInt('0xFFFFFFFFFFFFFFFF'),
+          high: remainder >> BigInt(64),
+        },
+      },
+    ];
+  },
+
+  divUint128Locally(
+    context: WitnessContext<Ledger, MathU256ContractPrivateState>,
+    a: bigint,
+    b: bigint,
+  ): [MathU256ContractPrivateState, DivResultU128] {
+    const quotient = a / b;
+    const remainder = a - quotient * b;
+    return [
+      context.privateState,
+      {
+        quotient: {
+          low: quotient & BigInt('0xFFFFFFFFFFFFFFFF'),
+          high: quotient >> BigInt(64),
+        },
+        remainder: {
+          low: remainder & BigInt('0xFFFFFFFFFFFFFFFF'),
+          high: remainder >> BigInt(64),
         },
       },
     ];

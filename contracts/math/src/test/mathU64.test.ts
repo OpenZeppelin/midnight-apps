@@ -3,11 +3,9 @@ import {
   MathContractSimulator,
   createMilecuiousSimulator,
 } from './MathU64Simulator';
+import { MAX_U32, MAX_U64 } from './consts';
 
 let mathSimulator: MathContractSimulator;
-
-const MAX_U32 = 2n ** 32n - 1n;
-const MAX_U64 = 2n ** 64n - 1n;
 
 const setup = () => {
   mathSimulator = new MathContractSimulator();

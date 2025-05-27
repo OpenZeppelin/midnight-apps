@@ -4,6 +4,7 @@ import type {
   DivResultU128,
   DivResultU256,
   Ledger,
+  U128,
   U256,
 } from '../artifacts/Index/contract/index.cjs';
 
@@ -21,9 +22,15 @@ export interface IMathU64Witnesses<P> {
 }
 
 export interface IMathU128Witnesses<L, P> {
-  sqrtU128Locally(context: WitnessContext<L, P>, radicand: bigint): [P, bigint];
+  sqrtU128Locally(context: WitnessContext<L, P>, radicand: U128): [P, bigint];
 
   divU128Locally(
+    context: WitnessContext<L, P>,
+    a: U128,
+    b: U128,
+  ): [P, DivResultU128];
+
+  divUint128Locally(
     context: WitnessContext<L, P>,
     a: bigint,
     b: bigint,
@@ -40,6 +47,12 @@ export interface IMathU256Witnesses<L, P> {
   ): [P, DivResultU256];
 
   divU128Locally(
+    context: WitnessContext<L, P>,
+    a: U128,
+    b: U128,
+  ): [P, DivResultU128];
+
+  divUint128Locally(
     context: WitnessContext<L, P>,
     a: bigint,
     b: bigint,

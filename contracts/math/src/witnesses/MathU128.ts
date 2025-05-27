@@ -1,5 +1,8 @@
 import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
-import type { DivResultU128 } from '../artifacts/Index/contract/index.cjs';
+import type {
+  DivResultU128,
+  U128,
+} from '../artifacts/Index/contract/index.cjs';
 import type { Ledger } from '../artifacts/MathU128/contract/index.cjs';
 import type { EmptyState } from '../types/state';
 import { sqrtBigint } from '../utils/sqrtBigint';
@@ -7,7 +10,7 @@ import type { IMathU128Witnesses } from './interfaces';
 
 /**
  * @description Represents the private state of the MathU128 module.
- * @remarks No persistent state is needed beyond what’s computed on-demand, so this is minimal.
+ * @remarks No persistent state is needed beyond what's computed on-demand, so this is minimal.
  */
 export type MathU128ContractPrivateState = EmptyState;
 
@@ -33,17 +36,21 @@ export const MathU128Witnesses = (): IMathU128Witnesses<
   MathU128ContractPrivateState
 > => ({
   /**
-   * @description Computes the square root of a Uint<128> value off-chain.
+   * @description Computes the square root of a U128 value off-chain.
    * @param context - The witness context containing ledger and private state.
-   * @param radicand - The number to compute the square root of.
+   * @param radicand - The U128 value to compute the square root of.
    * @returns A tuple of the unchanged private state and the square root as a bigint.
    */
   sqrtU128Locally(
     context: WitnessContext<Ledger, MathU128ContractPrivateState>,
-    radicand: bigint,
+    radicand: U128,
   ): [MathU128ContractPrivateState, bigint] {
+    // Convert U128 to bigint
+    const radicandBigInt =
+      (BigInt(radicand.high) << 64n) + BigInt(radicand.low);
+
     // Compute square root using sqrtBigint, ensuring result fits in Uint<64>
-    const root = sqrtBigint(radicand);
+    const root = sqrtBigint(radicandBigInt);
     return [context.privateState, root];
   },
 
@@ -56,23 +63,44 @@ export const MathU128Witnesses = (): IMathU128Witnesses<
    */
   divU128Locally(
     context: WitnessContext<Ledger, MathU128ContractPrivateState>,
-    dividend: bigint,
-    divisor: bigint,
+    a: U128,
+    b: U128,
   ): [MathU128ContractPrivateState, DivResultU128] {
-    const quotient = dividend / divisor; // Integer division
-    const remainder = dividend - quotient * divisor;
+    const aValue = (BigInt(a.high) << 64n) + BigInt(a.low);
+    const bValue = (BigInt(b.high) << 64n) + BigInt(b.low);
+    const quotient = aValue / bValue;
+    const remainder = aValue - quotient * bValue;
     return [
       context.privateState,
       {
         quotient: {
-          low: quotient & BigInt('0xFFFFFFFFFFFFFFFF'), // Lower 64 bits
-          high: quotient >> BigInt(64), // Upper 64 bits
+          low: quotient & BigInt('0xFFFFFFFFFFFFFFFF'),
+          high: quotient >> BigInt(64),
         },
         remainder: {
-          low: remainder & BigInt('0xFFFFFFFFFFFFFFFF'), // Lower 64 bits
-          high: remainder >> BigInt(64), // Upper 64 bits
+          low: remainder & BigInt('0xFFFFFFFFFFFFFFFF'),
+          high: remainder >> BigInt(64),
         },
       },
     ];
+  },
+
+  /**
+   * @description Computes division of two Uint<128> values off-chain.
+   * @param context - The witness context containing ledger and private state.
+   * @param dividend - The number to divide.
+   * @param divisor - The number to divide by.
+   * @returns A tuple of the unchanged private state and a DivResultU64 with quotient and remainder.
+   */
+  divUint128Locally(
+    context: WitnessContext<Ledger, MathU128ContractPrivateState>,
+    a: bigint,
+    b: bigint,
+  ): [MathU128ContractPrivateState, DivResultU128] {
+    return this.divU128Locally(
+      context,
+      { low: a, high: 0n },
+      { low: b, high: 0n },
+    );
   },
 });

@@ -102,7 +102,7 @@ module MathU128 {
      * @throws MathU128: conversion invalid If the reconstructed value does not match the input.
      */
     export circuit toU128(value: Uint<128>): U128 {
-        const result = divU128Locally(value, MODULES());
+        const result = divUint128Locally(value, MODULES());
         const high = result.quotient.low;
         const low = result.remainder.low;
 
@@ -603,9 +603,7 @@ module MathU128 {
             };
         } else {
             assert (gtU128(b, ZERO_U128())) "MathU128: division by zero";
-            const aValue = fromU128(a);
-            const bValue = fromU128(b);
-            const result = divU128Locally(aValue, bValue);
+            const result = divU128Locally(a, b);
             assert (leU128(result.remainder, b)) "MathU128: remainder error";
             
             // quotient * b + remainder == a
@@ -792,8 +790,7 @@ module MathU128 {
         } else if (eqU128(radicand, MAX_U128())) {
             return Max_U64();
         } else {
-            const radicandUint128 = fromU128(radicand);
-            const root = sqrtU128Locally(radicandUint128);
+            const root = sqrtU128Locally(radicand);
             const rootU128 = U128 { low: root, high: 0 };
             const rootSquareU256 = _mul(rootU128, rootU128); // U256 { low: U128, high: U128 }
             assert (eqU128(rootSquareU256.high, ZERO_U128())) "MathU128: sqrt root^2 overflow";
