@@ -45,7 +45,7 @@ module MathU128 {
      *
      * @returns Uint<65> The value 2^64 (18446744073709551616).
      */
-    export pure circuit MODULES(): Uint<65> {
+    export pure circuit MODULUS(): Uint<65> {
         // pow() is not supported yet, so we hardcode this value.
         return 18446744073709551616; // 2^64
     }
