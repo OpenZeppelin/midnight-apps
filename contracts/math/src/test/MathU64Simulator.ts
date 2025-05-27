@@ -156,7 +156,7 @@ export class MathContractSimulator
   }
 }
 
-export function createMilecuiousSimulator({
+export function createMaliciousSimulator({
   mockSqrt,
   mockDiv,
 }: {
