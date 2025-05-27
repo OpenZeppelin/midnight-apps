@@ -1,14 +1,26 @@
 // SPDX-License-Identifier: MIT
-pragma language_version >= 0.14.0;
+pragma language_version >= 0.15.0;
 
 /**
- * @description An interface module for Uint<256> types using U256 struct.
+ * @title IUint256
+ * @dev Interface for Uint<256> types using U256 struct.
+ * @dev This module provides a U256 struct that represents a 256-bit unsigned integer
+ * using two U128 structs. The low field contains the least significant 128 bits
+ * while the high field contains the most significant 128 bits.
+ * This structure enables arithmetic operations on 256-bit numbers by leveraging
+ * the U128 struct which further breaks down into 64-bit components.
  */
 module IUint256 {
     import IUint128; 
         
     export struct U256 {
+        /**
+         * @description The least significant 128 bits (bits 0-127) of the 256-bit number
+         */
         low: U128,
+        /**
+         * @description The most significant 128 bits (bits 128-255) of the 256-bit number
+         */
         high: U128 
     } 
 }

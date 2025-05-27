@@ -1,44 +1,40 @@
 // SPDX-License-Identifier: MIT
-pragma language_version >= 0.14.0;
+pragma language_version >= 0.15.0;
 
 /**
- * @description A utility module providing mathematical operations for 256-bit unsigned integers
+ * @title MathU256
+ * @dev A utility module providing mathematical operations for 256-bit unsigned integers
  * using the U256 struct, which represents numbers as high * 2^128 + low, where high and low are
  * 128-bit unsigned integers (Uint<128>) in [0, 2^128 - 1]. The module supports a range of
- * operations including conversions, comparisons, arithmetic, division, square root, and utility
- * functions. Operations are provided in dual forms: 
- * one for Uint<256> inputs with conversions to/from U256, and another for direct U256 inputs.
+ * operations including comparisons, arithmetic, division, square root, and utility functions.
+ * All operations work directly with U256 struct inputs.
  *
  * Supported Mathematical Operations:
- * - Conversions:
- *   - toU256(): Converts a Uint<256> to a U256 struct by splitting into high and low 128-bit parts.
- *   - fromU256(): Converts a U256 struct to a Uint<256> by combining high and low parts.
  * - Comparisons:
- *   - le(), leU256(): Checks if one 256-bit number is less than another.
- *   - gt(), gtU256(): Checks if one 256-bit number is greater than another.
+ *   - le(): Checks if one 256-bit number is less than another.
+ *   - gt(): Checks if one 256-bit number is greater than another.
  * - Arithmetic:
- *   - add(), addU256(): Adds two 256-bit numbers, checking for overflow.
- *   - sub(), subU256(): Subtracts one 256-bit number from another, checking for underflow.
- *   - mul(), mulU256(): Multiplies two 256-bit numbers, checking for overflow.
+ *   - add(): Adds two 256-bit numbers, checking for overflow.
+ *   - sub(): Subtracts one 256-bit number from another, checking for underflow.
+ *   - mul(): Multiplies two 256-bit numbers, checking for overflow.
  * - Division:
- *   - div(), divU256(): Computes the quotient of dividing one 256-bit number by another.
- *   - rem(), remU256(): Computes the remainder of dividing one 256-bit number by another.
+ *   - div(): Computes the quotient of dividing one 256-bit number by another.
+ *   - rem(): Computes the remainder of dividing one 256-bit number by another.
+ *   - divRem(): Computes both quotient and remainder of dividing one 256-bit number by another.
  * - Square Root:
- *   - sqrt(), sqrtU256(): Computes the floor of the square root of a 256-bit number, with special cases
+ *   - sqrt(): Computes the floor of the square root of a 256-bit number, with special cases
  *     for efficiency.
  * - Utility:
- *   - isZero(): Checks if a U256 value equals zero.
  *   - ZERO_U256(): Returns a U256 struct representing zero.
  *   - MAX_U256(): Returns a U256 struct representing the maximum 256-bit value (2^256 - 1).
- *   - min(), minU256:() Returns the smaller of two 256-bit numbers.
- *   - max(), maxU256(): Returns the larger of two 256-bit numbers.
- *   - isMultiple(), isMultipleU256(): Checks if one 256-bit number is a multiple of another.
- * 
+ *   - isZero(): Checks if a U256 value equals zero.
+ *   - isMultiple(): Checks if one 256-bit number is a multiple of another.
+ *   - min(): Returns the smaller of two 256-bit numbers.
+ *   - max(): Returns the larger of two 256-bit numbers.
+ *
  * TODO: Future Operations:
  * - pow(), powU256(): Compute the power of a 256-bit number raised to a given exponent.
  * - fromU256(), toU256(): Needs support of Uint<256> type.
- *
- * @module MathU256
  */
 module MathU256 {
     import CompactStandardLibrary;
@@ -510,6 +506,13 @@ module MathU256 {
         return _div(a, b).remainder;
     }
 
+    /**
+     * @description Computes the quotient and remainder of dividing a U256 a by a U256 b.
+     *
+     * @param a The U256 value to divide.
+     * @param b The U256 value to divide by.
+     * @returns DivResultU256 The quotient and remainder of the division as U256 structs.
+     */
     export circuit divRem(a: U256, b: U256): DivResultU256 {
         return _div(a, b);
     }

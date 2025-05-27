@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma language_version >= 0.14.0;
+pragma language_version >= 0.15.0;
 
 /**
- * @description A utility module providing mathematical operations for unsigned integers. Most functions operate on
+ * @title MathU64
+ * @dev A utility module providing mathematical operations for unsigned integers. Most functions operate on
  * `Uint<64>` values in the range [0, 2^64 - 1], while the `sqrt` function accepts a `Uint<128>` input in the range
  * [0, 2^128 - 1]. The module supports arithmetic, division, square root, and utility functions with overflow and
  * underflow checks where applicable.

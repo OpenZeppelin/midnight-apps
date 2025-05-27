@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma language_version >= 0.14.0;
+pragma language_version >= 0.15.0;
 
 /**
- * @description A utility module providing mathematical operations for 128-bit unsigned integers
+ * @title MathU128
+ * @dev A utility module providing mathematical operations for 128-bit unsigned integers
  * using the U128 struct, which represents numbers as high * 2^64 + low, where high and low are
  * 64-bit unsigned integers (Uint<64>) in [0, 2^64 - 1]. The module supports conversions,
  * comparisons, arithmetic, division, square root, and utility functions. Operations are provided
@@ -281,13 +282,6 @@ module MathU128 {
                 low: a,
                 high: ZERO_U128()
             };
-        } else if (a.low == Max_U64() && a.high == Max_U64() &&
-                b.low == 1 && b.high == 0) {
-            // Special case: a = MAX_U128, b = 1
-            return U256 {
-                low: ZERO_U128(),
-                high: U128 { low: 1, high: 0 }
-            };
         } else {
             // General case
             const lowSumFull = a.low + b.low;
@@ -390,13 +384,6 @@ module MathU128 {
         } else if (eqU128(a, b)) {
             // Special case: a = b, return 0
             return ZERO_U128();
-        } else if (a.low == Max_U64() && a.high == Max_U64() &&
-                b.low == 1 && b.high == 0) {
-            // Special case: a = MAX_U128, b = 1
-            return U128 {
-                low: Max_U64() - 1,
-                high: Max_U64()
-            };
         } else {
             // General case
             assert (gtU128(a, b) || eqU128(a, b)) "MathU128: subtraction underflow";
@@ -481,12 +468,6 @@ module MathU128 {
             return U256 {
                 low: a,
                 high: U128 { low: 0, high: 0 }
-            };
-        } else if (eqU128(a, MAX_U128()) && eqU128(b, U128 { low: 2, high: 0 })) {
-            // Special case: a = MAX_U128, b = 2
-            return U256 {
-                low: U128 { low: Max_U64() - 1, high: Max_U64() },
-                high: U128 { low: 1, high: 0 }
             };
         } else {
             // Compute partial products (each is Uint<128>)
@@ -808,8 +789,6 @@ module MathU128 {
             return 65535 as Uint<64>;
         } else if (eqU128(radicand, U128 { low: Max_U64(), high: 0 })) {
             return 4294967295 as Uint<64>;
-        } else if (eqU128(radicand, U128 { low: 1000000, high: 0 })) {
-            return 1000 as Uint<64>;
         } else if (eqU128(radicand, MAX_U128())) {
             return Max_U64();
         } else {
@@ -817,7 +796,7 @@ module MathU128 {
             const root = sqrtU128Locally(radicandUint128);
             const rootU128 = U128 { low: root, high: 0 };
             const rootSquareU256 = _mul(rootU128, rootU128); // U256 { low: U128, high: U128 }
-            assert (rootSquareU256.high.low == 0 && rootSquareU256.high.high == 0) "MathU128: sqrt root^2 overflow";
+            assert (eqU128(rootSquareU256.high, ZERO_U128())) "MathU128: sqrt root^2 overflow";
             
             const rootSquareU128 = rootSquareU256.low; // U128
             assert (!gtU128(rootSquareU128, radicand)) "MathU128: sqrt overestimate";
@@ -825,7 +804,7 @@ module MathU128 {
             const next = root + 1 as Uint<64>;
             const nextU128 = U128 { low: next, high: 0 };
             const nextSquareU256 = _mul(nextU128, nextU128); // U256 { low: U128, high: U128 }
-            assert (eqU128(nextSquareU256.high, ZERO_U128())) "MathU128: sqrt next overflow";
+            assert (eqU128(nextSquareU256.high, ZERO_U128())) "MathU128: next sqrt overflow";
             
             const nextSquareU128 = nextSquareU256.low; // U128
             assert (gtU128(nextSquareU128, radicand)) "MathU128: sqrt underestimate";
@@ -912,7 +891,6 @@ module MathU128 {
     }
 
     /**
-     * @description Checks if a U128 value is a multiple of another.
      * @description Checks if a U128 value is a multiple of another.
      *
      * This circuit determines whether a 128-bit unsigned integer (`a`) is a multiple of another

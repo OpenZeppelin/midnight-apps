@@ -239,6 +239,16 @@ describe('MathU64', () => {
         'Math: division invalid',
       ); // 2*5 + 0 = 10 ≠ 11
     });
+
+    test('should fail when remainder >= divisor', () => {
+      const badSimulator = createMilecuiousSimulator({
+        mockDiv: () => ({ quotient: 1n, remainder: 10n }), // 10n not < 5n
+      });
+
+      expect(() => badSimulator.divRem(10n, 5n)).toThrow(
+        'Math: remainder error',
+      );
+    });
   });
 
   describe('Sqrt', () => {
@@ -293,7 +303,7 @@ describe('MathU64', () => {
       expect(mathSimulator.sqrt(MAX_U64)).toBe(MAX_U32); // floor(sqrt(2^64 - 1)) = 2^32 - 1
     });
 
-    test('sqrt fails with overestimated root', () => {
+    test('should fail with overestimated root', () => {
       const badSimulator = createMilecuiousSimulator({
         mockSqrt: () => 5n, // 5^2 = 25 > 10
       });
@@ -301,14 +311,12 @@ describe('MathU64', () => {
       expect(() => badSimulator.sqrt(10n)).toThrow('Math: sqrt overestimate');
     });
 
-    test('div fails with incorrect remainder', () => {
+    test('should fail with underestimated root', () => {
       const badSimulator = createMilecuiousSimulator({
-        mockDiv: () => ({ quotient: 1n, remainder: 10n }), // 10n not < 5n
+        mockSqrt: () => 3n, // 3^2 = 9 < 16
       });
 
-      expect(() => badSimulator.divRem(10n, 5n)).toThrow(
-        'Math: remainder error',
-      );
+      expect(() => badSimulator.sqrt(16n)).toThrow('Math: sqrt underestimate');
     });
   });
 

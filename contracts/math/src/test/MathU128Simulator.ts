@@ -172,42 +172,38 @@ export class MathU128Simulator
     return result.result;
   }
 
-  public div(dividend: bigint, divisor: bigint): bigint {
-    const result = this.contract.circuits.div(
-      this.circuitContext,
-      dividend,
-      divisor,
-    );
+  public div(a: bigint, b: bigint): bigint {
+    const result = this.contract.circuits.div(this.circuitContext, a, b);
     this.circuitContext = result.context;
     return result.result;
   }
 
-  public divU128(dividend: U128, divisor: U128): U128 {
-    const result = this.contract.circuits.divU128(
-      this.circuitContext,
-      dividend,
-      divisor,
-    );
+  public divU128(a: U128, b: U128): U128 {
+    const result = this.contract.circuits.divU128(this.circuitContext, a, b);
     this.circuitContext = result.context;
     return result.result;
   }
 
-  public rem(dividend: bigint, divisor: bigint): bigint {
-    const result = this.contract.circuits.rem(
-      this.circuitContext,
-      dividend,
-      divisor,
-    );
+  public rem(a: bigint, b: bigint): bigint {
+    const result = this.contract.circuits.rem(this.circuitContext, a, b);
     this.circuitContext = result.context;
     return result.result;
   }
 
-  public remU128(dividend: U128, divisor: U128): U128 {
-    const result = this.contract.circuits.remU128(
-      this.circuitContext,
-      dividend,
-      divisor,
-    );
+  public remU128(a: U128, b: U128): U128 {
+    const result = this.contract.circuits.remU128(this.circuitContext, a, b);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public divRem(a: bigint, b: bigint): DivResultU128 {
+    const result = this.contract.circuits.divRem(this.circuitContext, a, b);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public divRemU128(a: U128, b: U128): DivResultU128 {
+    const result = this.contract.circuits.divRemU128(this.circuitContext, a, b);
     this.circuitContext = result.context;
     return result.result;
   }

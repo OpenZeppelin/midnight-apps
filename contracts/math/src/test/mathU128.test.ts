@@ -760,6 +760,113 @@ describe('MathU128', () => {
       expect(() => sim.remU128(a, b)).toThrow('MathU128: conversion invalid');
     });
   });
+  describe('divRem', () => {
+    test('should handle basic division with remainder', () => {
+      const result = mathSimulator.divRem(17n, 5n);
+      expect(result.quotient.low).toBe(3n);
+      expect(result.quotient.high).toBe(0n);
+      expect(result.remainder.low).toBe(2n);
+      expect(result.remainder.high).toBe(0n);
+    });
+
+    test('should handle division without remainder', () => {
+      const result = mathSimulator.divRem(15n, 3n);
+      expect(result.quotient.low).toBe(5n);
+      expect(result.quotient.high).toBe(0n);
+      expect(result.remainder.low).toBe(0n);
+      expect(result.remainder.high).toBe(0n);
+    });
+
+    test('should handle dividend equals divisor', () => {
+      const result = mathSimulator.divRem(5n, 5n);
+      expect(result.quotient.low).toBe(1n);
+      expect(result.quotient.high).toBe(0n);
+      expect(result.remainder.low).toBe(0n);
+      expect(result.remainder.high).toBe(0n);
+    });
+
+    test('should handle dividend less than divisor', () => {
+      const result = mathSimulator.divRem(3n, 5n);
+      expect(result.quotient.low).toBe(0n);
+      expect(result.quotient.high).toBe(0n);
+      expect(result.remainder.low).toBe(3n);
+      expect(result.remainder.high).toBe(0n);
+    });
+
+    test('should compute division of max U128 by 2', () => {
+      const result = mathSimulator.divRem(MAX_U128, 2n);
+      expect(result.quotient.low).toBe(MAX_U64);
+      expect(result.quotient.high).toBe(MAX_U64 >> 1n);
+      expect(result.remainder.low).toBe(1n);
+      expect(result.remainder.high).toBe(0n);
+    });
+
+    test('should fail on division by zero', () => {
+      expect(() => mathSimulator.divRem(5n, 0n)).toThrowError(
+        'MathU128: division by zero',
+      );
+    });
+  });
+
+  describe('divRemU128', () => {
+    test('should handle basic division with remainder', () => {
+      const a: U128 = { low: 17n, high: 0n };
+      const b: U128 = { low: 5n, high: 0n };
+      const result = mathSimulator.divRemU128(a, b);
+      expect(result.quotient.low).toBe(3n);
+      expect(result.quotient.high).toBe(0n);
+      expect(result.remainder.low).toBe(2n);
+      expect(result.remainder.high).toBe(0n);
+    });
+
+    test('should handle division without remainder', () => {
+      const a: U128 = { low: 15n, high: 0n };
+      const b: U128 = { low: 3n, high: 0n };
+      const result = mathSimulator.divRemU128(a, b);
+      expect(result.quotient.low).toBe(5n);
+      expect(result.quotient.high).toBe(0n);
+      expect(result.remainder.low).toBe(0n);
+      expect(result.remainder.high).toBe(0n);
+    });
+
+    test('should handle dividend equals divisor', () => {
+      const a: U128 = { low: 5n, high: 0n };
+      const b: U128 = { low: 5n, high: 0n };
+      const result = mathSimulator.divRemU128(a, b);
+      expect(result.quotient.low).toBe(1n);
+      expect(result.quotient.high).toBe(0n);
+      expect(result.remainder.low).toBe(0n);
+      expect(result.remainder.high).toBe(0n);
+    });
+
+    test('should handle dividend less than divisor', () => {
+      const a: U128 = { low: 3n, high: 0n };
+      const b: U128 = { low: 5n, high: 0n };
+      const result = mathSimulator.divRemU128(a, b);
+      expect(result.quotient.low).toBe(0n);
+      expect(result.quotient.high).toBe(0n);
+      expect(result.remainder.low).toBe(3n);
+      expect(result.remainder.high).toBe(0n);
+    });
+
+    test('should compute division of max U128 by 2', () => {
+      const a: U128 = { low: MAX_U64, high: MAX_U64 };
+      const b: U128 = { low: 2n, high: 0n };
+      const result = mathSimulator.divRemU128(a, b);
+      expect(result.quotient.low).toBe(MAX_U64);
+      expect(result.quotient.high).toBe(MAX_U64 >> 1n);
+      expect(result.remainder.low).toBe(1n);
+      expect(result.remainder.high).toBe(0n);
+    });
+
+    test('should fail on division by zero', () => {
+      const a: U128 = { low: 5n, high: 0n };
+      const b: U128 = { low: 0n, high: 0n };
+      expect(() => mathSimulator.divRemU128(a, b)).toThrowError(
+        'MathU128: division by zero',
+      );
+    });
+  });
 
   describe('sqrt', () => {
     test('should handle zero', () => {
