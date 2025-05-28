@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, test } from 'vitest';
+import { MAX_UINT32, MAX_UINT64 } from '../utils/consts';
 import {
   MathContractSimulator,
-  createMilecuiousSimulator,
+  createMaliciousSimulator,
 } from './MathU64Simulator';
-import { MAX_U32, MAX_U64 } from './consts';
 
 let mathSimulator: MathContractSimulator;
 
@@ -20,7 +20,9 @@ describe('MathU64', () => {
     });
 
     test('should not overflow', () => {
-      expect(mathSimulator.add(MAX_U64, MAX_U64)).toBe(36893488147419103230n);
+      expect(mathSimulator.add(MAX_UINT64, MAX_UINT64)).toBe(
+        36893488147419103230n,
+      );
     });
   });
 
@@ -41,11 +43,11 @@ describe('MathU64', () => {
     });
 
     test('should subtract max Uint<64> minus 1', () => {
-      expect(mathSimulator.sub(MAX_U64, 1n)).toBe(MAX_U64 - 1n);
+      expect(mathSimulator.sub(MAX_UINT64, 1n)).toBe(MAX_UINT64 - 1n);
     });
 
     test('should subtract max Uint<64> minus itself', () => {
-      expect(mathSimulator.sub(MAX_U64, MAX_U64)).toBe(0n);
+      expect(mathSimulator.sub(MAX_UINT64, MAX_UINT64)).toBe(0n);
     });
 
     test('should fail on underflow with small numbers', () => {
@@ -55,9 +57,9 @@ describe('MathU64', () => {
     });
 
     test('should fail on underflow with large numbers', () => {
-      expect(() => mathSimulator.sub(MAX_U64 - 10n, MAX_U64)).toThrowError(
-        'Math: subtraction underflow',
-      );
+      expect(() =>
+        mathSimulator.sub(MAX_UINT64 - 10n, MAX_UINT64),
+      ).toThrowError('Math: subtraction underflow');
     });
   });
 
@@ -67,11 +69,13 @@ describe('MathU64', () => {
     });
 
     test('should handle max Uint<64> times 1', () => {
-      expect(mathSimulator.mul(MAX_U64, 1n)).toBe(MAX_U64);
+      expect(mathSimulator.mul(MAX_UINT64, 1n)).toBe(MAX_UINT64);
     });
 
     test('should handle max Uint<64> times max Uint<64> without overflow', () => {
-      expect(mathSimulator.mul(MAX_U64, MAX_U64)).toBe(MAX_U64 * MAX_U64);
+      expect(mathSimulator.mul(MAX_UINT64, MAX_UINT64)).toBe(
+        MAX_UINT64 * MAX_UINT64,
+      );
     });
   });
 
@@ -97,7 +101,7 @@ describe('MathU64', () => {
     });
 
     test('should handle large division', () => {
-      expect(mathSimulator.div(MAX_U64, 2n)).toBe(MAX_U64 / 2n);
+      expect(mathSimulator.div(MAX_UINT64, 2n)).toBe(MAX_UINT64 / 2n);
     });
 
     test('should fail on division by zero', () => {
@@ -107,14 +111,14 @@ describe('MathU64', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      const badSimulator = createMilecuiousSimulator({
+      const badSimulator = createMaliciousSimulator({
         mockDiv: () => ({ quotient: 1n, remainder: 10n }), // 10n >= 5n
       });
       expect(() => badSimulator.div(10n, 5n)).toThrow('Math: remainder error');
     });
 
     test('should fail when quotient * b + remainder != a', () => {
-      const badSimulator = createMilecuiousSimulator({
+      const badSimulator = createMaliciousSimulator({
         mockDiv: () => ({ quotient: 1n, remainder: 1n }), // 1*5 + 1 = 6 ≠ 10
       });
       expect(() => badSimulator.div(10n, 5n)).toThrow('Math: division invalid');
@@ -143,7 +147,7 @@ describe('MathU64', () => {
     });
 
     test('should compute remainder of max U64 by 2', () => {
-      expect(mathSimulator.rem(MAX_U64, 2n)).toBe(1n);
+      expect(mathSimulator.rem(MAX_UINT64, 2n)).toBe(1n);
     });
 
     test('should handle zero remainder', () => {
@@ -157,14 +161,14 @@ describe('MathU64', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      const badSimulator = createMilecuiousSimulator({
+      const badSimulator = createMaliciousSimulator({
         mockDiv: () => ({ quotient: 1n, remainder: 5n }), // 5n >= 5n
       });
       expect(() => badSimulator.rem(10n, 5n)).toThrow('Math: remainder error');
     });
 
     test('should fail when quotient * b + remainder != a', () => {
-      const badSimulator = createMilecuiousSimulator({
+      const badSimulator = createMaliciousSimulator({
         mockDiv: () => ({ quotient: 0n, remainder: 2n }), // 0*5 + 2 = 2 ≠ 10
       });
       expect(() => badSimulator.rem(10n, 5n)).toThrow('Math: division invalid');
@@ -203,8 +207,8 @@ describe('MathU64', () => {
     });
 
     test('should compute quotient and remainder of max U64 by 2', () => {
-      const result = mathSimulator.divRem(MAX_U64, 2n);
-      expect(result.quotient).toBe(MAX_U64 / 2n);
+      const result = mathSimulator.divRem(MAX_UINT64, 2n);
+      expect(result.quotient).toBe(MAX_UINT64 / 2n);
       expect(result.remainder).toBe(1n);
     });
 
@@ -221,7 +225,7 @@ describe('MathU64', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      const badSimulator = createMilecuiousSimulator({
+      const badSimulator = createMaliciousSimulator({
         mockDiv: () => ({ quotient: 1n, remainder: 5n }), // 5n >= 5n
       });
       expect(() => badSimulator.divRem(10n, 5n)).toThrow(
@@ -230,7 +234,7 @@ describe('MathU64', () => {
     });
 
     test('should fail when quotient * b + remainder != a', () => {
-      const badSimulator = createMilecuiousSimulator({
+      const badSimulator = createMaliciousSimulator({
         mockDiv: () => ({ quotient: 2n, remainder: 0n }), // 2*5 = 10 OK, change to fail
       });
       expect(() => badSimulator.divRem(11n, 5n)).toThrow(
@@ -239,7 +243,7 @@ describe('MathU64', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      const badSimulator = createMilecuiousSimulator({
+      const badSimulator = createMaliciousSimulator({
         mockDiv: () => ({ quotient: 1n, remainder: 10n }), // 10n not < 5n
       });
 
@@ -280,11 +284,11 @@ describe('MathU64', () => {
 
     test('should handle powers of 2', () => {
       expect(mathSimulator.sqrt(2n ** 32n)).toBe(65536n); // sqrt(2^32) = 2^16
-      expect(mathSimulator.sqrt(MAX_U64)).toBe(4294967295n); // sqrt(2^64 - 1) ≈ 2^32 - 1
+      expect(mathSimulator.sqrt(MAX_UINT64)).toBe(4294967295n); // sqrt(2^64 - 1) ≈ 2^32 - 1
     });
 
     test('should fail if number exceeds MAX_64', () => {
-      expect(() => mathSimulator.sqrt(MAX_U64 + 1n)).toThrow(
+      expect(() => mathSimulator.sqrt(MAX_UINT64 + 1n)).toThrow(
         'expected value of type Uint<0..18446744073709551615> but received 18446744073709551616',
       );
     });
@@ -298,11 +302,11 @@ describe('MathU64', () => {
     });
 
     test('should handle max Uint<64>', () => {
-      expect(mathSimulator.sqrt(MAX_U64)).toBe(MAX_U32); // floor(sqrt(2^64 - 1)) = 2^32 - 1
+      expect(mathSimulator.sqrt(MAX_UINT64)).toBe(MAX_UINT32); // floor(sqrt(2^64 - 1)) = 2^32 - 1
     });
 
     test('should fail with overestimated root', () => {
-      const badSimulator = createMilecuiousSimulator({
+      const badSimulator = createMaliciousSimulator({
         mockSqrt: () => 5n, // 5^2 = 25 > 10
       });
 
@@ -310,7 +314,7 @@ describe('MathU64', () => {
     });
 
     test('should fail with underestimated root', () => {
-      const badSimulator = createMilecuiousSimulator({
+      const badSimulator = createMaliciousSimulator({
         mockSqrt: () => 3n, // 3^2 = 9 < 16
       });
 
@@ -330,7 +334,7 @@ describe('MathU64', () => {
     });
 
     test('should check max Uint<64> is multiple of 1', () => {
-      expect(mathSimulator.isMultiple(MAX_U64, 1n)).toBe(true);
+      expect(mathSimulator.isMultiple(MAX_UINT64, 1n)).toBe(true);
     });
 
     test('should detect a failed case', () => {
@@ -348,7 +352,7 @@ describe('MathU64', () => {
     });
 
     test('should handle max Uint<64> and smaller value', () => {
-      expect(mathSimulator.min(MAX_U64, 1n)).toBe(1n);
+      expect(mathSimulator.min(MAX_UINT64, 1n)).toBe(1n);
     });
   });
 
@@ -362,7 +366,7 @@ describe('MathU64', () => {
     });
 
     test('should handle max Uint<64> and smaller value', () => {
-      expect(mathSimulator.max(MAX_U64, 1n)).toBe(MAX_U64);
+      expect(mathSimulator.max(MAX_UINT64, 1n)).toBe(MAX_UINT64);
     });
   });
 });

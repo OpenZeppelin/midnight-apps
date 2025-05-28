@@ -67,62 +67,38 @@ export class MathContractSimulator
     return this.circuitContext.originalState;
   }
 
-  public add(addend: bigint, augend: bigint): bigint {
-    const result = this.contract.circuits.add(
-      this.circuitContext,
-      addend,
-      augend,
-    );
+  public add(a: bigint, b: bigint): bigint {
+    const result = this.contract.circuits.add(this.circuitContext, a, b);
     this.circuitContext = result.context;
     return result.result;
   }
 
-  public sub(minuend: bigint, subtrahend: bigint): bigint {
-    const result = this.contract.circuits.sub(
-      this.circuitContext,
-      minuend,
-      subtrahend,
-    );
+  public sub(a: bigint, b: bigint): bigint {
+    const result = this.contract.circuits.sub(this.circuitContext, a, b);
     this.circuitContext = result.context;
     return result.result;
   }
 
-  public mul(multiplicand: bigint, multiplier: bigint): bigint {
-    const result = this.contract.circuits.mul(
-      this.circuitContext,
-      multiplicand,
-      multiplier,
-    );
+  public mul(a: bigint, b: bigint): bigint {
+    const result = this.contract.circuits.mul(this.circuitContext, a, b);
     this.circuitContext = result.context;
     return result.result;
   }
 
-  public div(dividend: bigint, divisor: bigint): bigint {
-    const result = this.contract.circuits.div(
-      this.circuitContext,
-      dividend,
-      divisor,
-    );
+  public div(a: bigint, b: bigint): bigint {
+    const result = this.contract.circuits.div(this.circuitContext, a, b);
     this.circuitContext = result.context;
     return result.result;
   }
 
-  public rem(dividend: bigint, divisor: bigint): bigint {
-    const result = this.contract.circuits.rem(
-      this.circuitContext,
-      dividend,
-      divisor,
-    );
+  public rem(a: bigint, b: bigint): bigint {
+    const result = this.contract.circuits.rem(this.circuitContext, a, b);
     this.circuitContext = result.context;
     return result.result;
   }
 
-  public divRem(dividend: bigint, divisor: bigint): DivResultU64 {
-    const result = this.contract.circuits.divRem(
-      this.circuitContext,
-      dividend,
-      divisor,
-    );
+  public divRem(a: bigint, b: bigint): DivResultU64 {
+    const result = this.contract.circuits.divRem(this.circuitContext, a, b);
     this.circuitContext = result.context;
     return result.result;
   }
@@ -133,12 +109,8 @@ export class MathContractSimulator
     return result.result;
   }
 
-  public isMultiple(value: bigint, divisor: bigint): boolean {
-    const result = this.contract.circuits.isMultiple(
-      this.circuitContext,
-      value,
-      divisor,
-    );
+  public isMultiple(a: bigint, b: bigint): boolean {
+    const result = this.contract.circuits.isMultiple(this.circuitContext, a, b);
     this.circuitContext = result.context;
     return result.result;
   }

@@ -1,17 +1,17 @@
 import { beforeEach, describe, expect, test } from 'vitest';
 import type { U256 } from '../artifacts/Index/contract/index.d.cts';
 import {
+  MAX_UINT8,
+  MAX_UINT16,
+  MAX_UINT32,
+  MAX_UINT64,
+  MAX_UINT128,
+  MAX_UINT256,
+} from '../utils/consts';
+import {
   MathU256Simulator,
   createMaliciousSimulator,
 } from './MathU256Simulator';
-import {
-  MAX_U8,
-  MAX_U16,
-  MAX_U32,
-  MAX_U64,
-  MAX_U128,
-  MAX_U256,
-} from './consts';
 
 let mathSimulator: MathU256Simulator;
 
@@ -24,8 +24,8 @@ const toU256 = (value: bigint): U256 => {
   const lowBigInt = value & ((1n << 128n) - 1n);
   const highBigInt = value >> 128n;
   return {
-    low: { low: lowBigInt & MAX_U64, high: lowBigInt >> 64n },
-    high: { low: highBigInt & MAX_U64, high: highBigInt >> 64n },
+    low: { low: lowBigInt & MAX_UINT64, high: lowBigInt >> 64n },
+    high: { low: highBigInt & MAX_UINT64, high: highBigInt >> 64n },
   };
 };
 
@@ -42,33 +42,23 @@ const fromU256 = (value: U256): bigint => {
 describe('MathU256', () => {
   beforeEach(setup);
 
-  describe('Utility Functions', () => {
-    test('isZero should return true for zero', () => {
-      const zero = mathSimulator.ZERO_U256();
-      expect(mathSimulator.isZero(zero)).toBe(true);
+  describe('toU256 utils', () => {
+    test('should return max struct', () => {
+      const result = toU256(MAX_UINT256);
+      expect(result.low.low).toBe(MAX_UINT64);
+      expect(result.low.high).toBe(MAX_UINT64);
+      expect(result.high.low).toBe(MAX_UINT64);
+      expect(result.high.high).toBe(MAX_UINT64);
     });
+  });
 
-    test('isZero should return false for non-zero', () => {
-      const one = toU256(1n);
-      expect(mathSimulator.isZero(one)).toBe(false);
-      const max = mathSimulator.MAX_U256();
-      expect(mathSimulator.isZero(max)).toBe(false);
-    });
-
-    test('ZERO_U256 should return zero struct', () => {
+  describe('ZERO_U256', () => {
+    test('should return zero struct', () => {
       const result = mathSimulator.ZERO_U256();
       expect(result.low.low).toBe(0n);
       expect(result.low.high).toBe(0n);
       expect(result.high.low).toBe(0n);
       expect(result.high.high).toBe(0n);
-    });
-
-    test('MAX_U256 should return max struct', () => {
-      const result = mathSimulator.MAX_U256();
-      expect(result.low.low).toBe(MAX_U64);
-      expect(result.low.high).toBe(MAX_U64);
-      expect(result.high.low).toBe(MAX_U64);
-      expect(result.high.high).toBe(MAX_U64);
     });
   });
 
@@ -106,7 +96,7 @@ describe('MathU256', () => {
     });
 
     test('should compare max U256 values', () => {
-      const max = toU256(MAX_U256);
+      const max = toU256(MAX_UINT256);
       expect(mathSimulator.eq(max, max)).toBe(true);
     });
   });
@@ -121,8 +111,8 @@ describe('MathU256', () => {
     });
 
     test('should compare max U256 values', () => {
-      const max = toU256(MAX_U256);
-      const maxMinusOne = toU256(MAX_U256 - 1n);
+      const max = toU256(MAX_UINT256);
+      const maxMinusOne = toU256(MAX_UINT256 - 1n);
       expect(mathSimulator.le(max, max)).toBe(true);
       expect(mathSimulator.le(maxMinusOne, max)).toBe(true);
       expect(mathSimulator.le(max, maxMinusOne)).toBe(false);
@@ -138,11 +128,11 @@ describe('MathU256', () => {
 
     test('should compare with high parts', () => {
       const a: U256 = {
-        low: { low: MAX_U64, high: MAX_U64 },
+        low: { low: MAX_UINT64, high: MAX_UINT64 },
         high: { low: 0n, high: 0n },
       };
       const b: U256 = {
-        low: { low: MAX_U64, high: MAX_U64 },
+        low: { low: MAX_UINT64, high: MAX_UINT64 },
         high: { low: 1n, high: 0n },
       };
       expect(mathSimulator.le(a, b)).toBe(true);
@@ -160,8 +150,8 @@ describe('MathU256', () => {
     });
 
     test('should compare max U256 values', () => {
-      const max = toU256(MAX_U256);
-      const maxMinusOne = toU256(MAX_U256 - 1n);
+      const max = toU256(MAX_UINT256);
+      const maxMinusOne = toU256(MAX_UINT256 - 1n);
       expect(mathSimulator.gt(max, maxMinusOne)).toBe(true);
       expect(mathSimulator.gt(maxMinusOne, max)).toBe(false);
       expect(mathSimulator.gt(max, max)).toBe(false);
@@ -177,11 +167,11 @@ describe('MathU256', () => {
 
     test('should compare with high parts', () => {
       const a: U256 = {
-        low: { low: MAX_U64, high: MAX_U64 },
+        low: { low: MAX_UINT64, high: MAX_UINT64 },
         high: { low: 1n, high: 0n },
       };
       const b: U256 = {
-        low: { low: MAX_U64, high: MAX_U64 },
+        low: { low: MAX_UINT64, high: MAX_UINT64 },
         high: { low: 0n, high: 0n },
       };
       expect(mathSimulator.gt(a, b)).toBe(true);
@@ -198,10 +188,10 @@ describe('MathU256', () => {
     });
 
     test('should add max U256 minus 1 plus 1', () => {
-      const a = toU256(MAX_U256 - 1n);
+      const a = toU256(MAX_UINT256 - 1n);
       const b = toU256(1n);
       const result = mathSimulator.add(a, b);
-      expect(fromU256(result)).toBe(MAX_U256);
+      expect(fromU256(result)).toBe(MAX_UINT256);
     });
 
     test('should handle zero', () => {
@@ -235,7 +225,7 @@ describe('MathU256', () => {
     });
 
     test('should throw on overflow', () => {
-      const max = toU256(MAX_U256);
+      const max = toU256(MAX_UINT256);
       const one = toU256(1n);
       expect(() => mathSimulator.add(max, one)).toThrowError(
         'MathU256: addition overflow',
@@ -244,7 +234,7 @@ describe('MathU256', () => {
 
     test('should handle carry from low to high', () => {
       const a: U256 = {
-        low: { low: MAX_U64, high: MAX_U64 },
+        low: { low: MAX_UINT64, high: MAX_UINT64 },
         high: { low: 0n, high: 0n },
       };
       const b: U256 = {
@@ -268,10 +258,10 @@ describe('MathU256', () => {
     });
 
     test('should subtract max U256 minus 1', () => {
-      const a = toU256(MAX_U256);
+      const a = toU256(MAX_UINT256);
       const b = toU256(1n);
       const result = mathSimulator.sub(a, b);
-      expect(fromU256(result)).toBe(MAX_U256 - 1n);
+      expect(fromU256(result)).toBe(MAX_UINT256 - 1n);
     });
 
     test('should throw on underflow', () => {
@@ -302,8 +292,8 @@ describe('MathU256', () => {
         high: { low: 0n, high: 0n },
       };
       const result = mathSimulator.sub(a, b);
-      expect(result.low.low).toBe(MAX_U64);
-      expect(result.low.high).toBe(MAX_U64);
+      expect(result.low.low).toBe(MAX_UINT64);
+      expect(result.low.high).toBe(MAX_UINT64);
       expect(result.high.low).toBe(0n);
       expect(result.high.high).toBe(0n);
     });
@@ -333,17 +323,17 @@ describe('MathU256', () => {
     });
 
     test('should multiply max U128 by 1', () => {
-      const a = toU256(MAX_U128);
+      const a = toU256(MAX_UINT128);
       const b = toU256(1n);
       const result = mathSimulator.mul(a, b);
-      expect(fromU256(result)).toBe(MAX_U128);
+      expect(fromU256(result)).toBe(MAX_UINT128);
     });
 
     test('should handle large multiplication', () => {
-      const a = toU256(MAX_U128);
+      const a = toU256(MAX_UINT128);
       const b = toU256(2n);
       const result = mathSimulator.mul(a, b);
-      expect(fromU256(result)).toBe(MAX_U128 * 2n);
+      expect(fromU256(result)).toBe(MAX_UINT128 * 2n);
     });
 
     test('should handle zero', () => {
@@ -351,7 +341,7 @@ describe('MathU256', () => {
       const zero = toU256(0n);
       const result = mathSimulator.mul(five, zero);
       expect(fromU256(result)).toBe(0n);
-      const result2 = mathSimulator.mul(zero, toU256(MAX_U128));
+      const result2 = mathSimulator.mul(zero, toU256(MAX_UINT128));
       expect(fromU256(result2)).toBe(0n);
     });
 
@@ -391,14 +381,21 @@ describe('MathU256', () => {
     });
 
     test('should handle general multiplication with carry', () => {
-      const a = toU256(MAX_U128);
+      const a = toU256(MAX_UINT128);
       const b = toU256(2n);
       const result = mathSimulator.mul(a, b);
-      expect(fromU256(result)).toBe(MAX_U128 * 2n);
+      expect(fromU256(result)).toBe(MAX_UINT128 * 2n);
+    });
+
+    test('should handle multiplication of MAX_U256 by 1', () => {
+      const a = toU256(MAX_UINT256);
+      const b = toU256(1n);
+      const result = mathSimulator.mul(a, b);
+      expect(fromU256(result)).toBe(MAX_UINT256);
     });
 
     test('should throw on overflow', () => {
-      const a = toU256(MAX_U256);
+      const a = toU256(MAX_UINT256);
       const b = toU256(2n);
       expect(() => mathSimulator.mul(a, b)).toThrowError(
         'MathU256: multiplication overflow',
@@ -415,10 +412,10 @@ describe('MathU256', () => {
     });
 
     test('should divide max U256 by 1', () => {
-      const a = toU256(MAX_U256);
+      const a = toU256(MAX_UINT256);
       const b = toU256(1n);
       const quotient = mathSimulator.div(a, b);
-      expect(fromU256(quotient)).toBe(MAX_U256);
+      expect(fromU256(quotient)).toBe(MAX_UINT256);
     });
 
     test('should throw on division by zero', () => {
@@ -471,7 +468,7 @@ describe('MathU256', () => {
     });
 
     test('should compute remainder of max U256 by 2', () => {
-      const a = mathSimulator.MAX_U256();
+      const a = toU256(MAX_UINT256);
       const b = toU256(2n);
       const remainder = mathSimulator.rem(a, b);
       expect(fromU256(remainder)).toBe(1n);
@@ -549,10 +546,10 @@ describe('MathU256', () => {
     });
 
     test('should compute quotient and remainder of max U256 by 2', () => {
-      const a = mathSimulator.MAX_U256();
+      const a = toU256(MAX_UINT256);
       const b = toU256(2n);
       const result = mathSimulator.divRem(a, b);
-      expect(fromU256(result.quotient)).toBe(MAX_U256 / 2n);
+      expect(fromU256(result.quotient)).toBe(MAX_UINT256 / 2n);
       expect(fromU256(result.remainder)).toBe(1n);
     });
 
@@ -645,12 +642,14 @@ describe('MathU256', () => {
     });
 
     test('should handle maximum values', () => {
-      expect(mathSimulator.sqrt(toU256(MAX_U8))).toBe(15n);
-      expect(mathSimulator.sqrt(toU256(MAX_U16))).toBe(255n);
-      expect(mathSimulator.sqrt(toU256(MAX_U32))).toBe(65535n);
-      expect(mathSimulator.sqrt(toU256(MAX_U64))).toBe(4294967295n);
-      expect(mathSimulator.sqrt(toU256(MAX_U128))).toBe(18446744073709551615n);
-      expect(mathSimulator.sqrt(mathSimulator.MAX_U256())).toBe(
+      expect(mathSimulator.sqrt(toU256(MAX_UINT8))).toBe(15n);
+      expect(mathSimulator.sqrt(toU256(MAX_UINT16))).toBe(255n);
+      expect(mathSimulator.sqrt(toU256(MAX_UINT32))).toBe(65535n);
+      expect(mathSimulator.sqrt(toU256(MAX_UINT64))).toBe(4294967295n);
+      expect(mathSimulator.sqrt(toU256(MAX_UINT128))).toBe(
+        18446744073709551615n,
+      );
+      expect(mathSimulator.sqrt(toU256(MAX_UINT256))).toBe(
         340282366920938463463374607431768211455n,
       );
     });
@@ -691,11 +690,11 @@ describe('MathU256', () => {
     });
 
     test('should handle max U256', () => {
-      const max = toU256(MAX_U256);
+      const max = toU256(MAX_UINT256);
       const one = toU256(1n);
       const result = mathSimulator.min(max, one);
       expect(fromU256(result)).toBe(1n);
-      expect(fromU256(mathSimulator.min(max, max))).toBe(MAX_U256);
+      expect(fromU256(mathSimulator.min(max, max))).toBe(MAX_UINT256);
     });
 
     test('should handle zero', () => {
@@ -718,11 +717,11 @@ describe('MathU256', () => {
     });
 
     test('should handle max U256', () => {
-      const max = toU256(MAX_U256);
+      const max = toU256(MAX_UINT256);
       const one = toU256(1n);
       const result = mathSimulator.max(max, one);
-      expect(fromU256(result)).toBe(MAX_U256);
-      expect(fromU256(mathSimulator.max(max, max))).toBe(MAX_U256);
+      expect(fromU256(result)).toBe(MAX_UINT256);
+      expect(fromU256(mathSimulator.max(max, max))).toBe(MAX_UINT256);
     });
 
     test('should handle zero', () => {
@@ -734,6 +733,76 @@ describe('MathU256', () => {
     });
   });
 
+  describe('isZero', () => {
+    test('should return true for zero', () => {
+      const zero = mathSimulator.ZERO_U256();
+      expect(mathSimulator.isZero(zero)).toBe(true);
+    });
+
+    test('should return false for non-zero', () => {
+      const one = toU256(1n);
+      expect(mathSimulator.isZero(one)).toBe(false);
+      const max = toU256(MAX_UINT256);
+      expect(mathSimulator.isZero(max)).toBe(false);
+    });
+  });
+
+  describe('isLowestLimbOnly', () => {
+    test('should return true for zero', () => {
+      const zero = mathSimulator.ZERO_U256();
+      expect(mathSimulator.isLowestLimbOnly(zero, 0n)).toBe(true);
+    });
+
+    test('should return false for non-zero', () => {
+      const one = toU256(1n);
+      expect(mathSimulator.isLowestLimbOnly(one, 0n)).toBe(false);
+      const max = toU256(MAX_UINT256);
+      expect(mathSimulator.isLowestLimbOnly(max, 0n)).toBe(false);
+    });
+  });
+
+  describe('isSecondLowestLimbOnly', () => {
+    test('should return true for zero', () => {
+      const zero = mathSimulator.ZERO_U256();
+      expect(mathSimulator.isSecondLimbOnly(zero, 0n)).toBe(true);
+    });
+
+    test('should return false for non-zero', () => {
+      const one = toU256(1n);
+      expect(mathSimulator.isSecondLimbOnly(one, 0n)).toBe(false);
+      const max = toU256(MAX_UINT256);
+      expect(mathSimulator.isSecondLimbOnly(max, 0n)).toBe(false);
+    });
+  });
+
+  describe('isThirdHighestLimbOnly', () => {
+    test('should return true for zero', () => {
+      const zero = mathSimulator.ZERO_U256();
+      expect(mathSimulator.isThirdLimbOnly(zero, 0n)).toBe(true);
+    });
+
+    test('should return false for non-zero', () => {
+      const one = toU256(1n);
+      expect(mathSimulator.isThirdLimbOnly(one, 0n)).toBe(false);
+      const max = toU256(MAX_UINT256);
+      expect(mathSimulator.isThirdLimbOnly(max, 0n)).toBe(false);
+    });
+  });
+
+  describe('isHighestLimbOnly', () => {
+    test('should return true for zero', () => {
+      const zero = mathSimulator.ZERO_U256();
+      expect(mathSimulator.isHighestLimbOnly(zero, 0n)).toBe(true);
+    });
+
+    test('should return false for non-zero', () => {
+      const one = toU256(1n);
+      expect(mathSimulator.isHighestLimbOnly(one, 0n)).toBe(false);
+      const max = toU256(MAX_UINT256);
+      expect(mathSimulator.isHighestLimbOnly(max, 0n)).toBe(false);
+    });
+  });
+
   describe('isMultiple', () => {
     test('should check if small number is multiple', () => {
       expect(mathSimulator.isMultiple(toU256(6n), toU256(3n))).toBe(true);
@@ -741,7 +810,7 @@ describe('MathU256', () => {
     });
 
     test('should check max U256 is multiple of 1', () => {
-      const max = toU256(MAX_U256);
+      const max = toU256(MAX_UINT256);
       const one = toU256(1n);
       expect(mathSimulator.isMultiple(max, one)).toBe(true);
     });
@@ -755,8 +824,8 @@ describe('MathU256', () => {
     });
 
     test('should handle large divisors', () => {
-      const max = toU256(MAX_U256);
-      const maxMinusOne = toU256(MAX_U256 - 1n);
+      const max = toU256(MAX_UINT256);
+      const maxMinusOne = toU256(MAX_UINT256 - 1n);
       expect(mathSimulator.isMultiple(max, max)).toBe(true);
       expect(mathSimulator.isMultiple(maxMinusOne, max)).toBe(false);
     });

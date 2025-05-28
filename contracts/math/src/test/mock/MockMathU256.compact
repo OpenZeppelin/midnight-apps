@@ -9,16 +9,8 @@ import "../../interfaces/IMathU256";
 
 import "../../MathU256" prefix MathU256_;
 
-export circuit isZero(a: U256): Boolean {
-    return MathU256_isZero(a);
-}
-
 export circuit ZERO_U256(): U256 {
     return MathU256_ZERO_U256();
-}
-
-export circuit MAX_U256(): U256 {
-    return MathU256_MAX_U256();
 }
 
 export circuit eq(a: U256, b: U256): Boolean {
@@ -67,6 +59,26 @@ export circuit min(a: U256, b: U256): U256 {
 
 export circuit max(a: U256, b: U256): U256 {
     return disclose(MathU256_max(a, b));
+}
+
+export circuit isZero(a: U256): Boolean {
+    return MathU256_isZero(a);
+}
+
+export circuit isLowestLimbOnly(val: U256, limbValue: Uint<64>): Boolean {
+    return MathU256_isLowestLimbOnly(val, limbValue);
+}
+
+export circuit isSecondLimbOnly(val: U256, limbValue: Uint<64>): Boolean {
+    return MathU256_isSecondLimbOnly(val, limbValue);
+}
+
+export circuit isThirdLimbOnly(val: U256, limbValue: Uint<64>): Boolean {
+    return MathU256_isThirdLimbOnly(val, limbValue);
+}
+
+export circuit isHighestLimbOnly(val: U256, limbValue: Uint<64>): Boolean {
+    return MathU256_isHighestLimbOnly(val, limbValue);
 }
 
 export circuit isMultiple(value: U256, b: U256): Boolean {

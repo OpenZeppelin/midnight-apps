@@ -1,4 +1,3 @@
-// MathU256Simulator.ts
 import {
   type CircuitContext,
   type ContractState,
@@ -71,20 +70,8 @@ export class MathU256Simulator
     return this.circuitContext.originalState;
   }
 
-  public isZero(a: U256): boolean {
-    const result = this.contract.circuits.isZero(this.circuitContext, a);
-    this.circuitContext = result.context;
-    return result.result;
-  }
-
   public ZERO_U256(): U256 {
     const result = this.contract.circuits.ZERO_U256(this.circuitContext);
-    this.circuitContext = result.context;
-    return result.result;
-  }
-
-  public MAX_U256(): U256 {
-    const result = this.contract.circuits.MAX_U256(this.circuitContext);
     this.circuitContext = result.context;
     return result.result;
   }
@@ -157,6 +144,52 @@ export class MathU256Simulator
 
   public max(a: U256, b: U256): U256 {
     const result = this.contract.circuits.max(this.circuitContext, a, b);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public isZero(a: U256): boolean {
+    const result = this.contract.circuits.isZero(this.circuitContext, a);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public isLowestLimbOnly(val: U256, limbValue: bigint): boolean {
+    const result = this.contract.circuits.isLowestLimbOnly(
+      this.circuitContext,
+      val,
+      limbValue,
+    );
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public isSecondLimbOnly(val: U256, limbValue: bigint): boolean {
+    const result = this.contract.circuits.isSecondLimbOnly(
+      this.circuitContext,
+      val,
+      limbValue,
+    );
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public isThirdLimbOnly(val: U256, limbValue: bigint): boolean {
+    const result = this.contract.circuits.isThirdLimbOnly(
+      this.circuitContext,
+      val,
+      limbValue,
+    );
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public isHighestLimbOnly(val: U256, limbValue: bigint): boolean {
+    const result = this.contract.circuits.isHighestLimbOnly(
+      this.circuitContext,
+      val,
+      limbValue,
+    );
     this.circuitContext = result.context;
     return result.result;
   }

@@ -70,6 +70,18 @@ export class MathU128Simulator
     return this.circuitContext.originalState;
   }
 
+  public MODULUS(): bigint {
+    const result = this.contract.circuits.MODULUS(this.circuitContext);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public ZERO_U128(): U128 {
+    const result = this.contract.circuits.ZERO_U128(this.circuitContext);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
   public toU128(value: bigint): U128 {
     const result = this.contract.impureCircuits.toU128(
       this.circuitContext,

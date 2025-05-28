@@ -12,6 +12,14 @@ import "../../MathU128" prefix MathU128_;
  * @description A mock contract for testing the MathU128 module's circuits.
  */
 
+export pure circuit MODULUS(): Uint<128> {
+    return MathU128_MODULUS();
+}
+
+export pure circuit ZERO_U128(): U128 {
+    return MathU128_ZERO_U128();
+}
+
 export circuit toU128(value: Uint<128>): U128 {
     return disclose(MathU128_toU128(value));
 }

@@ -190,13 +190,13 @@ module MathU64 {
 
     /**
      * @description Checks if a `Uint<64>` number is a multiple of another.
-     * @param value - The unsigned 64-bit integer to check.
+     * @param a - The unsigned 64-bit integer to check.
      * @param b - The unsigned 64-bit integer divisor.
-     * @returns `true` if `value` is a multiple of `b`, `false` otherwise.
+     * @returns `true` if `a` is a multiple of `b`, `false` otherwise.
      * @throws If `b` is zero, causing division by zero.
      */
-    export circuit isMultiple(value: Uint<64>, b: Uint<64>): Boolean {
-        return rem(value, b) == 0;
+    export circuit isMultiple(a: Uint<64>, b: Uint<64>): Boolean {
+        return rem(a, b) == 0;
     }
 
     /**
