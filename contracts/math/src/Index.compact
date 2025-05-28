@@ -10,25 +10,21 @@ import "./interfaces/IMathU64";
 import "./interfaces/IMathU128";
 import "./interfaces/IMathU256";
 
-import Max prefix Max_;
-
-/**
- * @description Exports public ledger state and types from Math for contract and TypeScript integration.
- */
+import Max;
 
 export {
     U128,
     U256
 }
-
 export {
-    Max_U8,
-    Max_U16,
-    Max_U32,
-    Max_U64,
-    Max_U128
+    MAX_UINT8,
+    MAX_UINT16,
+    MAX_UINT32,
+    MAX_UINT64,
+    MAX_UINT128,
+    MAX_U128,
+    MAX_U256
 }
-
 export {
     DivResultU64,
     DivResultU128,
