@@ -1,0 +1,9 @@
+pragma language_version >= 0.14.0;
+
+module ILunarswapFee {
+    import CompactStandardLibrary;
+
+    // TODO: those are not a shielded address.
+    export ledger feeTo: ZswapCoinPublicKey;
+    export ledger feeToSetter: ZswapCoinPublicKey;
+}

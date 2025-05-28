@@ -1,0 +1,41 @@
+pragma language_version >= 0.14.0;
+
+module ILunarswapPair {
+    import CompactStandardLibrary;
+ 
+    export struct Pair {
+        token0: ContractAddress,
+        token1: ContractAddress, 
+    }
+
+    export struct Leaf {
+        treeIndex: Uint<64>,
+        nullifier: Bytes<32>,
+    }
+    
+    export struct Reserve {
+        // TODO: supposed to be Uint<128>
+        reserve0: Uint<64>,
+        reserve1: Uint<64>
+    }
+
+    export struct EncryptedPoolState {
+        ciphertext: Bytes<32>
+    }
+
+    export struct LiquidityPool {
+        pair: Pair,
+        leaf: Leaf,
+        reserve: Reserve,
+        liquidity: Uint<128>,
+        // TODO: supposed to be Uint<256>
+        kLast: Uint<128> // as of the recent liquidity event, reserve0.mul(reserve1)
+    }
+
+    export ledger LiquidityPoolTree: MerkleTree<10, LiquidityPool>;
+    export ledger MINIMUM_LIQUIDITY: Uint<16>;
+
+    export witness updateLocalLiquidityPool(liquidityPool: LiquidityPool): [];
+    export witness getLocalLiquidityPool(): LiquidityPool;
+    export witness getLocalLiquidityPoolPath(liquidityPool: LiquidityPool): Maybe<MerkleTreePath<10, Bytes<32>>>;
+}

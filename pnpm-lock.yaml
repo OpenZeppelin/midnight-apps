@@ -21,8 +21,13 @@ importers:
         specifier: ^19.8.1
         version: 19.8.1
       '@midnight-ntwrk/compact-runtime':
+<<<<<<< HEAD
         specifier: ^0.8.1
         version: 0.8.1
+=======
+        specifier: ^0.8.0
+        version: 0.8.0
+>>>>>>> 2ef2f6e (feat: addLiquidity wip)
       '@tailwindcss/vite':
         specifier: ^4.0.6
         version: 4.0.7(vite@6.3.5(@types/node@22.14.0)(jiti@2.4.2)(lightningcss@1.29.1)(yaml@2.8.0))
@@ -244,8 +249,13 @@ importers:
         specifier: workspace:^
         version: link:../../packages/compact-std
       '@midnight-ntwrk/compact-runtime':
+<<<<<<< HEAD
         specifier: ^0.8.1
         version: 0.8.1
+=======
+        specifier: ^0.8.0
+        version: 0.8.0
+>>>>>>> 2ef2f6e (feat: addLiquidity wip)
       '@midnight-ntwrk/midnight-js-network-id':
         specifier: ^2.0.0
         version: 2.0.0
@@ -316,6 +326,102 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/node@22.14.0)(jiti@2.4.2)(lightningcss@1.29.1)(yaml@2.8.0)
 
+  contracts/lunarswap-v1:
+    dependencies:
+      '@midnight-dapps/access-contract':
+        specifier: workspace:^
+        version: link:../access
+      '@midnight-dapps/compact':
+        specifier: workspace:^
+        version: link:../../packages/compact
+      '@midnight-dapps/math-contracts':
+        specifier: workspace:^
+        version: link:../math
+      '@midnight-dapps/structs-contracts':
+        specifier: workspace:^
+        version: link:../structs
+      '@midnight-ntwrk/compact-runtime':
+        specifier: ^0.8.0
+        version: 0.8.0
+      '@midnight-ntwrk/midnight-js-network-id':
+        specifier: ^0.2.5
+        version: 0.2.5
+      '@midnight-ntwrk/zswap':
+        specifier: ^3.0.6
+        version: 3.0.6
+    devDependencies:
+      '@types/node':
+        specifier: ^22.13.10
+        version: 22.14.0
+      typescript:
+        specifier: ^5.8.2
+        version: 5.8.2
+      vitest:
+        specifier: ^3.0.9
+        version: 3.0.9(@types/node@22.14.0)(jiti@2.4.2)(lightningcss@1.29.1)(yaml@2.7.1)
+
+  contracts/math:
+    dependencies:
+      '@midnight-dapps/biome-config':
+        specifier: workspace:^
+        version: link:../../packages/biome-config
+      '@midnight-dapps/compact':
+        specifier: workspace:^
+        version: link:../../packages/compact
+      '@midnight-ntwrk/compact-runtime':
+        specifier: ^0.8.0
+        version: 0.8.0
+      '@midnight-ntwrk/midnight-js-network-id':
+        specifier: ^0.2.5
+        version: 0.2.5
+      '@midnight-ntwrk/zswap':
+        specifier: ^3.0.6
+        version: 3.0.6
+    devDependencies:
+      '@types/node':
+        specifier: ^22.13.10
+        version: 22.13.14
+      chalk:
+        specifier: ^5.4.1
+        version: 5.4.1
+      fast-check:
+        specifier: ^4.1.1
+        version: 4.1.1
+      ora:
+        specifier: ^8.2.0
+        version: 8.2.0
+      typescript:
+        specifier: ^5.8.2
+        version: 5.8.2
+      vitest:
+        specifier: ^3.0.9
+        version: 3.0.9(@types/node@22.13.14)(jiti@2.4.2)(lightningcss@1.29.1)(yaml@2.7.1)
+
+  contracts/structs:
+    dependencies:
+      '@midnight-dapps/compact':
+        specifier: workspace:^
+        version: link:../../packages/compact
+      '@midnight-ntwrk/compact-runtime':
+        specifier: ^0.8.0
+        version: 0.8.0
+      '@midnight-ntwrk/midnight-js-network-id':
+        specifier: ^0.2.5
+        version: 0.2.5
+      '@midnight-ntwrk/zswap':
+        specifier: ^3.0.6
+        version: 3.0.6
+    devDependencies:
+      '@types/node':
+        specifier: ^22.13.10
+        version: 22.14.0
+      typescript:
+        specifier: ^5.8.2
+        version: 5.8.2
+      vitest:
+        specifier: ^3.0.9
+        version: 3.0.9(@types/node@22.14.0)(jiti@2.4.2)(lightningcss@1.29.1)(yaml@2.7.1)
+
   packages/biome-config: {}
 
   packages/compact:
@@ -352,8 +458,13 @@ importers:
         specifier: workspace:^
         version: link:../compact
       '@midnight-ntwrk/compact-runtime':
+<<<<<<< HEAD
         specifier: ^0.8.1
         version: 0.8.1
+=======
+        specifier: ^0.8.0
+        version: 0.8.0
+>>>>>>> 2ef2f6e (feat: addLiquidity wip)
       '@midnight-ntwrk/midnight-js-network-id':
         specifier: ^2.0.0
         version: 2.0.0
@@ -1001,14 +1112,24 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
+<<<<<<< HEAD
   '@midnight-ntwrk/compact-runtime@0.8.1':
     resolution: {integrity: sha512-ZXG/iprEqTCxQC/P1oETGOR5CnsoemPsfb17eSANPRsm+11AcIOP0Tp8KJipN+GbycgxOA+fAVwLFqA1hDCgbw==}
+=======
+  '@midnight-ntwrk/compact-runtime@0.8.0':
+    resolution: {integrity: sha512-oCsXkb0/51NWMsfcJD8VhVi8KSGRa6OYNJT4Qd7CS8DzuVTkHCl/AxZdi3SFHjf+kYlCboyLpRUtF6dUDPHfHQ==, tarball: https://npm.pkg.github.com/download/@midnight-ntwrk/compact-runtime/0.8.0/33f7f64286d41a4ca613a9a99c37282f6b1e4d17}
+>>>>>>> 2ef2f6e (feat: addLiquidity wip)
 
   '@midnight-ntwrk/midnight-js-network-id@2.0.0':
     resolution: {integrity: sha512-yzgyvIaq+tu820a5VpsTwH8z4g+wzeW3nIIw6pnJBjW39mtIcs/38xrJ8+FDMEOcBD8jXZrjuySNeo9EnJMpRg==}
 
+<<<<<<< HEAD
   '@midnight-ntwrk/onchain-runtime@0.3.0':
     resolution: {integrity: sha512-vZWPoz7MhXO5UgWZET50g7APOcT5dbAfADDcrSreeOagV8lj7JJzlnYIIhrcUaMOv+NHWxPaUcJUYUkmu9LoTA==}
+=======
+  '@midnight-ntwrk/onchain-runtime@0.3.0-rc':
+    resolution: {integrity: sha512-X77wN62o9tUdwpBDvIaa7V8+w92opFk65QMFqd/ypZ5hbEgwR7V94+gduC+rJGkC7lamCFxcxKyyA43bbxjJ7Q==, tarball: https://npm.pkg.github.com/download/@midnight-ntwrk/onchain-runtime/0.3.0-rc/bc9e7677fc39904e65fd849869fbf4948acc5e78}
+>>>>>>> 2ef2f6e (feat: addLiquidity wip)
 
   '@midnight-ntwrk/zswap@3.0.6':
     resolution: {integrity: sha512-OtJxo8Y4uW4SM13wcGmWpXEqsfyiIUeLqZgMBiNmRZ6ZwMHlytunohN/cRb2cSh62lq2eEw/NdVxIFYI25y88A==}
@@ -2858,6 +2979,10 @@ packages:
     resolution: {integrity: sha512-80F22aiJ3GLyVnS/B3HzgR6RelZVumzj9jkL0Rhz4h0xYbNW9PjlQz5h3J/SShErbXBc295vseR4/MIbVmUbeA==}
     engines: {node: '>=12.0.0'}
 
+  fast-check@4.1.1:
+    resolution: {integrity: sha512-8+yQYeNYqBfWem0Nmm7BUnh27wm+qwGvI0xln60c8RPM5rVekxZf/Ildng2GNBfjaG6utIebFmVBPlNtZlBLxg==}
+    engines: {node: '>=12.17.0'}
+
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
 
@@ -3164,8 +3289,13 @@ packages:
     engines: {node: '>=20.18'}
     hasBin: true
 
+<<<<<<< HEAD
   listr2@8.3.3:
     resolution: {integrity: sha512-LWzX2KsqcB1wqQ4AHgYb4RsDXauQiqhjLk+6hjbaeHG4zpjjVAB6wC/gz6X0l+Du1cN3pUB5ZlrvTbhGSNnUQQ==}
+=======
+  listr2@8.3.2:
+    resolution: {integrity: sha512-vsBzcU4oE+v0lj4FhVLzr9dBTv4/fHIa57l+GCwovP8MoFNZJTOhGU8PXd4v2VJCbECAaijBiHntiekFMLvo0g==}
+>>>>>>> 2ef2f6e (feat: addLiquidity wip)
     engines: {node: '>=18.0.0'}
 
   locate-path@7.2.0:
@@ -3463,6 +3593,9 @@ packages:
 
   prop-types@15.8.1:
     resolution: {integrity: sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==}
+
+  pure-rand@7.0.1:
+    resolution: {integrity: sha512-oTUZM/NAZS8p7ANR3SHh30kXB+zK2r2BPcEn/awJIbOvq82WoMN4p62AWWp3Hhw50G0xMsw1mhIBLqHw64EcNQ==}
 
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
@@ -4558,15 +4691,25 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
+<<<<<<< HEAD
   '@midnight-ntwrk/compact-runtime@0.8.1':
     dependencies:
       '@midnight-ntwrk/onchain-runtime': 0.3.0
+=======
+  '@midnight-ntwrk/compact-runtime@0.8.0':
+    dependencies:
+      '@midnight-ntwrk/onchain-runtime': 0.3.0-rc
+>>>>>>> 2ef2f6e (feat: addLiquidity wip)
       '@types/object-inspect': 1.13.0
       object-inspect: 1.13.4
 
   '@midnight-ntwrk/midnight-js-network-id@2.0.0': {}
 
+<<<<<<< HEAD
   '@midnight-ntwrk/onchain-runtime@0.3.0': {}
+=======
+  '@midnight-ntwrk/onchain-runtime@0.3.0-rc': {}
+>>>>>>> 2ef2f6e (feat: addLiquidity wip)
 
   '@midnight-ntwrk/zswap@3.0.6': {}
 
@@ -5862,7 +6005,19 @@ snapshots:
       chai: 5.2.0
       tinyrainbow: 2.0.0
 
+<<<<<<< HEAD
   '@vitest/mocker@3.0.9(vite@6.2.5(@types/node@22.13.14)(jiti@2.4.2)(lightningcss@1.29.1)(yaml@2.8.0))':
+=======
+  '@vitest/mocker@3.0.9(vite@6.2.5(@types/node@22.13.14)(jiti@2.4.2)(lightningcss@1.29.1)(yaml@2.7.1))':
+    dependencies:
+      '@vitest/spy': 3.0.9
+      estree-walker: 3.0.3
+      magic-string: 0.30.17
+    optionalDependencies:
+      vite: 6.2.5(@types/node@22.13.14)(jiti@2.4.2)(lightningcss@1.29.1)(yaml@2.7.1)
+
+  '@vitest/mocker@3.0.9(vite@6.2.5(@types/node@22.14.0)(jiti@2.4.2)(lightningcss@1.29.1)(yaml@2.7.1))':
+>>>>>>> 2ef2f6e (feat: addLiquidity wip)
     dependencies:
       '@vitest/spy': 3.0.9
       estree-walker: 3.0.3
@@ -6321,6 +6476,10 @@ snapshots:
 
   expect-type@1.2.0: {}
 
+  fast-check@4.1.1:
+    dependencies:
+      pure-rand: 7.0.1
+
   fast-deep-equal@3.1.3: {}
 
   fast-equals@5.2.2: {}
@@ -6571,7 +6730,11 @@ snapshots:
       commander: 13.1.0
       debug: 4.4.1
       lilconfig: 3.1.3
+<<<<<<< HEAD
       listr2: 8.3.3
+=======
+      listr2: 8.3.2
+>>>>>>> 2ef2f6e (feat: addLiquidity wip)
       micromatch: 4.0.8
       nano-spawn: 1.0.2
       pidtree: 0.6.0
@@ -6580,7 +6743,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+<<<<<<< HEAD
   listr2@8.3.3:
+=======
+  listr2@8.3.2:
+>>>>>>> 2ef2f6e (feat: addLiquidity wip)
     dependencies:
       cli-truncate: 4.0.0
       colorette: 2.0.20
@@ -6853,6 +7020,8 @@ snapshots:
       loose-envify: 1.4.0
       object-assign: 4.1.1
       react-is: 16.13.1
+
+  pure-rand@7.0.1: {}
 
   queue-microtask@1.2.3: {}
 
@@ -7472,7 +7641,11 @@ snapshots:
   vitest@3.0.9(@types/node@22.13.14)(jiti@2.4.2)(lightningcss@1.29.1)(yaml@2.8.0):
     dependencies:
       '@vitest/expect': 3.0.9
+<<<<<<< HEAD
       '@vitest/mocker': 3.0.9(vite@6.2.5(@types/node@22.13.14)(jiti@2.4.2)(lightningcss@1.29.1)(yaml@2.8.0))
+=======
+      '@vitest/mocker': 3.0.9(vite@6.2.5(@types/node@22.13.14)(jiti@2.4.2)(lightningcss@1.29.1)(yaml@2.7.1))
+>>>>>>> 2ef2f6e (feat: addLiquidity wip)
       '@vitest/pretty-format': 3.0.9
       '@vitest/runner': 3.0.9
       '@vitest/snapshot': 3.0.9

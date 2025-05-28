@@ -1,5 +1,6 @@
 version: 2
 updates:
+<<<<<<< HEAD
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -7,8 +8,28 @@ updates:
     open-pull-requests-limit: 5
     rebase-strategy: "auto"
 
+=======
+  - package-ecosystem: "npm"          
+    directory: "/"                    
+    schedule:
+      interval: "daily"               
+    open-pull-requests-limit: 5
+    rebase-strategy: "auto"
+    registries:
+      - github-private
+>>>>>>> 2ef2f6e (feat: addLiquidity wip)
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+<<<<<<< HEAD
       
+=======
+
+registries:
+  github-private:
+    type: "npm-registry"
+    url: "https://npm.pkg.github.com"
+    # use the default DEPENDABOT_TOKEN, or create a PAT with read:packages
+    token: "${{ secrets.DEPENDABOT_TOKEN }}"
+>>>>>>> 2ef2f6e (feat: addLiquidity wip)

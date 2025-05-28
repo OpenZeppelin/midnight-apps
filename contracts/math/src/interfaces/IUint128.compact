@@ -1,0 +1,24 @@
+// SPDX-License-Identifier: MIT
+pragma language_version >= 0.15.0;
+
+/**
+ * @title IUint128
+ * @dev Interface for Uint<128> types using U128 struct.
+ * @dev This module provides a U128 struct that represents a 128-bit unsigned integer
+ * using two 64-bit unsigned integers. The low field contains the least significant
+ * 64 bits while the high field contains the most significant 64 bits.
+ * This structure enables arithmetic operations on 128-bit numbers in environments
+ * that natively support only 64-bit integers.
+ */
+module IUint128 {    
+    export struct U128 {
+        /**
+         * @description The least significant 64 bits (bits 0-63) of the 128-bit number
+         */
+        low: Uint<64>,
+        /**
+         * @description The most significant 64 bits (bits 64-127) of the 128-bit number
+         */
+        high: Uint<64>
+    } 
+}
