@@ -1,0 +1,65 @@
+// SPDX-License-Identifier: MIT
+
+pragma language_version >= 0.14.0;
+
+module Utils {
+  import CompactStandardLibrary;
+
+  /**
+   * @description Returns whether `keyOrAddress` is the zero address.
+   *
+   * @param {keyOrAddress} - The target value to check, either a ZswapCoinPublicKey or a ContractAddress.
+   * @return {Boolean} - Returns true if `keyOrAddress` is zero.
+   */
+  export pure circuit isKeyOrAddressZero(keyOrAddress: Either<ZswapCoinPublicKey, ContractAddress>): Boolean {
+    if (keyOrAddress.is_left) {
+      return keyOrAddress == eitherZeroSenderAddress();
+    } else {
+      return keyOrAddress == eitherZeroContractAddress();
+    }
+  }
+
+  export pure circuit zeroBytes(): Bytes<32> {
+    return pad(32, ""); 
+  }
+
+  export pure circuit zeroAddress(): ZswapCoinPublicKey {
+    return ZswapCoinPublicKey { bytes: zeroBytes() };
+  }
+
+  export circuit msgSender(): ZswapCoinPublicKey {
+    return own_public_key();
+  }
+
+  export circuit thisAddress(): ContractAddress {
+    return kernel.self();
+  }
+
+  /**
+   * @description Returns the sender's public key as the left variant of an Either type, representing
+   * a ZswapCoinPublicKey.
+   *
+   * @returns Either<ZswapCoinPublicKey, ContractAddress> The sender’s public key as the left variant.
+   */
+  export circuit eitherMsgSender(): Either<ZswapCoinPublicKey, ContractAddress> {
+    return left<ZswapCoinPublicKey, ContractAddress>(msgSender());
+  }
+
+  export pure circuit eitherZeroSenderAddress(): Either<ZswapCoinPublicKey, ContractAddress> {
+    return left<ZswapCoinPublicKey, ContractAddress>(zeroAddress());
+  }
+
+  export pure circuit eitherZeroContractAddress(): Either<ZswapCoinPublicKey, ContractAddress> {
+    return right<ZswapCoinPublicKey, ContractAddress>(ContractAddress{ zeroBytes() });
+  }
+
+  /**
+   * @description Returns the contract’s address as the right variant of an Either type, representing
+   * a ContractAddress.
+   *
+   * @returns Either<ZswapCoinPublicKey, ContractAddress> The contract’s address as the right variant.
+   */
+  export circuit eitherThisAddress(): Either<ZswapCoinPublicKey, ContractAddress> {
+    return right<ZswapCoinPublicKey, ContractAddress>(thisAddress());
+  }
+}

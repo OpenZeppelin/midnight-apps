@@ -1,0 +1,31 @@
+pragma language_version >= 0.14.0;
+
+import CompactStandardLibrary;
+
+import "./LunarswapRouter";
+
+export {
+    addLiquidity
+}
+
+// TODO: Lunarswap DEX will be only working on TokenA and TokenB for now
+// Until contracts-to-contracts calls are available
+constructor(
+    _tokenAName: Maybe<Opaque<"string">>,
+    _tokenASymbol: Maybe<Opaque<"string">>,
+    _tokenBName: Maybe<Opaque<"string">>,
+    _tokenBSymbol: Maybe<Opaque<"string">>,
+    _lpTokenName: Maybe<Opaque<"string">>,
+    _lpTokenSymbol: Maybe<Opaque<"string">>,
+    _feeToSetter: ZswapCoinPublicKey
+) {
+    initialize(
+        _tokenAName,
+        _tokenASymbol,
+        _tokenBName,
+        _tokenBSymbol,
+        _lpTokenName,
+        _lpTokenSymbol,
+        _feeToSetter
+    );
+}

@@ -28,8 +28,13 @@
     "@midnight-dapps/biome-config": "workspace:^",
     "@midnight-dapps/compact": "workspace:^",
     "@midnight-dapps/compact-std": "workspace:^",
+<<<<<<< HEAD
     "@midnight-ntwrk/compact-runtime": "^0.8.1",
     "@midnight-ntwrk/midnight-js-network-id": "^2.0.0",
+=======
+    "@midnight-ntwrk/compact-runtime": "^0.8.0",
+    "@midnight-ntwrk/midnight-js-network-id": "^0.2.5",
+>>>>>>> 2ef2f6e (feat: addLiquidity wip)
     "@midnight-ntwrk/zswap": "^3.0.6"
   }
 }

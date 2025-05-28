@@ -1,0 +1,33 @@
+pragma language_version >= 0.14.0;
+
+module LunarswapFee {
+    import CompactStandardLibrary;
+
+    import "./openzeppelin/Utils";
+    import "../node_modules/@midnight-dapps/access-contract/dist/AccessControl";
+
+    import "./interfaces/ILunarswapFee"; 
+
+    export circuit initialize(
+        _feeToSetter: ZswapCoinPublicKey
+    ): [] {
+        feeToSetter = _feeToSetter; 
+    }
+
+    // TODO: what is the difference between Admin and feeToSetter. 
+    export circuit setFeeTo(
+        _feeTo: ZswapCoinPublicKey
+    ): [] {
+        assert (onlyAdmin() && msgSender() == feeToSetter) "LunarswapFactory: forbidden";
+        feeTo = _feeTo;
+        return [];
+    }
+    
+    export circuit setFeeToSetter(
+        _feeToSetter: ZswapCoinPublicKey
+    ): [] {
+        assert (onlyAdmin() && msgSender() == feeToSetter) "LunarswapFactory: forbidden";
+        feeToSetter = _feeToSetter;
+        return [];
+    }  
+}

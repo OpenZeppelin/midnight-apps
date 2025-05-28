@@ -1,0 +1,147 @@
+pragma language_version >= 0.14.0;
+
+module LunarswapRouter {
+    import CompactStandardLibrary;
+    
+    import "./openzeppelin/Utils";
+    import "./openzeppelin/ERC20" prefix ERC20_;
+    import "../node_modules/@midnight-dapps/access-contract/dist/AccessControl" prefix AccessControl_;
+    
+    import "./interfaces/ILunarswapPair";
+
+    import "./tokens/TokenA" prefix TokenA_;
+    import "./tokens/TokenB" prefix TokenB_;
+    import LunarswapFactory prefix LunarswapFactory_;
+    import LunarswapPair prefix LunarswapPair_;
+    import LunarswapLibrary prefix LunarswapLibrary_;
+    import LunarswapFee prefix LunarswapFee_;
+
+    export circuit initialize(  
+        _tokenAName: Maybe<Opaque<"string">>,
+        _tokenASymbol: Maybe<Opaque<"string">>,
+        _tokenBName: Maybe<Opaque<"string">>,
+        _tokenBSymbol: Maybe<Opaque<"string">>,
+        _lpTokenName: Maybe<Opaque<"string">>,
+        _lpTokenSymbol: Maybe<Opaque<"string">>,
+        _feeToSetter: ZswapCoinPublicKey
+    ): [] {
+        // TODO: use TokenA and TokenB for testing purposes
+        TokenA_initialize(_tokenAName, _tokenASymbol);
+        TokenB_initialize(_tokenBName, _tokenBSymbol);
+
+        LunarswapPair_initialize(_lpTokenName, _lpTokenSymbol);
+        LunarswapFee_initialize(_feeToSetter);
+    }
+
+    // TODO: Maybe we can add a deadline for the router if passed then router considered expired.
+    // TODO: Maybe I should replace all those params with witnesses.
+    export circuit addLiquidity(
+        _tokenA: ContractAddress,
+        _tokenB: ContractAddress,
+        _amountADesired: Uint<64>,
+        _amountBDesired: Uint<64>,
+        _amountAMin: Uint<64>,
+        _amountBMin: Uint<64>,
+        _to: ZswapCoinPublicKey,
+        _coin: CoinInfo
+    ): [] {
+        const liquidityPool = _addLiquidity(
+            _tokenA,
+            _tokenB, 
+            _amountADesired,
+            _amountBDesired,
+            _amountAMin,
+            _amountBMin
+        );
+        // SEND ERC20 
+        // TODO: I should transfer tokens from 'To' to the 'Router'
+        // The issue is that how to specify the address name with the 
+        // module call?
+        TokenA_transferFrom(
+            eitherMsgSender(),
+            eitherThisAddress(),
+            liquidityPool.reserve.reserve0 
+        );
+        TokenB_transferFrom(
+            eitherMsgSender(),
+            eitherThisAddress(),
+            liquidityPool.reserve.reserve1 
+        );
+        // UPDATE Pair reserve
+        // Mint Liquidity tokens
+        LunarswapPair_mint(_to, liquidityPool);
+        return [];
+    } 
+
+    circuit _addLiquidity(
+        _tokenA: ContractAddress,
+        _tokenB: ContractAddress,
+        _amountADesired: Uint<64>,
+        _amountBDesired: Uint<64>,
+        _amountAMin: Uint<64>,
+        _amountBMin: Uint<64>
+    ): LiquidityPool {
+        if (!LunarswapFactory_isPairExists(_tokenA, _tokenB)) {
+            return LunarswapFactory_createPair(_tokenA, _tokenB); 
+        } else {
+            // TODO: review disclose
+            const liquidityPool = disclose(LunarswapPair_getLiquidityPool());
+            if (
+                liquidityPool.reserve.reserve0 == 0 && liquidityPool.reserve.reserve1 == 0 
+            ) {
+                const reserve = Reserve {
+                    _amountADesired,
+                    _amountBDesired
+                };
+                return LiquidityPool {
+                    liquidityPool.pair,
+                    liquidityPool.leaf,
+                    reserve,
+                    liquidityPool.liquidity,
+                    liquidityPool.kLast
+                };
+            } else {
+                // TODO: review disclose
+                const amountBOptimal = disclose(LunarswapLibrary_quote(
+                    _amountADesired,
+                    liquidityPool.reserve.reserve0,
+                    liquidityPool.reserve.reserve1
+                ));
+                if (amountBOptimal <= _amountBDesired) {
+                    assert (amountBOptimal >= _amountAMin) "LunarswapRouter: Insufficient B amount";
+                    const reserve = Reserve {
+                        _amountADesired,
+                        amountBOptimal
+                    };
+                    return LiquidityPool {
+                        liquidityPool.pair,
+                        liquidityPool.leaf,
+                        reserve,
+                        liquidityPool.liquidity,
+                        liquidityPool.kLast
+                    };
+                } else {
+                    // TODO: review disclose
+                    const amountAOptimal = disclose(LunarswapLibrary_quote(
+                        _amountBDesired,
+                        liquidityPool.reserve.reserve1,
+                        liquidityPool.reserve.reserve0
+                    ));
+                    assert (amountAOptimal <= _amountADesired) "LunarswapRouter: Insufficient A amount";
+                    assert (amountAOptimal >= _amountAMin) "LunarswapRouter: Insufficient A amount";
+                    const reserve = Reserve {
+                        amountAOptimal,
+                        _amountBDesired
+                    };
+                    return LiquidityPool {
+                        liquidityPool.pair,
+                        liquidityPool.leaf,
+                        reserve,
+                        liquidityPool.liquidity,
+                        liquidityPool.kLast
+                    };
+                }
+            } 
+        }
+    }
+}

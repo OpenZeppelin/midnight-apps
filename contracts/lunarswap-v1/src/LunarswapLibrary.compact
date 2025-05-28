@@ -1,0 +1,20 @@
+pragma language_version >= 0.14.0;
+
+module LunarswapLibrary {
+    import CompactStandardLibrary;
+
+    import "../node_modules/@midnight-dapps/math-contracts/dist/Math";
+
+    export circuit quote(
+        amountA: Uint<64>,
+        reserveA: Uint<64>,
+        reserveB: Uint<64>
+    ): Uint<64> {
+        assert (amountA > 0) "Lunarswap: Insufficient amount";
+        assert (reserveA > 0 && reserveB > 0) "Lunarswap: Insufficient liquidity";
+        return div(
+            mul(amountA, reserveB),
+            reserveA
+        );
+    }
+}

@@ -1,0 +1,73 @@
+pragma language_version >= 0.14.0;
+
+module LunarswapFactory {
+    import CompactStandardLibrary;
+
+    import "./openzeppelin/Utils" prefix Utils_;
+    import "./openzeppelin/ERC20" prefix ERC20_;
+    import "../node_modules/@midnight-dapps/access-contract/dist/AccessControl" prefix AccessControl_;
+    import "../node_modules/@midnight-dapps/structs-contracts/dist/Queue"<Uint<64>> prefix Queue_;
+
+    import "./interfaces/ILunarswapFactory";
+    import "./interfaces/ILunarswapPair";
+    
+    import LunarswapPair prefix LunarswapPair_; 
+
+    export circuit isPairExists(
+        _tokenA: ContractAddress, 
+        _tokenB: ContractAddress
+    ): Boolean {
+        const Pair = LunarswapPair_sortTokens(_tokenA, _tokenB);
+        const nullifier = hashNullifier(Pair.token0.bytes, Pair.token1.bytes);
+        return pairNullifiers.member(nullifier);
+    }
+
+    export circuit allPairsLength(): Uint<64> {
+        return pairTreeIndex.read();
+    }
+
+    export circuit createPair(
+        _tokenA: ContractAddress, 
+        _tokenB: ContractAddress
+    ): LiquidityPool {
+        assert (AccessControl_onlyLp()) "LunarswapFactory: access it not permitted";
+        assert (_tokenA != _tokenB) "LunarswapFactory: Identical addresses";
+        const Pair = LunarswapPair_sortTokens(_tokenA, _tokenB);
+        assert (!Utils_isKeyOrAddressZero(right<ZswapCoinPublicKey, ContractAddress>(Pair.token0))) "LunarswapFactory: Zero address";
+        assert (!isPairExists(_tokenA, _tokenB)) "LunarswapFactory: Pair Exists"; 
+        // TODO: That is not efficient the nullifier's been calculated twice here and in isPairExists()
+        const nullifier = hashNullifier(Pair.token0.bytes, Pair.token1.bytes);
+        pairNullifiers.insert(nullifier);
+        if (Queue_isEmpty()) {
+            const leaf = Leaf {
+                pairTreeIndex,
+                nullifier
+            };
+            pairTreeIndex.increment(1);
+            return LunarswapPair_initializeLiquidityPool(Pair, leaf, true); 
+        } else {
+            // TODO: That is just in case if we are going to support removePair otherwise
+            // this else closure will never happen. 
+            const currentAvailableIndex = Queue_dequeue();
+            assert(currentAvailableIndex.is_some) "LunarswapFactory: issue with the pair Queue";
+            const leaf = Leaf {
+                currentAvailableIndex.value,
+                nullifier
+            };
+            return LunarswapPair_initializeLiquidityPool(Pair, leaf, false); 
+        }
+    }
+
+    export circuit hashNullifier(
+        _token0: Bytes<32>, 
+        _token1: Bytes<32>
+    ): Bytes<32> {
+        // TODO: That is not totally private, we need to use some shared secret among Lps for calculating 
+        // a secret nullifier, that could be done potentially via ShamirSecretSharing.
+        return persistent_hash<Vector<3, Bytes<32>>>([
+            pad(32, "pair-nullifier"), 
+            _token0, 
+            _token1
+        ]);
+    } 
+}

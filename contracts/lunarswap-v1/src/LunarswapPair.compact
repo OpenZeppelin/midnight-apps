@@ -1,0 +1,204 @@
+pragma language_version >= 0.14.0;
+
+module LunarswapPair {
+    import CompactStandardLibrary;
+    
+    import "./openzeppelin/Utils";
+    import "./openzeppelin/ERC20" prefix ERC20_;
+    import "../node_modules/@midnight-dapps/access-contract/dist/AccessControl";
+    import "../node_modules/@midnight-dapps/math-contracts/dist/Math";
+    import "../node_modules/@midnight-dapps/math-contracts/dist/Max" prefix Max_;
+    
+    // I see there is a problem with the current interface pattern that needs both modules together the interface & and its module
+    import "./interfaces/ILunarswapPair";
+    import "./interfaces/ILunarswapFee";
+    
+    import "./tokens/TokenA" prefix TokenA_;
+    import "./tokens/TokenB" prefix TokenB_;
+    import LunarswapERC20 prefix LunarswapERC20_;
+     
+    // TODO: access control needed. 
+    // TODO: use initialize contract to prevent double initialize.
+    export circuit initialize(
+        _lpTokenName: Maybe<Opaque<"string">>,
+        _lpTokenSymbol: Maybe<Opaque<"string">>
+    ): [] {
+        MINIMUM_LIQUIDITY = 1000;
+        LunarswapERC20_initialize(_lpTokenName, _lpTokenSymbol);
+        return [];
+    }
+
+    export circuit initializeLiquidityPool(
+        _pair: Pair, 
+        _pairLeaf: Leaf,
+        _isNewIndex: Boolean
+    ): LiquidityPool {
+        // TODO: we need to prevent this to be only called via LunarswapFactory.
+        const reserve0 = 0;
+        const reserve1 = 0;
+        const liquidity = 0;
+        const kLast = 0;
+        const reserve = Reserve {
+            reserve0,
+            reserve1
+        };
+        const liquidityPool = LiquidityPool {
+            _pair,
+            _pairLeaf,
+            reserve,
+            liquidity,
+            kLast
+        };
+        assert (_isNewIndex && !LiquidityPoolTree.is_full()) "Lunarswap: Pool state tree is full!"; 
+        LiquidityPoolTree.insert_index(liquidityPool, _pairLeaf.treeIndex);
+        updateLocalLiquidityPool(liquidityPool);        
+        return liquidityPool;
+    }
+
+    circuit _update(
+        _to: ZswapCoinPublicKey,
+        _liquidityPool: LiquidityPool,
+        _liquidity: Uint<128>,
+        _balance0: Uint<128>,
+        _balance1: Uint<128>
+    ): [] {
+        assert(_liquidity > 0) "LunarswapPair: Insufficient liquidity minted";
+        LunarswapERC20__mint(left<ZswapCoinPublicKey, ContractAddress>(_to), _liquidity);
+
+    }
+
+    // Updating the Pool and then Mint LP tokens
+    export circuit mint(
+        _to: ZswapCoinPublicKey,
+        _liquidityPool: LiquidityPool
+    ): [] {
+        // How to check balance of that contract on Token A programmatically.
+        // TODO: (ERC20_call)
+        const balance0 = TokenA_balanceOf(eitherThisAddress()); 
+        const balance1 = TokenB_balanceOf(eitherThisAddress()); 
+
+        // TODO: using - operator for sub since both values are Uint<128> and Uint<64>
+        const amount0 = balance0 - _liquidityPool.reserve.reserve0;
+        const amount1 = balance1 - _liquidityPool.reserve.reserve1;
+
+        const [isFeeOn, liquidityPool] = _mintFee(_liquidityPool);
+        const totalSupply = LunarswapERC20_totalSupply();
+        if (totalSupply == 0) {
+            // liquidity = (√amount0 * amount1) - MINIMUM_LIQUIDITY = Uint<128>
+            // TODO: review disclose
+            const liquidity = sub(disclose(sqrt(mul(amount0, amount1))), MINIMUM_LIQUIDITY);
+            LunarswapERC20__mint(eitherZeroSenderAddress(), MINIMUM_LIQUIDITY);
+            _update(_to, _liquidityPool, liquidity, balance0, balance1);
+        } else { 
+            // TODO: In case of using Uint<128> for reserves that results a conflict with 
+            // the ERC20 Compact standard, since the result here is Uint<256> while the max min tokens are Uint<128>
+            // liquidity = ((amount0 * totalSupply / reserve0) ∧ ((amount1 * totalSupply) / reserve1) 
+            const liquidity = min(
+                div(mul(amount0, totalSupply), _liquidityPool.reserve.reserve0),
+                div(mul(amount1, totalSupply), _liquidityPool.reserve.reserve1)
+            ); 
+            // TODO: that is TBD later in the future after doing benchmarks on the performance of MathU256
+            assert (liquidity <= Max_U128()) "Lunarswap: liquidity overflows MAX_U128 supported size in ERC20";
+            _update(_to, _liquidityPool, liquidity as Uint<128>, balance0, balance1);
+        }
+        
+        // update
+        if (isFeeOn) {
+            const kLast = mul(
+                liquidityPool.reserve.reserve0,
+                liquidityPool.reserve.reserve1
+            );
+            const liquidityPoolUpdated = LiquidityPool {
+                liquidityPool.pair, 
+                liquidityPool.leaf,
+                liquidityPool.reserve,
+                liquidityPool.liquidity,
+                kLast
+            };
+        }
+
+        // TODO: update LiquidityPool in tree.
+        return [];
+    }
+
+    circuit _mintFee(_liquidityPool: LiquidityPool): [Boolean, LiquidityPool] {
+        const isFeeToZero = isKeyOrAddressZero(left<ZswapCoinPublicKey, ContractAddress>(feeTo));
+        const isFeeOn = isFeeToZero == true ? false : true;
+        if (isFeeOn) {
+            if (_liquidityPool.kLast != 0) {
+                // TODO: review disclose
+                const rootK = disclose(sqrt(mul(
+                    _liquidityPool.reserve.reserve0,
+                    _liquidityPool.reserve.reserve1
+                )));
+                // TODO: review disclose
+                const rootKLast = disclose(sqrt(_liquidityPool.kLast));
+                if (rootK > rootKLast) {
+                    const totalSupply = LunarswapERC20_totalSupply();
+                    const numerator = mul(sub(rootK, rootKLast), totalSupply);
+                    const denominator = add(mul(rootK, 5), rootKLast);
+                    const liquidity = div(numerator, denominator);
+                    assert (liquidity <= Max_U128()) "Lunarswap: liquidity overflows MAX_U128 supported size in ERC20";
+                    if (liquidity as Uint<128> > 0) {
+                        // Mint Liquidity Tokens
+                        LunarswapERC20__mint(left<ZswapCoinPublicKey, ContractAddress>(feeTo), liquidity as Uint<128>); 
+                    } 
+                } 
+            } 
+            return [isFeeOn, _liquidityPool];
+        } else if (_liquidityPool.kLast != 0) {
+            const kLast = 0;
+            return [isFeeOn, LiquidityPool {
+                _liquidityPool.pair,
+                _liquidityPool.leaf,
+                _liquidityPool.reserve,
+                _liquidityPool.liquidity,
+                kLast
+            }];
+        } else {
+            return [isFeeOn, _liquidityPool];
+        }
+    }
+
+    export circuit sortTokens(
+        tokenA: ContractAddress, 
+        tokenB: ContractAddress
+    ): Pair {
+        // TODO: I think it worth adding this as a generic utility for ContractAddress
+        const token0 = (
+            tokenA.bytes as Field as Uint<128> < tokenB.bytes as Field as Uint<128>
+            ) ? tokenA : tokenB;
+        const token1 = (
+            tokenA.bytes as Field as Uint<128> < tokenB.bytes as Field as Uint<128>
+            ) ? tokenB : tokenA;
+
+        return Pair {
+            token0,
+            token1
+        };
+    }
+
+    export circuit getLiquidityPool(): LiquidityPool {
+        const liquidityPool = getLocalLiquidityPool();
+        const liquidityPoolPath = getLocalLiquidityPoolPath(liquidityPool);
+
+        assert (
+            liquidityPoolPath.is_some &&
+            LiquidityPoolTree.check_root(getPathRoot(liquidityPoolPath.value)) 
+            //liquidityPool == liquidityPoolPath.value.leaf // TODO: fixme
+        ) "Lunarswap: Invalid liquidity pool state.";
+
+        return liquidityPool;
+    }
+
+    // TODO: Should be in a general Compact utils contract for MerkleTree.
+    /**
+     * @description Computes the Merkle tree root from a path.
+     * @param {MerkleTreePath<10, Bytes<32>>} path - The Merkle path to compute the root from.
+     * @returns {MerkleTreeDigest} - The root digest of the Merkle tree.
+     * @todo Move to a utils.compact module for reusability.
+     */
+    circuit getPathRoot(path: MerkleTreePath<10, Bytes<32>>): MerkleTreeDigest {
+        return merkle_tree_path_root<10, Bytes<32>>(path);
+    }
+}

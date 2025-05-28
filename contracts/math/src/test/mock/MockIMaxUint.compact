@@ -1,0 +1,12 @@
+pragma language_version >= 0.14.0;
+
+import "../../Max" prefix Max_;
+
+// Export Ledger
+export {
+    Max_U8,
+    Max_U16,
+    Max_U32,
+    Max_U64,
+    Max_U128
+};

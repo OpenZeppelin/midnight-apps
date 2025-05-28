@@ -1,7 +1,7 @@
 {
-  "name": "@midnight-dapps/structs-contracts",
+  "name": "@midnight-dapps/lunarswap-v1",
   "version": "1.0.0-alpha.1",
-  "description": "Compacts contracts for Data structures i.e. Queue",
+  "description": "Compacts contracts for LunarSwap DEX V1",
   "type": "module",
   "scripts": {
     "compact": "pnpm exec compact-compiler",
@@ -19,22 +19,16 @@
   "packageManager": "pnpm@10.4.1",
   "devDependencies": {
     "@types/node": "^22.13.10",
-<<<<<<< HEAD
-    "typescript": "^5.8.3",
-=======
     "typescript": "^5.8.2",
->>>>>>> 2ef2f6e (feat: addLiquidity wip)
     "vitest": "^3.0.9"
   },
   "dependencies": {
     "@midnight-dapps/compact": "workspace:^",
-<<<<<<< HEAD
-    "@midnight-ntwrk/compact-runtime": "^0.8.1",
-    "@midnight-ntwrk/midnight-js-network-id": "^2.0.0",
-=======
+    "@midnight-dapps/access-contract": "workspace:^",
+    "@midnight-dapps/structs-contracts": "workspace:^",
+    "@midnight-dapps/math-contracts": "workspace:^",
     "@midnight-ntwrk/compact-runtime": "^0.8.0",
     "@midnight-ntwrk/midnight-js-network-id": "^0.2.5",
->>>>>>> 2ef2f6e (feat: addLiquidity wip)
     "@midnight-ntwrk/zswap": "^3.0.6"
   }
 }
