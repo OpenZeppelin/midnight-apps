@@ -39,7 +39,7 @@ module MathU128 {
     import "./interfaces/IUint256";
     import "./interfaces/IMathU128";
 
-    import Max prefix Max_;
+    import Max;
 
     /**
      * @description A pure circuit that returns the modulus value of U128 (2^64).
@@ -58,18 +58,6 @@ module MathU128 {
      */
     export pure circuit ZERO_U128(): U128 {
         return U128 { low: 0, high: 0 };
-    }
-
-    /**
-     * @description A pure circuit that returns the maximum U128 value.
-     *
-     * @returns U128 A U128 struct with low and high fields set to 2^64 - 1.
-     */
-    export pure circuit MAX_U128(): U128 {
-        return U128 {
-            low: Max_U64(),
-            high: Max_U64()
-        };
     } 
 
     /**
@@ -102,12 +90,12 @@ module MathU128 {
      * @throws MathU128: conversion invalid If the reconstructed value does not match the input.
      */
     export circuit toU128(value: Uint<128>): U128 {
-        const result = divUint128Locally(value, MODULES());
+        const result = divUint128Locally(value, MODULUS());
         const high = result.quotient.low;
         const low = result.remainder.low;
 
         // Verify that value = high * 2^64 + low
-        const highShifted = (high as Uint<128>) * MODULES(); // high * 2^64
+        const highShifted = (high as Uint<128>) * MODULUS(); // high * 2^64
         const reconstructed = highShifted + (low as Uint<128>); // high * 2^64 + low
 
         // Verify reconstruction matches value
@@ -143,7 +131,7 @@ module MathU128 {
      * @returns Uint<128> The 128-bit value represented by high * 2^64 + low.
      */
     export pure circuit fromU128(value: U128): Uint<128> {
-        const highShifted = (value.high as Uint<128>) * MODULES();
+        const highShifted = (value.high as Uint<128>) * MODULUS();
         const result = highShifted + (value.low as Uint<128>);
         return result as Uint<128>;
     }
@@ -399,7 +387,7 @@ module MathU128 {
                     high: highDiff 
                 };
             } else {
-                const lowDiff = a.low + MODULES() - b.low;
+                const lowDiff = a.low + MODULUS() - b.low;
                 return U128 { 
                     low: lowDiff as Uint<64>, 
                     high: highDiff 
@@ -779,16 +767,16 @@ module MathU128 {
             return 2 as Uint<64>;
         } else if (eqU128(radicand, U128 { low: 9, high: 0 })) {
             return 3 as Uint<64>;
-        } else if (eqU128(radicand, U128 { low: Max_U8(), high: 0 })) {
+        } else if (eqU128(radicand, U128 { low: MAX_UINT8(), high: 0 })) {
             return 15 as Uint<64>;
-        } else if (eqU128(radicand, U128 { low: Max_U16(), high: 0 })) {
+        } else if (eqU128(radicand, U128 { low: MAX_UINT16(), high: 0 })) {
             return 255 as Uint<64>;
-        } else if (eqU128(radicand, U128 { low: Max_U32(), high: 0 })) {
+        } else if (eqU128(radicand, U128 { low: MAX_UINT32(), high: 0 })) {
             return 65535 as Uint<64>;
-        } else if (eqU128(radicand, U128 { low: Max_U64(), high: 0 })) {
+        } else if (eqU128(radicand, U128 { low: MAX_UINT64(), high: 0 })) {
             return 4294967295 as Uint<64>;
         } else if (eqU128(radicand, MAX_U128())) {
-            return Max_U64();
+            return MAX_UINT64();
         } else {
             const root = sqrtU128Locally(radicand);
             const rootU128 = U128 { low: root, high: 0 };

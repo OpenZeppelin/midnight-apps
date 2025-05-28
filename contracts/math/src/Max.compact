@@ -2,26 +2,76 @@
 pragma language_version >= 0.15.0;
 
 /**
- * @description A module for MAX Uint values.
+ * @description A module providing maximum values for various unsigned integer types.
+ * This module contains pure circuits that return the maximum possible value for each
+ * supported unsigned integer size (8-bit through 256-bit).
  */
 module Max {
-    export pure circuit U8(): Uint<8> {
+    import "./interfaces/IUint128";
+    import "./interfaces/IUint256";
+    
+    /**
+     * @description Returns the maximum value for an 8-bit unsigned integer (2^8 - 1).
+     * @returns Uint<8> The value 255 (0xFF).
+     */
+    export pure circuit MAX_UINT8(): Uint<8> {
         return 255;
     }
 
-    export pure circuit U16(): Uint<16> {
+    /**
+     * @description Returns the maximum value for a 16-bit unsigned integer (2^16 - 1).
+     * @returns Uint<16> The value 65,535 (0xFFFF).
+     */
+    export pure circuit MAX_UINT16(): Uint<16> {
         return 65535;
     }
 
-    export pure circuit U32(): Uint<32> {
+    /**
+     * @description Returns the maximum value for a 32-bit unsigned integer (2^32 - 1).
+     * @returns Uint<32> The value 4,294,967,295 (0xFFFFFFFF).
+     */
+    export pure circuit MAX_UINT32(): Uint<32> {
         return 4294967295;
     }
 
-    export pure circuit U64(): Uint<64> {
+    /**
+     * @description Returns the maximum value for a 64-bit unsigned integer (2^64 - 1).
+     * @returns Uint<64> The value 18,446,744,073,709,551,615 (0xFFFFFFFFFFFFFFFF).
+     */
+    export pure circuit MAX_UINT64(): Uint<64> {
         return 18446744073709551615;
     }
 
-    export pure circuit U128(): Uint<128> {
+    /**
+     * @description Returns the maximum value for a 128-bit unsigned integer (2^128 - 1).
+     * @returns Uint<128> The value 340,282,366,920,938,463,463,374,607,431,768,211,455 
+     * (0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF).
+     */
+    export pure circuit MAX_UINT128(): Uint<128> {
         return 340282366920938463463374607431768211455;
+    }
+
+    /**
+     * @description Returns the maximum value for a U128 struct, where both low and high
+     * fields are set to the maximum 64-bit value (2^64 - 1).
+     * @returns U128 A U128 struct representing 2^128 - 1.
+     */
+    export pure circuit MAX_U128(): U128 {
+        return U128 {
+            low: MAX_UINT64(),  
+            high: MAX_UINT64()
+        };
+    }
+
+    /**
+     * @description Returns the maximum value for a U256 struct, where both low and high
+     * fields are set to the maximum 128-bit value (2^128 - 1).
+     * @returns U256 A U256 struct representing 2^256 - 1.
+     */
+    export pure circuit MAX_U256(): U256 {
+        return U256 {
+            low: MAX_U128(),
+            high: MAX_U128()
+        };
     }
 }
