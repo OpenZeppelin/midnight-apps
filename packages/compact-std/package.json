@@ -1,6 +1,7 @@
 {
   "name": "@midnight-dapps/compact-std",
   "version": "1.0.0-alpha.1",
+  "private": true,
   "description": "",
   "type": "module",
   "main": "dist/index.js",

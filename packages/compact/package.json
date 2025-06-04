@@ -1,10 +1,8 @@
 {
   "name": "@midnight-dapps/compact",
   "version": "1.2.0",
-  "keywords": [
-    "compact",
-    "compiler"
-  ],
+  "private": true,
+  "keywords": ["compact", "compiler"],
   "author": "",
   "license": "ISC",
   "description": "Compact fetcher",

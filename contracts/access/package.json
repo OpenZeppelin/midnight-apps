@@ -1,6 +1,7 @@
 {
   "name": "@midnight-dapps/access-contract",
   "version": "1.0.0-alpha.1",
+  "private": true,
   "description": "Compacts for implementing LunarSwap DEX",
   "type": "module",
   "main": "dist/index.js",

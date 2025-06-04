@@ -1,6 +1,7 @@
 {
   "name": "@midnight-dapps/structs-contracts",
   "version": "1.0.0-alpha.1",
+  "private": true,
   "description": "Compacts contracts for Data structures i.e. Queue",
   "type": "module",
   "scripts": {

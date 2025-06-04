@@ -1,6 +1,7 @@
 {
   "name": "@midnight-dapps/math-contracts",
   "version": "1.0.0-alpha.1",
+  "private": true,
   "description": "Compacts contracts math operations.",
   "type": "module",
   "scripts": {
