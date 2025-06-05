@@ -30,19 +30,19 @@ jobs:
       - name: Check for build artifacts
         run: |
           # Check if build artifacts exist
-          if ! find apps/*/dist -type d 2>/dev/null | grep -q .; then
-            echo "::error::❌ Build artifacts not found in apps/*/dist directories!"
+          if ! find apps/*/.next -type d 2>/dev/null | grep -q .; then
+            echo "::error::❌ Build artifacts not found in apps/*/.next directories!"
             exit 1
           fi
           
           # List build artifacts
           echo "✅ Build artifacts found:"
           echo "Application build artifacts:"
-          find apps -name "dist" -type d -exec ls -la {} \;
+          find apps -name ".next" -type d -exec ls -la {} \;
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: apps-builds
-          path: apps/*/dist/
+          path: apps/*/.next/
           retention-days: 7
