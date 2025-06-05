@@ -24,35 +24,29 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/setup
 
-      - name: Check versions
+      - name: Check compiler version
         run: |
-          # Get expected versions
-          EXPECTED_LANGUAGE_VERSION="0.15.0"
           EXPECTED_COMPILER_VERSION="0.23.0"
-          
-          # Get actual versions
-          LANGUAGE_OUTPUT=$(pnpm compact:language-version)
           COMPILER_OUTPUT=$(pnpm compact:version)
-          
-          # Extract versions from output
-          LANGUAGE_VERSION=$(echo "$LANGUAGE_OUTPUT" | grep -oP 'v\K[0-9.]+')
-          COMPILER_VERSION=$(echo "$COMPILER_OUTPUT" | grep -oP 'v\K[0-9.]+')
-          
-          # Check language version
-          if [ "$LANGUAGE_VERSION" != "$EXPECTED_LANGUAGE_VERSION" ]; then
-            errMsg="❌ Language version mismatch!%0AExpected: $EXPECTED_LANGUAGE_VERSION%0AGot: $LANGUAGE_VERSION"
-            echo "::error::$errMsg"
-            exit 1
-          fi
-          echo "✅ Language version matches: $LANGUAGE_VERSION"
-          
-          # Check compiler version
+          COMPILER_VERSION=$(echo "$COMPILER_OUTPUT" | grep -oP '\b0\.[0-9]+\.[0-9]+\b' | head -n 1)
           if [ "$COMPILER_VERSION" != "$EXPECTED_COMPILER_VERSION" ]; then
             errMsg="❌ Compiler version mismatch!%0AExpected: $EXPECTED_COMPILER_VERSION%0AGot: $COMPILER_VERSION"
             echo "::error::$errMsg"
             exit 1
           fi
           echo "✅ Compiler version matches: $COMPILER_VERSION"
+
+      - name: Check language version
+        run: |
+          EXPECTED_LANGUAGE_VERSION="0.15.0"
+          LANGUAGE_OUTPUT=$(pnpm compact:language-version)
+          LANGUAGE_VERSION=$(echo "$LANGUAGE_OUTPUT" | grep -oP '\b0\.[0-9]+\.[0-9]+\b' | tail -n 1)
+          if [ "$LANGUAGE_VERSION" != "$EXPECTED_LANGUAGE_VERSION" ]; then
+            errMsg="❌ Language version mismatch!%0AExpected: $EXPECTED_LANGUAGE_VERSION%0AGot: $LANGUAGE_VERSION"
+            echo "::error::$errMsg"
+            exit 1
+          fi
+          echo "✅ Language version matches: $LANGUAGE_VERSION"
 
       - name: Cleanup on failure
         if: failure()
