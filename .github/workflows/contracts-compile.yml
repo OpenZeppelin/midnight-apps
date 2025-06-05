@@ -26,19 +26,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
-
-      - name: Set check run name
-        uses: actions/github-script@v6
-        with:
-          script: |
-            await github.rest.checks.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: "Fast Compile Contracts",
-              head_sha: context.sha,
-              status: "in_progress"
-            });
-
+          
       - name: Setup Environment
         uses: ./.github/actions/setup
 
