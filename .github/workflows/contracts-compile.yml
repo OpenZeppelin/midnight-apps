@@ -1,0 +1,66 @@
+name: Contracts Compile
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  checks: write
+  actions: write
+  contents: read
+
+concurrency:
+  group: contracts-compile-${{ github.run_id }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compile:
+    name: Fast Compile Contracts
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set check run name
+        uses: actions/github-script@v6
+        with:
+          script: |
+            await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: "Fast Compile Contracts",
+              head_sha: context.sha,
+              status: "in_progress"
+            });
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+
+      - name: Verify compilation
+        run: |
+          if ! find contracts/*/src/artifacts -type d 2>/dev/null | grep -q .; then
+            echo "::error::❌ Compact compilation artifacts not found!"
+            exit 1
+          fi
+          echo "✅ Compact compilation artifacts found:"
+          find contracts -name "artifacts" -type d -exec ls -la {} \;
+
+      - name: Upload compilation artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compact-compilation
+          path: contracts/*/src/artifacts/
+          retention-days: 7
+
+      - name: Cleanup on failure
+        if: failure()
+        run: |
+          echo "Compilation failed. Cleaning up..."
+          rm -rf contracts/*/src/artifacts/

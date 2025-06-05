@@ -1,13 +1,14 @@
-import { Header } from "@/components/header"
-import { PoolPositions } from "@/components/pool/pool-positions"
-import { TokenRewards } from "@/components/pool/token-rewards"
-import { TopPoolsList } from "@/components/pool/top-pools-list"
-import { StarsBackground } from "@/components/stars-background"
+import { Header } from '@/components/header';
+import { PoolPositions } from '@/components/pool/pool-positions';
+import { TokenRewards } from '@/components/pool/token-rewards';
+import { TopPoolsList } from '@/components/pool/top-pools-list';
+import { StarsBackground } from '@/components/stars-background';
 
 export const metadata = {
-  title: "LunarSwap | Pool",
-  description: "Provide liquidity and earn fees on the most celestial DEX in the galaxy",
-}
+  title: 'LunarSwap | Pool',
+  description:
+    'Provide liquidity and earn fees on the most celestial DEX in the galaxy',
+};
 
 export default function PoolPage() {
   return (
@@ -32,5 +33,5 @@ export default function PoolPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

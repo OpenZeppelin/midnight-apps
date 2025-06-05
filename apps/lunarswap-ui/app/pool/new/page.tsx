@@ -1,13 +1,14 @@
-import { Header } from "@/components/header"
-import { NewPositionWizard } from "@/components/pool/new-position-wizard"
-import { StarsBackground } from "@/components/stars-background"
-import Link from "next/link"
-import { ChevronRight } from "lucide-react"
+import { Header } from '@/components/header';
+import { NewPositionWizard } from '@/components/pool/new-position-wizard';
+import { StarsBackground } from '@/components/stars-background';
+import { ChevronRight } from 'lucide-react';
+import Link from 'next/link';
 
 export const metadata = {
-  title: "LunarSwap | New Position",
-  description: "Create a new liquidity position on the most celestial DEX in the galaxy",
-}
+  title: 'LunarSwap | New Position',
+  description:
+    'Create a new liquidity position on the most celestial DEX in the galaxy',
+};
 
 export default function NewPositionPage() {
   return (
@@ -17,7 +18,10 @@ export default function NewPositionPage() {
       <main className="container mx-auto px-4 py-8 relative z-0 pt-24">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center text-sm mb-4 text-gray-500 dark:text-gray-400">
-            <Link href="/pool" className="hover:text-blue-500 dark:hover:text-blue-400">
+            <Link
+              href="/pool"
+              className="hover:text-blue-500 dark:hover:text-blue-400"
+            >
               Your positions
             </Link>
             <ChevronRight className="h-4 w-4 mx-1" />
@@ -30,5 +34,5 @@ export default function NewPositionPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

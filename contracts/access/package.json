@@ -1,6 +1,7 @@
 {
   "name": "@midnight-dapps/access-contract",
   "version": "1.0.0-alpha.1",
+  "private": true,
   "description": "Compacts for implementing LunarSwap DEX",
   "type": "module",
   "main": "dist/index.js",
@@ -29,7 +30,7 @@
     "@midnight-dapps/compact": "workspace:^",
     "@midnight-dapps/compact-std": "workspace:^",
     "@midnight-ntwrk/compact-runtime": "^0.8.1",
-    "@midnight-ntwrk/midnight-js-network-id": "^2.0.0",
+    "@midnight-ntwrk/midnight-js-network-id": "^2.0.1",
     "@midnight-ntwrk/zswap": "^3.0.6"
   }
 }

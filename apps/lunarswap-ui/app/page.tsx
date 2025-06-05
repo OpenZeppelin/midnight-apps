@@ -1,12 +1,13 @@
-import { Header } from "@/components/header"
-import { SwapCard } from "@/components/swap-card"
-import { TokenStats } from "@/components/token-stats"
-import { StarsBackground } from "@/components/stars-background"
+import { Header } from '@/components/header';
+import { StarsBackground } from '@/components/stars-background';
+import { SwapCard } from '@/components/swap-card';
+import { TokenStats } from '@/components/token-stats';
 
 export const metadata = {
-  title: "LunarSwap | Swap",
-  description: "Swap tokens on the lunar surface with the most celestial DEX in the galaxy",
-}
+  title: 'LunarSwap | Swap',
+  description:
+    'Swap tokens on the lunar surface with the most celestial DEX in the galaxy',
+};
 
 export default function Home() {
   return (
@@ -20,5 +21,5 @@ export default function Home() {
         </div>
       </main>
     </div>
-  )
+  );
 }

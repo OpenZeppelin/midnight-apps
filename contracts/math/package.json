@@ -1,18 +1,9 @@
 {
   "name": "@midnight-dapps/math-contracts",
   "version": "1.0.0-alpha.1",
+  "private": true,
   "description": "Compacts contracts math operations.",
-  "type": "module",
-  "scripts": {
-    "compact": "pnpm exec compact-compiler",
-    "build": "pnpm exec compact-builder && tsc",
-    "test": "vitest run --printConsoleTrace",
-    "types": "tsc -p tsconfig.json --noEmit",
-    "fmt": "biome format --write",
-    "lint": "biome lint",
-    "lint:fix": "biome check --write",
-    "precommit": "lint-staged --no-stash && pnpm run types"
-  },
+  "type": "module", 
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -26,7 +17,7 @@
     "@midnight-dapps/biome-config": "workspace:^",
     "@midnight-dapps/compact": "workspace:^",
     "@midnight-ntwrk/compact-runtime": "^0.8.1",
-    "@midnight-ntwrk/midnight-js-network-id": "^2.0.0",
+    "@midnight-ntwrk/midnight-js-network-id": "^2.0.1",
     "@midnight-ntwrk/zswap": "^3.0.6"
   }
 }

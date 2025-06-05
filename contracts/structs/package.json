@@ -1,6 +1,7 @@
 {
   "name": "@midnight-dapps/structs-contracts",
   "version": "1.0.0-alpha.1",
+  "private": true,
   "description": "Compacts contracts for Data structures i.e. Queue",
   "type": "module",
   "scripts": {
@@ -23,9 +24,10 @@
     "vitest": "^3.1.4"
   },
   "dependencies": {
+    "@midnight-dapps/biome-config": "workspace:^",
     "@midnight-dapps/compact": "workspace:^",
     "@midnight-ntwrk/compact-runtime": "^0.8.1",
-    "@midnight-ntwrk/midnight-js-network-id": "^2.0.0",
+    "@midnight-ntwrk/midnight-js-network-id": "^2.0.1",
     "@midnight-ntwrk/zswap": "^3.0.6"
   }
 }

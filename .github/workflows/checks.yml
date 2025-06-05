@@ -1,0 +1,39 @@
+name: Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: checks-${{ github.run_id }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Run Checks
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+
+      - name: Lint
+        run: pnpm lint
+        timeout-minutes: 10
+
+      - name: Format
+        run: pnpm fmt
+        timeout-minutes: 10
+
+      - name: Cleanup on failure
+        if: failure()
+        run: |
+          echo "Checks failed. Cleaning up..."
+          rm -rf contracts/*/src/artifacts/

@@ -1,14 +1,15 @@
 {
   "name": "@midnight-dapps/compact-std",
   "version": "1.0.0-alpha.1",
+  "private": true,
   "description": "",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "prepare": "pnpm build",
-    "compact": "pnpm exec compact-compile",
-    "build": "pnpm exec compact-build && tsc",
+    "compact": "pnpm exec compact-compiler",
+    "build": "pnpm exec compact-builder && tsc",
     "test": "vitest run --printConsoleTrace",
     "types": "tsc -p tsconfig.json --noEmit",
     "fmt": "biome format --write",
@@ -29,7 +30,7 @@
     "@midnight-dapps/biome-config": "workspace:^",
     "@midnight-dapps/compact": "workspace:^",
     "@midnight-ntwrk/compact-runtime": "^0.8.1",
-    "@midnight-ntwrk/midnight-js-network-id": "^2.0.0",
+    "@midnight-ntwrk/midnight-js-network-id": "^2.0.1",
     "@midnight-ntwrk/zswap": "^3.0.6"
   }
 }
