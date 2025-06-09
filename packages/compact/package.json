@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "chalk": "^5.4.1",
-    "log-symbols": "^7.0.0",
+    "log-symbols": "^7.0.1",
     "ora": "^8.2.0"
   }
 }
