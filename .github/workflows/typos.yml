@@ -17,6 +17,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Use typos with config file
-        uses: crate-ci/typos@v1.29.9
+        uses: crate-ci/typos@v1.33.1
         with:
           config: .github/workflows/config/typos.toml
