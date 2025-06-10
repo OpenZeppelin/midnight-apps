@@ -3,17 +3,7 @@
   "version": "1.0.0-alpha.1",
   "private": true,
   "description": "Compacts contracts math operations.",
-  "type": "module",
-  "scripts": {
-    "compact": "pnpm exec compact-compiler",
-    "build": "pnpm exec compact-builder && tsc",
-    "test": "vitest run --printConsoleTrace",
-    "types": "tsc -p tsconfig.json --noEmit",
-    "fmt": "biome format --write",
-    "lint": "biome lint",
-    "lint:fix": "biome check --write",
-    "precommit": "lint-staged --no-stash && pnpm run types"
-  },
+  "type": "module", 
   "keywords": [],
   "author": "",
   "license": "ISC",

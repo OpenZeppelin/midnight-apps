@@ -1,0 +1,34 @@
+name: Commit Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: commitlint-${{ github.run_id }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint Commits
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+
+      - name: Check commit messages
+        run: pnpm commitlint --from=${{ github.event.pull_request.base.sha }} --to=${{ github.event.pull_request.head.sha }}
+
+      - name: Cleanup on failure
+        if: failure()
+        run: |
+          echo "Linting failed. Cleaning up..."
+          rm -rf contracts/*/src/artifacts/

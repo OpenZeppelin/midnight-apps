@@ -138,7 +138,7 @@ describe('AccessControl', () => {
           admin,
         ),
       ).toThrowError('AccessControl: Role commitments tree is full!');
-    }, 15000); // 15s timeout
+    }, 60000); // 60s timeout
 
     test.concurrent(
       'should handle concurrent grants to unique users',

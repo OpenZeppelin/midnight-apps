@@ -1,0 +1,29 @@
+[files]
+extend-exclude = [
+  "*.lock",
+  "*.min.js",
+  "*.min.css",
+  "node_modules/",
+  "dist/",
+  "build/",
+  ".git/",
+  "artifacts/"
+]
+
+[default.extend-words]
+# Add custom words that should be considered correct
+Zswap = "Zswap"
+vitest = "vitest"
+ntwrk  = "ntwrk"
+UTXO   = "UTXO"
+UTXOs  = "UTXOs"
+Merkle = "Merkle"
+
+[default.extend-identifiers]
+# Add custom identifiers that should be considered correct
+Lunarswap = "Lunarswap"
+Zswap     = "Zswap"
+vitest    = "vitest"
+UTXO      = "UTXO"
+UTXOs     = "UTXOs"
+Merkle    = "Merkle"
