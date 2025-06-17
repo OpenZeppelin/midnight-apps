@@ -31,6 +31,6 @@
     "@midnight-dapps/compact-std": "workspace:^",
     "@midnight-ntwrk/compact-runtime": "^0.8.1",
     "@midnight-ntwrk/midnight-js-network-id": "^2.0.1",
-    "@midnight-ntwrk/zswap": "^3.0.6"
+    "@midnight-ntwrk/zswap": "^4.0.0"
   }
 }
