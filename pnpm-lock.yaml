@@ -250,8 +250,8 @@ importers:
         specifier: ^2.0.1
         version: 2.0.1
       '@midnight-ntwrk/zswap':
-        specifier: ^3.0.6
-        version: 3.0.6
+        specifier: ^4.0.0
+        version: 4.0.0
     devDependencies:
       '@types/node':
         specifier: ^22.15.29
@@ -278,8 +278,8 @@ importers:
         specifier: ^2.0.1
         version: 2.0.1
       '@midnight-ntwrk/zswap':
-        specifier: ^3.0.6
-        version: 3.0.6
+        specifier: ^4.0.0
+        version: 4.0.0
     devDependencies:
       '@types/node':
         specifier: ^22.15.29
@@ -306,8 +306,8 @@ importers:
         specifier: ^2.0.1
         version: 2.0.1
       '@midnight-ntwrk/zswap':
-        specifier: ^3.0.6
-        version: 3.0.6
+        specifier: ^4.0.0
+        version: 4.0.0
     devDependencies:
       '@types/node':
         specifier: ^22.15.29
@@ -361,8 +361,8 @@ importers:
         specifier: ^2.0.1
         version: 2.0.1
       '@midnight-ntwrk/zswap':
-        specifier: ^3.0.6
-        version: 3.0.6
+        specifier: ^4.0.0
+        version: 4.0.0
     devDependencies:
       '@types/node':
         specifier: ^22.15.29
@@ -873,8 +873,8 @@ packages:
   '@midnight-ntwrk/onchain-runtime@0.3.0':
     resolution: {integrity: sha512-vZWPoz7MhXO5UgWZET50g7APOcT5dbAfADDcrSreeOagV8lj7JJzlnYIIhrcUaMOv+NHWxPaUcJUYUkmu9LoTA==}
 
-  '@midnight-ntwrk/zswap@3.0.6':
-    resolution: {integrity: sha512-OtJxo8Y4uW4SM13wcGmWpXEqsfyiIUeLqZgMBiNmRZ6ZwMHlytunohN/cRb2cSh62lq2eEw/NdVxIFYI25y88A==}
+  '@midnight-ntwrk/zswap@4.0.0':
+    resolution: {integrity: sha512-yKfzp4M/wUkqxUJv1D2SizojYdWYnF3FDeKaxPehLPOFC4BrR9KnLZsNR2Y/occ8a4yFDtQXf7bN1QvK5k7Grw==}
 
   '@next/env@15.3.3':
     resolution: {integrity: sha512-OdiMrzCl2Xi0VTjiQQUK0Xh7bJHnOuET2s+3V+Y40WJBAXrJeGA3f+I8MZJ/YQ3mVGi5XGR1L66oFlgqXhQ4Vw==}
@@ -4022,7 +4022,7 @@ snapshots:
 
   '@midnight-ntwrk/onchain-runtime@0.3.0': {}
 
-  '@midnight-ntwrk/zswap@3.0.6': {}
+  '@midnight-ntwrk/zswap@4.0.0': {}
 
   '@next/env@15.3.3': {}
 
