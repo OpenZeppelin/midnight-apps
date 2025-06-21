@@ -5,7 +5,7 @@ import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'LunarSwap | New Position',
+  title: 'Lunarswap | New Position',
   description:
     'Create a new liquidity position on the most celestial DEX in the galaxy',
 };

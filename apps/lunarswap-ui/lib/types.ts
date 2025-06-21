@@ -1,0 +1,30 @@
+// Type definitions for Midnight Lace wallet integration
+
+export interface WalletState {
+  status: 'disconnected' | 'connecting' | 'connected' | 'error';
+  address?: string;
+  error?: string;
+}
+
+export interface DAppConnectorWalletAPI {
+  state(): Promise<WalletState>;
+  // Add other wallet methods as needed
+}
+
+export interface MidnightLaceConnector {
+  apiVersion: string;
+  isEnabled(): Promise<boolean>;
+  enable(): Promise<DAppConnectorWalletAPI>;
+  serviceUriConfig(): Promise<string>;
+}
+
+export interface MidnightWindow {
+  midnight?: {
+    mnLace?: MidnightLaceConnector;
+  };
+}
+
+// Extend the global Window interface
+declare global {
+  interface Window extends MidnightWindow {}
+} 

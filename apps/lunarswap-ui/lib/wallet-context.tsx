@@ -1,0 +1,272 @@
+'use client';
+
+import { type PropsWithChildren, createContext, useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import type { DAppConnectorWalletAPI, WalletState } from './types';
+
+type WalletConnectionStatusType = 'disconnected' | 'connecting' | 'connected' | 'error';
+
+// Constants for localStorage keys
+const WALLET_STORAGE_KEYS = {
+  CONNECTION_STATUS: 'wallet_connection_status',
+  WALLET_STATE: 'wallet_state',
+  WALLET_ADDRESS: 'wallet_address',
+} as const;
+
+/**
+ * Enhanced wallet context that stores both the manager AND the wallet instance
+ */
+export interface WalletContextType {
+  // Direct access to wallet instance for transactions
+  wallet: DAppConnectorWalletAPI | null;
+  
+  // Setters to save wallet when connected
+  setWallet: (wallet: DAppConnectorWalletAPI | null) => void;
+
+  // Convenience methods
+  isWalletConnected: boolean;
+  walletAddress: string | null;
+
+  // Contains the wallet state, including the sync progress (coins, balances, etc.)
+  walletState: WalletState | null;
+  setWalletState: (state: WalletState | null) => void;
+
+  // wallet connection status
+  walletConnectionStatus: WalletConnectionStatusType;
+  setWalletConnectionStatus: (status: WalletConnectionStatusType) => void;
+}
+
+export const WalletContext = createContext<WalletContextType | undefined>(undefined);
+
+export interface WalletProviderProps extends PropsWithChildren {}
+
+export const WalletProvider: React.FC<Readonly<WalletProviderProps>> = ({ children }) => {
+  // Add hydration state to prevent SSR issues
+  const [isHydrated, setIsHydrated] = useState(false);
+  
+  // Add reconnection flag to prevent infinite loops
+  const isReconnecting = useRef(false);
+
+  // Initialize state from localStorage
+  const [wallet, setWallet] = useState<DAppConnectorWalletAPI | null>(null);
+  const [walletAddress, setWalletAddress] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        return localStorage.getItem(WALLET_STORAGE_KEYS.WALLET_ADDRESS);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
+  const [walletState, setWalletState] = useState<WalletState | null>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedState = localStorage.getItem(WALLET_STORAGE_KEYS.WALLET_STATE);
+        return savedState ? JSON.parse(savedState) : null;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
+  const [walletConnectionStatus, setWalletConnectionStatus] = useState<WalletConnectionStatusType>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedStatus = localStorage.getItem(WALLET_STORAGE_KEYS.CONNECTION_STATUS);
+        return (savedStatus as WalletConnectionStatusType) || 'disconnected';
+      } catch {
+        return 'disconnected';
+      }
+    }
+    return 'disconnected';
+  });
+
+  // Mark as hydrated after initial render
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  // Save wallet connection status to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(WALLET_STORAGE_KEYS.CONNECTION_STATUS, walletConnectionStatus);
+      } catch (error) {
+        console.warn('Failed to save wallet connection status to localStorage:', error);
+      }
+    }
+  }, [walletConnectionStatus]);
+
+  // Save wallet state to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        if (walletState) {
+          localStorage.setItem(WALLET_STORAGE_KEYS.WALLET_STATE, JSON.stringify(walletState));
+        } else {
+          localStorage.removeItem(WALLET_STORAGE_KEYS.WALLET_STATE);
+        }
+      } catch (error) {
+        console.warn('Failed to save wallet state to localStorage:', error);
+      }
+    }
+  }, [walletState]);
+
+  // Save wallet address to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        if (walletAddress) {
+          localStorage.setItem(WALLET_STORAGE_KEYS.WALLET_ADDRESS, walletAddress);
+        } else {
+          localStorage.removeItem(WALLET_STORAGE_KEYS.WALLET_ADDRESS);
+        }
+      } catch (error) {
+        console.warn('Failed to save wallet address to localStorage:', error);
+      }
+    }
+  }, [walletAddress]);
+
+  // Attempt to reconnect wallet on app load (only after hydration)
+  useEffect(() => {
+    if (!isHydrated) return; // Don't attempt reconnection during SSR or initial hydration
+    if (isReconnecting.current) return; // Prevent multiple simultaneous reconnection attempts
+
+    console.log('Reconnection effect triggered:', {
+      walletConnectionStatus,
+      hasWalletState: !!walletState,
+      hasWallet: !!wallet,
+      isReconnecting: isReconnecting.current
+    });
+
+    const attemptReconnection = async () => {
+      // Only attempt reconnection if we have a saved connected state and we're not already connected
+      if (walletConnectionStatus === 'connected' && walletState && !wallet) {
+        console.log('Attempting to reconnect wallet from saved state...');
+        isReconnecting.current = true;
+        setWalletConnectionStatus('connecting');
+        
+        try {
+          // Check if Midnight Lace wallet is still available
+          const midnight = window.midnight;
+          if (!midnight?.mnLace) {
+            console.warn('Midnight Lace wallet not found during reconnection');
+            setWalletConnectionStatus('disconnected');
+            setWalletState(null);
+            setWalletAddress(null);
+            return;
+          }
+
+          const connector = midnight.mnLace;
+          
+          // Check if already enabled with timeout
+          const isEnabled = await Promise.race([
+            connector.isEnabled(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout checking if wallet is enabled')), 10000))
+          ]);
+          if (!isEnabled) {
+            console.log('Wallet is not enabled, clearing saved state');
+            setWalletConnectionStatus('disconnected');
+            setWalletState(null);
+            setWalletAddress(null);
+            return;
+          }
+
+          // Enable the wallet with timeout
+          const reconnectedWallet = await Promise.race([
+            connector.enable(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout enabling wallet')), 15000))
+          ]) as DAppConnectorWalletAPI;
+          
+          // Get current wallet state with timeout
+          const currentState: WalletState = await Promise.race([
+            reconnectedWallet.state(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout getting wallet state')), 10000))
+          ]) as WalletState;
+          
+          // Verify the wallet address matches what we saved
+          if (currentState.address === walletState.address) {
+            console.log('Wallet reconnected successfully');
+            setWallet(reconnectedWallet);
+            setWalletState(currentState);
+            setWalletAddress(currentState.address || null);
+            setWalletConnectionStatus('connected');
+          } else {
+            console.warn('Wallet address mismatch during reconnection');
+            setWalletConnectionStatus('disconnected');
+            setWalletState(null);
+            setWalletAddress(null);
+          }
+        } catch (error) {
+          console.error('Failed to reconnect wallet:', error);
+          setWalletConnectionStatus('disconnected');
+          setWalletState(null);
+          setWalletAddress(null);
+        } finally {
+          isReconnecting.current = false;
+        }
+      } else {
+        console.log('Skipping reconnection - conditions not met:', {
+          walletConnectionStatus,
+          hasWalletState: !!walletState,
+          hasWallet: !!wallet
+        });
+      }
+    };
+
+    // Small delay to ensure DOM is ready
+    const timeoutId = setTimeout(attemptReconnection, 100);
+    return () => clearTimeout(timeoutId);
+  }, [isHydrated, walletConnectionStatus, walletState, wallet]);
+
+  // Enhanced setters that clear localStorage when disconnecting
+  const handleSetWalletState = useCallback((state: WalletState | null) => {
+    setWalletState(state);
+    if (!state) {
+      setWalletAddress(null);
+    } else {
+      setWalletAddress(state.address || null);
+    }
+  }, []);
+
+  const handleSetWalletConnectionStatus = useCallback((status: WalletConnectionStatusType) => {
+    setWalletConnectionStatus(status);
+    
+    // Clear all wallet data when disconnecting
+    if (status === 'disconnected') {
+      setWallet(null);
+      setWalletState(null);
+      setWalletAddress(null);
+      
+      // Clear localStorage
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.removeItem(WALLET_STORAGE_KEYS.WALLET_STATE);
+          localStorage.removeItem(WALLET_STORAGE_KEYS.WALLET_ADDRESS);
+        } catch (error) {
+          console.warn('Failed to clear wallet data from localStorage:', error);
+        }
+      }
+    }
+  }, []);
+
+  // Computed values
+  const isWalletConnected = walletConnectionStatus === 'connected';
+
+  const contextValue: WalletContextType = useMemo(() => ({
+    wallet,
+    setWallet: setWallet,
+    isWalletConnected,
+    walletAddress,
+    walletState,
+    setWalletState: handleSetWalletState,
+    walletConnectionStatus,
+    setWalletConnectionStatus: handleSetWalletConnectionStatus,
+  }), [wallet, isWalletConnected, walletAddress, walletState, handleSetWalletState, walletConnectionStatus, handleSetWalletConnectionStatus]);
+
+  return (
+    <WalletContext.Provider value={contextValue}>
+      {children}
+    </WalletContext.Provider>
+  );
+}; 
