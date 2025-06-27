@@ -28,6 +28,14 @@ export pure circuit MAX_UINT128(): Uint<128> {
     return Max_MAX_UINT128();
 }
 
+export pure circuit MAX_FIELD(): Uint<254> {
+    return Max_MAX_FIELD();
+}
+
+export pure circuit MAX_UINT254(): U256 {
+    return Max_MAX_UINT254();
+}
+
 export pure circuit MAX_U128(): U128 {
     return Max_MAX_U128();
 }

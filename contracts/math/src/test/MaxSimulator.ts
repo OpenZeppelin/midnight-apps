@@ -82,6 +82,18 @@ export class MaxSimulator
     return result.result;
   }
 
+  public MAX_FIELD(): bigint {
+    const result = this.contract.circuits.MAX_FIELD(this.circuitContext);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public MAX_UINT254(): U256 {
+    const result = this.contract.circuits.MAX_UINT254(this.circuitContext);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
   public MAX_U128(): U128 {
     const result = this.contract.circuits.MAX_U128(this.circuitContext);
     this.circuitContext = result.context;

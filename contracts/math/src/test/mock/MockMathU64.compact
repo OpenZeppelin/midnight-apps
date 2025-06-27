@@ -4,9 +4,6 @@ import CompactStandardLibrary;
 import "../../interfaces/IMathU64";
 import "../../MathU64" prefix MathU64_;
 
-/**
- * @description A mock contract for testing the Math module's circuits.
- */
 export circuit add(a: Uint<64>, b: Uint<64>): Uint<128> {
     return MathU64_add(a, b);
 }

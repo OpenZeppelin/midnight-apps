@@ -124,14 +124,26 @@ export class MathU128Simulator
     return result.result;
   }
 
-  public le(a: bigint, b: bigint): boolean {
-    const result = this.contract.circuits.le(this.circuitContext, a, b);
+  public lt(a: bigint, b: bigint): boolean {
+    const result = this.contract.circuits.lt(this.circuitContext, a, b);
     this.circuitContext = result.context;
     return result.result;
   }
 
-  public leU128(a: U128, b: U128): boolean {
-    const result = this.contract.circuits.leU128(this.circuitContext, a, b);
+  public ltU128(a: U128, b: U128): boolean {
+    const result = this.contract.circuits.ltU128(this.circuitContext, a, b);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public lte(a: bigint, b: bigint): boolean {
+    const result = this.contract.circuits.lte(this.circuitContext, a, b);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public lteU128(a: U128, b: U128): boolean {
+    const result = this.contract.circuits.lteU128(this.circuitContext, a, b);
     this.circuitContext = result.context;
     return result.result;
   }
@@ -148,6 +160,18 @@ export class MathU128Simulator
     return result.result;
   }
 
+  public gte(a: bigint, b: bigint): boolean {
+    const result = this.contract.circuits.gte(this.circuitContext, a, b);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public gteU128(a: U128, b: U128): boolean {
+    const result = this.contract.circuits.gteU128(this.circuitContext, a, b);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
   public add(a: bigint, b: bigint): U256 {
     const result = this.contract.circuits.add(this.circuitContext, a, b);
     this.circuitContext = result.context;
@@ -156,6 +180,22 @@ export class MathU128Simulator
 
   public addU128(a: U128, b: U128): U256 {
     const result = this.contract.circuits.addU128(this.circuitContext, a, b);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public addChecked(a: bigint, b: bigint): bigint {
+    const result = this.contract.circuits.addChecked(this.circuitContext, a, b);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public addCheckedU128(a: U128, b: U128): bigint {
+    const result = this.contract.circuits.addCheckedU128(
+      this.circuitContext,
+      a,
+      b,
+    );
     this.circuitContext = result.context;
     return result.result;
   }
@@ -180,6 +220,22 @@ export class MathU128Simulator
 
   public mulU128(a: U128, b: U128): U256 {
     const result = this.contract.circuits.mulU128(this.circuitContext, a, b);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public mulChecked(a: bigint, b: bigint): bigint {
+    const result = this.contract.circuits.mulChecked(this.circuitContext, a, b);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public mulCheckedU128(a: U128, b: U128): bigint {
+    const result = this.contract.circuits.mulCheckedU128(
+      this.circuitContext,
+      a,
+      b,
+    );
     this.circuitContext = result.context;
     return result.result;
   }

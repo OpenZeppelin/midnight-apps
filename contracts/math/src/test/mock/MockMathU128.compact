@@ -8,6 +8,8 @@ import "../../interfaces/IMathU128";
 
 import "../../MathU128" prefix MathU128_;
 
+export { U128, U256, DivResultU128 };
+
 /**
  * @description A mock contract for testing the MathU128 module's circuits.
  */
@@ -44,20 +46,36 @@ export circuit eqU128(a: U128, b: U128): Boolean {
     return MathU128_eqU128(a, b);
 }
 
-export circuit le(a: Uint<128>, b: Uint<128>): Boolean {
-    return disclose(MathU128_le(a, b));
+export circuit lt(a: Uint<128>, b: Uint<128>): Boolean {
+    return disclose(MathU128_lt(a, b));
 }
 
-export circuit leU128(a: U128, b: U128): Boolean {
-    return disclose(MathU128_leU128(a, b));
+export circuit lte(a: Uint<128>, b: Uint<128>): Boolean {
+    return disclose(MathU128_lte(a, b));
+}
+
+export circuit ltU128(a: U128, b: U128): Boolean {
+    return disclose(MathU128_ltU128(a, b));
+}
+
+export circuit lteU128(a: U128, b: U128): Boolean {
+    return disclose(MathU128_lteU128(a, b));
 }
 
 export circuit gt(a: Uint<128>, b: Uint<128>): Boolean {
     return disclose(MathU128_gt(a, b));
 }
 
+export circuit gte(a: Uint<128>, b: Uint<128>): Boolean {
+    return disclose(MathU128_gte(a, b));
+}
+
 export circuit gtU128(a: U128, b: U128): Boolean {
     return disclose(MathU128_gtU128(a, b));
+}
+
+export circuit gteU128(a: U128, b: U128): Boolean {
+    return disclose(MathU128_gteU128(a, b));
 }
 
 export circuit add(a: Uint<128>, b: Uint<128>): U256 {
@@ -66,6 +84,14 @@ export circuit add(a: Uint<128>, b: Uint<128>): U256 {
 
 export circuit addU128(a: U128, b: U128): U256 {
     return disclose(MathU128_addU128(a, b));
+}
+
+export circuit addChecked(a: Uint<128>, b: Uint<128>): Uint<128> {
+    return disclose(MathU128_addChecked(a, b));
+}
+
+export circuit addCheckedU128(a: U128, b: U128): Uint<128> {
+    return disclose(MathU128_addCheckedU128(a, b));
 }
 
 export circuit sub(a: Uint<128>, b: Uint<128>): Uint<128> {
@@ -82,6 +108,14 @@ export circuit mul(a: Uint<128>, b: Uint<128>): U256 {
 
 export circuit mulU128(a: U128, b: U128): U256 {
     return disclose(MathU128_mulU128(a, b));
+}
+
+export circuit mulChecked(a: Uint<128>, b: Uint<128>): Uint<128> {
+    return disclose(MathU128_mulChecked(a, b));
+}
+
+export circuit mulCheckedU128(a: U128, b: U128): Uint<128> {
+    return disclose(MathU128_mulCheckedU128(a, b));
 }
 
 export circuit div(a: Uint<128>, b: Uint<128>): Uint<128> {

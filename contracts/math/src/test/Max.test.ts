@@ -42,6 +42,24 @@ describe('Max', () => {
     });
   });
 
+  describe('MAX_FIELD', () => {
+    test('should return 28948022309329048855892746252171976963317496166410141009864396001978282409983', () => {
+      expect(maxSimulator.MAX_FIELD()).toBe(
+        28948022309329048855892746252171976963317496166410141009864396001978282409983n,
+      );
+    });
+  });
+
+  describe('MAX_UINT254', () => {
+    test('should return U256 with max Uint<254> values', () => {
+      const result = maxSimulator.MAX_UINT254();
+      expect(result.low.low).toBe(18446744073709551615n);
+      expect(result.low.high).toBe(18446744073709551615n);
+      expect(result.high.low).toBe(18446744073709551615n);
+      expect(result.high.high).toBe(4611686018427387903n);
+    });
+  });
+
   describe('MAX_U128', () => {
     test('should return U128 with max values', () => {
       const result = maxSimulator.MAX_U128();

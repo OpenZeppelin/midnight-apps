@@ -82,14 +82,26 @@ export class MathU256Simulator
     return result.result;
   }
 
-  public le(a: U256, b: U256): boolean {
-    const result = this.contract.circuits.le(this.circuitContext, a, b);
+  public lt(a: U256, b: U256): boolean {
+    const result = this.contract.circuits.lt(this.circuitContext, a, b);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public lte(a: U256, b: U256): boolean {
+    const result = this.contract.circuits.lte(this.circuitContext, a, b);
     this.circuitContext = result.context;
     return result.result;
   }
 
   public gt(a: U256, b: U256): boolean {
     const result = this.contract.circuits.gt(this.circuitContext, a, b);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public gte(a: U256, b: U256): boolean {
+    const result = this.contract.circuits.gte(this.circuitContext, a, b);
     this.circuitContext = result.context;
     return result.result;
   }
@@ -200,6 +212,18 @@ export class MathU256Simulator
       value,
       divisor,
     );
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public fromU256(a: U256): bigint {
+    const result = this.contract.circuits.fromU256(this.circuitContext, a);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public toU256(a: bigint): U256 {
+    const result = this.contract.circuits.toU256(this.circuitContext, a);
     this.circuitContext = result.context;
     return result.result;
   }

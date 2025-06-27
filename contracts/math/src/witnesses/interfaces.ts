@@ -57,4 +57,10 @@ export interface IMathU256Witnesses<L, P> {
     a: bigint,
     b: bigint,
   ): [P, DivResultU128];
+
+  divUint254Locally(
+    context: WitnessContext<L, P>,
+    a: bigint,
+    b: bigint,
+  ): [P, DivResultU256];
 }

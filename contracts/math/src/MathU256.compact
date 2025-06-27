@@ -11,8 +11,11 @@ pragma language_version >= 0.15.0;
  *
  * Supported Mathematical Operations:
  * - Comparisons:
- *   - le(): Checks if one 256-bit number is less than another.
+ *   - eq(): Checks if two 256-bit numbers are equal.
+ *   - lt(): Checks if one 256-bit number is less than another.
+ *   - lte(): Checks if one 256-bit number is less than or equal to another.
  *   - gt(): Checks if one 256-bit number is greater than another.
+ *   - gte(): Checks if one 256-bit number is greater than or equal to another.
  * - Arithmetic:
  *   - add(): Adds two 256-bit numbers, checking for overflow.
  *   - sub(): Subtracts one 256-bit number from another, checking for underflow.
@@ -25,16 +28,23 @@ pragma language_version >= 0.15.0;
  *   - sqrt(): Computes the floor of the square root of a 256-bit number, with special cases
  *     for efficiency.
  * - Utility:
+ *   - MODULUS(): Returns the modulus value for U256 high part (2^128).
+ *   - MODULUS_U256(): Returns a U256 struct representing the modulus value for U256 high part (2^128).
  *   - ZERO_U256(): Returns a U256 struct representing zero.
- *   - MAX_U256(): Returns a U256 struct representing the maximum 256-bit value (2^256 - 1).
- *   - isZero(): Checks if a U256 value equals zero.
- *   - isMultiple(): Checks if one 256-bit number is a multiple of another.
  *   - min(): Returns the smaller of two 256-bit numbers.
  *   - max(): Returns the larger of two 256-bit numbers.
+ *   - isMultiple(): Checks if one 256-bit number is a multiple of another.
+ *   - isZero(): Checks if a U256 value equals zero.
+ *   - isLowestLimbOnly(): Checks if a U256 value has a specific value in its lowest limb and zeros elsewhere.
+ *   - isSecondLowestLimbOnly(): Checks if a U256 value has a specific value in its second lowest limb and zeros elsewhere.
+ *   - isThirdLowestLimbOnly(): Checks if a U256 value has a specific value in its third lowest limb and zeros elsewhere.
+ *   - isHighestLimbOnly(): Checks if a U256 value has a specific value in its highest limb and zeros elsewhere.
+ *   - isExceedingFieldSize(): Checks if a U256 value exceeds the field size (2^254 - 1).
  *
  * TODO: Future Operations:
  * - pow(), powU256(): Compute the power of a 256-bit number raised to a given exponent.
- * - fromU256(), toU256(): Needs support of Uint<256> type.
+ * - fromU256(), toU256(): Conversion to and from Uint<256> is not currently implemented, 
+ *   as it requires native support for the Uint<256> type. 
  */
 module MathU256 {
     import CompactStandardLibrary;
@@ -44,27 +54,160 @@ module MathU256 {
     import "./interfaces/IMathU256";
 
     import Max;
+
     import MathU128 prefix MathU128_;
 
     /**
+     * @title MODULUS circuit
+     * @description A pure circuit that returns the modulus value for U256 high part (2^128).
+     *
+     * @circuitInfo k=10, rows=128
+     *
+     * @returns {Uint<129>} The value 2^128 (340282366920938463463374607431768211456).
+     */
+    export pure circuit MODULUS(): Uint<129> {
+        return 340282366920938463463374607431768211456; // 2^128
+    }
+
+    /**
+     * @title MODULUS_U256 circuit
+     * @description A pure circuit that returns the modulus value for U256 high part (2^128) as a U256 struct.
+     *
+     * @circuitInfo k=10, rows=128
+     *
+     * @returns {U256} The value 2^128 as a U256 struct { low: {0, 0}, high: {1, 0} }.
+     */
+    export pure circuit MODULUS_U256(): U256 {
+        return U256 {
+            low: U128 { low: 0, high: 0 },
+            high: U128 { low: 1, high: 0 }
+        }; // 2^128
+    }
+
+    /**
+     * @title ZERO_U256 circuit
      * @description Returns a U256 struct representing zero.
      *
+     * @remarks
      * This circuit returns a U256 struct with all fields set to zero:
      * {low: {0, 0}, high: {0, 0}}, representing the 256-bit value 0.
      * No computations are performed, only struct construction.
      *
-     * @returns U256 A U256 struct representing 0.
+     * @circuitInfo k=10, rows=128
+     *
+     * @returns {U256} A U256 struct representing 0.
      */
     export circuit ZERO_U256(): U256 {
         return U256 {
             low: U128 { low: 0, high: 0 },
             high: U128 { low: 0, high: 0 }
         };
+    } 
+
+    /**
+     * @title fromU256 circuit
+     * @description Converts a U256 struct to a Uint<254>, checking if the value fits within 254 bits.
+     *
+     * @remark
+     * Theoretical Description:
+     * This circuit converts a U256 struct to a 254-bit unsigned integer, ensuring the value
+     * doesn't exceed 254 bits. The U256 value is reconstructed as value = high * 2^128 + low
+     * and validated against the 254-bit limit.
+     *
+     * Mathematical Steps:
+     * 1. Reconstruct U256 Value:
+     *    - Convert high U128 to Uint<128> using MathU128_fromU128.
+     *    - Convert low U128 to Uint<128> using MathU128_fromU128.
+     *    - Compute value = high * 2^128 + low.
+     * 2. 254-bit Validation:
+     *    - Check if value < 2^254 (254-bit limit).
+     *    - If value >= 2^254, throw "MathU256: value exceeds 254 bits".
+     * 3. Convert to Uint<254>:
+     *    - Cast the validated value to Uint<254>.
+     * 4. Return Result:
+     *    - Return the 254-bit unsigned integer.
+     *
+     * @circuitInfo k=10, rows=816
+     *
+     * @param {U256} a - The U256 struct to convert.
+     *
+     * @throws {Error} "MathU256: fromU256() - value exceeds 254 bits" If the U256 value is >= 2^254.
+     *
+     * @returns {Uint<254>} The 254-bit representation of the U256 value.
+     */
+    export circuit fromU256(a: U256): Uint<254> {
+        assert (!isExceedingFieldSize(a)) "MathU256: fromU256() - value exceeds 254 bits";
+
+        // Compute highShifted = valueU256.high * 2^128 as a U256 struct
+        const highShiftedU256 = U256 { low: U128 { low: 0, high: 0 }, high: a.high }; // Equivalent to value.high * 2^128
+        // Represent valueU256.low as a U256 struct
+        const lowU256 = U256 { low: a.low, high: U128 { low: 0, high: 0 } };
+        // Add using addU256 to get the combined result
+        const resultU256 = add(highShiftedU256, lowU256);
+        
+        // Extract the actual values from U128 structs
+        const highValue = MathU128_fromU128(resultU256.high);
+        const lowValue = MathU128_fromU128(resultU256.low);
+        
+        // Combine high and low parts: high * 2^128 + low, with explicit casts
+        const highField = highValue as Field;
+        const modulusField = MODULUS() as Field;
+        const lowField = lowValue as Field;
+        const result = highField * modulusField + lowField;
+        
+        return result as Uint<254>;
     }
 
     /**
+     * @title toU256 circuit
+     * @description Converts a Uint<254> to a U256 struct.
+     *
+     * @remarks
+     * Splits the 254-bit integer into two 128-bit halves and packs them into
+     * the U256 struct, then verifies lossless conversion.
+     * 
+     * @circuitInfo k=10, rows=739
+     *
+     * @param {Uint<254>} a - The 254-bit unsigned integer to convert.
+     *
+     * @returns {U256} The U256 struct representation.
+     */
+    export circuit toU256(a: Uint<254>): U256 {
+        // split into high and low 128-bit parts
+        const { quotient, remainder } = divUint254Locally(a, MODULUS());
+
+        // extract the U128 limbs
+        const lowU128  = remainder.low;
+        const highU128 = quotient.low;
+
+        // build the result struct
+        const result = U256 {
+            low:  lowU128,
+            high: highU128
+        };
+
+        // reconstruct via placement + add, no 256-bit multiply
+        const lowU256 = U256 {
+            low: lowU128,
+            high: U128 { low: 0, high: 0 }
+        };
+        const highU256 = U256 {
+            low: U128 { low: 0, high: 0 },
+            high: highU128
+        };
+        const reconstructed = add(highU256, lowU256);
+
+        // verify we recovered the original a exactly
+        assert(eq(reconstructed, result)) "MathU256: conversion invalid";
+
+        return result;
+    }
+
+    /**
+     * @title eq circuit
      * @description Compares two U256 values to check if a == b.
      *
+     * @remarks
      * This circuit compares two 256-bit numbers A = a.high * 2^128 + a.low and
      * B = b.high * 2^128 + b.low, where a.high, a.low, b.high, b.low are in [0, 2^128 - 1],
      * to determine if A == B. It performs a field-wise comparison of the high and low parts,
@@ -76,17 +219,49 @@ module MathU256 {
      * - A.low == B.low (using MathU128_eqU128).
      * The result is true only if both conditions hold.
      *
-     * @param a The first U256 value.
-     * @param b The second U256 value.
-     * @returns Boolean True if a == b, false otherwise.
+     * @circuitInfo k=11, rows=1410
+     *
+     * @param {U256} a - The first U256 value.
+     * @param {U256} b - The second U256 value.
+     *
+     * @returns {Boolean} True if a == b, false otherwise.
      */
     export circuit eq(a: U256, b: U256): Boolean {
         return MathU128_eqU128(a.high, b.high) && MathU128_eqU128(a.low, b.low);
-    } 
+    }
 
     /**
+     * @title lt circuit
+     * @description Compares two U256 values to check if a < b.
+     *
+     * @remarks
+     * Theoretical Description:
+     * This circuit compares two 256-bit numbers A = a.high * 2^128 + a.low and
+     * B = b.high * 2^128 + b.low, where a.high, a.low, b.high,
+     * b.low are in [0, 2^128 - 1], to determine if A < B. It performs a lexicographical
+     * comparison by checking the high parts first, then the low parts if the high parts are
+     * equal, returning true if A < B, false otherwise. No arithmetic operations are performed,
+     * only comparisons and logical operations (OR, AND).
+     *
+     * @circuitInfo k=11, rows=1495
+     *
+     * @param {U256} a - The first U256 value.
+     * @param {U256} b - The second U256 value.
+     *
+     * @returns {Boolean} True if a < b, false otherwise.
+     */
+    export circuit lt(a: U256, b: U256): Boolean {
+        return MathU128_ltU128(a.high, b.high) || (
+            MathU128_eqU128(a.high, b.high) && 
+            MathU128_ltU128(a.low, b.low)
+        );
+    }
+
+    /**
+     * @title lte circuit
      * @description Compares two U256 values to check if a <= b.
      *
+     * @remarks
      * Theoretical Description:
      * This circuit compares two 256-bit numbers A = a.high * 2^128 + a.low and
      * B = b.high * 2^128 + b.low, where a.high, a.low, b.high, b.low are in [0, 2^128 - 1],
@@ -94,17 +269,22 @@ module MathU256 {
      * parts first, then the low parts if the high parts are equal, returning true if A <= B,
      * false otherwise.
      *
-     * @param a The first U256 value.
-     * @param b The second U256 value.
-     * @returns Boolean True if a <= b, false otherwise.
+     * @circuitInfo k=11, rows=1518
+     *
+     * @param {U256} a - The first U256 value.
+     * @param {U256} b - The second U256 value.
+     *
+     * @returns {Boolean} True if a <= b, false otherwise.
      */
-    export circuit le(a: U256, b: U256): Boolean {
-        return MathU128_leU128(a.high, b.high) && MathU128_leU128(a.low, b.low);
+    export circuit lte(a: U256, b: U256): Boolean {
+        return lt(a, b) || eq(a, b);
     }
 
     /**
+     * @title gt circuit
      * @description Compares two U256 values to check if a > b.
      *
+     * @remarks
      * Theoretical Description:
      * This circuit compares two 256-bit numbers A = a.high * 2^128 + a.low and
      * B = b.high * 2^128 + b.low, where a.high, a.low, b.high,
@@ -113,9 +293,12 @@ module MathU256 {
      * equal, returning true if A > B, false otherwise. No arithmetic operations are performed,
      * only comparisons and logical operations (OR, AND).
      *
-     * @param a The first U256 value.
-     * @param b The second U256 value.
-     * @returns Boolean True if a > b, false otherwise.
+     * @circuitInfo k=11, rows=1495
+     *
+     * @param {U256} a - The first U256 value.
+     * @param {U256} b - The second U256 value.
+     *
+     * @returns {Boolean} True if a > b, false otherwise.
      */
     export circuit gt(a: U256, b: U256): Boolean {
         return MathU128_gtU128(a.high, b.high) || (
@@ -125,8 +308,33 @@ module MathU256 {
     }
 
     /**
+     * @title gte circuit
+     * @description Compares two U256 values to check if a >= b.
+     *
+     * @remarks
+     * Theoretical Description:
+     * This circuit compares two 256-bit numbers A = a.high * 2^128 + a.low and
+     * B = b.high * 2^128 + b.low, where a.high, a.low, b.high, b.low are in [0, 2^128 - 1],
+     * to determine if A >= B. It performs a lexicographical comparison by checking the high
+     * parts first, then the low parts if the high parts are equal, returning true if A >= B,
+     * false otherwise.
+     *
+     * @circuitInfo k=11, rows=1518
+     *
+     * @param {U256} a - The first U256 value.
+     * @param {U256} b - The second U256 value.
+     *
+     * @returns {Boolean} True if a >= b, false otherwise.
+     */
+    export circuit gte(a: U256, b: U256): Boolean {
+        return gt(a, b) || eq(a, b);
+    }
+
+    /**
+     * @title add circuit
      * @description Adds two U256 values, checking for overflow.
      *
+     * @remarks
      * Theoretical Description:
      * This circuit computes the sum S = A + B of two 256-bit numbers represented as U256 structs,
      * where A = a.high * 2^128 + a.low, B = b.high * 2^128 + b.low, and
@@ -151,13 +359,17 @@ module MathU256 {
      *    - Return U256 {low: lowResult, high: highSum.low}, representing
      *      S = highSum.low * 2^128 + lowResult.
      *
-     * @param a The first U256 value to add.
-     * @param b The second U256 value to add.
-     * @returns U256 The sum of a and b.
-     * @throws MathU256: addition overflow If the sum exceeds 2^256 - 1.
+     * @circuitInfo k=12, rows=2208
+     *
+     * @param {U256} a - The first U256 value to add.
+     * @param {U256} b - The second U256 value to add.
+     *
+     * @throws {Error} "MathU256: addition overflow" If the sum exceeds 2^256 - 1.
+     *
+     * @returns {U256} The sum of a and b.
      */
     export circuit add(a: U256, b: U256): U256 {
-        assert (!eq(a, MAX_U256()) && !isZero(b), "MathU256: addition overflow");
+        assert (!(eq(a, MAX_U256()) && !isZero(b))) "MathU256: addition overflow";
 
         // Special case: a = 0, return b
         if (isZero(a)) {
@@ -170,7 +382,7 @@ module MathU256 {
             const carry = lowSum.high.low; // 0 or 1
             const bHighCarrySum = MathU128_addU128(b.high, MathU128_toU128(carry));
             const highSum = MathU128_addU128(a.high, bHighCarrySum.low);
-            assert (MathU128_isZeroU128(highSum.high), "MathU256: addition overflow");
+            assert (MathU128_isZeroU128(highSum.high)) "MathU256: addition overflow";
             return U256 {
                 low: lowSum.low,
                 high: highSum.low
@@ -179,8 +391,10 @@ module MathU256 {
     }
 
     /**
+     * @title sub circuit
      * @description Subtracts one U256 value from another, checking for underflow.
      *
+     * @remarks
      * Theoretical Description:
      * This circuit computes the difference D = A - B of two 256-bit numbers represented as U256
      * structs, where A = a.high * 2^128 + a.low, B = b.high * 2^128 + b.low,
@@ -207,10 +421,14 @@ module MathU256 {
      *      D = highDiff * 2^128 + lowDiff.
      * The underflow check ensures D >= 0, and the result is in [0, 2^256 - 1].
      *
-     * @param a The U256 value to subtract from (minuend).
-     * @param b The U256 value to subtract (subtrahend).
-     * @returns U256 The difference between a and b.
-     * @throws MathU256: subtraction underflow If a < b.
+     * @circuitInfo k=11, rows=1271
+     *
+     * @param {U256} a - The U256 value to subtract from (minuend).
+     * @param {U256} b - The U256 value to subtract (subtrahend).
+     *
+     * @throws {Error} "MathU256: subtraction underflow" If a < b.
+     *
+     * @returns {U256} The difference between a and b.
      */
     export circuit sub(a: U256, b: U256): U256 {
         if (isZero(b)) {
@@ -221,10 +439,10 @@ module MathU256 {
             return ZERO_U256();
         } else {
             // Check for underflow: a must be >= b
-            assert (gt(a, b) || eq(a, b), "MathU256: subtraction underflow");
+            assert (gt(a, b) || eq(a, b)) "MathU256: subtraction underflow";
             
             // Handle low part subtraction with borrow
-            const borrow = MathU128_leU128(a.low, b.low) ? 1 : 0;
+            const borrow = MathU128_lteU128(a.low, b.low) ? 1 : 0;
             const highWithBorrow = MathU128_addU128(b.high, MathU128_toU128(borrow)).low;
             const highDiff = MathU128_subU128(a.high, highWithBorrow);
 
@@ -246,8 +464,10 @@ module MathU256 {
 
    
     /**
+     * @title mul circuit
      * @description Multiplies two U256 values, checking for overflow.
      *
+     * @remarks
      * Theoretical Description:
      * This circuit computes the product P = A * B of two 256-bit numbers represented as U256
      * structs, where A = a.high * 2^128 + a.low, B = b.high * 2^128 + b.low,
@@ -280,13 +500,17 @@ module MathU256 {
      * 5. Return Result:
      *    - Return result as a U256 struct.
      *
-     * @param a The first U256 value to multiply.
-     * @param b The second U256 value to multiply.
-     * @returns U256 The product of a and b.
-     * @throws MathU256: multiplication overflow If the product exceeds 2^256 - 1.
+     * @circuitInfo k=14, rows=9249
+     *
+     * @param {U256} a - The first U256 value to multiply.
+     * @param {U256} b - The second U256 value to multiply.
+     *
+     * @throws {Error} "MathU256: multiplication overflow" If the product exceeds 2^256 - 1.
+     *
+     * @returns {U256} The product of a and b.
      */
     export circuit mul(a: U256, b: U256): U256 {
-        assert (!eq(a, MAX_U256()) && !MathU128_gtU128(b.low, U128 { low: 1, high: 0 }), "MathU256: multiplication overflow");
+        assert (!(eq(a, MAX_U256()) && MathU128_gtU128(b.low, U128 { low: 1, high: 0 }))) "MathU256: multiplication overflow";
 
         if (isZero(a) || isZero(b)) {
             // Special case: a = 0 or b = 0, return 0
@@ -313,15 +537,17 @@ module MathU256 {
             const hhShifted = add(high, crossCarry); // Align hh and add carry
 
             // Check that upper 256 bits from partial products are zero
-            assert (isZero(hhShifted), "MathU256: multiplication overflow");
+            assert (isZero(hhShifted)) "MathU256: multiplication overflow";
 
             return lowAndCross;
         }
     }
 
     /**
+     * @title div circuit
      * @description Internal implementation to divide a U256 a by a U256 b, returning quotient and remainder.
      *
+     * @remarks
      * Theoretical Description:
      * This circuit computes the quotient `quot` and remainder `rem` of dividing a 256-bit number
      * a = a.high * 2^128 + a.low by another 256-bit number
@@ -350,15 +576,19 @@ module MathU256 {
      * 5. Return Result:
      *    - Return DivResultU256 {quotient: quotientU256, remainder: remainderU256}.
      *
-     * @param a The U256 value to divide (dividend).
-     * @param b The U256 value to divide by (divisor).
-     * @returns DivResultU256 The quotient and remainder of the division as U256 structs.
-     * @throws MathU256: division by zero If b = 0.
-     * @throws MathU256: remainder error If remainder is not less than or equal to b.
-     * @throws MathU256: division invalid If quotient * b + remainder does not equal a.
+     * @circuitInfo k=14, rows=10912
+     *
+     * @param {U256} a - The U256 value to divide (dividend).
+     * @param {U256} b - The U256 value to divide by (divisor).
+     *
+     * @throws {Error} "MathU256: division by zero" If b = 0.
+     * @throws {Error} "MathU256: remainder error" If remainder is not less than or equal to b.
+     * @throws {Error} "MathU256: division invalid" If quotient * b + remainder does not equal a.
+     *
+     * @returns {DivResultU256} The quotient and remainder of the division as U256 structs.
      */
     circuit _div(a: U256, b: U256): DivResultU256 {
-        assert (!isZero(b), "MathU256: division by zero");
+        assert (!isZero(b)) "MathU256: division by zero";
         
         if (isZero(a)) {
             // Dividend is zero: quotient = 0, remainder = 0
@@ -378,7 +608,7 @@ module MathU256 {
                 quotient: U256 { low: U128 { low: 1, high: 0 }, high: U128 { low: 0, high: 0 } },
                 remainder: ZERO_U256()
             };
-        } else if (le(a, b)) {
+        } else if (lte(a, b)) {
             // Dividend less than divisor: quotient = 0, remainder = a
             return DivResultU256 {
                 quotient: ZERO_U256(),
@@ -389,55 +619,69 @@ module MathU256 {
 
             // Verify remainder < b
             const remainderU256 = result.remainder;
-            assert (le(remainderU256, b), "MathU256: remainder error");
+            assert (lte(remainderU256, b)) "MathU256: remainder error";
 
             // Verify: quotient * b + remainder == a
             const quotientU256 = result.quotient;
             const product = mul(quotientU256, b);
             const sum = add(product, remainderU256);
 
-            assert (eq(sum, a), "MathU256: division invalid");
+            assert (eq(sum, a)) "MathU256: division invalid";
 
             return result;
         } 
     }
 
     /**
+     * @title div circuit
      * @description Divides a U256 a by a U256 b, returning quotient.
      *
-     * @param a The U256 value to divide.
-     * @param b The U256 value to divide by.
-     * @returns U256 The quotient of the division.
+     * @circuitInfo k=14, rows=10912
+     *
+     * @param {U256} a - The U256 value to divide.
+     * @param {U256} b - The U256 value to divide by.
+     *
+     * @returns {U256} The quotient of the division.
      */
     export circuit div(a: U256, b: U256): U256 {
         return _div(a, b).quotient;
     }
 
     /**
+     * @title rem circuit
      * @description Computes the remainder of dividing a U256 a by a U256 b.
      *
-     * @param a The U256 value to divide.
-     * @param b The U256 value to divide by.
-     * @returns U256 The remainder of the division.
+     * @circuitInfo k=14, rows=10912
+     *
+     * @param {U256} a - The U256 value to divide.
+     * @param {U256} b - The U256 value to divide by.
+     *
+     * @returns {U256} The remainder of the division.
      */
     export circuit rem(a: U256, b: U256): U256 {
         return _div(a, b).remainder;
     }
 
     /**
+     * @title divRem circuit
      * @description Computes the quotient and remainder of dividing a U256 a by a U256 b.
      *
-     * @param a The U256 value to divide.
-     * @param b The U256 value to divide by.
-     * @returns DivResultU256 The quotient and remainder of the division as U256 structs.
+     * @circuitInfo k=14, rows=11020
+     *
+     * @param {U256} a - The U256 value to divide.
+     * @param {U256} b - The U256 value to divide by.
+     *
+     * @returns {DivResultU256} The quotient and remainder of the division as U256 structs.
      */
     export circuit divRem(a: U256, b: U256): DivResultU256 {
         return _div(a, b);
     }
 
     /**
+     * @title sqrt circuit
      * @description Computes the square root of a U256 value, verified on-chain.
      *
+     * @remarks
      * Theoretical Description:
      * This circuit computes the floor of the square root R = floor(sqrt(N)) of a 256-bit number
      * N = radicand.high * 2^128 + radicand.low, where radicand.high, radicand.low are in
@@ -468,10 +712,14 @@ module MathU256 {
      * 4. Return Result:
      *    - Return R as Uint<128>.
      *
-     * @param radicand The U256 value to compute the square root of.
-     * @returns Uint<128> The floor of the square root of radicand.
-     * @throws MathU256: sqrt overestimate If R^2 > N.
-     * @throws MathU256: sqrt underestimate If (R + 1)^2 <= N.
+     * @circuitInfo k=14, rows=11693
+     *
+     * @param {U256} radicand - The U256 value to compute the square root of.
+     *
+     * @throws {Error} "MathU256: sqrt overestimate" If R^2 > N.
+     * @throws {Error} "MathU256: sqrt underestimate" If (R + 1)^2 <= N.
+     *
+     * @returns {Uint<128>} The floor of the square root of radicand.
      */
     export circuit sqrt(radicand: U256): Uint<128> {
         if (isZero(radicand)) {
@@ -501,19 +749,21 @@ module MathU256 {
         } else {
             const root = sqrtU256Locally(radicand);
             const rootSquareU256 = MathU128_mul(root, root);
-            assert(!gt(rootSquareU256, radicand), "MathU256: sqrt overestimate");
+            assert (!gt(rootSquareU256, radicand)) "MathU256: sqrt overestimate";
 
             const next = MathU128_add(root, 1);
             const nextSquareU256 = mul(next, next);
-            assert(gt(nextSquareU256, radicand), "MathU256: sqrt underestimate");
+            assert (gt(nextSquareU256, radicand)) "MathU256: sqrt underestimate";
 
             return root;
         }
     }
 
     /**
+     * @title min circuit
      * @description Returns the minimum of two U256 values.
      *
+     * @remarks
      * Theoretical Description:
      * This circuit computes the minimum of two 256-bit numbers A = a.high * 2^128 + a.low
      * and B = b.high * 2^128 + b.low, where a.high, a.low, b.high,
@@ -528,17 +778,22 @@ module MathU256 {
      * The operation involves comparison and conditional selection, with no arithmetic operations
      * beyond the comparison logic. The result is a U256 struct representing min(A, B).
      *
-     * @param a The first U256 value.
-     * @param b The second U256 value.
-     * @returns U256 The smaller of a and b.
+     * @circuitInfo k=12, rows=2208
+     *
+     * @param {U256} a - The first U256 value.
+     * @param {U256} b - The second U256 value.
+     *
+     * @returns {U256} The smaller of a and b.
      */
     export circuit min(a: U256, b: U256): U256 {
-        return le(a, b) ? a : b;
+        return lte(a, b) ? a : b;
     }
 
     /**
+     * @title max circuit
      * @description Returns the maximum of two U256 values.
      *
+     * @remarks
      * Theoretical Description:
      * This circuit computes the maximum of two 256-bit numbers A = a.high * 2^128 + a.low
      * and B = b.high * 2^128 + b.low, where a.high, a.low, b.high,
@@ -553,35 +808,102 @@ module MathU256 {
      * The operation involves comparison and conditional selection, with no arithmetic operations
      * beyond the comparison logic. The result is a U256 struct representing max(A, B).
      *
-     * @param a The first U256 value.
-     * @param b The second U256 value.
-     * @returns U256 The larger of a and b.
+     * @circuitInfo k=12, rows=2208
+     *
+     * @param {U256} a - The first U256 value.
+     * @param {U256} b - The second U256 value.
+     *
+     * @returns {U256} The larger of a and b.
      */
     export circuit max(a: U256, b: U256): U256 {
-        return le(a, b) ? b : a;
+        return lte(a, b) ? b : a;
     }
 
     /**
+     * @title isZero circuit
      * @description Checks if a U256 value equals zero.
      *
+     * @remarks
+     * Theoretical Description:
      * This circuit checks if a 256-bit number A = a.high * 2^128 + a.low is zero by verifying
      * that all fields (a.high.low, a.high.high, a.low.low, a.low.high) are zero.
      * Returns true if A = 0, false otherwise. No arithmetic operations are performed,
      * only field comparisons and logical operations (AND).
      *
-     * @param a The U256 value to check.
-     * @returns Boolean True if a equals zero, false otherwise.
+     * @circuitInfo k=10, rows=128
+     *
+     * @param {U256} a - The U256 value to check.
+     *
+     * @returns {Boolean} True if a equals zero, false otherwise.
      */
     export circuit isZero(a: U256): Boolean {
         return eq(a, ZERO_U256());
     }
 
     /**
+     * @title isExceedingFieldSize circuit
+     * @description Checks if a U256 value exceeds the field size (2^254 - 1).
+     *
+     * @remarks
+     * Theoretical Description:
+     * This circuit efficiently checks if a 256-bit number exceeds the maximum field value
+     * (2^254 - 1) by comparing the limbs directly, avoiding expensive reconstruction and
+     * multiplication operations. The field size limit is 2^254 - 1, which means the highest
+     * 2 bits of the 256-bit number must be zero.
+     *
+     * Mathematical Steps:
+     * 1. Check Highest Limb:
+     *    - The highest limb (a.high.high) must be <= 4611686018427387903 (2^62 - 1).
+     *    - If a.high.high > 4611686018427387903, the value exceeds field size.
+     * 2. Check Other Limbs:
+     *    - If a.high.high == 4611686018427387903, then a.high.low must be <= MAX_UINT64.
+     *    - If a.high.high == 4611686018427387903 and a.high.low == MAX_UINT64, then
+     *      a.low.high and a.low.low must be <= MAX_UINT64.
+     * 3. Return Result:
+     *    - Return true if the value exceeds field size, false otherwise.
+     *
+     * This approach is much more efficient than reconstructing the full value and comparing.
+     *
+     * @circuitInfo k=10, rows=128
+     *
+     * @param {U256} a - The U256 value to check.
+     *
+     * @returns {Boolean} True if a exceeds field size (2^254 - 1), false otherwise.
+     */
+    export circuit isExceedingFieldSize(a: U256): Boolean {
+        const maxUint64 = 18446744073709551615; // 2^64 - 1
+        const maxHighHigh = 4611686018427387903; // 2^62 - 1 (highest 2 bits must be 0)
+        
+        // Check if highest limb exceeds the limit
+        if (a.high.high > maxHighHigh) {
+            return true;
+        }
+        
+        // If highest limb is at the limit, check other limbs
+        if (a.high.high == maxHighHigh) {
+            if (a.high.low > maxUint64) {
+                return true;
+            }
+            if (a.high.low == maxUint64) {
+                if (a.low.high > maxUint64 || a.low.low > maxUint64) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * @title isLowestLimbOnly circuit
      * @description Checks if a U256 value has a specific value in its lowest limb and zeros elsewhere.
      *
-     * @param val The U256 value to check.
-     * @param limbValue The value to check in the lowest limb.
-     * @returns Boolean True if val has the specified value in its lowest limb and zeros elsewhere.
+     * @circuitInfo k=10, rows=128
+     *
+     * @param {U256} val - The U256 value to check.
+     * @param {Uint<64>} limbValue - The value to check in the lowest limb.
+     *
+     * @returns {Boolean} True if val has the specified value in its lowest limb and zeros elsewhere.
      */
     export circuit isLowestLimbOnly(val: U256, limbValue: Uint<64>): Boolean {
         return val.low.low == limbValue &&
@@ -591,11 +913,15 @@ module MathU256 {
     }
 
     /**
+     * @title isSecondLimbOnly circuit
      * @description Checks if a U256 value has a specific value in its second lowest limb and zeros elsewhere.
      *
-     * @param val The U256 value to check.
-     * @param limbValue The value to check in the second lowest limb.
-     * @returns Boolean True if val has the specified value in its second lowest limb and zeros elsewhere.
+     * @circuitInfo k=10, rows=128
+     *
+     * @param {U256} val - The U256 value to check.
+     * @param {Uint<64>} limbValue - The value to check in the second lowest limb.
+     *
+     * @returns {Boolean} True if val has the specified value in its second lowest limb and zeros elsewhere.
      */
     export circuit isSecondLimbOnly(val: U256, limbValue: Uint<64>): Boolean {
         return val.low.low == 0 &&
@@ -605,11 +931,15 @@ module MathU256 {
     }
 
     /**
+     * @title isThirdLimbOnly circuit
      * @description Checks if a U256 value has a specific value in its second highest limb and zeros elsewhere.
      *
-     * @param val The U256 value to check.
-     * @param limbValue The value to check in the second highest limb.
-     * @returns Boolean True if val has the specified value in its second highest limb and zeros elsewhere.
+     * @circuitInfo k=10, rows=128
+     *
+     * @param {U256} val - The U256 value to check.
+     * @param {Uint<64>} limbValue - The value to check in the second highest limb.
+     *
+     * @returns {Boolean} True if val has the specified value in its second highest limb and zeros elsewhere.
      */
     export circuit isThirdLimbOnly(val: U256, limbValue: Uint<64>): Boolean {
         return val.low.low == 0 &&
@@ -619,11 +949,15 @@ module MathU256 {
     }
 
     /**
+     * @title isHighestLimbOnly circuit
      * @description Checks if a U256 value has a specific value in its highest limb and zeros elsewhere.
      *
-     * @param val The U256 value to check.
-     * @param limbValue The value to check in the highest limb.
-     * @returns Boolean True if val has the specified value in its highest limb and zeros elsewhere.
+     * @circuitInfo k=10, rows=128
+     *
+     * @param {U256} val - The U256 value to check.
+     * @param {Uint<64>} limbValue - The value to check in the highest limb.
+     *
+     * @returns {Boolean} True if val has the specified value in its highest limb and zeros elsewhere.
      */
     export circuit isHighestLimbOnly(val: U256, limbValue: Uint<64>): Boolean {
         return val.low.low == 0 &&
@@ -633,8 +967,10 @@ module MathU256 {
     }
 
     /**
+     * @title isMultiple circuit
      * @description Checks if a U256 value is a multiple of another.
      *
+     * @remarks
      * Theoretical Description:
      * This circuit determines if a 256-bit number N = value.high * 2^128 + value.low is a multiple
      * of another 256-bit number M = b.high * 2^128 + b.low, where value.high,
@@ -652,12 +988,15 @@ module MathU256 {
      * The operations include division, comparison, and logical checks. The result is a boolean
      * indicating whether N is a multiple of M.
      *
-     * @param value The U256 value to check.
-     * @param b The U256 b to test against.
-     * @returns Boolean True if value is a multiple of b, false otherwise.
+     * @circuitInfo k=14, rows=10897
+     *
+     * @param {U256} value - The U256 value to check.
+     * @param {U256} b - The U256 b to test against.
+     *
+     * @returns {Boolean} True if value is a multiple of b, false otherwise.
      */
     export circuit isMultiple(value: U256, b: U256): Boolean {
-        assert (!isZero(b), "MathU256: division by zero");
+        assert (!isZero(b)) "MathU256: division by zero";
         const result = _div(value, b);
         return eq(result.remainder, ZERO_U256());
     }

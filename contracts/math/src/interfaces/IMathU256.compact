@@ -42,4 +42,13 @@ module IMathU256 {
      * @returns Uint<128> The square root of radicand.
      */
     export witness sqrtU256Locally(radicand: U256): Uint<128>;
+
+    /**
+     * @description Computes division of two Uint<254> values locally (off-chain).
+     *
+     * @param a The Uint<254> value to divide.
+     * @param b The Uint<254> value to divide by.
+     * @returns DivResultU256 The quotient and remainder of the division as U256 structs.
+     */
+    export witness divUint254Locally(a: Uint<254>, b: Uint<254>): DivResultU256;
 }

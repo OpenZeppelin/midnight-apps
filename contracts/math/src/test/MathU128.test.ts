@@ -123,42 +123,81 @@ describe('MathU128', () => {
     });
   });
 
-  describe('le', () => {
+  describe('lte', () => {
     test('should compare small numbers', () => {
-      expect(mathSimulator.le(5n, 10n)).toBe(true);
-      expect(mathSimulator.le(10n, 5n)).toBe(false);
-      expect(mathSimulator.le(5n, 5n)).toBe(true);
+      expect(mathSimulator.lte(5n, 10n)).toBe(true);
+      expect(mathSimulator.lte(10n, 5n)).toBe(false);
+      expect(mathSimulator.lte(5n, 5n)).toBe(true);
     });
 
     test('should compare max Uint<128>', () => {
-      expect(mathSimulator.le(MAX_UINT128, MAX_UINT128)).toBe(true);
-      expect(mathSimulator.le(MAX_UINT128 - 1n, MAX_UINT128)).toBe(true);
+      expect(mathSimulator.lte(MAX_UINT128, MAX_UINT128)).toBe(true);
+      expect(mathSimulator.lte(MAX_UINT128 - 1n, MAX_UINT128)).toBe(true);
     });
 
     test('should handle zero', () => {
-      expect(mathSimulator.le(0n, 1n)).toBe(true);
-      expect(mathSimulator.le(0n, 0n)).toBe(true);
+      expect(mathSimulator.lte(0n, 1n)).toBe(true);
+      expect(mathSimulator.lte(0n, 0n)).toBe(true);
     });
   });
 
-  describe('leU128', () => {
+  describe('lteU128', () => {
     test('should compare small U128 numbers', () => {
       const a: U128 = { low: 5n, high: 0n };
       const b: U128 = { low: 10n, high: 0n };
-      expect(mathSimulator.leU128(a, b)).toBe(true);
-      expect(mathSimulator.leU128(b, a)).toBe(false);
-      expect(mathSimulator.leU128(a, a)).toBe(true);
+      expect(mathSimulator.lteU128(a, b)).toBe(true);
+      expect(mathSimulator.lteU128(b, a)).toBe(false);
+      expect(mathSimulator.lteU128(a, a)).toBe(true);
     });
 
     test('should compare U128 with high parts', () => {
       const a: U128 = { low: MAX_UINT64, high: MAX_UINT64 - 1n };
       const b: U128 = { low: MAX_UINT64, high: MAX_UINT64 };
-      expect(mathSimulator.leU128(a, b)).toBe(true);
+      expect(mathSimulator.lteU128(a, b)).toBe(true);
     });
 
     test('should return true for equal U128 numbers', () => {
       const a: U128 = { low: 5n, high: 0n };
-      expect(mathSimulator.leU128(a, a)).toBe(true);
+      expect(mathSimulator.lteU128(a, a)).toBe(true);
+    });
+  });
+
+  describe('lt', () => {
+    test('should compare small numbers', () => {
+      expect(mathSimulator.lt(5n, 10n)).toBe(true);
+      expect(mathSimulator.lt(10n, 5n)).toBe(false);
+      expect(mathSimulator.lt(5n, 5n)).toBe(false);
+    });
+
+    test('should compare max Uint<128>', () => {
+      expect(mathSimulator.lt(MAX_UINT128, MAX_UINT128)).toBe(false);
+      expect(mathSimulator.lt(MAX_UINT128 - 1n, MAX_UINT128)).toBe(true);
+    });
+
+    test('should handle zero', () => {
+      expect(mathSimulator.lt(0n, 1n)).toBe(true);
+      expect(mathSimulator.lt(0n, 0n)).toBe(false);
+    });
+  });
+
+  describe('ltU128', () => {
+    test('should compare small U128 numbers', () => {
+      const a: U128 = { low: 5n, high: 0n };
+      const b: U128 = { low: 10n, high: 0n };
+      expect(mathSimulator.ltU128(a, b)).toBe(true);
+      expect(mathSimulator.ltU128(b, a)).toBe(false);
+      expect(mathSimulator.ltU128(a, a)).toBe(false);
+    });
+
+    test('should compare U128 with high parts', () => {
+      const a: U128 = { low: MAX_UINT64, high: MAX_UINT64 - 1n };
+      const b: U128 = { low: MAX_UINT64, high: MAX_UINT64 };
+      expect(mathSimulator.ltU128(a, b)).toBe(true);
+    });
+
+    test('should return false for equal U128 numbers', () => {
+      const a: U128 = { low: 5n, high: 0n };
+      expect(mathSimulator.ltU128(a, a)).toBe(false);
     });
   });
 
@@ -198,6 +237,45 @@ describe('MathU128', () => {
     test('should return false for equal U128 numbers', () => {
       const a: U128 = { low: 5n, high: 0n };
       expect(mathSimulator.gtU128(a, a)).toBe(false);
+    });
+  });
+
+  describe('gte', () => {
+    test('should compare small numbers', () => {
+      expect(mathSimulator.gte(10n, 5n)).toBe(true);
+      expect(mathSimulator.gte(5n, 10n)).toBe(false);
+      expect(mathSimulator.gte(5n, 5n)).toBe(true);
+    });
+
+    test('should compare max Uint<128>', () => {
+      expect(mathSimulator.gte(MAX_UINT128, MAX_UINT128 - 1n)).toBe(true);
+      expect(mathSimulator.gte(MAX_UINT128, MAX_UINT128)).toBe(true);
+    });
+
+    test('should handle zero', () => {
+      expect(mathSimulator.gte(1n, 0n)).toBe(true);
+      expect(mathSimulator.gte(0n, 0n)).toBe(true);
+    });
+  });
+
+  describe('gteU128', () => {
+    test('should compare small U128 numbers', () => {
+      const a: U128 = { low: 10n, high: 0n };
+      const b: U128 = { low: 5n, high: 0n };
+      expect(mathSimulator.gteU128(a, b)).toBe(true);
+      expect(mathSimulator.gteU128(b, a)).toBe(false);
+      expect(mathSimulator.gteU128(a, a)).toBe(true);
+    });
+
+    test('should compare U128 with high parts', () => {
+      const a: U128 = { low: MAX_UINT64, high: MAX_UINT64 };
+      const b: U128 = { low: MAX_UINT64, high: MAX_UINT64 - 1n };
+      expect(mathSimulator.gteU128(a, b)).toBe(true);
+    });
+
+    test('should return true for equal U128 numbers', () => {
+      const a: U128 = { low: 5n, high: 0n };
+      expect(mathSimulator.gteU128(a, a)).toBe(true);
     });
   });
 
@@ -1107,6 +1185,76 @@ describe('MathU128', () => {
       const b: U128 = { low: 0n, high: 0n };
       expect(() => mathSimulator.isMultipleU128(a, b)).toThrowError(
         'MathU128: division by zero',
+      );
+    });
+  });
+});
+
+describe('Checked Operations', () => {
+  describe('addChecked', () => {
+    test('should add two numbers within bounds', () => {
+      const a = 100n;
+      const b = 200n;
+      const result = mathSimulator.addChecked(a, b);
+      expect(result).toBe(300n);
+    });
+
+    test('should throw on overflow', () => {
+      const a = MAX_UINT128;
+      const b = 1n;
+      expect(() => mathSimulator.addChecked(a, b)).toThrow(
+        'cast from unsigned value to smaller unsigned value failed: 340282366920938463463374607431768211456 is greater than 340282366920938463463374607431768211455',
+      );
+    });
+  });
+
+  describe('addCheckedU128', () => {
+    test('should add two U128 numbers within bounds', () => {
+      const a = mathSimulator.toU128(100n);
+      const b = mathSimulator.toU128(200n);
+      const result = mathSimulator.addCheckedU128(a, b);
+      expect(result).toBe(300n);
+    });
+
+    test('should throw on overflow', () => {
+      const a = mathSimulator.toU128(2n ** 128n - 1n);
+      const b = mathSimulator.toU128(1n);
+      expect(() => mathSimulator.addCheckedU128(a, b)).toThrow(
+        'cast from unsigned value to smaller unsigned value failed: 340282366920938463463374607431768211456 is greater than 340282366920938463463374607431768211455',
+      );
+    });
+  });
+
+  describe('mulChecked', () => {
+    test('should multiply two numbers within bounds', () => {
+      const a = 100n;
+      const b = 200n;
+      const result = mathSimulator.mulChecked(a, b);
+      expect(result).toBe(20000n);
+    });
+
+    test('should throw on overflow', () => {
+      const a = 2n ** 64n;
+      const b = 2n ** 64n;
+      expect(() => mathSimulator.mulChecked(a, b)).toThrow(
+        'MathU128: multiplication overflow',
+      );
+    });
+  });
+
+  describe('mulCheckedU128', () => {
+    test('should multiply two U128 numbers within bounds', () => {
+      const a = mathSimulator.toU128(100n);
+      const b = mathSimulator.toU128(200n);
+      const result = mathSimulator.mulCheckedU128(a, b);
+      expect(result).toBe(20000n);
+    });
+
+    test('should throw on overflow', () => {
+      const a = mathSimulator.toU128(2n ** 64n);
+      const b = mathSimulator.toU128(2n ** 64n);
+      expect(() => mathSimulator.mulCheckedU128(a, b)).toThrow(
+        'MathU128: multiplication overflow',
       );
     });
   });
