@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
-import { spawn } from 'node:child_process';
+import { exec as execCallback } from 'node:child_process';
 import { existsSync, readdirSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { promisify } from 'node:util';
 import chalk from 'chalk';
 import ora, { type Ora } from 'ora';
 
@@ -122,6 +123,7 @@ export class CompactCompiler {
     index: number,
     total: number,
   ): Promise<void> {
+    const execAsync = promisify(execCallback);
     const inputPath: string = join(SRC_DIR, file);
     const outputDir: string = join(ARTIFACTS_DIR, basename(file, '.compact'));
     const step: string = `[${index + 1}/${total}]`;
@@ -130,43 +132,18 @@ export class CompactCompiler {
     ).start();
 
     try {
-      const args = [...this.flags.split(' '), inputPath, outputDir].filter(
-        Boolean,
-      );
-      const command = COMPACTC_PATH;
-
-      spinner.text = chalk.blue(`[COMPILE] ${step} Compiling ${file}...`);
-
-      return new Promise((resolve, reject) => {
-        spinner.stop();
-
-        const shortCommand = basename(command);
-        console.log(chalk.blue(`  [COMPILE] ${step} ${shortCommand} ${file}`));
-
-        const process = spawn(command, args, {
-          stdio: 'inherit',
-        });
-
-        process.on('close', (code) => {
-          if (code === 0) {
-            spinner.succeed(chalk.green(`[COMPILE] ${step} ✓ ${file}`));
-            resolve();
-          } else {
-            spinner.fail(chalk.red(`[COMPILE] ${step} ✗ ${file}`));
-            reject(new Error(`Process exited with code ${code}`));
-          }
-        });
-
-        process.on('error', (err) => {
-          spinner.fail(chalk.red(`[COMPILE] ${step} ✗ ${file}`));
-          reject(err);
-        });
-      });
-    } catch (error: unknown) {
-      spinner.fail(chalk.red(`[COMPILE] ${step} ✗ ${file}`));
-      if (error instanceof Error) {
-        this.printOutput(error.message, chalk.red);
-      }
+      const command: string =
+        `${COMPACTC_PATH} ${this.flags} "${inputPath}" "${outputDir}"`.trim();
+      spinner.text = chalk.blue(`[COMPILE] ${step} Running: ${command}`);
+      const { stdout, stderr }: { stdout: string; stderr: string } =
+        await execAsync(command);
+      spinner.succeed(chalk.green(`[COMPILE] ${step} Compiled ${file}`));
+      this.printOutput(stdout, chalk.cyan);
+      this.printOutput(stderr, chalk.yellow);
+    } catch (error: any) {
+      spinner.fail(chalk.red(`[COMPILE] ${step} Failed ${file}`));
+      this.printOutput(error.stdout, chalk.cyan);
+      this.printOutput(error.stderr, chalk.red);
       throw error;
     }
   }
