@@ -52,6 +52,16 @@ export const AccessContractPrivateState = {
     index: bigint,
   ): AccessContractPrivateState => {
     const userRoleCommitString = userRoleCommit.toString();
+    if (role === AccessControl_Role.None) {
+      // Remove the role entry if role is None
+      const { [userRoleCommitString]: _, ...remainingRoles } = state.roles;
+
+      return {
+        ...state,
+        roles: remainingRoles,
+      };
+    }
+
     return {
       ...state,
       roles: {

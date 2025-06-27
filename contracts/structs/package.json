@@ -23,6 +23,7 @@
     "vitest": "^3.0.9"
   },
   "dependencies": {
+    "@midnight-dapps/biome-config": "workspace:^",
     "@midnight-dapps/compact": "workspace:^",
     "@midnight-ntwrk/compact-runtime": "^0.8.1",
     "@midnight-ntwrk/midnight-js-network-id": "^2.0.0",

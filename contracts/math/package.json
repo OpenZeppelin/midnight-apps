@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "compact": "pnpm exec compact-compiler",
-    "build": "pnpm exec compact-builder && tsc",
+    "compact:fast": "pnpm exec compact-compiler --skip-zk",
+    "build": "tsc && pnpm exec compact-builder",
     "test": "vitest run --printConsoleTrace",
     "types": "tsc -p tsconfig.json --noEmit",
     "fmt": "biome format --write",

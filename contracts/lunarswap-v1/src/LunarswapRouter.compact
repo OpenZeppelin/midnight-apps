@@ -1,0 +1,198 @@
+pragma language_version >= 0.14.0;
+
+/**
+ * @title LunarswapRouter
+ * @description Router contract providing user-friendly interface for liquidity operations in the Lunarswap protocol.
+ * 
+ * @remarks
+ * The LunarswapRouter abstracts pair management complexity and provides simplified functions for adding and removing
+ * liquidity, handling token splitting, managing optimal amount calculations, and facilitating token swapping.
+ * 
+ * Key Features:
+ * - Simplified liquidity addition interface
+ * - Automatic token splitting and change handling
+ * - Optimal amount calculation for price maintenance
+ * - Pair creation for new token combinations 
+ */
+module LunarswapRouter {
+    import CompactStandardLibrary;
+    
+    import "./openzeppelin/Utils";
+    
+    import LunarswapLibrary prefix LunarswapLibrary_;
+    import LunarswapFactory prefix LunarswapFactory_;
+    import LunarswapPair prefix LunarswapPair_;
+    import LunarswapFee prefix LunarswapFee_;
+
+    /**
+     * @title initialize circuit
+     * @description Initializes the Lunarswap router with factory and fee configuration.
+     * 
+     * @remarks
+     * This circuit sets up the initial configuration for the router by initializing
+     * both the factory and fee management systems. It should only be called once
+     * during contract deployment.
+     *
+     * @circuitInfo k=11, rows=2000
+     *
+     * @param {Bytes<32>} lpTokenNonce      - The nonce for LP token generation.
+     * @param {Opaque<"string">} lpTokenName - The name of the LP token.
+     * @param {Opaque<"string">} lpTokenSymbol - The symbol of the LP token.
+     * @param {Uint<8>} lpTokenDecimals     - The number of decimals for LP tokens.
+     * @param {ZswapCoinPublicKey} feeToSetter_ - The address that can set protocol fees.
+     *
+     * @returns [] - No return values.
+     */
+    export circuit initialize(
+        lpTokenNonce: Bytes<32>,
+        lpTokenName: Opaque<"string">,
+        lpTokenSymbol: Opaque<"string">,
+        lpTokenDecimals: Uint<8>,
+        feeToSetter_: ZswapCoinPublicKey
+    ): [] {
+        LunarswapFactory_initialize(lpTokenNonce, lpTokenName, lpTokenSymbol, lpTokenDecimals);
+        LunarswapFee_initialize(feeToSetter_);
+        return [];
+    }
+
+    /**
+     * @title addLiquidity circuit
+     * @description Adds liquidity to a trading pair and mints LP tokens.
+     * 
+     * @remarks
+     * This circuit handles the complete liquidity addition process. It calculates
+     * optimal amounts to maintain the current price ratio, receives the tokens,
+     * returns any excess tokens to the user, and mints LP tokens to the specified
+     * recipient.
+     *
+     * TODO: Maybe we can add a deadline for the router if passed then router considered expired.
+     * TODO: Maybe I should replace all those params with witnesses.
+     *
+     * Requirements:
+     * - The pair must exist or be created during this operation
+     * - The calculated amounts must meet minimum requirements
+     *
+     * @circuitInfo k=11, rows=4000
+     *
+     * @param {Bytes<32>} identity - The unique identity hash of the pair.
+     * @param {CoinInfo} token0    - The first token to add liquidity for.
+     * @param {CoinInfo} token1    - The second token to add liquidity for.
+     * @param {Uint<128>} amount0Min - The minimum amount of token0 to add.
+     * @param {Uint<128>} amount1Min - The minimum amount of token1 to add.
+     * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The recipient of the LP tokens.
+     *
+     * @throws {Error} "LunarswapRouter: Insufficient A amount" if calculated amount is below minimum.
+     * @throws {Error} "LunarswapRouter: Insufficient B amount" if calculated amount is below minimum.
+     *
+     * @returns [] - No return values.
+     */
+    export circuit addLiquidity(
+        identity: Bytes<32>,
+        token0: CoinInfo,
+        token1: CoinInfo,
+        amount0Min: Uint<128>,
+        amount1Min: Uint<128>,
+        to: Either<ZswapCoinPublicKey, ContractAddress>,
+    ): [] {
+        // Compute the optimal amounts to add, given the sorted tokens and min amounts
+        const [amount0Optimal, amount1Optimal, reserve0, reserve1] = _addLiquidity(
+            token0,
+            token1,
+            token0.value,
+            token1.value,
+            amount0Min,
+            amount1Min,
+            identity
+        );
+
+        // Only receive the used amount of the tokenA, the remainder will be returned to the user
+        const splitToken0 = LunarswapLibrary_splitCoin(token0, amount0Optimal);
+        receive(splitToken0.used);
+        if (splitToken0.remainder.value > 0) {
+            send_immediate(splitToken0.remainder, to, splitToken0.remainder.value);
+        }
+
+        // Only receive the used amount of the tokenB, the remainder will be returned to the user
+        const splitToken1 = LunarswapLibrary_splitCoin(token1, amount1Optimal);
+        receive(splitToken1.used);
+        if (splitToken1.remainder.value > 0) {
+            send_immediate(splitToken1.remainder, to, splitToken1.remainder.value);
+        }
+
+        // Sort tokens before getting identity and updating pair
+        const pair = LunarswapFactory_getPair(identity);
+        // Mint LP tokens and update the pair with the optimal amounts
+        const updatedPair = LunarswapPair_mint(
+            to,
+            identity,
+            pair,
+            token0,
+            token1,
+            reserve0,
+            reserve1,
+            amount0Optimal,
+            amount1Optimal
+        );
+        LunarswapFactory_updatePair(updatedPair, identity);
+        return [];
+    } 
+
+    /**
+     * @title _addLiquidity circuit
+     * @description Calculates optimal amounts for adding liquidity to a pair.
+     * 
+     * @remarks
+     * This internal circuit calculates the optimal amounts of tokens to add to a pair
+     * while maintaining the current price ratio. For new pairs, it uses the desired amounts.
+     * For existing pairs, it calculates amounts based on the current reserves and desired ratios.
+     *
+     * Requirements:
+     * - The calculated amounts must meet minimum requirements
+     * - The amounts must not exceed desired amounts
+     *
+     * @circuitInfo k=11, rows=2000
+     *
+     * @param {CoinInfo} token0        - The first token in the pair.
+     * @param {CoinInfo} token1        - The second token in the pair.
+     * @param {Uint<128>} amount0Desired - The desired amount of token0.
+     * @param {Uint<128>} amount1Desired - The desired amount of token1.
+     * @param {Uint<128>} amount0Min     - The minimum amount of token0 to add.
+     * @param {Uint<128>} amount1Min     - The minimum amount of token1 to add.
+     * @param {Bytes<32>} identity       - The unique identity hash of the pair.
+     *
+     * @throws {Error} "LunarswapRouter: Insufficient B amount" if calculated amount1 is below minimum.
+     * @throws {Error} "LunarswapRouter: Insufficient A amount" if calculated amount0 is below minimum or exceeds desired.
+     *
+     * @returns {[Uint<128>, Uint<128>, Uint<128>, Uint<128>]} - The optimal amounts and reserves [amount0Optimal, amount1Optimal, reserve0, reserve1].
+     */
+    circuit _addLiquidity(
+        token0: CoinInfo,
+        token1: CoinInfo,
+        amount0Desired: Uint<128>,
+        amount1Desired: Uint<128>,
+        amount0Min: Uint<128>,
+        amount1Min: Uint<128>,
+        identity: Bytes<32>
+    ): [Uint<128>, Uint<128>, Uint<128>, Uint<128>] {
+        if (!LunarswapFactory_isIdentityExists(identity)) {
+            LunarswapFactory_createPair(identity, token0, token1); 
+            return [amount0Desired, amount1Desired, 0, 0];
+        } else {
+            const [reserve0, reserve1] = LunarswapFactory_getReserves(identity, token0, token1);
+            if (reserve0 == 0 && reserve1 == 0) {
+                return [amount0Desired, amount1Desired, reserve0, reserve1];
+            } else {
+                const amount1Optimal = LunarswapLibrary_quote(amount0Desired, reserve0, reserve1);
+                if (amount1Optimal <= amount1Desired) {
+                    assert (amount1Optimal >= amount1Min) "LunarswapRouter: Insufficient B amount";
+                    return [amount0Desired, amount1Optimal, reserve0, reserve1];
+                } else {
+                    const amount0Optimal = LunarswapLibrary_quote(amount1Desired, reserve1, reserve0);
+                    assert (amount0Optimal <= amount0Desired) "LunarswapRouter: Insufficient A amount";
+                    assert (amount0Optimal >= amount0Min) "LunarswapRouter: Insufficient A amount";
+                    return [amount0Optimal, amount1Optimal, reserve0, reserve1];
+                }
+            } 
+        }
+    }
+}
