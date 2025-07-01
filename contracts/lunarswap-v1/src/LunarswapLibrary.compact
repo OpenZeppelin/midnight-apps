@@ -29,6 +29,11 @@ module LunarswapLibrary {
         remainder: CoinInfo
     }
 
+    export struct SplitQualifiedCoinResult {
+        used: QualifiedCoinInfo,
+        remainder: QualifiedCoinInfo
+    }
+
     /**
      * @title splitCoin circuit
      * @description Splits a coin into two parts: used amount and remainder.
@@ -50,19 +55,57 @@ module LunarswapLibrary {
      *
      * @returns {SplitCoinResult} - The split result containing used and remainder coins.
      */
-    export circuit splitCoin(_coin: CoinInfo, _amount: Uint<128>): SplitCoinResult {
-        assert _amount <= _coin.value "LunarswapLibrary: splitCoin() - Insufficient amount";
+    export circuit splitCoin(coin: CoinInfo, amount: Uint<128>): SplitCoinResult {
+        assert amount <= coin.value "LunarswapLibrary: splitCoin() - Insufficient amount";
         const used = CoinInfo {
-            color: _coin.color,
-            value: _amount,
-            nonce: evolve_nonce(0, _coin.nonce)
+            color: coin.color,
+            value: amount,
+            nonce: evolve_nonce(0, coin.nonce)
         };
         const remainder = CoinInfo {
-            color: _coin.color,
-            value: _coin.value - _amount,
-            nonce: evolve_nonce(1, _coin.nonce)
+            color: coin.color,
+            value: MathU128_sub(coin.value, amount),
+            nonce: evolve_nonce(1, coin.nonce)
         };
         return SplitCoinResult { used, remainder };
+    }
+
+    /**
+     * @title splitQualifiedCoin circuit
+     * @description Splits a QualifiedCoinInfo into two parts: used amount and remainder.
+     * 
+     * @remarks
+     * This circuit divides a QualifiedCoinInfo into two new QualifiedCoinInfo objects: one with the specified amount
+     * and another with the remaining value. Both coins maintain the same color and contract address but
+     * have different nonces.
+     *
+     * Requirements:
+     * - The amount to split must not exceed the coin's value
+     *
+     * @circuitInfo k=11, rows=1000
+     *
+     * @param {QualifiedCoinInfo} _coin   - The qualified coin to split.
+     * @param {Uint<128>} _amount - The amount to extract from the qualified coin.
+     *
+     * @throws {Error} "LunarswapLibrary: splitQualifiedCoin() - Insufficient amount" if amount exceeds coin value.
+     *
+     * @returns {{used: QualifiedCoinInfo, remainder: QualifiedCoinInfo}} - The split result containing used and remainder qualified coins.
+     */
+    export circuit splitQualifiedCoin(qualifiedCoin: QualifiedCoinInfo, amount: Uint<128>): SplitQualifiedCoinResult {
+        assert amount <= qualifiedCoin.value "LunarswapLibrary: splitQualifiedCoin() - Insufficient amount";
+        const used = QualifiedCoinInfo {
+            color: qualifiedCoin.color,
+            value: amount,
+            nonce: evolve_nonce(0, qualifiedCoin.nonce),
+            mt_index: qualifiedCoin.mt_index
+        };
+        const remainder = QualifiedCoinInfo {
+            color: qualifiedCoin.color,
+            value: MathU128_sub(qualifiedCoin.value, amount),
+            nonce: evolve_nonce(1, qualifiedCoin.nonce),
+            mt_index: qualifiedCoin.mt_index
+        };
+        return SplitQualifiedCoinResult { used, remainder };
     }
 
     /**
@@ -160,31 +203,7 @@ module LunarswapLibrary {
         const token0 = disclose(Bytes32_lt(_tokenA.color, _tokenB.color)) ? _tokenA : _tokenB;
         const token1 = disclose(Bytes32_lt(_tokenA.color, _tokenB.color)) ? _tokenB : _tokenA;
         return [token0, token1];
-    }
-
-    /**
-     * @title addToCoin circuit
-     * @description Adds a value to a coin and returns a new CoinInfo.
-     * 
-     * @remarks
-     * This circuit creates a new coin with an increased value by adding the specified
-     * amount to the original coin's value. The new coin has a different nonce.
-     *
-     * @circuitInfo k=11, rows=600
-     *
-     * @param {CoinInfo} _coin   - The original coin.
-     * @param {Uint<128>} _amount - The amount to add to the coin.
-     *
-     * @returns {CoinInfo} - A new coin with the increased value.
-     */
-    // Helper circuit to add a value to a coin and return a new CoinInfo
-    export circuit addToCoin(_coin: CoinInfo, _amount: Uint<128>): CoinInfo {
-        return CoinInfo {
-            color: _coin.color,
-            value: MathU128_addChecked(_coin.value, _amount),
-            nonce: evolve_nonce(0, _coin.nonce)
-        };
-    }
+    } 
 
     /**
      * @title addCoinValue circuit
@@ -226,12 +245,22 @@ module LunarswapLibrary {
      *
      * @returns {QualifiedCoinInfo} - A new qualified coin with the increased value.
      */
-    export circuit addQualifiedCoinValue(_coin: QualifiedCoinInfo, _amount: Uint<128>): QualifiedCoinInfo {
+    export circuit addQualifiedCoinValue(coin: QualifiedCoinInfo, amount: Uint<128>): QualifiedCoinInfo {
         return QualifiedCoinInfo {
-            color: _coin.color,
-            value: MathU128_addChecked(_coin.value, _amount),
-            nonce: evolve_nonce(0, _coin.nonce),
-            mt_index: 0
+            color: coin.color,
+            value: MathU128_addChecked(coin.value, amount),
+            nonce: evolve_nonce(0, coin.nonce),
+            mt_index: coin.mt_index
+        };
+    }
+
+    export circuit subQualifiedCoinValue(coin: QualifiedCoinInfo, amount: Uint<128>): QualifiedCoinInfo {
+        assert amount <= coin.value "LunarswapLibrary: subQualifiedCoinValue() - Insufficient amount";
+        return QualifiedCoinInfo {
+            color: coin.color,
+            value: MathU128_sub(coin.value, amount),
+            nonce: evolve_nonce(0, coin.nonce),
+            mt_index: coin.mt_index
         };
     }
 

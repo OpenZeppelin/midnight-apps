@@ -30,7 +30,7 @@ module LunarswapFactory {
 
     // TODO: that is a public ledger, should be private.
     export ledger liquidityPool: Map<Bytes<32>, LunarswapPair_Pair>;
-
+    
     /**
      * @title initialize circuit
      * @description Initializes the Lunarswap factory with LP token configuration.

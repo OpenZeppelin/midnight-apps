@@ -125,8 +125,66 @@ export circuit addLiquidity(
     assert (tokenA.color != tokenB.color) "Lunarswap: addLiquidity() - Identical addresses";
     const [token0, token1, amount0Min, amount1Min] = LunarswapLibrary_sortCoinsAndAmounts(tokenA, tokenB, amountAMin, amountBMin);
     const identity = LunarswapLibrary_getIdentity(token0, token1);
-    disclose(LunarswapRouter_addLiquidity(identity, token0, token1, amount0Min, amount1Min, to));
-    return [];
+    return disclose(
+        LunarswapRouter_addLiquidity(
+            identity,
+            token0,
+            token1,
+            amount0Min,
+            amount1Min,
+            to
+        )
+    );
+}
+
+/**
+ * @title removeLiquidity circuit
+ * @description Removes liquidity from a trading pair and burns LP tokens.
+ * 
+ * @remarks
+ * This circuit handles the complete liquidity removal process. It receives the LP tokens,
+ * adds them to the liquidity pot, burns them, and distributes the underlying tokens to the
+ * liquidity provider.
+ *
+ * @circuitInfo k=11, rows=4000
+ *
+ * @param {CoinInfo} tokenA - The first token in the pair.
+ * @param {CoinInfo} tokenB - The second token in the pair.
+ * @param {CoinInfo} liquidity - The LP tokens to remove.
+ * @param {Uint<128>} amountAMin - The minimum amount of tokenA to remove.
+ * @param {Uint<128>} amountBMin - The minimum amount of tokenB to remove.
+ * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The recipient of the removed tokens.
+ *
+ * @throws {Error} "Lunarswap: removeLiquidity() - Identical addresses" if tokenA and tokenB are the same.
+ * @throws {Error} "LunarswapRouter: Insufficient A amount" if the calculated amount is below minimum.
+ * @throws {Error} "LunarswapRouter: Insufficient B amount" if the calculated amount is below minimum.
+ *
+ * @returns [] - No return values.
+ */
+export circuit removeLiquidity(
+    tokenA: CoinInfo,
+    tokenB: CoinInfo,
+    liquidity: CoinInfo,
+    amountAMin: Uint<128>,
+    amountBMin: Uint<128>,
+    to: Either<ZswapCoinPublicKey, ContractAddress>,
+): [] {
+    assert (tokenA.color != tokenB.color) "Lunarswap: removeLiquidity() - Identical addresses";
+    const [token0, token1, amount0Min, amount1Min] = LunarswapLibrary_sortCoinsAndAmounts(tokenA, tokenB, amountAMin, amountBMin);
+    const identity = LunarswapLibrary_getIdentity(token0, token1);
+    const pair = LunarswapFactory_getPair(identity); 
+    return disclose(
+        LunarswapRouter_removeLiquidity(
+            identity,
+            pair,
+            pair.token0.value,
+            pair.token1.value,
+            liquidity,
+            amount0Min,
+            amount1Min,
+            to
+        )
+    );
 }
 
 /**

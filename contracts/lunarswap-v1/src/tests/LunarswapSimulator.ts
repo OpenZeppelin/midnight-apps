@@ -122,6 +122,32 @@ export class LunarswapSimulator
 		this.circuitContext = result.context;
 	}
 
+	public removeLiquidity(
+		tokenA: CoinInfo,
+		tokenB: CoinInfo,
+		liquidity: CoinInfo,
+		amountAMin: bigint,
+		amountBMin: bigint,
+		to: Either<ZswapCoinPublicKey, ContractAddress>,
+		sender?: CoinPublicKey,
+	): void {
+		const result = this.contract.circuits.removeLiquidity(
+			{
+				...this.circuitContext,
+				currentZswapLocalState: sender
+					? emptyZswapLocalState(sender)
+					: this.circuitContext.currentZswapLocalState,
+			},
+			tokenA,
+			tokenB,
+			liquidity,
+			amountAMin,
+			amountBMin,
+			to,
+		);
+		this.circuitContext = result.context;
+	}
+
 	public getPair(
 		tokenA: CoinInfo,
 		tokenB: CoinInfo,

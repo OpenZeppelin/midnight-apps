@@ -126,8 +126,8 @@ module LunarswapRouter {
             to,
             identity,
             pair,
-            token0,
-            token1,
+            splitToken0.used,
+            splitToken1.used,
             reserve0,
             reserve1,
             amount0Optimal,
@@ -184,15 +184,70 @@ module LunarswapRouter {
             } else {
                 const amount1Optimal = LunarswapLibrary_quote(amount0Desired, reserve0, reserve1);
                 if (amount1Optimal <= amount1Desired) {
+                    // TODO: convert assert message to token1
                     assert (amount1Optimal >= amount1Min) "LunarswapRouter: Insufficient B amount";
                     return [amount0Desired, amount1Optimal, reserve0, reserve1];
                 } else {
                     const amount0Optimal = LunarswapLibrary_quote(amount1Desired, reserve1, reserve0);
+                    // TODO: convert assert message to token0
                     assert (amount0Optimal <= amount0Desired) "LunarswapRouter: Insufficient A amount";
                     assert (amount0Optimal >= amount0Min) "LunarswapRouter: Insufficient A amount";
                     return [amount0Optimal, amount1Optimal, reserve0, reserve1];
                 }
             } 
         }
+    }
+
+    /**
+     * @title removeLiquidity circuit
+     * @description Removes liquidity from a trading pair and burns LP tokens.
+     * 
+     * @remarks
+     * This circuit handles the complete liquidity removal process. It receives the LP tokens,
+     * adds them to the liquidity pot, burns them, and distributes the underlying tokens to the
+     * liquidity provider.
+     *
+     * @circuitInfo k=11, rows=4000
+     *
+     * @param {Bytes<32>} identity - The unique identity hash of the pair.
+     * @param {Pair} pair - The current pair state.
+     * @param {Uint<128>} reserve0 - The current reserve of token0.
+     * @param {Uint<128>} reserve1 - The current reserve of token1.
+     * @param {CoinInfo} liquidity - The LP tokens to remove.
+     * @param {Uint<128>} amount0Min - The minimum amount of token0 to remove.
+     * @param {Uint<128>} amount1Min - The minimum amount of token1 to remove.
+     * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The recipient of the removed tokens.
+     *
+     * @returns [] - No return values.
+     */
+    export circuit removeLiquidity(
+        identity: Bytes<32>,
+        pair: LunarswapPair_Pair,
+        reserve0: Uint<128>,
+        reserve1: Uint<128>,
+        liquidity: CoinInfo,
+        amount0Min: Uint<128>,
+        amount1Min: Uint<128>,
+        to: Either<ZswapCoinPublicKey, ContractAddress>,
+    ): [] {
+        // Send the liquidity to the pair
+        receive(liquidity);
+        LunarswapPair_addToLiquidityPot(liquidity);
+
+        // Burn the liquidity and get the amounts
+        const [updatedPair, amount0, amount1] = LunarswapPair_burn(
+            to,
+            identity,
+            pair,
+            pair.token0,
+            pair.token1,
+            reserve0,
+            reserve1
+        );
+
+        assert (amount0 >= amount0Min) "LunarswapRouter: Insufficient token0 amount";
+        assert (amount1 >= amount1Min) "LunarswapRouter: Insufficient token1 amount"; 
+        LunarswapFactory_updatePair(updatedPair, identity);
+        return [];
     }
 }
