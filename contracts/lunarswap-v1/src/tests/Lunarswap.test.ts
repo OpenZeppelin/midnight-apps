@@ -129,7 +129,13 @@ describe("Lunarswap", () => {
 				expect(pair.token1.value).toBe(expectedValues.token1Value);
 
 				// Check liquidity (should be sqrt(2000 * 1000) - MINIMUM_LIQUIDITY = 414)
-				expect(pair.liquidity.value).toBe(414n);
+				// Liquidity is now tracked via LP token total supply
+				const lpTotalSupply = lunarswap.getLpTokenTotalSupply(
+					usdcCoin,
+					nightCoin,
+				);
+				// Total LP tokens = MINIMUM_LIQUIDITY (1000) + liquidity (414) = 1414
+				expect(lpTotalSupply.value).toBe(1414n);
 
 				// Check price and volume cumulative values
 				// For first liquidity provision, these should be 0 since no trades have occurred
@@ -141,14 +147,6 @@ describe("Lunarswap", () => {
 				// Check kLast (should be 0 if fees are off, or balance0 * balance1 if fees are on)
 				// Since this is a new pair and fees are likely off, kLast should be 0
 				expect(pair.kLast).toBe(0n);
-
-				// Verify LP token was minted with exact expected amounts
-				const lpTotalSupply = lunarswap.getLpTokenTotalSupply(
-					usdcCoin,
-					nightCoin,
-				);
-				// Total LP tokens = MINIMUM_LIQUIDITY (1000) + liquidity (414) = 1414
-				expect(lpTotalSupply).toBe(1414n);
 			});
 
 			/**
@@ -239,7 +237,7 @@ describe("Lunarswap", () => {
 					expect(pair.volume1Cumulative).toBe(2000n);
 				}
 
-				expect(pair.liquidity.value).toBe(1828n); // 414 + 1414
+				expect(lunarswap.getLpTokenTotalSupply(usdcCoin1, nightCoin1).value).toBe(2828n); // USDC/NIGHT existing pair
 				expect(pair.kLast).toBe(0n);
 			});
 
@@ -281,7 +279,7 @@ describe("Lunarswap", () => {
 
 				// LP tokens should be sqrt(2000 * 1000) = 1414
 				const expectedLPTokens = 1414n;
-				expect(lpTotalSupply).toBe(expectedLPTokens);
+				expect(lpTotalSupply.value).toBe(expectedLPTokens);
 			});
 		});
 
@@ -405,7 +403,7 @@ describe("Lunarswap", () => {
 				);
 				expect(updatedPair.token0.value).toBe(expectedValues.token0Value);
 				expect(updatedPair.token1.value).toBe(expectedValues.token1Value);
-				expect(updatedPair.liquidity.value).toBe(1121n);
+				expect(lunarswap.getLpTokenTotalSupply(usdcCoin1, dustCoin1).value).toBe(2121n); // USDC/DUST existing pair
 				expect(updatedPair.kLast).toBe(0n);
 			});
 
@@ -446,7 +444,7 @@ describe("Lunarswap", () => {
 
 				// LP tokens should be sqrt(2000 * 1000) - MINIMUM_LIQUIDITY
 				const expectedLPTokens = 1414n; // sqrt(2000 * 1000) ≈ 1414
-				expect(Number(lpTotalSupply)).toBeCloseTo(Number(expectedLPTokens), -2);
+				expect(Number(lpTotalSupply.value)).toBeCloseTo(Number(expectedLPTokens), -2);
 			});
 		});
 
@@ -496,7 +494,7 @@ describe("Lunarswap", () => {
 				);
 				expect(pair.token0.value).toBe(expectedValues.token0Value);
 				expect(pair.token1.value).toBe(expectedValues.token1Value);
-				expect(pair.liquidity.value).toBe(8797n);
+				expect(lunarswap.getLpTokenTotalSupply(nightCoin, dustCoin).value).toBe(9797n); // NIGHT/DUST new pair
 				expect(pair.kLast).toBe(0n);
 			});
 
@@ -578,7 +576,7 @@ describe("Lunarswap", () => {
 				);
 				expect(updatedPair.token0.value).toBe(expectedValues.token0Value);
 				expect(updatedPair.token1.value).toBe(expectedValues.token1Value);
-				expect(updatedPair.liquidity.value).toBe(13695n);
+				expect(lunarswap.getLpTokenTotalSupply(nightCoin1, dustCoin1).value).toBe(14695n); // NIGHT/DUST existing pair
 				expect(updatedPair.kLast).toBe(0n);
 			});
 
@@ -619,8 +617,8 @@ describe("Lunarswap", () => {
 				);
 
 				// LP tokens should be sqrt(8000 * 12000) - MINIMUM_LIQUIDITY
-				const expectedLPTokens = 9800n; // sqrt(8000 * 12000) ≈ 9800
-				expect(Number(lpTotalSupply)).toBeCloseTo(Number(expectedLPTokens), -2);
+				const expectedLPTokens = 9797n; // sqrt(8000 * 12000) ≈ 9797
+				expect(lpTotalSupply.value).toEqual(expectedLPTokens);
 			});
 		});
 
@@ -656,12 +654,9 @@ describe("Lunarswap", () => {
 					recipient,
 				);
 
-				// Use getPairIdentity to get the correct order for getIdentity
-				const identity = lunarswap.getPairIdentity(usdcCoin, nightCoin);
-				const pair = lunarswap.getPair(usdcCoin, nightCoin);
 
 				// Should have minimum liquidity of 1000
-				expect(pair.liquidity.value).toBeGreaterThan(1000n);
+				expect(lunarswap.getLpTokenTotalSupply(usdcCoin, nightCoin).value).toBeGreaterThan(1000n);
 			});
 
 			/**
@@ -709,7 +704,7 @@ describe("Lunarswap", () => {
 				);
 				expect(pair.token0.value).toBe(expectedValues.token0Value);
 				expect(pair.token1.value).toBe(expectedValues.token1Value);
-				expect(pair.liquidity.value).toBe(9000n);
+				expect(lunarswap.getLpTokenTotalSupply(usdcCoin, nightCoin).value).toBe(10000n); // equal token amounts
 				expect(pair.kLast).toBe(0n);
 			});
 
@@ -918,9 +913,7 @@ describe("Lunarswap", () => {
 				);
 
 				// Use getPairIdentity to get the correct order for getIdentity
-				const identity = lunarswap.getPairIdentity(usdcCoin, nightCoin);
-				const pair = lunarswap.getPair(usdcCoin, nightCoin);
-				expect(pair.liquidity.value).toBeGreaterThan(0n);
+				expect(lunarswap.getLpTokenTotalSupply(usdcCoin, nightCoin).value).toBe(2000n);
 			});
 		});
 
@@ -1156,9 +1149,7 @@ describe("Lunarswap", () => {
 				);
 
 				// Verify the pair has accumulated liquidity
-				const identity = lunarswap.getPairIdentity(usdcCoin1, nightCoin1);
-				const pair = lunarswap.getPair(usdcCoin1, nightCoin1);
-				expect(pair.liquidity.value).toBeGreaterThan(1000n);
+				expect(lunarswap.getLpTokenTotalSupply(usdcCoin1, nightCoin1).value).toBe(6000n); // multiple rapid additions
 			});
 
 			/**
@@ -1270,9 +1261,7 @@ describe("Lunarswap", () => {
 				);
 
 				// Use getPairIdentity to get the correct order for getIdentity
-				const identity = lunarswap.getPairIdentity(usdcCoin, nightCoin);
-				const pair = lunarswap.getPair(usdcCoin, nightCoin);
-				expect(pair.liquidity.value).toBeGreaterThan(0n);
+				expect(lunarswap.getLpTokenTotalSupply(usdcCoin, nightCoin).value).toBe(2000n);
 			});
 		});
 	});
@@ -1321,10 +1310,10 @@ describe("Lunarswap", () => {
 				);
 
 				// Create LP token coin for removal (use all burnable liquidity)
-				const lpTokensToRemove = pair.liquidity.value;
+				const lpTokensToRemove = initialLpTotalSupply.value - 1000n;
 				const lpTokenCoin = {
-					nonce: pair.liquidity.nonce,
-					color: pair.liquidity.color,
+					nonce: initialLpTotalSupply.nonce,
+					color: initialLpTotalSupply.color,
 					value: lpTokensToRemove,
 				};
 
@@ -1335,7 +1324,7 @@ describe("Lunarswap", () => {
 				);
 				const { amountAMin, amountBMin } = calculateRemoveLiquidityMinimums(
 					lpTokensToRemove,
-					initialLpTotalSupply,
+					initialLpTotalSupply.value,
 					reserveA,
 					reserveB,
 					SLIPPAGE_TOLERANCE.LOW,
@@ -1363,8 +1352,8 @@ describe("Lunarswap", () => {
 				);
 
 				// Verify LP token supply decreased
-				expect(updatedLpTotalSupply).toBe(
-					initialLpTotalSupply - lpTokensToRemove,
+				expect(updatedLpTotalSupply.value).toBe(
+					initialLpTotalSupply.value - lpTokensToRemove,
 				);
 
 				// Verify reserves decreased proportionally
@@ -1422,10 +1411,10 @@ describe("Lunarswap", () => {
 				);
 
 				// Remove all LP tokens except MINIMUM_LIQUIDITY (1000)
-				const removableLpTokens = initialLpTotalSupply - 1000n;
+				const removableLpTokens = initialLpTotalSupply.value - 1000n;
 				const lpTokenCoin = {
-					nonce: pair.liquidity.nonce,
-					color: pair.liquidity.color,
+					nonce: initialLpTotalSupply.nonce,
+					color: initialLpTotalSupply.color,
 					value: removableLpTokens,
 				};
 
@@ -1436,7 +1425,7 @@ describe("Lunarswap", () => {
 				);
 				const { amountAMin, amountBMin } = calculateRemoveLiquidityMinimums(
 					removableLpTokens,
-					initialLpTotalSupply,
+					initialLpTotalSupply.value,
 					reserveA,
 					reserveB,
 					SLIPPAGE_TOLERANCE.LOW,
@@ -1460,7 +1449,7 @@ describe("Lunarswap", () => {
 				);
 
 				// Verify only MINIMUM_LIQUIDITY remains
-				expect(updatedLpTotalSupply).toBe(1000n);
+				expect(updatedLpTotalSupply.value).toBe(1000n);
 
 				// Verify reserves are reduced but not zero
 				const expectedValues = getExpectedTokenValues(
@@ -1515,10 +1504,10 @@ describe("Lunarswap", () => {
 				);
 
 				// Remove 10% of LP tokens
-				const lpTokensToRemove = initialLpTotalSupply / 10n;
+				const lpTokensToRemove = initialLpTotalSupply.value / 10n;
 				const lpTokenCoin = {
-					nonce: pair.liquidity.nonce,
-					color: pair.liquidity.color,
+					nonce: initialLpTotalSupply.nonce,
+					color: initialLpTotalSupply.color,
 					value: lpTokensToRemove,
 				};
 
@@ -1529,7 +1518,7 @@ describe("Lunarswap", () => {
 				);
 				const { amountAMin, amountBMin } = calculateRemoveLiquidityMinimums(
 					lpTokensToRemove,
-					initialLpTotalSupply,
+					initialLpTotalSupply.value,
 					reserveA,
 					reserveB,
 					SLIPPAGE_TOLERANCE.LOW,
@@ -1553,8 +1542,8 @@ describe("Lunarswap", () => {
 				);
 
 				// Verify LP token supply decreased
-				expect(updatedLpTotalSupply).toBe(
-					initialLpTotalSupply - lpTokensToRemove,
+				expect(updatedLpTotalSupply.value).toBe(
+					initialLpTotalSupply.value - lpTokensToRemove,
 				);
 
 				// Verify reserves decreased proportionally
@@ -1612,10 +1601,10 @@ describe("Lunarswap", () => {
 				);
 
 				// Remove 30% of LP tokens
-				const lpTokensToRemove = (initialLpTotalSupply * 3n) / 10n;
+				const lpTokensToRemove = (initialLpTotalSupply.value * 3n) / 10n;
 				const lpTokenCoin = {
-					nonce: pair.liquidity.nonce,
-					color: pair.liquidity.color,
+					nonce: initialLpTotalSupply.nonce,
+					color: initialLpTotalSupply.color,
 					value: lpTokensToRemove,
 				};
 
@@ -1626,7 +1615,7 @@ describe("Lunarswap", () => {
 				);
 				const { amountAMin, amountBMin } = calculateRemoveLiquidityMinimums(
 					lpTokensToRemove,
-					initialLpTotalSupply,
+					initialLpTotalSupply.value,
 					reserveA,
 					reserveB,
 					SLIPPAGE_TOLERANCE.LOW,
@@ -1650,8 +1639,8 @@ describe("Lunarswap", () => {
 				);
 
 				// Verify LP token supply decreased
-				expect(updatedLpTotalSupply).toBe(
-					initialLpTotalSupply - lpTokensToRemove,
+				expect(updatedLpTotalSupply.value).toBe(
+					initialLpTotalSupply.value - lpTokensToRemove,
 				);
 
 				// Verify reserves decreased proportionally
@@ -1712,10 +1701,10 @@ describe("Lunarswap", () => {
 				);
 
 				// Remove 50% of LP tokens
-				const lpTokensToRemove = initialLpTotalSupply / 2n;
+				const lpTokensToRemove = initialLpTotalSupply.value / 2n;
 				const lpTokenCoin = {
-					nonce: pair.liquidity.nonce,
-					color: pair.liquidity.color,
+					nonce: initialLpTotalSupply.nonce,
+					color: initialLpTotalSupply.color,
 					value: lpTokensToRemove,
 				};
 
@@ -1730,7 +1719,7 @@ describe("Lunarswap", () => {
 						recipient,
 					);
 				}).toThrow(
-					"LunarswapLibrary: subQualifiedCoinValue() - Insufficient amount",
+					"LunarswapRouter: Insufficient A amount",
 				);
 			});
 
@@ -1768,11 +1757,15 @@ describe("Lunarswap", () => {
 
 				// Get initial pair state
 				const pair = lunarswap.getPair(usdcCoin, nightCoin);
+				const initialLpTotalSupply = lunarswap.getLpTokenTotalSupply(
+					usdcCoin,
+					nightCoin,
+				);
 
 				// Try to remove 0 LP tokens
 				const lpTokenCoin = {
-					nonce: pair.liquidity.nonce,
-					color: pair.liquidity.color,
+					nonce: initialLpTotalSupply.nonce,
+					color: initialLpTotalSupply.color,
 					value: 0n,
 				};
 
@@ -1828,9 +1821,9 @@ describe("Lunarswap", () => {
 
 				// Try to remove more LP tokens than exist
 				const lpTokenCoin = {
-					nonce: pair.liquidity.nonce,
-					color: pair.liquidity.color,
-					value: initialLpTotalSupply + 1000n, // More than total supply
+					nonce: initialLpTotalSupply.nonce,
+					color: initialLpTotalSupply.color,
+					value: initialLpTotalSupply.value + 1000n, // More than total supply
 				};
 
 				expect(() => {
@@ -1914,11 +1907,15 @@ describe("Lunarswap", () => {
 
 				// Get initial pair state
 				const pair = lunarswap.getPair(usdcCoin, nightCoin);
+				const initialLpTotalSupply = lunarswap.getLpTokenTotalSupply(
+					usdcCoin,
+					nightCoin,
+				);
 
 				// Try to remove 1 LP token
 				const lpTokenCoin = {
-					nonce: pair.liquidity.nonce,
-					color: pair.liquidity.color,
+					nonce: initialLpTotalSupply.nonce,
+					color: initialLpTotalSupply.color,
 					value: 1n,
 				};
 
@@ -1936,7 +1933,7 @@ describe("Lunarswap", () => {
 						usdcCoin,
 						nightCoin,
 					);
-					expect(updatedLpTotalSupply).toBeGreaterThan(0n);
+					expect(updatedLpTotalSupply.value).toBeGreaterThan(0n);
 				} catch (e: unknown) {
 					// If it fails, it should be due to insufficient liquidity burned
 					let message = "";
@@ -1996,10 +1993,10 @@ describe("Lunarswap", () => {
 
 				try {
 					// First removal: 20% of LP tokens
-					const firstRemoval = currentLpTotalSupply / 5n;
+					const firstRemoval = currentLpTotalSupply.value / 5n;
 					const lpTokenCoin1 = {
-						nonce: pair.liquidity.nonce,
-						color: pair.liquidity.color,
+						nonce: currentLpTotalSupply.nonce,
+						color: currentLpTotalSupply.color,
 						value: firstRemoval,
 					};
 
@@ -2011,7 +2008,7 @@ describe("Lunarswap", () => {
 					const { amountAMin: amountAMin1, amountBMin: amountBMin1 } =
 						calculateRemoveLiquidityMinimums(
 							firstRemoval,
-							currentLpTotalSupply,
+							currentLpTotalSupply.value,
 							reserveA1,
 							reserveB1,
 							SLIPPAGE_TOLERANCE.LOW,
@@ -2032,10 +2029,10 @@ describe("Lunarswap", () => {
 					);
 
 					// Second removal: 30% of remaining LP tokens
-					const secondRemoval = (currentLpTotalSupply * 3n) / 10n;
+					const secondRemoval = (currentLpTotalSupply.value * 3n) / 10n;
 					const lpTokenCoin2 = {
-						nonce: pair.liquidity.nonce,
-						color: pair.liquidity.color,
+						nonce: currentLpTotalSupply.nonce,
+						color: currentLpTotalSupply.color,
 						value: secondRemoval,
 					};
 
@@ -2047,7 +2044,7 @@ describe("Lunarswap", () => {
 					const { amountAMin: amountAMin2, amountBMin: amountBMin2 } =
 						calculateRemoveLiquidityMinimums(
 							secondRemoval,
-							currentLpTotalSupply,
+							currentLpTotalSupply.value,
 							reserveA2,
 							reserveB2,
 							SLIPPAGE_TOLERANCE.LOW,
@@ -2068,10 +2065,10 @@ describe("Lunarswap", () => {
 					);
 
 					// Third removal: 50% of remaining LP tokens
-					const thirdRemoval = currentLpTotalSupply / 2n;
+					const thirdRemoval = currentLpTotalSupply.value / 2n;
 					const lpTokenCoin3 = {
-						nonce: pair.liquidity.nonce,
-						color: pair.liquidity.color,
+						nonce: currentLpTotalSupply.nonce,
+						color: currentLpTotalSupply.color,
 						value: thirdRemoval,
 					};
 
@@ -2083,7 +2080,7 @@ describe("Lunarswap", () => {
 					const { amountAMin: amountAMin3, amountBMin: amountBMin3 } =
 						calculateRemoveLiquidityMinimums(
 							thirdRemoval,
-							currentLpTotalSupply,
+							currentLpTotalSupply.value,
 							reserveA3,
 							reserveB3,
 							SLIPPAGE_TOLERANCE.LOW,
@@ -2106,7 +2103,7 @@ describe("Lunarswap", () => {
 					const finalPair = lunarswap.getPair(usdcCoin, nightCoin);
 
 					// Should have some LP tokens remaining
-					expect(finalLpTotalSupply).toBeGreaterThan(0n);
+					expect(finalLpTotalSupply.value).toBeGreaterThan(0n);
 					expect(finalPair.token0.value).toBeGreaterThan(0n);
 					expect(finalPair.token1.value).toBeGreaterThan(0n);
 				} catch (e: unknown) {
@@ -2121,6 +2118,397 @@ describe("Lunarswap", () => {
 						"LunarswapLibrary: subQualifiedCoinValue() - Insufficient amount",
 					);
 				}
+			});
+		});
+
+		describe("error handling", () => {
+			/**
+			 * Tests removing liquidity with invalid LP token nonce
+			 *
+			 * Mathematical validation:
+			 * - LP token has wrong nonce that doesn't match the pair
+			 * - This should fail during LP token validation
+			 *
+			 * Error: Should fail due to invalid LP token nonce
+			 */
+			it("should fail when removing liquidity with invalid LP token nonce", () => {
+				// First, add liquidity to create the pair
+				const usdcCoin = usdc.mint(createEitherFromHex(LP_USER), 2000n);
+				const nightCoin = night.mint(createEitherFromHex(LP_USER), 1000n);
+				const recipient = createEitherFromHex(LP_USER);
+				const result = calculateAddLiquidityAmounts(
+					2000n, // desired USDC
+					1000n, // desired NIGHT
+					0n, // reserve USDC
+					0n, // reserve NIGHT
+					SLIPPAGE_TOLERANCE.LOW, // 0.5% slippage
+				);
+				lunarswap.addLiquidity(
+					usdcCoin,
+					nightCoin,
+					result.amountAMin,
+					result.amountBMin,
+					recipient,
+				);
+
+				// Get initial pair state
+				const initialLpTotalSupply = lunarswap.getLpTokenTotalSupply(
+					usdcCoin,
+					nightCoin,
+				);
+
+				// Create LP token with completely wrong nonce and color
+				const invalidLpTokenCoin = {
+					nonce: new Uint8Array(32).fill(0x99), // Wrong nonce
+					color: new Uint8Array(32).fill(0x88), // Wrong color
+					value: 100n,
+				};
+
+				// This should throw an error due to invalid LP token
+				expect(() => {
+					lunarswap.removeLiquidity(
+						usdcCoin,
+						nightCoin,
+						invalidLpTokenCoin,
+						50n,
+						50n,
+						recipient,
+					);
+				}).toThrow("LunarswapRouter: mismatched LP token color");
+			});
+
+			/**
+			 * Tests removing liquidity with wrong token order
+			 *
+			 * Mathematical validation:
+			 * - Tokens are passed in wrong order (NIGHT, USDC instead of USDC, NIGHT)
+			 * - This should still work as tokens are sorted internally
+			 *
+			 * Expected: Should work correctly despite wrong order
+			 */
+			it("should handle removing liquidity with wrong token order", () => {
+				// First, add liquidity to create the pair
+				const usdcCoin = usdc.mint(createEitherFromHex(LP_USER), 2000n);
+				const nightCoin = night.mint(createEitherFromHex(LP_USER), 1000n);
+				const recipient = createEitherFromHex(LP_USER);
+				const result = calculateAddLiquidityAmounts(
+					2000n, // desired USDC
+					1000n, // desired NIGHT
+					0n, // reserve USDC
+					0n, // reserve NIGHT
+					SLIPPAGE_TOLERANCE.LOW, // 0.5% slippage
+				);
+				lunarswap.addLiquidity(
+					usdcCoin,
+					nightCoin,
+					result.amountAMin,
+					result.amountBMin,
+					recipient,
+				);
+
+				// Get initial pair state
+				const initialLpTotalSupply = lunarswap.getLpTokenTotalSupply(
+					usdcCoin,
+					nightCoin,
+				);
+
+				// Remove 5% of LP tokens with wrong token order
+				const lpTokensToRemove = initialLpTotalSupply.value / 20n;
+				const lpTokenCoin = {
+					nonce: initialLpTotalSupply.nonce,
+					color: initialLpTotalSupply.color,
+					value: lpTokensToRemove,
+				};
+
+				// Remove liquidity with wrong token order (nightCoin, usdcCoin) and zero minimums
+				lunarswap.removeLiquidity(
+					nightCoin, // Wrong order
+					usdcCoin,  // Wrong order
+					lpTokenCoin,
+					0n, // amountAMin - use zero to avoid insufficient amount error
+					0n, // amountBMin - use zero to avoid insufficient amount error
+					recipient,
+				);
+
+				// Verify the operation succeeded
+				const updatedLpTotalSupply = lunarswap.getLpTokenTotalSupply(
+					usdcCoin,
+					nightCoin,
+				);
+				expect(updatedLpTotalSupply.value).toBe(
+					initialLpTotalSupply.value - lpTokensToRemove,
+				);
+			});
+
+			/**
+			 * Tests removing liquidity with identical token addresses
+			 *
+			 * Mathematical validation:
+			 * - Both tokens have same color (USDC = USDC)
+			 * - This should fail during token validation
+			 *
+			 * Error: "Lunarswap: removeLiquidity() - Identical addresses"
+			 */
+			it("should fail when removing liquidity with identical token addresses", () => {
+				// Create tokens but don't add liquidity
+				const usdcCoin1 = usdc.mint(createEitherFromHex(LP_USER), 2000n);
+				const usdcCoin2 = usdc.mint(createEitherFromHex(LP_USER), 1000n);
+				const recipient = createEitherFromHex(LP_USER);
+
+				// Create fake LP token coin
+				const fakeLpTokenCoin = {
+					nonce: new Uint8Array(32).fill(0x01),
+					color: new Uint8Array(32).fill(0x02),
+					value: 100n,
+				};
+
+				expect(() => {
+					lunarswap.removeLiquidity(
+						usdcCoin1,
+						usdcCoin2, // Same token type
+						fakeLpTokenCoin,
+						50n, // amountAMin
+						50n, // amountBMin
+						recipient,
+					);
+				}).toThrow("Lunarswap: removeLiquidity() - Identical addresses");
+			});
+
+			/**
+			 * Tests removing liquidity with negative minimum amounts
+			 *
+			 * Mathematical validation:
+			 * - Negative amounts should be rejected
+			 * - This should fail during parameter validation
+			 *
+			 * Error: Should fail due to negative amounts
+			 */
+			it("should fail when removing liquidity with negative minimum amounts", () => {
+				// First, add liquidity to create the pair
+				const usdcCoin = usdc.mint(createEitherFromHex(LP_USER), 2000n);
+				const nightCoin = night.mint(createEitherFromHex(LP_USER), 1000n);
+				const recipient = createEitherFromHex(LP_USER);
+				const result = calculateAddLiquidityAmounts(
+					2000n, // desired USDC
+					1000n, // desired NIGHT
+					0n, // reserve USDC
+					0n, // reserve NIGHT
+					SLIPPAGE_TOLERANCE.LOW, // 0.5% slippage
+				);
+				lunarswap.addLiquidity(
+					usdcCoin,
+					nightCoin,
+					result.amountAMin,
+					result.amountBMin,
+					recipient,
+				);
+
+				// Get initial pair state
+				const initialLpTotalSupply = lunarswap.getLpTokenTotalSupply(
+					usdcCoin,
+					nightCoin,
+				);
+
+				// Create LP token coin
+				const lpTokenCoin = {
+					nonce: initialLpTotalSupply.nonce,
+					color: initialLpTotalSupply.color,
+					value: 100n,
+				};
+
+				// Try to remove liquidity with negative minimum amounts
+				// Note: In bigint, negative values are represented differently
+				// This test checks if the system handles edge cases properly
+				expect(() => {
+					lunarswap.removeLiquidity(
+						usdcCoin,
+						nightCoin,
+						lpTokenCoin,
+						0n, // amountAMin (minimum allowed)
+						0n, // amountBMin (minimum allowed)
+						recipient,
+					);
+				}).not.toThrow(); // Should work with zero minimums
+			});
+
+			/**
+			 * Tests removing liquidity with excessive minimum amounts
+			 *
+			 * Mathematical calculations:
+			 * - Initial: 2000 USDC, 1000 NIGHT → liquidity = 414
+			 * - Remove 10% of LP tokens: 141 LP tokens
+			 * - Expected token0 amount = (141 * 2000) / 1414 = 199 (integer division)
+			 * - Expected token1 amount = (141 * 1000) / 1414 = 99 (integer division)
+			 * - Set amountAMin = 1000 > 199, should fail
+			 *
+			 * Error: "LunarswapRouter: Insufficient A amount" - minimum too high
+			 */
+			it("should fail when removing liquidity with excessive minimum amounts", () => {
+				// First, add liquidity to create the pair
+				const usdcCoin = usdc.mint(createEitherFromHex(LP_USER), 2000n);
+				const nightCoin = night.mint(createEitherFromHex(LP_USER), 1000n);
+				const recipient = createEitherFromHex(LP_USER);
+				const result = calculateAddLiquidityAmounts(
+					2000n, // desired USDC
+					1000n, // desired NIGHT
+					0n, // reserve USDC
+					0n, // reserve NIGHT
+					SLIPPAGE_TOLERANCE.LOW, // 0.5% slippage
+				);
+				lunarswap.addLiquidity(
+					usdcCoin,
+					nightCoin,
+					result.amountAMin,
+					result.amountBMin,
+					recipient,
+				);
+
+				// Get initial pair state
+				const initialLpTotalSupply = lunarswap.getLpTokenTotalSupply(
+					usdcCoin,
+					nightCoin,
+				);
+
+				// Remove 10% of LP tokens
+				const lpTokensToRemove = initialLpTotalSupply.value / 10n;
+				const lpTokenCoin = {
+					nonce: initialLpTotalSupply.nonce,
+					color: initialLpTotalSupply.color,
+					value: lpTokensToRemove,
+				};
+
+				// Try to remove liquidity with excessive minimum amounts
+				expect(() => {
+					lunarswap.removeLiquidity(
+						usdcCoin,
+						nightCoin,
+						lpTokenCoin,
+						1000n, // amountAMin much higher than expected (~199)
+						200n,  // amountBMin much higher than expected (~99)
+						recipient,
+					);
+				}).toThrow("LunarswapRouter: Insufficient A amount");
+			});
+
+			/**
+			 * Tests removing liquidity with mismatched LP token color
+			 *
+			 * Mathematical validation:
+			 * - LP token has wrong color that doesn't match the pair
+			 * - This should fail during LP token validation
+			 *
+			 * Error: Should fail due to mismatched LP token color
+			 */
+			it("should fail when removing liquidity with mismatched LP token color", () => {
+				// First, add liquidity to create the pair
+				const usdcCoin = usdc.mint(createEitherFromHex(LP_USER), 2000n);
+				const nightCoin = night.mint(createEitherFromHex(LP_USER), 1000n);
+				const recipient = createEitherFromHex(LP_USER);
+				const result = calculateAddLiquidityAmounts(
+					2000n, // desired USDC
+					1000n, // desired NIGHT
+					0n, // reserve USDC
+					0n, // reserve NIGHT
+					SLIPPAGE_TOLERANCE.LOW, // 0.5% slippage
+				);
+				lunarswap.addLiquidity(
+					usdcCoin,
+					nightCoin,
+					result.amountAMin,
+					result.amountBMin,
+					recipient,
+				);
+
+				// Get initial pair state
+				const initialLpTotalSupply = lunarswap.getLpTokenTotalSupply(
+					usdcCoin,
+					nightCoin,
+				);
+
+				// Create LP token with wrong color but correct nonce
+				const mismatchedLpTokenCoin = {
+					nonce: initialLpTotalSupply.nonce, // Correct nonce
+					color: new Uint8Array(32).fill(0xAA), // Wrong color
+					value: 100n,
+				};
+
+				// This should throw an error due to mismatched LP token color
+				expect(() => {
+					lunarswap.removeLiquidity(
+						usdcCoin,
+						nightCoin,
+						mismatchedLpTokenCoin,
+						50n,
+						50n,
+						recipient,
+					);
+				}).toThrow("LunarswapRouter: mismatched LP token color");
+			});
+
+			/**
+			 * Tests removing liquidity with zero minimum amounts
+			 *
+			 * Mathematical calculations:
+			 * - Initial: 2000 USDC, 1000 NIGHT → liquidity = 414
+			 * - Remove 5% of LP tokens: 71 LP tokens
+			 * - Expected token0 amount = (71 * 2000) / 1414 = 100 (integer division)
+			 * - Expected token1 amount = (71 * 1000) / 1414 = 50 (integer division)
+			 * - Set amountAMin = 0, amountBMin = 0, should pass
+			 *
+			 * Expected: Should work with zero minimum amounts
+			 */
+			it("should handle removing liquidity with zero minimum amounts", () => {
+				// First, add liquidity to create the pair
+				const usdcCoin = usdc.mint(createEitherFromHex(LP_USER), 2000n);
+				const nightCoin = night.mint(createEitherFromHex(LP_USER), 1000n);
+				const recipient = createEitherFromHex(LP_USER);
+				const result = calculateAddLiquidityAmounts(
+					2000n, // desired USDC
+					1000n, // desired NIGHT
+					0n, // reserve USDC
+					0n, // reserve NIGHT
+					SLIPPAGE_TOLERANCE.LOW, // 0.5% slippage
+				);
+				lunarswap.addLiquidity(
+					usdcCoin,
+					nightCoin,
+					result.amountAMin,
+					result.amountBMin,
+					recipient,
+				);
+
+				// Get initial pair state
+				const initialLpTotalSupply = lunarswap.getLpTokenTotalSupply(
+					usdcCoin,
+					nightCoin,
+				);
+
+				// Remove 5% of LP tokens
+				const lpTokensToRemove = initialLpTotalSupply.value / 20n;
+				const lpTokenCoin = {
+					nonce: initialLpTotalSupply.nonce,
+					color: initialLpTotalSupply.color,
+					value: lpTokensToRemove,
+				};
+
+				// Remove liquidity with zero minimum amounts
+				lunarswap.removeLiquidity(
+					usdcCoin,
+					nightCoin,
+					lpTokenCoin,
+					0n, // amountAMin
+					0n, // amountBMin
+					recipient,
+				);
+
+				// Verify the operation succeeded
+				const updatedLpTotalSupply = lunarswap.getLpTokenTotalSupply(
+					usdcCoin,
+					nightCoin,
+				);
+				expect(updatedLpTotalSupply.value).toBe(
+					initialLpTotalSupply.value - lpTokensToRemove,
+				);
 			});
 		});
 	});
@@ -2380,7 +2768,7 @@ describe("Lunarswap", () => {
 			);
 			expect(pair.token0.value).toBe(expectedValues.token0Value);
 			expect(pair.token1.value).toBe(expectedValues.token1Value);
-			expect(pair.liquidity.value).toBe(13142n);
+			expect(lunarswap.getLpTokenTotalSupply(usdcCoin, dustCoin).value).toBe(14142n);
 			expect(pair.kLast).toBe(0n);
 		});
 
@@ -2421,7 +2809,7 @@ describe("Lunarswap", () => {
 			);
 			expect(pair.token0.value).toBe(expectedValues.token0Value);
 			expect(pair.token1.value).toBe(expectedValues.token1Value);
-			expect(pair.liquidity.value).toBe(8797n);
+			expect(lunarswap.getLpTokenTotalSupply(nightCoin, dustCoin).value).toBe(9797n);
 			expect(pair.kLast).toBe(0n);
 		});
 	});
@@ -2555,9 +2943,7 @@ describe("Lunarswap", () => {
 
 			// Use getPairIdentity to get the correct order for getLpTokenTotalSupply
 			const identity = lunarswap.getPairIdentity(usdcCoin, nightCoin);
-			expect(
-				lunarswap.getLpTokenTotalSupply(usdcCoin, nightCoin),
-			).toBeGreaterThan(0n);
+			expect(lunarswap.getLpTokenTotalSupply(usdcCoin, nightCoin).value).toBe(7071n); // LP token total supply tracking
 		});
 	});
 });

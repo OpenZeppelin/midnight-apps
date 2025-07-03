@@ -1,11 +1,11 @@
 pragma language_version >= 0.15.0;
 
 /**
- * @title LunarswapLpTokens
+ * @title LunarswapLiquidity
  * @description Liquidity Provider (LP) token management system for the Lunarswap protocol.
  * 
  * @remarks
- * The LunarswapLpTokens module manages the creation, minting, burning, and tracking of liquidity
+ * The LunarswapLiquidity module manages the creation, minting, burning, and tracking of liquidity
  * provider tokens. These tokens represent a user's share of liquidity in a trading pair and
  * entitle holders to a portion of trading fees and the underlying assets.
  * 
@@ -17,7 +17,7 @@ pragma language_version >= 0.15.0;
  * - Nonce-based token generation
  * - UTXO-based token model
  */
-module LunarswapLpTokens {
+module LunarswapLiquidity {
     import CompactStandardLibrary;
 
     import "./openzeppelin/ShieldedERC20" prefix ShieldedERC20_;
@@ -26,7 +26,7 @@ module LunarswapLpTokens {
     export ledger _counter: Counter;
     export ledger _nonce: Bytes<32>;
     // That is a map of all the liquidity LP tokens, the key is the pair hash.
-    export ledger _totalSupply: Map<Bytes<32>, Uint<128>>;
+    export ledger _totalSupply: Map<Bytes<32>, QualifiedCoinInfo>;
     export sealed ledger _name: Opaque<"string">;
     export sealed ledger _symbol: Opaque<"string">;
     export sealed ledger _decimals: Uint<8>;
@@ -77,13 +77,13 @@ module LunarswapLpTokens {
      *
      * @param {Bytes<32>} identity - The unique identity hash of the trading pair.
      *
-     * @throws {Error} "LunarswapLpTokens: initializePairLpToken() - Lp token already exists" if LP tokens already exist for this pair.
+     * @throws {Error} "LunarswapLiquidity: initializePairLpToken() - Lp token already exists" if LP tokens already exist for this pair.
      *
      * @returns [] - No return values.
      */
     export circuit initializePairLpToken(identity: Bytes<32>): [] {
-        assert (!_totalSupply.member(identity)) "LunarswapLpTokens: initializePairLpToken() - Lp token already exists";
-        _totalSupply.insert(identity, 0);
+        assert (!_totalSupply.member(identity)) "LunarswapLiquidity: initializePairLpToken() - Lp token already exists";
+        _totalSupply.insert(identity, default<QualifiedCoinInfo>);
         return [];
     }
 
@@ -147,15 +147,15 @@ module LunarswapLpTokens {
      *
      * @param {Bytes<32>} identity - The unique identity hash of the trading pair.
      *
-     * @throws {Error} "LunarswapLpTokens: totalSupply() - Lp token not found" if LP tokens don't exist for this pair.
+     * @throws {Error} "LunarswapLiquidity: totalSupply() - Lp token not found" if LP tokens don't exist for this pair.
      *
      * @returns {Uint<128>} - The total supply of LP tokens for the pair.
      */
-    export circuit totalSupply(identity: Bytes<32>): Uint<128> {
-        assert (_totalSupply.member(identity)) "LunarswapLpTokens: totalSupply() - Lp token not found";
+    export circuit totalSupply(identity: Bytes<32>): QualifiedCoinInfo {
+        assert (_totalSupply.member(identity)) "LunarswapLiquidity: totalSupply() - Lp token not found";
         return _totalSupply.lookup(identity);
     }
-    
+
     /**
      * @title mint circuit
      * @description Mints new LP tokens and sends them to the specified recipient.
@@ -174,16 +174,25 @@ module LunarswapLpTokens {
      * @param {Either<ZswapCoinPublicKey, ContractAddress>} recipient - The recipient of the minted LP tokens.
      * @param {Uint<128>} amount - The amount of LP tokens to mint.
      *
-     * @throws {Error} "LunarswapLpTokens: totalSupply() - Lp token not found" if LP tokens don't exist for this pair.
-     *
      * @returns {CoinInfo} - The minted LP token coin.
      */
-    export circuit mint(identity: Bytes<32>, recipient: Either<ZswapCoinPublicKey, ContractAddress>, amount: Uint<128>): CoinInfo {
+    export circuit mint(
+        identity: Bytes<32>,
+        recipient: Either<ZswapCoinPublicKey, ContractAddress>,
+        amount: Uint<128>
+    ): CoinInfo {
         _counter.increment(1);
         const newNonce = evolve_nonce(_counter, _nonce);
         const ret = mint_token(identity, amount, newNonce, recipient);
-        const newTotalSupply = addChecked(_totalSupply.lookup(identity), amount);
+        
+        const newTotalSupply = QualifiedCoinInfo {
+            nonce: ret.nonce,
+            color: ret.color,
+            value: addChecked(_totalSupply.lookup(identity).value, amount),
+            mt_index: _totalSupply.lookup(identity).mt_index,
+        };
         _totalSupply.insert(identity, newTotalSupply);
+        
         return ret;
     }
 
@@ -206,17 +215,29 @@ module LunarswapLpTokens {
      * @param {CoinInfo} coin - The LP token coin to burn.
      * @param {Uint<128>} amount - The amount of LP tokens to burn.
      *
-     * @throws {Error} "LunarswapLpTokens: burn() - Insufficient coin value" if coin value is less than burn amount.
-     * @throws {Error} "LunarswapLpTokens: totalSupply() - Lp token not found" if LP tokens don't exist for this pair.
+     * @throws {Error} "LunarswapLiquidity: burn() - Insufficient coin value" if coin value is less than burn amount.
+     * @throws {Error} "LunarswapLiquidity: totalSupply() - Lp token not found" if LP tokens don't exist for this pair.
      *
      * @returns {SendResult} - The result of the burn operation including any change.
      */
-    export circuit burn(identity: Bytes<32>, coin: CoinInfo, amount: Uint<128>): SendResult {
-        assert coin.value >= amount "LunarswapLpTokens: burn() - Insufficient coin value";
+    export circuit burn(
+        identity: Bytes<32>, 
+        coin: CoinInfo, 
+        amount: Uint<128>
+    ): SendResult {
+        assert _totalSupply.member(identity) "LunarswapLiquidity: totalSupply() - Lp token not found";
+        assert coin.value >= amount "LunarswapLiquidity: burn() - Insufficient coin value";
 
         receive(coin);
-        const newTotalSupply = sub(_totalSupply.lookup(identity), amount);
+        
+        const newTotalSupply = QualifiedCoinInfo {
+            nonce: coin.nonce,
+            color: coin.color,
+            value: sub(_totalSupply.lookup(identity).value, amount),
+            mt_index: _totalSupply.lookup(identity).mt_index, // TODO: needs review
+        };
         _totalSupply.insert(identity, newTotalSupply);
+        
         const ret = send_immediate(coin, burn_address(), amount);
         if (ret.change.is_some) {
             const tmpAddr = left<ZswapCoinPublicKey, ContractAddress>(own_public_key());

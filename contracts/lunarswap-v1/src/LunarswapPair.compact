@@ -25,12 +25,11 @@ module LunarswapPair {
     
     import LunarswapLibrary prefix LunarswapLibrary_;
     import LunarswapFee prefix LunarswapFee_;
-    import LunarswapLpTokens prefix LunarswapLpTokens_;
+    import LunarswapLiquidity prefix LunarswapLiquidity_;
      
     export struct Pair {
         token0: QualifiedCoinInfo,
         token1: QualifiedCoinInfo,
-        liquidity: QualifiedCoinInfo, // Shielded liquidity token ERC20,
         price0VolCumulative: Uint<128>, // Sum of (price0 * volume), Token 1 per Token 0
         price1VolCumulative: Uint<128>, // Sum of (price1 * volume), Token 0 per Token 1
         volume0Cumulative: Uint<128>, 
@@ -38,8 +37,6 @@ module LunarswapPair {
         kLast: Uint<128>,
     }
 
-    export ledger liquidityPot: QualifiedCoinInfo;
-     
     /**
      * @title initialize circuit
      * @description Initializes the Lunarswap pair system with LP token configuration.
@@ -66,7 +63,7 @@ module LunarswapPair {
         lpTokenSymbol: Opaque<"string">,
         lpTokenDecimals: Uint<8>
     ): [] {
-        return LunarswapLpTokens_initialize(lpTokenNonce, lpTokenName, lpTokenSymbol, lpTokenDecimals);
+        return LunarswapLiquidity_initialize(lpTokenNonce, lpTokenName, lpTokenSymbol, lpTokenDecimals);
     } 
 
     /**
@@ -103,11 +100,10 @@ module LunarswapPair {
      * @returns {Pair} - The initialized pair with zero reserves and metadata.
      */
     export circuit initializePair(identity: Bytes<32>, token0: CoinInfo, token1: CoinInfo): Pair {
-        LunarswapLpTokens_initializePairLpToken(identity);
+        LunarswapLiquidity_initializePairLpToken(identity);
         return Pair {
             token0: QualifiedCoinInfo { nonce: token0.nonce, color: token0.color, value: 0, mt_index: 0 },
             token1: QualifiedCoinInfo { nonce: token1.nonce, color: token1.color, value: 0, mt_index: 0 },
-            liquidity: default<QualifiedCoinInfo>,
             price0VolCumulative: 0,
             price1VolCumulative: 0,
             volume0Cumulative: 0,
@@ -115,29 +111,6 @@ module LunarswapPair {
             kLast: 0,
         };
     }
-
-    /**
-     * @title addToLiquidityPot circuit
-     * @description Adds the given liquidity amount to the liquidity pot.
-     * 
-     * @remarks
-     * This circuit adds the specified liquidity to the liquidity pot, merging coins if necessary.
-     *
-     * @param {CoinInfo} liquidity - The liquidity amount to add to the pot.
-     *
-     * @returns [] - No return values.
-     */
-    export circuit addToLiquidityPot(liquidity: CoinInfo): [] {
-        if (liquidityPot.value == 0) {
-            liquidityPot.write_coin(liquidity, eitherThisAddress());
-        } else {
-            liquidityPot.write_coin(
-                merge_coin_immediate(liquidityPot, liquidity),
-                eitherThisAddress()
-            );
-        }
-        return [];
-    } 
 
     /**
      * @title mint circuit
@@ -187,8 +160,9 @@ module LunarswapPair {
 
         const [isFeeOn, kLast] = _mintFee(identity, reserve0, reserve1, pair.kLast);
         // TODO: review the risk of using totalSupply here. Because of the nature of UTXO that 
-        // a user could send the LP tokens to the burn address, but the totalSupply will not be updated.
-        const totalSupply = LunarswapLpTokens_totalSupply(identity);
+        // a user could send the LP tokens to the burn address directly without using the burn function, 
+        // but the totalSupply will not be updated.
+        const totalSupply = LunarswapLiquidity_totalSupply(identity).value;
         if (totalSupply == 0) {
             // liquidity = (√amount0 * amount1) - MINIMUM_LIQUIDITY = Uint<128>
             // TODO: review disclose
@@ -197,22 +171,20 @@ module LunarswapPair {
                 MINIMUM_LIQUIDITY()
             );
             assert(liquidity > 0) "LunarswapPair: Insufficient liquidity minted";
-            LunarswapLpTokens_mint(identity, eitherZeroSenderAddress(), MINIMUM_LIQUIDITY());
-            LunarswapLpTokens_mint(identity, to, liquidity);
+            LunarswapLiquidity_mint(identity, eitherZeroSenderAddress(), MINIMUM_LIQUIDITY());
+            LunarswapLiquidity_mint(identity, to, liquidity);
             // For the initial mint, set the liquidity reserve to MINIMUM_LIQUIDITY() + liquidity
             // to reflect the total minted LP tokens (including the locked minimum).
             return _update(
                 pair,
                 isFeeOn,
-                balance0,
-                balance1,
                 amount0,
                 amount1,
-                liquidity,
+                balance0,
+                balance1,
                 reserve0,
                 reserve1,
-                kLast,
-                /* isRemove = */ false
+                kLast
             );
         } else { 
             // TODO: In case of using Uint<128> for reserves that results a conflict with 
@@ -223,21 +195,19 @@ module LunarswapPair {
                 disclose(MathU128_div(MathU128_mulChecked(amount1, totalSupply), reserve1))
             ); 
             // TODO: that is TBD later in the future after doing benchmarks on the performance of MathU256
-            assert (liquidity <= MAX_UINT128()) "Lunarswap: liquidity overflows MAX_U128 supported size in ERC20";
+            assert (liquidity <= MAX_UINT128()) "LunarswapPair: liquidity overflows MAX_U128 supported size in ERC20";
             assert(liquidity > 0) "LunarswapPair: Insufficient liquidity minted";
-            LunarswapLpTokens_mint(identity, to, liquidity);
+            LunarswapLiquidity_mint(identity, to, liquidity);
             return _update(
                 pair,
                 isFeeOn,
-                balance0,
-                balance1,
                 amount0,
                 amount1,
-                liquidity,
+                balance0,
+                balance1,
                 reserve0,
                 reserve1,
-                kLast,
-                /* isRemove = */ false
+                kLast
             );
         }
     }
@@ -276,14 +246,14 @@ module LunarswapPair {
                 const rootKLast = disclose(MathU128_sqrt(kLast));
                 if (rootK > rootKLast) {
                     // TODO: review the security of the totalSupply.
-                    const totalSupply = LunarswapLpTokens_totalSupply(identity);
+                    const totalSupply = LunarswapLiquidity_totalSupply(identity).value;
                     const numerator = MathU128_mulChecked(MathU128_sub(rootK, rootKLast), totalSupply);
                     const denominator = MathU128_addChecked(MathU128_mulChecked(rootK, 5), rootKLast);
                     const liquidity = disclose(MathU128_div(numerator, denominator));
-                    assert (liquidity <= MAX_UINT128()) "Lunarswap: liquidity overflows MAX_U128 supported size in ERC20";
+                    assert (liquidity <= MAX_UINT128()) "LunarswapPair: liquidity overflows MAX_U128 supported size in ERC20";
                     if (liquidity as Uint<128> > 0) {
                         // Mint Liquidity Tokens for the protocol fee recipient
-                        LunarswapLpTokens_mint(identity, eitherZswapCoinPublicKey(LunarswapFee_feeTo()), liquidity as Uint<128>);
+                        LunarswapLiquidity_mint(identity, eitherZswapCoinPublicKey(LunarswapFee_feeTo()), liquidity as Uint<128>);
                     } 
                 } 
             }   
@@ -316,18 +286,37 @@ module LunarswapPair {
         to: Either<ZswapCoinPublicKey, ContractAddress>,
         identity: Bytes<32>,
         pair: Pair,
+        liquidity: CoinInfo,
         token0: QualifiedCoinInfo,
         token1: QualifiedCoinInfo,
         reserve0: Uint<128>,
         reserve1: Uint<128>,
     ): [Pair, Uint<128>, Uint<128>] {
+        // Trying to keep with Uniswap's implementation, Originally you would check the balanceOf 
+        // function for each token contract of that address. But here we don't have the token contract,
+        // so we use the reserves as the balance because the tokens in the reserves are not 
+        // transferred to the recipient yet.
         const balance0 = reserve0;
         const balance1 = reserve1;
-        const liquidity = liquidityPot.value;
-        const totalSupply = LunarswapLpTokens_totalSupply(identity);
+        const totalSupply = LunarswapLiquidity_totalSupply(identity).value;
 
         const [isFeeOn, kLast] = _mintFee(identity, reserve0, reserve1, pair.kLast);
-        return _burn(to, identity, pair, token0, token1, reserve0, reserve1, liquidity, totalSupply, isFeeOn, kLast);
+        // Call the internal _burn circuit and return its result
+        return _burn(
+            to,
+            identity,
+            pair,
+            token0,
+            token1,
+            balance0,
+            balance1,
+            reserve0,
+            reserve1,
+            liquidity,
+            totalSupply,
+            isFeeOn,
+            kLast
+        );
     }
 
     /**
@@ -361,16 +350,34 @@ module LunarswapPair {
         pair: Pair,
         token0: QualifiedCoinInfo,
         token1: QualifiedCoinInfo,
+        balance0: Uint<128>,
+        balance1: Uint<128>,
         reserve0: Uint<128>,
         reserve1: Uint<128>,
-        liquidity: Uint<128>,
+        liquidity: CoinInfo,
         totalSupply: Uint<128>,
         isFeeOn: Boolean,
         kLast: Uint<128>,
     ): [Pair, Uint<128>, Uint<128>] {
         // Early validation: Calculate expected amounts and validate reserves
-        const amount0 = disclose(MathU128_div(MathU128_mulChecked(liquidity, reserve0), totalSupply));
-        const amount1 = disclose(MathU128_div(MathU128_mulChecked(liquidity, reserve1), totalSupply));
+        const amount0 = disclose(
+            MathU128_div(
+                MathU128_mulChecked(
+                    liquidity.value,
+                    balance0
+                ),
+                totalSupply
+            )
+        );
+        const amount1 = disclose(
+            MathU128_div(
+                MathU128_mulChecked(
+                    liquidity.value,
+                    balance1
+                ),
+                totalSupply
+            )
+        );
         
         // Validate that calculated amounts are positive
         assert (amount0 > 0 && amount1 > 0) "LunarswapPair: burn() - Insufficient liquidity burned";
@@ -379,13 +386,7 @@ module LunarswapPair {
         assert (reserve0 >= amount0) "LunarswapPair: burn() - Insufficient reserves for token0";
         assert (reserve1 >= amount1) "LunarswapPair: burn() - Insufficient reserves for token1";
         
-        const liquidityCoinInfo = CoinInfo {
-            nonce: liquidityPot.nonce,
-            color: liquidityPot.color,
-            value: liquidity,
-        };
-        // TODO: I think we don't need to send the liquidity pot. 
-        LunarswapLpTokens_burn(identity, liquidityCoinInfo, liquidity);
+        LunarswapLiquidity_burn(identity, liquidity, liquidity.value);
 
         // Only send the used amount of the token0 to the LP.
         const splitToken0 = LunarswapLibrary_splitQualifiedCoin(token0, amount0);
@@ -399,26 +400,81 @@ module LunarswapPair {
             send(splitToken1.used, to, splitToken1.used.value);
         }
 
-        // TODO: test shadowing
         {
+            const amount0 = splitToken0.used.value;
+            const amount1 = splitToken1.used.value;
             const balance0 = MathU128_sub(reserve0, amount0);
             const balance1 = MathU128_sub(reserve1, amount1);
+            
             const updatedPair = _update(
                 pair,
                 isFeeOn,
-                balance0,
-                balance1,
                 amount0,
                 amount1,
-                liquidity,
+                balance0,
+                balance1,
                 reserve0,
                 reserve1,
-                kLast,
-                /* isRemove = */ true
+                kLast
             );
             return [updatedPair, amount0, amount1];
         }
-    } 
+    }
+
+    // TODO: support flash swap that requires contracts to contracts calls.
+    export circuit swap(
+        amount0Out: Uint<128>,
+        amount1Out: Uint<128>,
+        to: Either<ZswapCoinPublicKey, ContractAddress>,
+        identity: Bytes<32>,
+        pair: Pair,
+        reserve0: Uint<128>,
+        reserve1: Uint<128>,
+    ): Pair {
+        assert (amount0Out > 0 || amount1Out > 0) "LunarswapPair: swap() - Insufficient output amount";
+        assert (amount0Out < reserve0 && amount1Out < reserve1) "LunarswapPair: swap() - Insufficient liquidity";
+        
+        // Send the output tokens to the recipient
+        if (amount0Out > 0) {
+            const outputQualifiedCoin = QualifiedCoinInfo {
+                nonce: pair.token0.nonce,
+                color: pair.token0.color,
+                value: amount0Out,
+                mt_index: pair.token0.mt_index,
+            };
+            send(outputQualifiedCoin, to, amount0Out); 
+        } else if (amount1Out > 0) {
+            const outputQualifiedCoin = QualifiedCoinInfo {
+                nonce: pair.token1.nonce,
+                color: pair.token1.color,
+                value: amount1Out,
+                mt_index: pair.token1.mt_index,
+            };
+            send(outputQualifiedCoin, to, amount1Out);
+        }
+
+        const balance0 = amount0Out > 0 ? MathU128_sub(reserve0, amount0Out) : reserve0;
+        const balance1 = amount1Out > 0 ? MathU128_sub(reserve1, amount1Out) : reserve1;
+
+        const amount0In = balance0 > MathU128_sub(reserve0, amount0Out) ? MathU128_sub(balance0, MathU128_sub(reserve0, amount0Out)) : 0;
+        const amount1In = balance1 > MathU128_sub(reserve1, amount1Out) ? MathU128_sub(balance1, MathU128_sub(reserve1, amount1Out)) : 0;
+
+        assert (amount0In > 0 || amount1In > 0) "LunarswapPair: swap() - Insufficient input amount";
+
+        const balance0Adjusted = MathU128_sub(MathU128_mulChecked(balance0, 1000), MathU128_mulChecked(amount0In, 3));
+        const balance1Adjusted = MathU128_sub(MathU128_mulChecked(balance1, 1000), MathU128_mulChecked(amount1In, 3));
+
+        assert (
+            MathU128_mulChecked(balance0Adjusted, balance1Adjusted)
+                >=
+            MathU128_mulChecked(
+                MathU128_mulChecked(reserve0, reserve1),
+                1000000 // 1000 ** 2
+            )
+        ) "LunarswapPair: swap() - k";
+
+        return _update(pair, false, amount0In, amount1In, balance0, balance1, reserve0, reserve1, pair.kLast);
+    }
 
     /**
      * @title _update circuit
@@ -431,39 +487,42 @@ module LunarswapPair {
      *
      * @param {Pair} pair           - The current pair state.
      * @param {Boolean} isFeeOn     - Whether protocol fees are enabled.
-     * @param {Uint<128>} balance0  - The new balance of token0.
-     * @param {Uint<128>} balance1  - The new balance of token1.
      * @param {Uint<128>} amount0In - The amount of token0 added.
      * @param {Uint<128>} amount1In - The amount of token1 added.
-     * @param {Uint<128>} liquidity - The liquidity amount to add.
-     * @param {Uint<128>} reserve0  - The current reserve of token0.
-     * @param {Uint<128>} reserve1  - The current reserve of token1.
-     * @param {Uint<128>} kLast     - The k value from the last fee calculation.
+     * @param {Uint<128>} liquidity  - The new liquidity amount.
+     * @param {Uint<128>} balance0   - The new balance of token0.
+     * @param {Uint<128>} balance1   - The new balance of token1.
+     * @param {Uint<128>} reserve0   - The current reserve of token0.
+     * @param {Uint<128>} reserve1   - The current reserve of token1.
+     * @param {Uint<128>} kLast      - The k value from the last fee calculation.
      *
      * @returns {Pair} - The updated pair state.
      */
     circuit _update(
         pair: Pair,
         isFeeOn: Boolean,
-        balance0: Uint<128>,
-        balance1: Uint<128>,
         amount0In: Uint<128>,
         amount1In: Uint<128>,
-        liquidity: Uint<128>,
+        balance0: Uint<128>,
+        balance1: Uint<128>,
         reserve0: Uint<128>,
         reserve1: Uint<128>,
         kLast: Uint<128>,
-        isRemove: Boolean,
     ): Pair {
-        const [price0VolCumulative, price1VolCumulative, volume0Cumulative, volume1Cumulative] = _updatePairPrice(pair, reserve0, reserve1, amount0In, amount1In);
-        const [updatedToken0, updatedToken1] = _updateReserve(pair.token0, pair.token1, amount0In, amount1In, isRemove);
-        const updatedLiquidity = _updateLiquidity(pair.liquidity, liquidity, isRemove);
+        const [price0VolCumulative, price1VolCumulative, volume0Cumulative, volume1Cumulative] =
+            _updatePairPrice(
+                pair,
+                reserve0,
+                reserve1,
+                amount0In,
+                amount1In
+            );
+        const [updatedToken0, updatedToken1] = _updateReserve(pair.token0, pair.token1, balance0, balance1);
         const updatedKLast = _updateKLast(isFeeOn, updatedToken0.value, updatedToken1.value);
         return _updatePair(
             pair,
             updatedToken0,
             updatedToken1,
-            updatedLiquidity,
             price0VolCumulative,
             price1VolCumulative,
             volume0Cumulative,
@@ -523,55 +582,28 @@ module LunarswapPair {
      *
      * @param {QualifiedCoinInfo} token0 - The current QualifiedCoinInfo for token0.
      * @param {QualifiedCoinInfo} token1 - The current QualifiedCoinInfo for token1.
-     * @param {Uint<128>} amount0In - The amount to add to token0.
-     * @param {Uint<128>} amount1In - The amount to add to token1.
+     * @param {Uint<128>} balance0 - The new balance of token0.
+     * @param {Uint<128>} balance1 - The new balance of token1.
      *
      * @returns {[QualifiedCoinInfo, QualifiedCoinInfo]} - The updated QualifiedCoinInfo for token0 and token1.
      */
     circuit _updateReserve(
         token0: QualifiedCoinInfo,
         token1: QualifiedCoinInfo,
-        amount0: Uint<128>,
-        amount1: Uint<128>,
-        isRemove: Boolean,
+        balance0: Uint<128>,
+        balance1: Uint<128>,
     ): [QualifiedCoinInfo, QualifiedCoinInfo] {
-        if (isRemove) {
-            return [
-                LunarswapLibrary_subQualifiedCoinValue(token0, amount0),
-                LunarswapLibrary_subQualifiedCoinValue(token1, amount1)
-            ];
-        } else {
-            return [
-                LunarswapLibrary_addQualifiedCoinValue(token0, amount0),        
-                LunarswapLibrary_addQualifiedCoinValue(token1, amount1)
-            ];
-        }
-    }
-
-    /**
-     * @title _updateLiquidity circuit
-     * @description Updates the QualifiedCoinInfo for liquidity with a new liquidity amount.
-     * 
-     * @remarks
-     * This internal circuit calculates the updated QualifiedCoinInfo for liquidity
-     * by adding the specified liquidity amount to the current liquidity value.
-     * This is used to update the pair's liquidity when LP tokens are minted or burned.
-     *
-     * @param {QualifiedCoinInfo} liquidity - The current QualifiedCoinInfo for liquidity.
-     * @param {Uint<128>} liquidityAmount - The liquidity amount to add.
-     *
-     * @returns {QualifiedCoinInfo} - The updated QualifiedCoinInfo for liquidity.
-     */
-    circuit _updateLiquidity(
-        liquidity: QualifiedCoinInfo,
-        liquidityAmount: Uint<128>,
-        isRemove: Boolean,
-    ): QualifiedCoinInfo {
-        if (isRemove) {
-            return LunarswapLibrary_subQualifiedCoinValue(liquidity, liquidityAmount);
-        } else {
-            return LunarswapLibrary_addQualifiedCoinValue(liquidity, liquidityAmount);
-        }
+        return [QualifiedCoinInfo {
+            nonce: token0.nonce,
+            color: token0.color,
+            value: balance0,
+            mt_index: token0.mt_index,
+        }, QualifiedCoinInfo {
+            nonce: token1.nonce,
+            color: token1.color,
+            value: balance1,
+            mt_index: token1.mt_index,
+        }];
     }
 
     /**
@@ -594,12 +626,7 @@ module LunarswapPair {
         reserve0: Uint<128>,
         reserve1: Uint<128>,
     ): Uint<128> {
-        if (isFeeOn) {
-            const kLast = MathU128_mulChecked(reserve0, reserve1);
-            return kLast;
-        } else {
-            return 0;
-        }
+        return isFeeOn ? MathU128_mulChecked(reserve0, reserve1) : 0;
     } 
 
     /**
@@ -629,7 +656,6 @@ module LunarswapPair {
         pair: Pair,
         updatedToken0: QualifiedCoinInfo,
         updatedToken1: QualifiedCoinInfo,
-        updatedLiquidity: QualifiedCoinInfo,
         price0VolCumulative: Uint<128>,
         price1VolCumulative: Uint<128>,
         volume0Cumulative: Uint<128>,
@@ -639,7 +665,6 @@ module LunarswapPair {
         return Pair {
             token0: updatedToken0,
             token1: updatedToken1,
-            liquidity: updatedLiquidity,
             price0VolCumulative: price0VolCumulative,
             price1VolCumulative: price1VolCumulative,
             volume0Cumulative: volume0Cumulative,

@@ -21,6 +21,7 @@ import {
 	type Ledger,
 	type Pair,
 	ledger,
+	type QualifiedCoinInfo,
 } from "../artifacts/Lunarswap/contract/index.cjs";
 import type { IContractSimulator } from "../types/test";
 import {
@@ -256,7 +257,7 @@ export class LunarswapSimulator
 		tokenA: CoinInfo,
 		tokenB: CoinInfo,
 		sender?: CoinPublicKey,
-	): bigint {
+	): QualifiedCoinInfo {
 		const context = sender
 			? {
 					...this.circuitContext,

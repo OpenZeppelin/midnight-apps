@@ -254,6 +254,22 @@ module LunarswapLibrary {
         };
     }
 
+    /**
+     * @title subQualifiedCoinValue circuit
+     * @description Subtracts a value from a qualified coin and returns a new QualifiedCoinInfo.
+     * 
+     * @remarks
+     * This circuit creates a new qualified coin with a decreased value by subtracting the
+     * specified amount from the original coin's value. The new coin maintains the same
+     * color and Merkle tree index but has a different nonce.
+     *
+     * @circuitInfo k=11, rows=700
+     *
+     * @param {QualifiedCoinInfo} _coin   - The original qualified coin.
+     * @param {Uint<128>} _amount - The amount to subtract from the coin.
+     *
+     * @returns {QualifiedCoinInfo} - A new qualified coin with the decreased value.
+     */
     export circuit subQualifiedCoinValue(coin: QualifiedCoinInfo, amount: Uint<128>): QualifiedCoinInfo {
         assert amount <= coin.value "LunarswapLibrary: subQualifiedCoinValue() - Insufficient amount";
         return QualifiedCoinInfo {
@@ -342,6 +358,72 @@ module LunarswapLibrary {
             MathU128_mulChecked(amount0, reserve1),
             reserve0
         ));
+    }
+
+    /**
+     * @title getAmountOut circuit
+     * @description Calculates the expected output amount for a given input amount and reserves.
+     * 
+     * @remarks
+     * This circuit implements the constant product formula to calculate the expected
+     * output amount when swapping tokens. The calculation is as follows:
+     *   amountInWithFee = amountIn * 997
+     *   numerator = amountInWithFee * reserveOut
+     *   denominator = reserveIn * 1000 + amountInWithFee
+     *   amountOut = numerator / denominator
+     *
+     * @circuitInfo k=11, rows=1000
+     *
+     * @param {Uint<128>} amountIn  - The input amount of token0.
+     * @param {Uint<128>} reserveIn - The current reserve of token0.
+     * @param {Uint<128>} reserveOut - The current reserve of token1.
+     *
+     * @throws {Error} "LunarswapLibrary: getAmountOut() - Insufficient amount" if amountIn is zero.
+     * @throws {Error} "LunarswapLibrary: getAmountOut() - Insufficient liquidity" if reserves are zero.
+     *
+     * @returns {Uint<128>} - The expected output amount of token1.
+     */
+    export circuit getAmountOut(amountIn: Uint<128>, reserveIn: Uint<128>, reserveOut: Uint<128>): Uint<128> {
+        assert (amountIn > 0) "LunarswapLibrary: getAmountOut() - Insufficient amount";
+        assert (reserveIn > 0 && reserveOut > 0) "LunarswapLibrary: getAmountOut() - Insufficient liquidity";
+        const amountInWithFee = MathU128_mulChecked(amountIn, 997);
+        const numerator = MathU128_mulChecked(amountInWithFee, reserveOut);
+        const denominator = MathU128_addChecked(MathU128_mulChecked(reserveIn, 1000), amountInWithFee);
+        return disclose(MathU128_div(numerator, denominator));
+    }
+
+    /**
+     * @title getAmountIn circuit
+     * @description Calculates the expected input amount for a given output amount and reserves.
+     * 
+     * @remarks
+     * This circuit implements the constant product formula to calculate the expected 
+     * input amount when swapping tokens. The calculation is as follows:
+     *   amountOutWithFee = amountOut * 997
+     *   numerator = amountOutWithFee * reserveIn * 1000
+     *   denominator = reserveOut * amountOutWithFee - 997
+     *   amountIn = numerator / denominator + 1
+     *
+     * @circuitInfo k=11, rows=1000
+     *
+     * @param {Uint<128>} amountOut  - The output amount of token1.
+     * @param {Uint<128>} reserveIn - The current reserve of token0.
+     * @param {Uint<128>} reserveOut - The current reserve of token1.
+     *
+     * @throws {Error} "LunarswapLibrary: getAmountIn() - Insufficient amount" if amountOut is zero.
+     * @throws {Error} "LunarswapLibrary: getAmountIn() - Insufficient liquidity" if reserves are zero.
+     *
+     * @returns {Uint<128>} - The expected input amount of token0.
+     */
+    export circuit getAmountIn(amountOut: Uint<128>, reserveIn: Uint<128>, reserveOut: Uint<128>): Uint<128> {
+        assert (amountOut > 0) "LunarswapLibrary: getAmountIn() - Insufficient amount";
+        assert (reserveIn > 0 && reserveOut > 0) "LunarswapLibrary: getAmountIn() - Insufficient liquidity";
+        const numerator = MathU128_mulChecked(MathU128_mulChecked(reserveIn, amountOut), 1000);
+        const denominator = MathU128_mulChecked(MathU128_sub(reserveOut, amountOut), 997);
+        return MathU128_addChecked(
+            disclose(MathU128_div(numerator, denominator)),
+            1
+        );
     }
 
     /**

@@ -23,6 +23,7 @@ module LunarswapRouter {
     import LunarswapFactory prefix LunarswapFactory_;
     import LunarswapPair prefix LunarswapPair_;
     import LunarswapFee prefix LunarswapFee_;
+    import LunarswapLiquidity prefix LunarswapLiquidity_;
 
     /**
      * @title initialize circuit
@@ -229,25 +230,32 @@ module LunarswapRouter {
         amount0Min: Uint<128>,
         amount1Min: Uint<128>,
         to: Either<ZswapCoinPublicKey, ContractAddress>,
-    ): [] {
+    ): [Uint<128>, Uint<128>] {
+        const totalSupply = LunarswapLiquidity_totalSupply(identity);
+        
+        assert (totalSupply.value > 0) "LunarswapRouter: totalSupply is zero";
+        assert (totalSupply.color == liquidity.color) "LunarswapRouter: mismatched LP token color";
+        assert (totalSupply.nonce == liquidity.nonce) "LunarswapRouter: mismatched LP token nonce";
+
         // Send the liquidity to the pair
         receive(liquidity);
-        LunarswapPair_addToLiquidityPot(liquidity);
 
         // Burn the liquidity and get the amounts
         const [updatedPair, amount0, amount1] = LunarswapPair_burn(
             to,
             identity,
             pair,
+            liquidity,
             pair.token0,
             pair.token1,
             reserve0,
             reserve1
         );
 
-        assert (amount0 >= amount0Min) "LunarswapRouter: Insufficient token0 amount";
-        assert (amount1 >= amount1Min) "LunarswapRouter: Insufficient token1 amount"; 
         LunarswapFactory_updatePair(updatedPair, identity);
-        return [];
+
+        return [amount0, amount1];
     }
+
+
 }

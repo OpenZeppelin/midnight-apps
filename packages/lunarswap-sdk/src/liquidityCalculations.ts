@@ -112,7 +112,7 @@ export function calculateOptimalAmounts(
  * @param slippageTolerance - Slippage tolerance in basis points (e.g., 50 = 0.5%)
  * @returns Object with optimal amounts and minimum amounts for both tokens
  */
-export function calculateLiquidityAmounts(
+export function calculateAddLiquidityAmounts(
 	amountADesired: bigint,
 	amountBDesired: bigint,
 	reserveA: bigint,
@@ -194,6 +194,44 @@ export const SLIPPAGE_TOLERANCE = {
 	HIGH: 500, // 5%
 	VERY_HIGH: 1000, // 10%
 } as const;
+
+/**
+ * Calculates minimum amounts for liquidity removal based on LP token proportion
+ * This is useful for removeLiquidity operations
+ *
+ * @param lpTokensToRemove - The amount of LP tokens to remove
+ * @param totalLpSupply - The total supply of LP tokens for the pair
+ * @param reserveA - Current reserve of token A in the pair
+ * @param reserveB - Current reserve of token B in the pair
+ * @param slippageTolerance - Slippage tolerance in basis points (e.g., 50 = 0.5%)
+ * @returns Object with minimum amounts for both tokens
+ */
+export function calculateRemoveLiquidityMinimums(
+	lpTokensToRemove: bigint,
+	totalLpSupply: bigint,
+	reserveA: bigint,
+	reserveB: bigint,
+	slippageTolerance: number = SLIPPAGE_TOLERANCE.LOW,
+): { amountAMin: bigint; amountBMin: bigint } {
+	if (lpTokensToRemove <= 0n || totalLpSupply <= 0n || reserveA <= 0n || reserveB <= 0n) {
+		throw new Error("Invalid amounts or reserves");
+	}
+
+	if (lpTokensToRemove > totalLpSupply) {
+		throw new Error("Cannot remove more LP tokens than total supply");
+	}
+
+	// Calculate expected token amounts based on LP token proportion
+	// Use total LP supply as the denominator - this is the standard Uniswap V2 formula
+	const expectedAmountA = (lpTokensToRemove * reserveA) / totalLpSupply;
+	const expectedAmountB = (lpTokensToRemove * reserveB) / totalLpSupply;
+
+	// Calculate minimum amounts using slippage tolerance
+	const amountAMin = calculateMinimumAmount(expectedAmountA, slippageTolerance);
+	const amountBMin = calculateMinimumAmount(expectedAmountB, slippageTolerance);
+
+	return { amountAMin, amountBMin };
+}
 
 /**
  * Calculates the output amount for a token swap using the constant product formula

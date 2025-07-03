@@ -263,7 +263,7 @@ importers:
         specifier: ^3.0.9
         version: 3.0.9(@types/node@22.13.14)(jiti@2.4.2)(lightningcss@1.29.1)(yaml@2.8.0)
 
-  contracts/lunarswap-v2:
+  contracts/lunarswap-v1:
     dependencies:
       '@midnight-dapps/access-contract':
         specifier: workspace:^
