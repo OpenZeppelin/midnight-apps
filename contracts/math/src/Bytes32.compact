@@ -55,8 +55,7 @@ module Bytes32 {
      */
     export circuit fromBytes(a: Bytes<32>): Field {
         // Inline the isZero logic to avoid invalid context error
-        const zeroBytes = upgrade_from_transient(0 as Field);
-        if (a == zeroBytes) {
+        if (isZero(a)) {
             return 0 as Field;
         }
         const aField = degrade_to_transient(a);
@@ -193,7 +192,6 @@ module Bytes32 {
      * @returns {Boolean} - True if the bytes are zero, false otherwise.
      */
     export circuit isZero(a: Bytes<32>): Boolean {
-        const zeroBytes = upgrade_from_transient(0 as Field);
-        return a == zeroBytes;
+        return a == upgrade_from_transient(0 as Field);
     } 
 }

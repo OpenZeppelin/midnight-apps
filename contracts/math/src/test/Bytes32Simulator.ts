@@ -66,6 +66,18 @@ export class Bytes32ContractSimulator
     return this.circuitContext.originalState;
   }
 
+  public fromBytes(bytes: Uint8Array): bigint {
+    const result = this.contract.circuits.fromBytes(this.circuitContext, bytes);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public toBytes(field: bigint): Uint8Array {
+    const result = this.contract.circuits.toBytes(this.circuitContext, field);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
   public eq(a: Uint8Array, b: Uint8Array): boolean {
     const result = this.contract.circuits.eq(this.circuitContext, a, b);
     this.circuitContext = result.context;
@@ -98,18 +110,6 @@ export class Bytes32ContractSimulator
 
   public isZero(a: Uint8Array): boolean {
     const result = this.contract.circuits.isZero(this.circuitContext, a);
-    this.circuitContext = result.context;
-    return result.result;
-  }
-
-  public fromBytes(bytes: Uint8Array): bigint {
-    const result = this.contract.circuits.fromBytes(this.circuitContext, bytes);
-    this.circuitContext = result.context;
-    return result.result;
-  }
-
-  public toBytes(field: bigint): Uint8Array {
-    const result = this.contract.circuits.toBytes(this.circuitContext, field);
     this.circuitContext = result.context;
     return result.result;
   }

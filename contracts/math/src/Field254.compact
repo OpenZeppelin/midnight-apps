@@ -392,10 +392,7 @@ module Field254 {
      * @returns {Field} The quotient of the division.
      */
     export circuit div(a: Field, b: Field): Field {
-        const aU256 = fromField(a);
-        const bU256 = fromField(b);
-        const quotientU256 = MathU256_div(aU256, bU256);
-        return toField(quotientU256);
+        return toField(_div(a, b).quotient);
     }
 
     /**
@@ -421,10 +418,7 @@ module Field254 {
      * @returns {Field} The remainder of the division.
      */
     export circuit rem(a: Field, b: Field): Field {
-        const aU256 = fromField(a);
-        const bU256 = fromField(b);
-        const remainderU256 = MathU256_rem(aU256, bU256);
-        return toField(remainderU256);
+        return toField(_div(a, b).remainder);
     }
 
     /**

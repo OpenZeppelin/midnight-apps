@@ -68,12 +68,6 @@ export class Field254Simulator
     return this.circuitContext.originalState;
   }
 
-  public isZero(a: bigint): boolean {
-    const result = this.contract.circuits.isZero(this.circuitContext, a);
-    this.circuitContext = result.context;
-    return result.result;
-  }
-
   public fromField(a: bigint): U256 {
     const result = this.contract.circuits.fromField(this.circuitContext, a);
     this.circuitContext = result.context;
@@ -166,6 +160,12 @@ export class Field254Simulator
 
   public max(a: bigint, b: bigint): bigint {
     const result = this.contract.circuits.max(this.circuitContext, a, b);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public isZero(a: bigint): boolean {
+    const result = this.contract.circuits.isZero(this.circuitContext, a);
     this.circuitContext = result.context;
     return result.result;
   }
