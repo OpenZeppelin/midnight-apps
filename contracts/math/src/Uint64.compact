@@ -2,7 +2,7 @@
 pragma language_version >= 0.15.0;
 
 /**
- * @title MathU64
+ * @title Uint64
  * @dev A utility module providing mathematical operations for unsigned integers. Most functions operate on
  * `Uint<64>` values in the range [0, 2^64 - 1], while the `sqrt` function accepts a `Uint<128>` input in the range
  * [0, 2^128 - 1]. The module supports arithmetic, division, square root, and utility functions with overflow and
@@ -23,10 +23,10 @@ pragma language_version >= 0.15.0;
  *   - min(): Returns the smaller of two `Uint<64>` numbers.
  *   - max(): Returns the larger of two `Uint<64>` numbers.
  */
-module MathU64 {
+module Uint64 {
     import CompactStandardLibrary;
 
-    import "./interfaces/IMathU64";
+    import "./interfaces/IUint64";
 
     import Max prefix Max_;
 

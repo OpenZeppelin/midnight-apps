@@ -14,7 +14,7 @@ import {
   Contract,
   type Ledger,
   ledger,
-} from '../artifacts/MockMathU64/contract/index.cjs';
+} from '../artifacts/MockUint64/contract/index.cjs';
 import type { IContractSimulator } from '../types/test';
 import {
   MathU64ContractPrivateState,

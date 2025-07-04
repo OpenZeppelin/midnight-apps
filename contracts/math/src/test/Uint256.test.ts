@@ -11,7 +11,7 @@ import {
 import {
   MathU256Simulator,
   createMaliciousSimulator,
-} from './MathU256Simulator';
+} from './Uint256Simulator';
 
 let mathSimulator: MathU256Simulator;
 

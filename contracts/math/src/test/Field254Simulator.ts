@@ -2,6 +2,7 @@ import {
   type CircuitContext,
   type ContractState,
   QueryContext,
+  type WitnessContext,
   constructorContext,
 } from '@midnight-ntwrk/compact-runtime';
 import {
@@ -169,4 +170,94 @@ export class Field254Simulator
     this.circuitContext = result.context;
     return result.result;
   }
+}
+
+export function createMaliciousField254Simulator({
+  mockSqrtU256,
+  mockDivU256,
+}: {
+  mockSqrtU256?: (radicand: U256) => bigint;
+  mockDivU256?: (a: U256, b: U256) => { quotient: bigint; remainder: bigint };
+}): Field254Simulator {
+  const MAX_U64 = 2n ** 64n - 1n;
+
+  const baseWitnesses = Field254Witnesses();
+
+  const witnesses = {
+    ...baseWitnesses,
+    ...(mockSqrtU256 && {
+      sqrtU256Locally(
+        context: WitnessContext<Ledger, Field254ContractPrivateState>,
+        radicand: U256,
+      ): [Field254ContractPrivateState, bigint] {
+        return [context.privateState, mockSqrtU256(radicand)];
+      },
+    }),
+    ...(mockDivU256 && {
+      divU256Locally(
+        context: WitnessContext<Ledger, Field254ContractPrivateState>,
+        a: U256,
+        b: U256,
+      ): [Field254ContractPrivateState, DivResultU256] {
+        const { quotient, remainder } = mockDivU256(a, b);
+
+        const qLow = quotient & ((1n << 128n) - 1n);
+        const qHigh = quotient >> 128n;
+        const rLow = remainder & ((1n << 128n) - 1n);
+        const rHigh = remainder >> 128n;
+
+        return [
+          context.privateState,
+          {
+            quotient: {
+              low: {
+                low: qLow & MAX_U64,
+                high: qLow >> 64n,
+              },
+              high: {
+                low: qHigh & MAX_U64,
+                high: qHigh >> 64n,
+              },
+            },
+            remainder: {
+              low: {
+                low: rLow & MAX_U64,
+                high: rLow >> 64n,
+              },
+              high: {
+                low: rHigh & MAX_U64,
+                high: rHigh >> 64n,
+              },
+            },
+          },
+        ];
+      },
+    }),
+  };
+
+  const contract = new Contract<Field254ContractPrivateState>(witnesses);
+
+  const { currentPrivateState, currentContractState, currentZswapLocalState } =
+    contract.initialState(
+      constructorContext(
+        Field254ContractPrivateState.generate(),
+        sampleCoinPublicKey(),
+      ),
+    );
+
+  const badSimulator = new Field254Simulator();
+  Object.defineProperty(badSimulator, 'contract', {
+    value: contract,
+    writable: false,
+    configurable: true,
+  });
+
+  badSimulator.circuitContext = {
+    currentPrivateState,
+    currentZswapLocalState,
+    originalState: currentContractState,
+    transactionContext: badSimulator.circuitContext.transactionContext,
+  };
+
+  return badSimulator;
 }

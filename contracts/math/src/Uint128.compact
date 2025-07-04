@@ -2,7 +2,7 @@
 pragma language_version >= 0.15.0;
 
 /**
- * @title MathU128
+ * @title Uint128
  * @dev A utility module providing mathematical operations for 128-bit unsigned integers
  * using the U128 struct, which represents numbers as high * 2^64 + low, where high and low are
  * 64-bit unsigned integers (Uint<64>) in [0, 2^64 - 1]. The module supports conversions,
@@ -36,12 +36,11 @@ pragma language_version >= 0.15.0;
  *   - max(), maxU128(): Returns the larger of two 128-bit numbers.
  *   - isMultiple(), isMultipleU128(): Checks if one 128-bit number is a multiple of another.
  */
-module MathU128 {
+module Uint128 {
     import CompactStandardLibrary;
 
     import "./interfaces/IUint128";
     import "./interfaces/IUint256";
-    import "./interfaces/IMathU128";
 
     import Max;
 

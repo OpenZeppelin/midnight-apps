@@ -2,7 +2,6 @@ pragma language_version >= 0.15.0;
 
 import CompactStandardLibrary;
 import "../../interfaces/IUint256";
-import "../../interfaces/IMathU256";
 
 import "../../Field254" prefix Field254_;
 

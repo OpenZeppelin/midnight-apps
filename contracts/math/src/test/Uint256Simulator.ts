@@ -18,7 +18,7 @@ import {
   Contract,
   type Ledger,
   ledger,
-} from '../artifacts/MockMathU256/contract/index.cjs'; // Adjust path based on your project
+} from '../artifacts/MockUint256/contract/index.cjs';
 import type { IContractSimulator } from '../types/test';
 import {
   MathU256ContractPrivateState,

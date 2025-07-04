@@ -2,12 +2,12 @@
 pragma language_version >= 0.15.0;
 
 /**
- * @title IMathU64
+ * @title IUint64
  * @dev This module provides interfaces for performing mathematical operations on Uint<64> values.
  * It includes witness functions for division and square root calculations that are computed locally (off-chain).
  * The module works with Uint<64> values which represent 64-bit unsigned integers.
  */
-module IMathU64 {
+module IUint64 {
     /**
      * @dev Struct containing the quotient and remainder from a division operation
      */

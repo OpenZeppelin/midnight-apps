@@ -5,7 +5,7 @@ import type {
   U128,
   U256,
 } from '../artifacts/Index/contract/index.cjs';
-import type { Ledger } from '../artifacts/MathU256/contract/index.cjs';
+import type { Ledger } from '../artifacts/Uint256/contract/index.cjs';
 import type { EmptyState } from '../types/state';
 import { sqrtBigint } from '../utils/sqrtBigint';
 import type { IMathU256Witnesses } from './interfaces';

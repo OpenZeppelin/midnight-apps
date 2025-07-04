@@ -10,7 +10,7 @@ import {
 import {
   MathU128Simulator,
   createMaliciousSimulator,
-} from './MathU128Simulator';
+} from './Uint128Simulator';
 
 let mathSimulator: MathU128Simulator;
 

@@ -25,11 +25,9 @@ pragma language_version >= 0.15.0;
  * const result = Index.DivResultU128 { quotient: ..., remainder: ... };
  * ```
  */
+import "./interfaces/IUint64";
 import "./interfaces/IUint128";
 import "./interfaces/IUint256";
-import "./interfaces/IMathU64";
-import "./interfaces/IMathU128";
-import "./interfaces/IMathU256";
 
 import Max;
 

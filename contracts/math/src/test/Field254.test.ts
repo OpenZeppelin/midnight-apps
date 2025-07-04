@@ -40,6 +40,27 @@ describe('Field254', () => {
       const backToU256 = fieldSimulator.fromField(field);
       expect(fromU256(backToU256)).toBe(123n);
     });
+
+    test('should throw error for values exceeding field size', () => {
+      const exceedingValue = 2n ** 254n;
+      expect(() => fieldSimulator.toField(toU256(exceedingValue))).toThrow(
+        'MathU256: fromU256() - value exceeds 254 bits',
+      );
+    });
+
+    test('should handle values at field boundary', () => {
+      const atFieldLimit = FIELD_MODULUS;
+      const u256 = fieldSimulator.fromField(atFieldLimit);
+      const backToField = fieldSimulator.toField(u256);
+      expect(backToField).toBe(atFieldLimit);
+    });
+
+    test('should throw error for values just above field boundary', () => {
+      const justAboveField = FIELD_MODULUS + 1n;
+      expect(() => fieldSimulator.toField(toU256(justAboveField))).toThrow(
+        'MathU256: fromU256() - value exceeds 254 bits',
+      );
+    });
   });
 
   describe('eq', () => {

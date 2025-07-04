@@ -3,7 +3,7 @@ import type {
   DivResultU128,
   U128,
 } from '../artifacts/Index/contract/index.cjs';
-import type { Ledger } from '../artifacts/MathU128/contract/index.cjs';
+import type { Ledger } from '../artifacts/Uint128/contract/index.cjs';
 import type { EmptyState } from '../types/state';
 import { sqrtBigint } from '../utils/sqrtBigint';
 import type { IMathU128Witnesses } from './interfaces';

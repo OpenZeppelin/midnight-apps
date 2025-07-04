@@ -3,7 +3,7 @@ import { MAX_UINT32, MAX_UINT64 } from '../utils/consts';
 import {
   MathContractSimulator,
   createMaliciousSimulator,
-} from './MathU64Simulator';
+} from './Uint64Simulator';
 
 let mathSimulator: MathContractSimulator;
 

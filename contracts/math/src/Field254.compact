@@ -38,10 +38,9 @@ module Field254 {
 
     import "./interfaces/IUint256";
     import "./interfaces/IUint128";
-    import "./interfaces/IMathU256";
 
-    import MathU256 prefix MathU256_;
-    import MathU128 prefix MathU128_;
+    import Uint256 prefix Uint256_;
+    import Uint128 prefix Uint128_;
 
     /**
      * @title From Field circuit
@@ -77,7 +76,7 @@ module Field254 {
      */
     export circuit fromField(a: Field): U256 {
         // divide into 128-bit halves
-        const result = divUint254Locally(a as Uint<254>, MathU256_MODULUS());
+        const result = divUint254Locally(a as Uint<254>, Uint256_MODULUS());
         const low = result.remainder;
         const high = result.quotient;
 
@@ -102,10 +101,10 @@ module Field254 {
         };
 
         // recombine by simple placement + add (no multiply)
-        const reconstructed = MathU256_add(highU256, lowU256);
+        const reconstructed = Uint256_add(highU256, lowU256);
 
         // verify lossless conversion
-        assert (MathU256_eq(reconstructed, origU256)) "MathU256: reconstruction mismatch";
+        assert (Uint256_eq(reconstructed, origU256)) "MathU256: reconstruction mismatch";
 
         return origU256;
     }
@@ -123,7 +122,7 @@ module Field254 {
      * @returns {Field} The Field representation of the U256 value.
      */
     export circuit toField(a: U256): Field {
-        return MathU256_fromU256(a) as Field;
+        return Uint256_fromU256(a) as Field;
     } 
 
     /**
@@ -133,12 +132,12 @@ module Field254 {
      * This circuit compares two field elements by converting them to U256 structs
      * and then using the MathU256 equality comparison. The comparison is performed
      * by first converting both field values to U256 format, then comparing them
-     * using the existing MathU256_eq function.
+     * using the existing Uint256_eq function.
      * 
      * @remarks
      * Requirements:
      * - Both `a` and `b` must be valid `Field` values.
-     * - Comparison is performed by converting to U256 and using MathU256_eq.
+     * - Comparison is performed by converting to U256 and using Uint256_eq.
      *
      * @circuitInfo k=10, rows=128
      *
@@ -150,7 +149,7 @@ module Field254 {
     export circuit eq(a: Field, b: Field): Boolean {
         const aU256 = fromField(a);
         const bU256 = fromField(b);
-        return MathU256_eq(aU256, bU256);
+        return Uint256_eq(aU256, bU256);
     }
 
     /**
@@ -160,12 +159,12 @@ module Field254 {
      * This circuit compares two field elements by converting them to U256 structs
      * and then using the MathU256 less than comparison. The comparison is performed
      * by first converting both field values to U256 format, then comparing them
-     * using the existing MathU256_lt function.
+     * using the existing Uint256_lt function.
      * 
      * @remarks
      * Requirements:
      * - Both `a` and `b` must be valid `Field` values.
-     * - Comparison is performed by converting to U256 and using MathU256_lt.
+     * - Comparison is performed by converting to U256 and using Uint256_lt.
      *
      * @circuitInfo k=10, rows=128
      *
@@ -177,7 +176,7 @@ module Field254 {
     export circuit lt(a: Field, b: Field): Boolean {
         const aU256 = fromField(a);
         const bU256 = fromField(b);
-        return MathU256_lt(aU256, bU256);
+        return Uint256_lt(aU256, bU256);
     }
 
     /**
@@ -187,12 +186,12 @@ module Field254 {
      * This circuit compares two field elements by converting them to U256 structs
      * and then using the MathU256 less than or equal comparison. The comparison is performed
      * by first converting both field values to U256 format, then comparing them
-     * using the existing MathU256_lte function.
+     * using the existing Uint256_lte function.
      * 
      * @remarks
      * Requirements:
      * - Both `a` and `b` must be valid `Field` values.
-     * - Comparison is performed by converting to U256 and using MathU256_lte.
+     * - Comparison is performed by converting to U256 and using Uint256_lte.
      *
      * @circuitInfo k=10, rows=128
      *
@@ -204,7 +203,7 @@ module Field254 {
     export circuit lte(a: Field, b: Field): Boolean {
         const aU256 = fromField(a);
         const bU256 = fromField(b);
-        return MathU256_lte(aU256, bU256);
+        return Uint256_lte(aU256, bU256);
     }
 
     /**
@@ -214,12 +213,12 @@ module Field254 {
      * This circuit compares two field elements by converting them to U256 structs
      * and then using the MathU256 greater than comparison. The comparison is performed
      * by first converting both field values to U256 format, then comparing them
-     * using the existing MathU256_gt function.
+     * using the existing Uint256_gt function.
      * 
      * @remarks
      * Requirements:
      * - Both `a` and `b` must be valid `Field` values.
-     * - Comparison is performed by converting to U256 and using MathU256_gt.
+     * - Comparison is performed by converting to U256 and using Uint256_gt.
      *
      * @circuitInfo k=10, rows=128
      *
@@ -231,7 +230,7 @@ module Field254 {
     export circuit gt(a: Field, b: Field): Boolean {
         const aU256 = fromField(a);
         const bU256 = fromField(b);
-        return MathU256_gt(aU256, bU256);
+        return Uint256_gt(aU256, bU256);
     }
 
     /**
@@ -241,12 +240,12 @@ module Field254 {
      * This circuit compares two field elements by converting them to U256 structs
      * and then using the MathU256 greater than or equal comparison. The comparison is performed
      * by first converting both field values to U256 format, then comparing them
-     * using the existing MathU256_gte function.
+     * using the existing Uint256_gte function.
      * 
      * @remarks
      * Requirements:
      * - Both `a` and `b` must be valid `Field` values.
-     * - Comparison is performed by converting to U256 and using MathU256_gte.
+     * - Comparison is performed by converting to U256 and using Uint256_gte.
      *
      * @circuitInfo k=10, rows=128
      *
@@ -258,7 +257,7 @@ module Field254 {
     export circuit gte(a: Field, b: Field): Boolean {
         const aU256 = fromField(a);
         const bU256 = fromField(b);
-        return MathU256_gte(aU256, bU256);
+        return Uint256_gte(aU256, bU256);
     }
 
     /**
@@ -266,7 +265,7 @@ module Field254 {
      * @description Adds two Field values using U256 conversion.
      *
      * This circuit adds two field elements by converting them to U256 structs,
-     * performing the addition using MathU256_add, and converting the result back to Field.
+     * performing the addition using Uint256_add, and converting the result back to Field.
      * The addition is performed modulo the field size (2^254 - 1).
      * 
      * @remarks
@@ -284,7 +283,7 @@ module Field254 {
     export circuit add(a: Field, b: Field): Field {
         const aU256 = fromField(a);
         const bU256 = fromField(b);
-        const sumU256 = MathU256_add(aU256, bU256);
+        const sumU256 = Uint256_add(aU256, bU256);
         return toField(sumU256);
     }
 
@@ -293,7 +292,7 @@ module Field254 {
      * @description Subtracts one Field value from another using U256 conversion.
      *
      * This circuit subtracts two field elements by converting them to U256 structs,
-     * performing the subtraction using MathU256_sub, and converting the result back to Field.
+     * performing the subtraction using Uint256_sub, and converting the result back to Field.
      * The subtraction is performed modulo the field size (2^254 - 1).
      * 
      * @remarks
@@ -313,7 +312,7 @@ module Field254 {
     export circuit sub(a: Field, b: Field): Field {
         const aU256 = fromField(a);
         const bU256 = fromField(b);
-        const diffU256 = MathU256_sub(aU256, bU256);
+        const diffU256 = Uint256_sub(aU256, bU256);
         return toField(diffU256);
     }
 
@@ -322,7 +321,7 @@ module Field254 {
      * @description Multiplies two Field values using U256 conversion.
      *
      * This circuit multiplies two field elements by converting them to U256 structs,
-     * performing the multiplication using MathU256_mul, and converting the result back to Field.
+     * performing the multiplication using Uint256_mul, and converting the result back to Field.
      * The multiplication is performed modulo the field size (2^254 - 1).
      * 
      * @remarks
@@ -342,7 +341,7 @@ module Field254 {
     export circuit mul(a: Field, b: Field): Field {
         const aU256 = fromField(a);
         const bU256 = fromField(b);
-        const productU256 = MathU256_mul(aU256, bU256);
+        const productU256 = Uint256_mul(aU256, bU256);
         return toField(productU256);
     }
 
@@ -367,7 +366,7 @@ module Field254 {
     circuit _div(a: Field, b: Field): DivResultU256 {
         const aU256 = fromField(a);
         const bU256 = fromField(b);
-        return MathU256_divRem(aU256, bU256);
+        return Uint256_divRem(aU256, bU256);
     }
 
     /**
@@ -375,7 +374,7 @@ module Field254 {
      * @description Divides a Field a by a Field b, returning quotient.
      *
      * This circuit divides two field elements by converting them to U256 structs,
-     * performing the division using MathU256_div, and converting the result back to Field.
+     * performing the division using Uint256_div, and converting the result back to Field.
      * 
      * @remarks
      * Requirements:
@@ -400,7 +399,7 @@ module Field254 {
      * @description Computes the remainder of dividing a Field a by a Field b.
      *
      * This circuit computes the remainder of dividing two field elements
-     * by converting them to U256 structs, performing the remainder operation using MathU256_rem,
+     * by converting them to U256 structs, performing the remainder operation using Uint256_rem,
      * and converting the result back to Field.
      * 
      * @remarks
@@ -426,7 +425,7 @@ module Field254 {
      * @description Computes the quotient and remainder of dividing a Field a by a Field b.
      *
      * This circuit computes both the quotient and remainder of dividing two field elements
-     * by converting them to U256 structs, performing the division using MathU256_divRem,
+     * by converting them to U256 structs, performing the division using Uint256_divRem,
      * and converting the results back to Field.
      * 
      * @remarks
@@ -452,7 +451,7 @@ module Field254 {
      * @description Computes the square root of a Field value using U256 conversion.
      *
      * This circuit computes the square root of a field element by converting it to a U256 struct,
-     * performing the square root operation using MathU256_sqrt, and converting the result back to Field.
+     * performing the square root operation using Uint256_sqrt, and converting the result back to Field.
      * The result is the floor of the square root.
      * 
      * @remarks
@@ -471,9 +470,9 @@ module Field254 {
      */
     export circuit sqrt(radicand: Field): Field {
         const radicandU256 = fromField(radicand);
-        const rootUint128 = MathU256_sqrt(radicandU256);
+        const rootUint128 = Uint256_sqrt(radicandU256);
         const rootU256 = U256 {
-            low: MathU128_toU128(rootUint128),
+            low: Uint128_toU128(rootUint128),
             high: U128 { low: 0, high: 0 }
         };
         return toField(rootU256);
@@ -484,7 +483,7 @@ module Field254 {
      * @description Returns the minimum of two Field values using U256 conversion.
      *
      * This circuit computes the minimum of two field elements by converting them to U256 structs,
-     * performing the minimum operation using MathU256_min, and converting the result back to Field.
+     * performing the minimum operation using Uint256_min, and converting the result back to Field.
      * 
      * @remarks
      * Requirements:
@@ -501,7 +500,7 @@ module Field254 {
     export circuit min(a: Field, b: Field): Field {
         const aU256 = fromField(a);
         const bU256 = fromField(b);
-        const minU256 = MathU256_min(aU256, bU256);
+        const minU256 = Uint256_min(aU256, bU256);
         return toField(minU256);
     }
 
@@ -510,7 +509,7 @@ module Field254 {
      * @description Returns the maximum of two Field values using U256 conversion.
      *
      * This circuit computes the maximum of two field elements by converting them to U256 structs,
-     * performing the maximum operation using MathU256_max, and converting the result back to Field.
+     * performing the maximum operation using Uint256_max, and converting the result back to Field.
      * 
      * @remarks
      * Requirements:
@@ -527,7 +526,7 @@ module Field254 {
     export circuit max(a: Field, b: Field): Field {
         const aU256 = fromField(a);
         const bU256 = fromField(b);
-        const maxU256 = MathU256_max(aU256, bU256);
+        const maxU256 = Uint256_max(aU256, bU256);
         return toField(maxU256);
     }
 
@@ -547,6 +546,6 @@ module Field254 {
      */
     export circuit isZero(a: Field): Boolean {
         const aU256 = fromField(a);
-        return MathU256_isZero(aU256);
+        return Uint256_isZero(aU256);
     }
 }

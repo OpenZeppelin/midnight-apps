@@ -4,9 +4,8 @@ import CompactStandardLibrary;
 
 import "../../interfaces/IUint128";
 import "../../interfaces/IUint256";
-import "../../interfaces/IMathU128";
 
-import "../../MathU128" prefix MathU128_;
+import "../../Uint128" prefix Uint128_;
 
 export { U128, U256, DivResultU128 };
 
@@ -15,161 +14,161 @@ export { U128, U256, DivResultU128 };
  */
 
 export pure circuit MODULUS(): Uint<128> {
-    return MathU128_MODULUS();
+    return Uint128_MODULUS();
 }
 
 export pure circuit ZERO_U128(): U128 {
-    return MathU128_ZERO_U128();
+    return Uint128_ZERO_U128();
 }
 
 export circuit toU128(value: Uint<128>): U128 {
-    return disclose(MathU128_toU128(value));
+    return disclose(Uint128_toU128(value));
 }
 
 export circuit fromU128(value: U128): Uint<128> {
-    return disclose(MathU128_fromU128(value));
+    return disclose(Uint128_fromU128(value));
 }
 
 export circuit isZero(value: Uint<128>): Boolean {
-    return MathU128_isZero(value);
+    return Uint128_isZero(value);
 }
 
 export circuit isZeroU128(value: U128): Boolean {
-    return MathU128_isZeroU128(value);
+    return Uint128_isZeroU128(value);
 }
 
 export circuit eq(a: Uint<128>, b: Uint<128>): Boolean {
-    return MathU128_eq(a, b);
+    return Uint128_eq(a, b);
 }
 
 export circuit eqU128(a: U128, b: U128): Boolean {
-    return MathU128_eqU128(a, b);
+    return Uint128_eqU128(a, b);
 }
 
 export circuit lt(a: Uint<128>, b: Uint<128>): Boolean {
-    return disclose(MathU128_lt(a, b));
+    return disclose(Uint128_lt(a, b));
 }
 
 export circuit lte(a: Uint<128>, b: Uint<128>): Boolean {
-    return disclose(MathU128_lte(a, b));
+    return disclose(Uint128_lte(a, b));
 }
 
 export circuit ltU128(a: U128, b: U128): Boolean {
-    return disclose(MathU128_ltU128(a, b));
+    return disclose(Uint128_ltU128(a, b));
 }
 
 export circuit lteU128(a: U128, b: U128): Boolean {
-    return disclose(MathU128_lteU128(a, b));
+    return disclose(Uint128_lteU128(a, b));
 }
 
 export circuit gt(a: Uint<128>, b: Uint<128>): Boolean {
-    return disclose(MathU128_gt(a, b));
+    return disclose(Uint128_gt(a, b));
 }
 
 export circuit gte(a: Uint<128>, b: Uint<128>): Boolean {
-    return disclose(MathU128_gte(a, b));
+    return disclose(Uint128_gte(a, b));
 }
 
 export circuit gtU128(a: U128, b: U128): Boolean {
-    return disclose(MathU128_gtU128(a, b));
+    return disclose(Uint128_gtU128(a, b));
 }
 
 export circuit gteU128(a: U128, b: U128): Boolean {
-    return disclose(MathU128_gteU128(a, b));
+    return disclose(Uint128_gteU128(a, b));
 }
 
 export circuit add(a: Uint<128>, b: Uint<128>): U256 {
-    return disclose(MathU128_add(a, b));
+    return disclose(Uint128_add(a, b));
 }
 
 export circuit addU128(a: U128, b: U128): U256 {
-    return disclose(MathU128_addU128(a, b));
+    return disclose(Uint128_addU128(a, b));
 }
 
 export circuit addChecked(a: Uint<128>, b: Uint<128>): Uint<128> {
-    return disclose(MathU128_addChecked(a, b));
+    return disclose(Uint128_addChecked(a, b));
 }
 
 export circuit addCheckedU128(a: U128, b: U128): Uint<128> {
-    return disclose(MathU128_addCheckedU128(a, b));
+    return disclose(Uint128_addCheckedU128(a, b));
 }
 
 export circuit sub(a: Uint<128>, b: Uint<128>): Uint<128> {
-    return disclose(MathU128_sub(a, b));
+    return disclose(Uint128_sub(a, b));
 }
 
 export circuit subU128(a: U128, b: U128): U128 {
-    return MathU128_subU128(a, b);
+    return Uint128_subU128(a, b);
 }
 
 export circuit mul(a: Uint<128>, b: Uint<128>): U256 {
-    return disclose(MathU128_mul(a, b));
+    return disclose(Uint128_mul(a, b));
 }
 
 export circuit mulU128(a: U128, b: U128): U256 {
-    return disclose(MathU128_mulU128(a, b));
+    return disclose(Uint128_mulU128(a, b));
 }
 
 export circuit mulChecked(a: Uint<128>, b: Uint<128>): Uint<128> {
-    return disclose(MathU128_mulChecked(a, b));
+    return disclose(Uint128_mulChecked(a, b));
 }
 
 export circuit mulCheckedU128(a: U128, b: U128): Uint<128> {
-    return disclose(MathU128_mulCheckedU128(a, b));
+    return disclose(Uint128_mulCheckedU128(a, b));
 }
 
 export circuit div(a: Uint<128>, b: Uint<128>): Uint<128> {
-    return disclose(MathU128_div(a, b));
+    return disclose(Uint128_div(a, b));
 }
 
 export circuit divU128(a: U128, b: U128): U128 {
-    return disclose(MathU128_divU128(a, b));
+    return disclose(Uint128_divU128(a, b));
 }
 
 export circuit rem(a: Uint<128>, b: Uint<128>): Uint<128> {
-    return disclose(MathU128_rem(a, b));
+    return disclose(Uint128_rem(a, b));
 }
 
 export circuit remU128(a: U128, b: U128): U128 {
-    return disclose(MathU128_remU128(a, b));
+    return disclose(Uint128_remU128(a, b));
 }
 
 export circuit divRem(a: Uint<128>, b: Uint<128>): DivResultU128 {
-    return disclose(MathU128_divRem(a, b));
+    return disclose(Uint128_divRem(a, b));
 }
 
 export circuit divRemU128(a: U128, b: U128): DivResultU128 {
-    return disclose(MathU128_divRemU128(a, b));
+    return disclose(Uint128_divRemU128(a, b));
 }
 
 export circuit sqrt(radicand: Uint<128>): Uint<64> {
-    return disclose(MathU128_sqrt(radicand));
+    return disclose(Uint128_sqrt(radicand));
 }
 
 export circuit sqrtU128(radicand: U128): Uint<64> {
-    return disclose(MathU128_sqrtU128(radicand));
+    return disclose(Uint128_sqrtU128(radicand));
 }
 
 export circuit min(a: Uint<128>, b: Uint<128>): Uint<128> {
-    return disclose(MathU128_min(a, b));
+    return disclose(Uint128_min(a, b));
 }
 
 export circuit minU128(a: U128, b: U128): U128 {
-    return MathU128_minU128(a, b);
+    return Uint128_minU128(a, b);
 }
 
 export circuit max(a: Uint<128>, b: Uint<128>): Uint<128> {
-    return disclose(MathU128_max(a, b));
+    return disclose(Uint128_max(a, b));
 }
 
 export circuit maxU128(a: U128, b: U128): U128 {
-    return disclose(MathU128_maxU128(a, b));
+    return disclose(Uint128_maxU128(a, b));
 }
 
 export circuit isMultiple(value: Uint<128>, b: Uint<128>): Boolean {
-    return disclose(MathU128_isMultiple(value, b));
+    return disclose(Uint128_isMultiple(value, b));
 }
 
 export circuit isMultipleU128(value: U128, b: U128): Boolean {
-    return disclose(MathU128_isMultipleU128(value, b));
+    return disclose(Uint128_isMultipleU128(value, b));
 }

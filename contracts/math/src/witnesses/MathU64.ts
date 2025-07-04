@@ -1,8 +1,6 @@
 import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
-import type {
-  DivResultU64,
-  Ledger,
-} from '../artifacts/Index/contract/index.cjs'; // Adjust path to your generated artifacts
+import type { DivResultU64 } from '../artifacts/Index/contract/index.cjs';
+import type { Ledger } from '../artifacts/Uint64/contract/index.cjs';
 import type { EmptyState } from '../types/state';
 import { sqrtBigint } from '../utils/sqrtBigint';
 import type { IMathU64Witnesses } from './interfaces';
