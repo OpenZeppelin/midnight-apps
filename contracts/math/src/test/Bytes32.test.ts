@@ -267,172 +267,201 @@ describe('Bytes32', () => {
         expect(bytes32Simulator.eq(a, b)).toBe(false);
       });
 
-      test('should return false when comparing different overflow values (2^254 + 1 vs 2^254 + 1000)', () => {
-        const overflow1 = createBytes(2n ** 254n + 1n);
-        const overflow2 = createBytes(2n ** 254n + 1000n);
+      // Helper function to create test cases for overflow comparisons
+      const createOverflowTestCases = () => [
+        {
+          name: '2^254 + 1 vs 2^254 + 1000',
+          a: createBytes(2n ** 254n + 1n),
+          b: createBytes(2n ** 254n + 1000n),
+          expected: false,
+        },
+        {
+          name: '2^254 + 1000 vs 2^254 + 2000',
+          a: createBytes(2n ** 254n + 1000n),
+          b: createBytes(2n ** 254n + 2000n),
+          expected: false,
+        },
+        {
+          name: '2^254 vs 2^254 + 1',
+          a: createBytes(2n ** 254n),
+          b: createBytes(2n ** 254n + 1n),
+          expected: false,
+        },
+        {
+          name: '2^254 + 1 vs 2^255',
+          a: createBytes(2n ** 254n + 1n),
+          b: createBytes(2n ** 255n),
+          expected: false,
+        },
+        {
+          name: '2^255 vs 2^256 - 1',
+          a: createBytes(2n ** 255n),
+          b: createBytes(2n ** 256n - 1n),
+          expected: false,
+        },
+        {
+          name: 'overflow with valid field value',
+          a: createMaxFieldBytes(), // 2^254 - 1 (valid)
+          b: createBytes(2n ** 254n), // 2^254 (overflow)
+          expected: false,
+        },
+        {
+          name: 'zero with overflow value',
+          a: new Uint8Array(32),
+          b: createBytes(2n ** 254n),
+          expected: false,
+        },
+        {
+          name: '2^256 - 1 with 2^254 + 1',
+          a: createBytes(2n ** 256n - 1n),
+          b: createBytes(2n ** 254n + 1n),
+          expected: false,
+        },
+        {
+          name: '2^256 - 1 with 2^255',
+          a: createBytes(2n ** 256n - 1n),
+          b: createBytes(2n ** 255n),
+          expected: false,
+        },
+        {
+          name: '2^256 - 1 with zero',
+          a: createBytes(2n ** 256n - 1n),
+          b: new Uint8Array(32),
+          expected: false,
+        },
+        {
+          name: '2^256 - 1 with valid field value',
+          a: createBytes(2n ** 256n - 1n),
+          b: createMaxFieldBytes(), // 2^254 - 1
+          expected: false,
+        },
+        {
+          name: '2^256 - 1 with 2^254',
+          a: createBytes(2n ** 256n - 1n),
+          b: createBytes(2n ** 254n),
+          expected: false,
+        },
+      ];
 
-        expect(bytes32Simulator.eq(overflow1, overflow2)).toBe(false);
-      });
+      // Helper function to create test cases for self-comparisons
+      const createSelfComparisonTestCases = () => [
+        {
+          name: 'overflow value with itself (2^254 + 1)',
+          value: createBytes(2n ** 254n + 1n),
+          expected: true,
+        },
+        {
+          name: '2^256 - 1 with itself',
+          value: createBytes(2n ** 256n - 1n),
+          expected: true,
+        },
+      ];
 
-      test('should return false when comparing different overflow values (2^254 + 1000 vs 2^254 + 2000)', () => {
-        const overflow1 = createBytes(2n ** 254n + 1000n);
-        const overflow2 = createBytes(2n ** 254n + 2000n);
+      test.each(createOverflowTestCases())(
+        'should return $expected when comparing $name',
+        ({ a, b, expected }) => {
+          expect(bytes32Simulator.eq(a, b)).toBe(expected);
+        },
+      );
 
-        expect(bytes32Simulator.eq(overflow1, overflow2)).toBe(false);
-      });
-
-      test('should return false when comparing 2^254 vs 2^254 + 1', () => {
-        const overflow = createBytes(2n ** 254n);
-        const overflowPlusOne = createBytes(2n ** 254n + 1n);
-
-        expect(bytes32Simulator.eq(overflow, overflowPlusOne)).toBe(false);
-      });
-
-      test('should return false when comparing 2^254 + 1 vs 2^255', () => {
-        const overflowPlusOne = createBytes(2n ** 254n + 1n);
-        const twoTo255 = createBytes(2n ** 255n);
-
-        expect(bytes32Simulator.eq(overflowPlusOne, twoTo255)).toBe(false);
-      });
-
-      test('should return false when comparing 2^255 vs 2^256 - 1', () => {
-        const twoTo255 = createBytes(2n ** 255n);
-        const max256Bit = createBytes(2n ** 256n - 1n);
-
-        expect(bytes32Simulator.eq(twoTo255, max256Bit)).toBe(false);
-      });
-
-      test('should return false when comparing overflow with valid field value', () => {
-        const validField = createMaxFieldBytes(); // 2^254 - 1 (valid)
-        const overflow = createBytes(2n ** 254n); // 2^254 (overflow)
-
-        expect(bytes32Simulator.eq(validField, overflow)).toBe(false);
-      });
-
-      test('should return false when comparing zero with overflow value', () => {
-        const zero = new Uint8Array(32);
-        const overflow = createBytes(2n ** 254n);
-
-        expect(bytes32Simulator.eq(zero, overflow)).toBe(false);
-      });
-
-      test('should return true when comparing overflow value with itself', () => {
-        const overflow = createBytes(2n ** 254n + 1n);
-
-        expect(bytes32Simulator.eq(overflow, overflow)).toBe(true);
-      });
-
-      test('should return false when comparing 2^256 - 1 with 2^254 + 1', () => {
-        const max256Bit = createBytes(2n ** 256n - 1n);
-        const overflowPlusOne = createBytes(2n ** 254n + 1n);
-
-        expect(bytes32Simulator.eq(max256Bit, overflowPlusOne)).toBe(false);
-      });
-
-      test('should return false when comparing 2^256 - 1 with 2^255', () => {
-        const max256Bit = createBytes(2n ** 256n - 1n);
-        const twoTo255 = createBytes(2n ** 255n);
-
-        expect(bytes32Simulator.eq(max256Bit, twoTo255)).toBe(false);
-      });
-
-      test('should return true when comparing 2^256 - 1 with itself', () => {
-        const max256Bit = createBytes(2n ** 256n - 1n);
-
-        expect(bytes32Simulator.eq(max256Bit, max256Bit)).toBe(true);
-      });
-
-      test('should return false when comparing 2^256 - 1 with zero', () => {
-        const max256Bit = createBytes(2n ** 256n - 1n);
-        const zero = new Uint8Array(32);
-
-        expect(bytes32Simulator.eq(max256Bit, zero)).toBe(false);
-      });
-
-      test('should return false when comparing 2^256 - 1 with valid field value', () => {
-        const max256Bit = createBytes(2n ** 256n - 1n);
-        const validField = createMaxFieldBytes(); // 2^254 - 1
-
-        expect(bytes32Simulator.eq(max256Bit, validField)).toBe(false);
-      });
-
-      test('should return false when comparing 2^256 - 1 with 2^254', () => {
-        const max256Bit = createBytes(2n ** 256n - 1n);
-        const overflow = createBytes(2n ** 254n);
-
-        expect(bytes32Simulator.eq(max256Bit, overflow)).toBe(false);
-      });
+      test.each(createSelfComparisonTestCases())(
+        'should return $expected when comparing $name',
+        ({ value, expected }) => {
+          expect(bytes32Simulator.eq(value, value)).toBe(expected);
+        },
+      );
     });
   });
 
   describe('Lexicographic Comparison Functions', () => {
     describe('lt', () => {
-      test('should handle full 256-bit range comparisons', () => {
-        // Test maximum possible 256-bit value (2^256 - 1)
-        const max256BitBytes = createBytes(2n ** 256n - 1n);
+      // Helper function to create test cases for lt comparisons
+      const createLtTestCases = () => [
+        {
+          name: 'zero vs max256Bit',
+          a: new Uint8Array(32),
+          b: createBytes(2n ** 256n - 1n),
+          expected: true,
+          shouldThrow: false,
+        },
+        {
+          name: 'max256Bit vs zero',
+          a: createBytes(2n ** 256n - 1n),
+          b: new Uint8Array(32),
+          expected: false,
+          shouldThrow: false,
+        },
+        {
+          name: 'one vs max256Bit',
+          a: createBytes(1n),
+          b: createBytes(2n ** 256n - 1n),
+          expected: true,
+          shouldThrow: false,
+        },
+        {
+          name: 'max256Bit vs one',
+          a: createBytes(2n ** 256n - 1n),
+          b: createBytes(1n),
+          expected: false,
+          shouldThrow: false,
+        },
+        {
+          name: 'maxFieldBytes vs max256Bit',
+          a: createMaxFieldBytes(),
+          b: createBytes(2n ** 256n - 1n),
+          expected: null,
+          shouldThrow: true,
+          errorMessage:
+            'failed assert: Bytes32: lt() - comparison invalid; one or both of the inputs exceed the field size',
+        },
+        {
+          name: 'max256Bit vs maxFieldBytes',
+          a: createBytes(2n ** 256n - 1n),
+          b: createMaxFieldBytes(),
+          expected: null,
+          shouldThrow: true,
+          errorMessage:
+            'failed assert: Bytes32: lt() - comparison invalid; one or both of the inputs exceed the field size',
+        },
+        {
+          name: 'overflowBytes vs max256Bit',
+          a: createOverflowBytes(),
+          b: createBytes(2n ** 256n - 1n),
+          expected: null,
+          shouldThrow: true,
+          errorMessage:
+            'failed assert: Bytes32: toField() - inputs exceed the field size',
+        },
+        {
+          name: 'max256Bit vs overflowBytes',
+          a: createBytes(2n ** 256n - 1n),
+          b: createOverflowBytes(),
+          expected: null,
+          shouldThrow: true,
+          errorMessage:
+            'failed assert: Bytes32: toField() - inputs exceed the field size',
+        },
+        {
+          name: 'max256Bit vs itself',
+          a: createBytes(2n ** 256n - 1n),
+          b: createBytes(2n ** 256n - 1n),
+          expected: false,
+          shouldThrow: false,
+        },
+      ];
 
-        // Test various other values for comparison
-        const zeroBytes = new Uint8Array(32);
-        const oneBytes = createBytes(1n);
-        const maxFieldBytes = createMaxFieldBytes();
-        const overflowBytes = createOverflowBytes();
-
-        // Test that the function doesn't throw with full 256-bit values
-        expect(() =>
-          bytes32Simulator.lt(zeroBytes, max256BitBytes),
-        ).not.toThrow();
-        expect(bytes32Simulator.lt(zeroBytes, max256BitBytes)).toBe(true);
-
-        expect(() =>
-          bytes32Simulator.lt(max256BitBytes, zeroBytes),
-        ).not.toThrow();
-        expect(bytes32Simulator.lt(max256BitBytes, zeroBytes)).toBe(false);
-
-        expect(() =>
-          bytes32Simulator.lt(oneBytes, max256BitBytes),
-        ).not.toThrow();
-        expect(bytes32Simulator.lt(oneBytes, max256BitBytes)).toBe(true);
-
-        expect(() =>
-          bytes32Simulator.lt(max256BitBytes, oneBytes),
-        ).not.toThrow();
-        expect(bytes32Simulator.lt(max256BitBytes, oneBytes)).toBe(false);
-
-        expect(() =>
-          bytes32Simulator.lt(maxFieldBytes, max256BitBytes),
-        ).toThrow(
-          'failed assert: Bytes32: lt() - comparison invalid; one or both of the inputs exceed the field size',
-        );
-
-        expect(() =>
-          bytes32Simulator.lt(max256BitBytes, maxFieldBytes),
-        ).toThrow(
-          'failed assert: Bytes32: lt() - comparison invalid; one or both of the inputs exceed the field size',
-        );
-
-        expect(() =>
-          bytes32Simulator.lt(overflowBytes, max256BitBytes),
-        ).toThrow(
-          'failed assert: Bytes32: toField() - inputs exceed the field size',
-        );
-
-        expect(() =>
-          bytes32Simulator.lt(max256BitBytes, overflowBytes),
-        ).toThrow(
-          'failed assert: Bytes32: toField() - inputs exceed the field size',
-        );
-
-        // Test that the function returns a boolean
-        expect(typeof bytes32Simulator.lt(zeroBytes, max256BitBytes)).toBe(
-          'boolean',
-        );
-        expect(typeof bytes32Simulator.lt(max256BitBytes, zeroBytes)).toBe(
-          'boolean',
-        );
-
-        // Test comparison with itself (should be false for lt)
-        expect(bytes32Simulator.lt(max256BitBytes, max256BitBytes)).toBe(false);
-      });
+      test.each(createLtTestCases())(
+        'should handle $name',
+        ({ a, b, expected, shouldThrow, errorMessage }) => {
+          if (shouldThrow) {
+            expect(() => bytes32Simulator.lt(a, b)).toThrow(errorMessage);
+          } else {
+            expect(() => bytes32Simulator.lt(a, b)).not.toThrow();
+            expect(bytes32Simulator.lt(a, b)).toBe(expected);
+            expect(typeof bytes32Simulator.lt(a, b)).toBe('boolean');
+          }
+        },
+      );
     });
   });
 
