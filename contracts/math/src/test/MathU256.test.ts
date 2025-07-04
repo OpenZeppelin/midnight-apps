@@ -1002,7 +1002,7 @@ describe('MathU256', () => {
       expect(result).toBe(at254BitLimit);
     });
 
-    test('should handle U256 values just above 254-bit limit', () => {
+    test('should throw when U256 values are just above 254-bit limit', () => {
       const justAbove254Bit = 2n ** 254n;
       const u256 = toU256(justAbove254Bit);
       expect(() => mathSimulator.fromU256(u256)).toThrow(
