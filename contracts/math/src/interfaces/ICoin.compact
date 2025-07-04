@@ -1,0 +1,14 @@
+pragma language_version >= 0.15.0;
+
+module ICoin {
+    import CompactStandardLibrary;
+
+    /**
+     * @title DivResultCoin struct
+     * @description A struct containing quotient and remainder coins.
+     */
+    export struct DivResultCoin {
+        quotient: CoinInfo,
+        remainder: CoinInfo
+    }
+}

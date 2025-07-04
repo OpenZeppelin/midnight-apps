@@ -1,0 +1,125 @@
+pragma language_version >= 0.15.0;
+
+import CompactStandardLibrary;
+
+import "../../interfaces/IMathU128";
+import "../../interfaces/IMathU256";
+import "../../interfaces/IUint128";
+import "../../interfaces/IUint256";
+import "../../interfaces/IQualifiedCoin";
+
+import "../../QualifiedCoin" prefix QualifiedCoin_;
+
+export { QualifiedCoinInfo, DivResultQualifiedCoin, U128, U256, DivResultU128, DivResultU256 };
+
+export circuit fromQCoin(coin: CoinInfo, mt_index: Uint<64>): QualifiedCoinInfo {
+    return QualifiedCoin_fromQCoin(coin, mt_index);
+}
+
+export circuit toQCoin(qualifiedCoin: QualifiedCoinInfo): CoinInfo {
+    return QualifiedCoin_toQCoin(qualifiedCoin);
+}
+
+export circuit add(a: QualifiedCoinInfo, b: QualifiedCoinInfo): QualifiedCoinInfo {
+    return disclose(QualifiedCoin_add(a, b));
+}
+
+export circuit sub(a: QualifiedCoinInfo, b: QualifiedCoinInfo): QualifiedCoinInfo {
+    return disclose(QualifiedCoin_sub(a, b));
+}
+
+export circuit mul(a: QualifiedCoinInfo, b: QualifiedCoinInfo): QualifiedCoinInfo {
+    return disclose(QualifiedCoin_mul(a, b));
+}
+
+export circuit div(a: QualifiedCoinInfo, b: QualifiedCoinInfo): QualifiedCoinInfo {
+    return disclose(QualifiedCoin_div(a, b));
+}
+
+export circuit divRem(a: QualifiedCoinInfo, b: QualifiedCoinInfo): DivResultQualifiedCoin {
+    return disclose(QualifiedCoin_divRem(a, b));
+}
+
+export circuit rem(a: QualifiedCoinInfo, b: QualifiedCoinInfo): QualifiedCoinInfo {
+    return disclose(QualifiedCoin_rem(a, b));
+}
+
+export circuit sqrt(a: QualifiedCoinInfo): QualifiedCoinInfo {
+    return disclose(QualifiedCoin_sqrt(a));
+}
+
+export circuit min(a: QualifiedCoinInfo, b: QualifiedCoinInfo): QualifiedCoinInfo {
+    return disclose(QualifiedCoin_min(a, b));
+}
+
+export circuit max(a: QualifiedCoinInfo, b: QualifiedCoinInfo): QualifiedCoinInfo {
+    return disclose(QualifiedCoin_max(a, b));
+}
+
+export circuit sortGtByColor(a: QualifiedCoinInfo, b: QualifiedCoinInfo): [QualifiedCoinInfo, QualifiedCoinInfo] {
+    return disclose(QualifiedCoin_sortGtByColor(a, b));
+}
+
+export circuit sortLtByColor(a: QualifiedCoinInfo, b: QualifiedCoinInfo): [QualifiedCoinInfo, QualifiedCoinInfo] {
+    return disclose(QualifiedCoin_sortLtByColor(a, b));
+}
+
+export circuit sortGtByValue(a: QualifiedCoinInfo, b: QualifiedCoinInfo): [QualifiedCoinInfo, QualifiedCoinInfo] {
+    return disclose(QualifiedCoin_sortGtByValue(a, b));
+}
+
+export circuit sortLtByValue(a: QualifiedCoinInfo, b: QualifiedCoinInfo): [QualifiedCoinInfo, QualifiedCoinInfo] {
+    return disclose(QualifiedCoin_sortLtByValue(a, b));
+}
+
+export circuit eqValue(a: QualifiedCoinInfo, b: QualifiedCoinInfo): Boolean {
+    return disclose(QualifiedCoin_eqValue(a, b));
+}
+
+export circuit ltValue(a: QualifiedCoinInfo, b: QualifiedCoinInfo): Boolean {
+    return disclose(QualifiedCoin_ltValue(a, b));
+}
+
+export circuit lteValue(a: QualifiedCoinInfo, b: QualifiedCoinInfo): Boolean {
+    return disclose(QualifiedCoin_lteValue(a, b));
+}
+
+export circuit gtValue(a: QualifiedCoinInfo, b: QualifiedCoinInfo): Boolean {
+    return disclose(QualifiedCoin_gtValue(a, b));
+}
+
+export circuit gteValue(a: QualifiedCoinInfo, b: QualifiedCoinInfo): Boolean {
+    return disclose(QualifiedCoin_gteValue(a, b));
+}
+
+export circuit eqColor(a: QualifiedCoinInfo, b: QualifiedCoinInfo): Boolean {
+    return disclose(QualifiedCoin_eqColor(a, b));
+}
+
+export circuit ltColor(a: QualifiedCoinInfo, b: QualifiedCoinInfo): Boolean {
+    return disclose(QualifiedCoin_ltColor(a, b));
+}
+
+export circuit lteColor(a: QualifiedCoinInfo, b: QualifiedCoinInfo): Boolean {
+    return disclose(QualifiedCoin_lteColor(a, b));
+}
+
+export circuit gtColor(a: QualifiedCoinInfo, b: QualifiedCoinInfo): Boolean {
+    return disclose(QualifiedCoin_gtColor(a, b));
+}
+
+export circuit gteColor(a: QualifiedCoinInfo, b: QualifiedCoinInfo): Boolean {
+    return disclose(QualifiedCoin_gteColor(a, b));
+}
+
+export circuit eq(a: QualifiedCoinInfo, b: QualifiedCoinInfo): Boolean {
+    return disclose(QualifiedCoin_eq(a, b));
+}
+
+export circuit isSameColor(a: QualifiedCoinInfo, b: QualifiedCoinInfo): Boolean {
+    return disclose(QualifiedCoin_isSameColor(a, b));
+}
+
+export circuit isSameValue(a: QualifiedCoinInfo, b: QualifiedCoinInfo): Boolean {
+    return disclose(QualifiedCoin_isSameValue(a, b));
+} 

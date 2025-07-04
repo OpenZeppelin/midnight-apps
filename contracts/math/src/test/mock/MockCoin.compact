@@ -1,0 +1,126 @@
+pragma language_version >= 0.15.0;
+
+import CompactStandardLibrary;
+
+import "../../interfaces/IMathU128";
+import "../../interfaces/IMathU256";
+import "../../interfaces/IUint128";
+import "../../interfaces/IUint256";
+import "../../interfaces/ICoin";
+
+import "../../Coin" prefix Coin_;
+
+export { CoinInfo, DivResultCoin, U128, U256, DivResultU128, DivResultU256 };
+
+
+export circuit fromCoin(coin: CoinInfo, mt_index: Uint<64>): QualifiedCoinInfo {
+    return Coin_fromCoin(coin, mt_index);
+}
+
+export circuit toCoin(qualifiedCoin: QualifiedCoinInfo): CoinInfo {
+    return Coin_toCoin(qualifiedCoin);
+}
+
+export circuit add(a: CoinInfo, b: CoinInfo): CoinInfo {
+    return disclose(Coin_add(a, b));
+}
+
+export circuit sub(a: CoinInfo, b: CoinInfo): CoinInfo {
+    return disclose(Coin_sub(a, b));
+}
+
+export circuit mul(a: CoinInfo, b: CoinInfo): CoinInfo {
+    return disclose(Coin_mul(a, b));
+}
+
+export circuit div(a: CoinInfo, b: CoinInfo): CoinInfo {
+    return disclose(Coin_div(a, b));
+}
+
+export circuit divRem(a: CoinInfo, b: CoinInfo): DivResultCoin {
+    return disclose(Coin_divRem(a, b));
+}
+
+export circuit rem(a: CoinInfo, b: CoinInfo): CoinInfo {
+    return disclose(Coin_rem(a, b));
+}
+
+export circuit sqrt(a: CoinInfo): CoinInfo {
+    return disclose(Coin_sqrt(a));
+}
+
+export circuit min(a: CoinInfo, b: CoinInfo): CoinInfo {
+    return disclose(Coin_min(a, b));
+}
+
+export circuit max(a: CoinInfo, b: CoinInfo): CoinInfo {
+    return disclose(Coin_max(a, b));
+}
+
+export circuit sortGtByColor(a: CoinInfo, b: CoinInfo): [CoinInfo, CoinInfo] {
+    return disclose(Coin_sortGtByColor(a, b));
+}
+
+export circuit sortLtByColor(a: CoinInfo, b: CoinInfo): [CoinInfo, CoinInfo] {
+    return disclose(Coin_sortLtByColor(a, b));
+}
+
+export circuit sortGtByValue(a: CoinInfo, b: CoinInfo): [CoinInfo, CoinInfo] {
+    return disclose(Coin_sortGtByValue(a, b));
+}
+
+export circuit sortLtByValue(a: CoinInfo, b: CoinInfo): [CoinInfo, CoinInfo] {
+    return disclose(Coin_sortLtByValue(a, b));
+}
+
+export circuit eqValue(a: CoinInfo, b: CoinInfo): Boolean {
+    return disclose(Coin_eqValue(a, b));
+}
+
+export circuit ltValue(a: CoinInfo, b: CoinInfo): Boolean {
+    return disclose(Coin_ltValue(a, b));
+}
+
+export circuit lteValue(a: CoinInfo, b: CoinInfo): Boolean {
+    return disclose(Coin_lteValue(a, b));
+}
+
+export circuit gtValue(a: CoinInfo, b: CoinInfo): Boolean {
+    return disclose(Coin_gtValue(a, b));
+}
+
+export circuit gteValue(a: CoinInfo, b: CoinInfo): Boolean {
+    return disclose(Coin_gteValue(a, b));
+}
+
+export circuit eqColor(a: CoinInfo, b: CoinInfo): Boolean {
+    return disclose(Coin_eqColor(a, b));
+}
+
+export circuit ltColor(a: CoinInfo, b: CoinInfo): Boolean {
+    return disclose(Coin_ltColor(a, b));
+}
+
+export circuit lteColor(a: CoinInfo, b: CoinInfo): Boolean {
+    return disclose(Coin_lteColor(a, b));
+}
+
+export circuit gtColor(a: CoinInfo, b: CoinInfo): Boolean {
+    return disclose(Coin_gtColor(a, b));
+}
+
+export circuit gteColor(a: CoinInfo, b: CoinInfo): Boolean {
+    return disclose(Coin_gteColor(a, b));
+}
+
+export circuit eq(a: CoinInfo, b: CoinInfo): Boolean {
+    return disclose(Coin_eq(a, b));
+}
+
+export circuit isSameColor(a: CoinInfo, b: CoinInfo): Boolean {
+    return disclose(Coin_isSameColor(a, b));
+}
+
+export circuit isSameValue(a: CoinInfo, b: CoinInfo): Boolean {
+    return disclose(Coin_isSameValue(a, b));
+}

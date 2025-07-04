@@ -1,0 +1,651 @@
+pragma language_version >= 0.15.0;
+
+/**
+ * @title Coin module
+ * @description Utility functions for working with CoinInfo and QualifiedCoinInfo types.
+ * Includes conversion functions and comparison operations for coins based on value and color.
+ * 
+ * @remarks
+ * This module provides a complete set of utilities for coin manipulation and comparison.
+ * Comparison operations can be based on coin values (bigint) or colors (Bytes<32>).
+ * All functions are designed to work with the standard CoinInfo and QualifiedCoinInfo types.
+ * 
+ * Supported Operations:
+ * - Conversions:
+ *   - fromCoin(): Converts CoinInfo to QualifiedCoinInfo by adding mt_index.
+ *   - toCoin(): Converts QualifiedCoinInfo to CoinInfo by removing mt_index.
+ * - Value-based Comparisons (require same color):
+ *   - eqValue(): Checks if two coins have equal values.
+ *   - ltValue(): Checks if one coin's value is less than another's.
+ *   - lteValue(): Checks if one coin's value is less than or equal to another's.
+ *   - gtValue(): Checks if one coin's value is greater than another's.
+ *   - gteValue(): Checks if one coin's value is greater than or equal to another's.
+ * - Color-based Comparisons:
+ *   - eqColor(): Checks if two coins have equal colors.
+ *   - ltColor(): Checks if one coin's color is less than another's (lexicographic).
+ *   - lteColor(): Checks if one coin's color is less than or equal to another's.
+ *   - gtColor(): Checks if one coin's color is greater than another's.
+ *   - gteColor(): Checks if one coin's color is greater than or equal to another's.
+ * - Combined Comparisons:
+ *   - eq(): Checks if two coins are completely equal (value, color, and nonce).
+ *   - isSameColor(): Checks if two coins have the same color.
+ *   - isSameValue(): Checks if two coins have the same value.
+ * - Arithmetic Operations (require same color):
+ *   - add(): Adds the values of two coins with the same color.
+ *   - sub(): Subtracts the value of the second coin from the first coin with the same color.
+ *   - mul(): Multiplies the values of two coins with the same color.
+ *   - div(): Divides the value of the first coin by the second coin with the same color.
+ *   - divRem(): Divides the value of the first coin by the second coin with the same color, returning both quotient and remainder.
+ *   - rem(): Computes the remainder when dividing the value of the first coin by the second coin with the same color.
+ *   - sqrt(): Computes the square root of a coin's value.
+ *   - min(): Returns the coin with the minimum value among two coins with the same color.
+ *   - max(): Returns the coin with the maximum value among two coins with the same color.
+ * - Sorting Operations:
+ *   - sortGtByColor(): Sorts two coins in descending order (greater to lesser) based on their colors.
+ *   - sortLtByColor(): Sorts two coins in ascending order (lesser to greater) based on their colors.
+ *   - sortGtByValue(): Sorts two coins in descending order (greater to lesser) based on their values.
+ *   - sortLtByValue(): Sorts two coins in ascending order (lesser to greater) based on their values.
+ */
+module Coin {
+    import CompactStandardLibrary;
+
+    import "./interfaces/ICoin";
+
+    import Bytes32 prefix Bytes32_;
+    import MathU128 prefix MathU128_; 
+    
+    /**
+     * @title fromCoin circuit
+     * @description Converts CoinInfo to QualifiedCoinInfo by adding mt_index.
+     * 
+     * @remarks
+     * This function takes a CoinInfo and adds a merkle tree index to create a QualifiedCoinInfo.
+     * The mt_index is typically used to track the position of the coin in a merkle tree.
+     *
+     * @param {CoinInfo} coin - The coin information to convert.
+     * @param {Uint<64>} mt_index - The merkle tree index for the coin.
+     *
+     * @returns {QualifiedCoinInfo} - The qualified coin information with mt_index.
+     */
+    export circuit fromCoin(coin: CoinInfo, mt_index: Uint<64>): QualifiedCoinInfo {
+        return QualifiedCoinInfo {
+            nonce: coin.nonce,
+            color: coin.color,
+            value: coin.value,
+            mt_index: mt_index
+        };
+    }
+
+    /**
+     * @title toCoin circuit
+     * @description Converts QualifiedCoinInfo to CoinInfo by removing mt_index.
+     * 
+     * @remarks
+     * This function takes a QualifiedCoinInfo and removes the mt_index to create a CoinInfo.
+     * This is useful when you need to work with the basic coin information without the merkle tree context.
+     *
+     * @param {QualifiedCoinInfo} qualifiedCoin - The qualified coin information to convert.
+     *
+     * @returns {CoinInfo} - The basic coin information without mt_index.
+     */
+    export circuit toCoin(qualifiedCoin: QualifiedCoinInfo): CoinInfo {
+        return CoinInfo {
+            nonce: qualifiedCoin.nonce,
+            color: qualifiedCoin.color,
+            value: qualifiedCoin.value
+        };
+    }
+
+    /**
+     * @title eqValue circuit
+     * @description Compares two coins for equal values.
+     * 
+     * @remarks
+     * This function compares only the value field of two coins, regardless of their color or nonce.
+     *
+     * @param {CoinInfo} a - First coin to compare.
+     * @param {CoinInfo} b - Second coin to compare.
+     *
+     * @returns {Boolean} - True if the coins have equal values, false otherwise.
+     * 
+     * @throws {Error} "Coin: eqValue() - colors must be the same" - When the coins have different colors.
+     */
+    export circuit eqValue(a: CoinInfo, b: CoinInfo): Boolean {
+        assert (eqColor(a, b)) "Coin: eqValue() - colors must be the same";
+        return a.value == b.value;
+    }
+
+    /**
+     * @title ltValue circuit
+     * @description Compares two coins for less than value.
+     * 
+     * @remarks
+     * This function compares only the value field of two coins using less than comparison.
+     *
+     * @param {CoinInfo} a - First coin to compare.
+     * @param {CoinInfo} b - Second coin to compare.
+     *
+     * @returns {Boolean} - True if a.value < b.value, false otherwise.
+     * 
+     * @throws {Error} "Coin: ltValue() - colors must be the same" - When the coins have different colors.
+     */
+    export circuit ltValue(a: CoinInfo, b: CoinInfo): Boolean {
+        assert (eqColor(a, b)) "Coin: ltValue() - colors must be the same";
+        return a.value < b.value;
+    }
+
+    /**
+     * @title lteValue circuit
+     * @description Compares two coins for less than or equal value.
+     * 
+     * @remarks
+     * This function compares only the value field of two coins using less than or equal comparison.
+     *
+     * @param {CoinInfo} a - First coin to compare.
+     * @param {CoinInfo} b - Second coin to compare.
+     *
+     * @returns {Boolean} - True if a.value <= b.value, false otherwise.
+     * 
+     * @throws {Error} "Coin: lteValue() - colors must be the same" - When the coins have different colors.
+     */
+    export circuit lteValue(a: CoinInfo, b: CoinInfo): Boolean {
+        assert (eqColor(a, b)) "Coin: lteValue() - colors must be the same";
+        return a.value <= b.value;
+    }
+
+    /**
+     * @title gtValue circuit
+     * @description Compares two coins for greater than value.
+     * 
+     * @remarks
+     * This function compares only the value field of two coins using greater than comparison.
+     *
+     * @param {CoinInfo} a - First coin to compare.
+     * @param {CoinInfo} b - Second coin to compare.
+     *
+     * @returns {Boolean} - True if a.value > b.value, false otherwise.
+     * 
+     * @throws {Error} "Coin: gtValue() - colors must be the same" - When the coins have different colors.
+     */
+    export circuit gtValue(a: CoinInfo, b: CoinInfo): Boolean {
+        assert (eqColor(a, b)) "Coin: gtValue() - colors must be the same";
+        return a.value > b.value;
+    }
+
+    /**
+     * @title gteValue circuit
+     * @description Compares two coins for greater than or equal value.
+     * 
+     * @remarks
+     * This function compares only the value field of two coins using greater than or equal comparison.
+     *
+     * @param {CoinInfo} a - First coin to compare.
+     * @param {CoinInfo} b - Second coin to compare.
+     *
+     * @returns {Boolean} - True if a.value >= b.value, false otherwise.
+     * 
+     * @throws {Error} "Coin: gteValue() - colors must be the same" - When the coins have different colors.
+     */
+    export circuit gteValue(a: CoinInfo, b: CoinInfo): Boolean {
+        assert (eqColor(a, b)) "Coin: gteValue() - colors must be the same";
+        return a.value >= b.value;
+    }
+
+    /**
+     * @title eqColor circuit
+     * @description Compares two coins for equal colors.
+     * 
+     * @remarks
+     * This function compares only the color field of two coins using Bytes32 equality.
+     *
+     * @param {CoinInfo} a - First coin to compare.
+     * @param {CoinInfo} b - Second coin to compare.
+     *
+     * @returns {Boolean} - True if the coins have equal colors, false otherwise.
+     */
+    export circuit eqColor(a: CoinInfo, b: CoinInfo): Boolean {
+        return Bytes32_eq(a.color, b.color);
+    }
+
+    /**
+     * @title ltColor circuit
+     * @description Compares two coins for less than color (lexicographic).
+     * 
+     * @remarks
+     * This function compares only the color field of two coins using Bytes32 less than comparison.
+     *
+     * @param {CoinInfo} a - First coin to compare.
+     * @param {CoinInfo} b - Second coin to compare.
+     *
+     * @returns {Boolean} - True if a.color < b.color (lexicographic), false otherwise.
+     */
+    export circuit ltColor(a: CoinInfo, b: CoinInfo): Boolean {
+        return Bytes32_lt(a.color, b.color);
+    }
+
+    /**
+     * @title lteColor circuit
+     * @description Compares two coins for less than or equal color.
+     * 
+     * @remarks
+     * This function compares only the color field of two coins using Bytes32 less than or equal comparison.
+     *
+     * @param {CoinInfo} a - First coin to compare.
+     * @param {CoinInfo} b - Second coin to compare.
+     *
+     * @returns {Boolean} - True if a.color <= b.color, false otherwise.
+     */
+    export circuit lteColor(a: CoinInfo, b: CoinInfo): Boolean {
+        return Bytes32_lte(a.color, b.color);
+    }
+
+    /**
+     * @title gtColor circuit
+     * @description Compares two coins for greater than color.
+     * 
+     * @remarks
+     * This function compares only the color field of two coins using Bytes32 greater than comparison.
+     *
+     * @param {CoinInfo} a - First coin to compare.
+     * @param {CoinInfo} b - Second coin to compare.
+     *
+     * @returns {Boolean} - True if a.color > b.color, false otherwise.
+     */
+    export circuit gtColor(a: CoinInfo, b: CoinInfo): Boolean {
+        return Bytes32_gt(a.color, b.color);
+    }
+
+    /**
+     * @title gteColor circuit
+     * @description Compares two coins for greater than or equal color.
+     * 
+     * @remarks
+     * This function compares only the color field of two coins using Bytes32 greater than or equal comparison.
+     *
+     * @param {CoinInfo} a - First coin to compare.
+     * @param {CoinInfo} b - Second coin to compare.
+     *
+     * @returns {Boolean} - True if a.color >= b.color, false otherwise.
+     */
+    export circuit gteColor(a: CoinInfo, b: CoinInfo): Boolean {
+        return Bytes32_gte(a.color, b.color);
+    }
+
+    /**
+     * @title eq circuit
+     * @description Compares two coins for complete equality (value, color, and nonce).
+     * 
+     * @remarks
+     * This function compares all fields of two coins for complete equality.
+     *
+     * @param {CoinInfo} a - First coin to compare.
+     * @param {CoinInfo} b - Second coin to compare.
+     *
+     * @returns {Boolean} - True if all fields are equal, false otherwise.
+     */
+    export circuit eq(a: CoinInfo, b: CoinInfo): Boolean {
+        return eqValue(a, b) && eqColor(a, b) && Bytes32_eq(a.nonce, b.nonce);
+    }
+
+    /**
+     * @title add circuit
+     * @description Adds the values of two coins with the same color.
+     * 
+     * @remarks
+     * This function adds the values of two coins, asserting that they have the same color.
+     * The result is a new coin with the same color and nonce as the first coin, but with the summed value.
+     *
+     * @param {CoinInfo} a - First coin to add.
+     * @param {CoinInfo} b - Second coin to add.
+     *
+     * @returns {CoinInfo} - A new coin with the same color and nonce as 'a', but with value = a.value + b.value.
+     * 
+     * @throws {Error} "Coin: add() - colors must be the same" - When the coins have different colors.
+     */
+    export circuit add(a: CoinInfo, b: CoinInfo): CoinInfo {
+        assert (eqColor(a, b)) "Coin: add() - colors must be the same";
+        const sum = MathU128_addChecked(a.value, b.value);
+        return CoinInfo {
+            nonce: a.nonce,
+            color: a.color,
+            value: sum
+        };
+    }
+
+    /**
+     * @title sub circuit
+     * @description Subtracts the value of the second coin from the first coin with the same color.
+     * 
+     * @remarks
+     * This function subtracts the values of two coins, asserting that they have the same color.
+     * The result is a new coin with the same color and nonce as the first coin, but with the difference value.
+     *
+     * @param {CoinInfo} a - First coin (minuend).
+     * @param {CoinInfo} b - Second coin (subtrahend).
+     *
+     * @returns {CoinInfo} - A new coin with the same color and nonce as 'a', but with value = a.value - b.value.
+     * 
+     * @throws {Error} "Coin: sub() - colors must be the same" - When the coins have different colors.
+     * @throws {Error} "Coin: sub() - result would be negative" - When b.value > a.value.
+     */
+    export circuit sub(a: CoinInfo, b: CoinInfo): CoinInfo {
+        assert (eqColor(a, b)) "Coin: sub() - colors must be the same";
+        assert (gteValue(a, b)) "Coin: sub() - result would be negative";
+        const difference = MathU128_sub(a.value, b.value);
+        return CoinInfo {
+            nonce: a.nonce,
+            color: a.color,
+            value: difference
+        };
+    }
+
+    /**
+     * @title mul circuit
+     * @description Multiplies the values of two coins with the same color.
+     * 
+     * @remarks
+     * This function multiplies the values of two coins, asserting that they have the same color.
+     * The result is a new coin with the same color and nonce as the first coin, but with the product value.
+     *
+     * @param {CoinInfo} a - First coin to multiply.
+     * @param {CoinInfo} b - Second coin to multiply.
+     *
+     * @returns {CoinInfo} - A new coin with the same color and nonce as 'a', but with value = a.value * b.value.
+     * 
+     * @throws {Error} "Coin: mul() - colors must be the same" - When the coins have different colors.
+     */
+    export circuit mul(a: CoinInfo, b: CoinInfo): CoinInfo {
+        assert (eqColor(a, b)) "Coin: mul() - colors must be the same";
+        const product = MathU128_mulChecked(a.value, b.value);
+        return CoinInfo {
+            nonce: a.nonce,
+            color: a.color,
+            value: product
+        };
+    }
+
+    /**
+     * @title div circuit
+     * @description Divides the value of the first coin by the second coin with the same color.
+     * 
+     * @remarks
+     * This function divides the values of two coins, asserting that they have the same color.
+     * The result is a new coin with the same color and nonce as the first coin, but with the quotient value.
+     *
+     * @param {CoinInfo} a - First coin (dividend).
+     * @param {CoinInfo} b - Second coin (divisor).
+     *
+     * @returns {CoinInfo} - A new coin with the same color and nonce as 'a', but with value = a.value / b.value.
+     * 
+     * @throws {Error} "Coin: div() - colors must be the same" - When the coins have different colors.
+     * @throws {Error} "Coin: div() - division by zero" - When b.value is zero.
+     */
+    export circuit div(a: CoinInfo, b: CoinInfo): CoinInfo {
+        assert (eqColor(a, b)) "Coin: div() - colors must be the same";
+        assert (b.value != 0) "Coin: div() - division by zero";
+        const quotient = MathU128_div(a.value, b.value);
+        return CoinInfo {
+            nonce: a.nonce,
+            color: a.color,
+            value: quotient
+        };
+    }
+ 
+    /**
+     * @title divRem circuit
+     * @description Divides the value of the first coin by the second coin with the same color, returning both quotient and remainder.
+     * 
+     * @remarks
+     * This function divides the values of two coins, asserting that they have the same color.
+     * Returns a struct containing both the quotient and remainder coins.
+     *
+     * @param {CoinInfo} a - First coin (dividend).
+     * @param {CoinInfo} b - Second coin (divisor).
+     *
+     * @returns {DivRemResult} - A struct containing quotient and remainder coins.
+     * 
+     * @throws {Error} "Coin: divRem() - colors must be the same" - When the coins have different colors.
+     * @throws {Error} "Coin: divRem() - division by zero" - When b.value is zero.
+     */
+    export circuit divRem(a: CoinInfo, b: CoinInfo): DivResultCoin {
+        assert (eqColor(a, b)) "Coin: divRem() - colors must be the same";
+        assert (b.value != 0) "Coin: divRem() - division by zero";
+        const divResult = MathU128_divRem(a.value, b.value);
+        return DivResultCoin {
+            quotient: CoinInfo {
+                nonce: a.nonce,
+                color: a.color,
+                value: MathU128_fromU128(divResult.quotient)
+            },
+            remainder: CoinInfo {
+                nonce: a.nonce,
+                color: a.color,
+                value: MathU128_fromU128(divResult.remainder)
+            }
+        };
+    }
+
+    /**
+     * @title rem circuit
+     * @description Computes the remainder when dividing the value of the first coin by the second coin with the same color.
+     * 
+     * @remarks
+     * This function computes the remainder of division, asserting that the coins have the same color.
+     * The result is a new coin with the same color and nonce as the first coin, but with the remainder value.
+     *
+     * @param {CoinInfo} a - First coin (dividend).
+     * @param {CoinInfo} b - Second coin (divisor).
+     *
+     * @returns {CoinInfo} - A new coin with the same color and nonce as 'a', but with value = a.value % b.value.
+     * 
+     * @throws {Error} "Coin: rem() - colors must be the same" - When the coins have different colors.
+     * @throws {Error} "Coin: rem() - division by zero" - When b.value is zero.
+     */
+    export circuit rem(a: CoinInfo, b: CoinInfo): CoinInfo {
+        assert (eqColor(a, b)) "Coin: rem() - colors must be the same";
+        assert (b.value != 0) "Coin: rem() - division by zero";
+        const remainder = MathU128_rem(a.value, b.value);
+        return CoinInfo {
+            nonce: a.nonce,
+            color: a.color,
+            value: remainder
+        };
+    }
+
+    /**
+     * @title sqrt circuit
+     * @description Computes the square root of a coin's value.
+     * 
+     * @remarks
+     * This function computes the square root of a coin's value using MathU128_sqrt.
+     * The result is a new coin with the same color and nonce as the input coin, but with the square root value.
+     *
+     * @param {CoinInfo} a - The coin to compute the square root of.
+     *
+     * @returns {CoinInfo} - A new coin with the same color and nonce as 'a', but with value = sqrt(a.value).
+     */
+    export circuit sqrt(a: CoinInfo): CoinInfo {
+        const sqrtValue = MathU128_sqrt(a.value);
+        return CoinInfo {
+            nonce: a.nonce,
+            color: a.color,
+            value: sqrtValue
+        };
+    }
+
+    /**
+     * @title min circuit
+     * @description Returns the coin with the minimum value among two coins with the same color.
+     * 
+     * @remarks
+     * This function compares the values of two coins, asserting that they have the same color.
+     * Returns the coin with the smaller value, maintaining the same color and nonce as the first coin.
+     *
+     * @param {CoinInfo} a - First coin to compare.
+     * @param {CoinInfo} b - Second coin to compare.
+     *
+     * @returns {CoinInfo} - The coin with the smaller value, same color and nonce as 'a'.
+     * 
+     * @throws {Error} "Coin: min() - colors must be the same" - When the coins have different colors.
+     */
+    export circuit min(a: CoinInfo, b: CoinInfo): CoinInfo {
+        assert (eqColor(a, b)) "Coin: min() - colors must be the same";
+        const minValue = MathU128_min(a.value, b.value);
+        return CoinInfo {
+            nonce: a.nonce,
+            color: a.color,
+            value: minValue
+        };
+    }
+
+    /**
+     * @title max circuit
+     * @description Returns the coin with the maximum value among two coins with the same color.
+     * 
+     * @remarks
+     * This function compares the values of two coins, asserting that they have the same color.
+     * Returns the coin with the larger value, maintaining the same color and nonce as the first coin.
+     *
+     * @param {CoinInfo} a - First coin to compare.
+     * @param {CoinInfo} b - Second coin to compare.
+     *
+     * @returns {CoinInfo} - The coin with the larger value, same color and nonce as 'a'.
+     * 
+     * @throws {Error} "Coin: max() - colors must be the same" - When the coins have different colors.
+     */
+    export circuit max(a: CoinInfo, b: CoinInfo): CoinInfo {
+        assert (eqColor(a, b)) "Coin: max() - colors must be the same";
+        const maxValue = MathU128_max(a.value, b.value);
+        return CoinInfo {
+            nonce: a.nonce,
+            color: a.color,
+            value: maxValue
+        };
+    }
+
+    /**
+     * @title sortGtByColor circuit
+     * @description Sorts two coins in descending order (greater to lesser) based on their colors.
+     * 
+     * @remarks
+     * This function sorts two coins by their colors in descending order (lexicographic).
+     * Returns a tuple where the first element has the greater color and the second has the lesser color.
+     * If the colors are equal, the order remains unchanged.
+     *
+     * @param {CoinInfo} a - First coin to sort.
+     * @param {CoinInfo} b - Second coin to sort.
+     *
+     * @returns {[CoinInfo, CoinInfo]} - A tuple with coins sorted in descending order by color.
+     */
+    export circuit sortGtByColor(a: CoinInfo, b: CoinInfo): [CoinInfo, CoinInfo] {
+        if (gtColor(a, b)) {
+            return [a, b];
+        } else {
+            return [b, a];
+        }
+    }
+
+    /**
+     * @title sortLtByColor circuit
+     * @description Sorts two coins in ascending order (lesser to greater) based on their colors.
+     * 
+     * @remarks
+     * This function sorts two coins by their colors in ascending order (lexicographic).
+     * Returns a tuple where the first element has the lesser color and the second has the greater color.
+     * If the colors are equal, the order remains unchanged.
+     *
+     * @param {CoinInfo} a - First coin to sort.
+     * @param {CoinInfo} b - Second coin to sort.
+     *
+     * @returns {[CoinInfo, CoinInfo]} - A tuple with coins sorted in ascending order by color.
+     */
+    export circuit sortLtByColor(a: CoinInfo, b: CoinInfo): [CoinInfo, CoinInfo] {
+        if (ltColor(a, b)) {
+            return [a, b];
+        } else {
+            return [b, a];
+        }
+    }
+
+    /**
+     * @title sortLtByValue circuit
+     * @description Sorts two coins in ascending order (lesser to greater) based on their values.
+     * 
+     * @remarks
+     * This function sorts two coins with the same color by their values in ascending order.
+     * Returns a tuple where the first element has the lesser value and the second has the greater value.
+     * If the values are equal, the order remains unchanged.
+     *
+     * @param {CoinInfo} a - First coin to sort.
+     * @param {CoinInfo} b - Second coin to sort.
+     *
+     * @returns {[CoinInfo, CoinInfo]} - A tuple with coins sorted in ascending order by value.
+     * 
+     * @throws {Error} "Coin: sortLtByValue() - colors must be the same" - When the coins have different colors.
+     */
+    export circuit sortLtByValue(a: CoinInfo, b: CoinInfo): [CoinInfo, CoinInfo] {
+        assert (eqColor(a, b)) "Coin: sortLtByValue() - colors must be the same";
+        if (ltValue(a, b)) {
+            return [a, b];
+        } else {
+            return [b, a];
+        }
+    }
+
+    /**
+     * @title sortGtByValue circuit
+     * @description Sorts two coins in descending order (greater to lesser) based on their values.
+     * 
+     * @remarks
+     * This function sorts two coins with the same color by their values in descending order.
+     * Returns a tuple where the first element has the greater value and the second has the lesser value.
+     * If the values are equal, the order remains unchanged.
+     *
+     * @param {CoinInfo} a - First coin to sort.
+     * @param {CoinInfo} b - Second coin to sort.
+     *
+     * @returns {[CoinInfo, CoinInfo]} - A tuple with coins sorted in descending order by value.
+     * 
+     * @throws {Error} "Coin: sortGtByValue() - colors must be the same" - When the coins have different colors.
+     */
+    export circuit sortGtByValue(a: CoinInfo, b: CoinInfo): [CoinInfo, CoinInfo] {
+        assert (eqColor(a, b)) "Coin: sortGtByValue() - colors must be the same";
+        if (gtValue(a, b)) {
+            return [a, b];
+        } else {
+            return [b, a];
+        }
+    }
+
+    /**
+     * @title isSameColor circuit
+     * @description Checks if two coins have the same color.
+     * 
+     * @remarks
+     * This is an alias for eqColor for better semantic clarity.
+     *
+     * @param {CoinInfo} a - First coin to compare.
+     * @param {CoinInfo} b - Second coin to compare.
+     *
+     * @returns {Boolean} - True if the coins have the same color, false otherwise.
+     */
+    export circuit isSameColor(a: CoinInfo, b: CoinInfo): Boolean {
+        return eqColor(a, b);
+    }
+
+    /**
+     * @title isSameValue circuit
+     * @description Checks if two coins have the same value.
+     * 
+     * @remarks
+     * This is an alias for eqValue for better semantic clarity.
+     *
+     * @param {CoinInfo} a - First coin to compare.
+     * @param {CoinInfo} b - Second coin to compare.
+     *
+     * @returns {Boolean} - True if the coins have the same value, false otherwise.
+     */
+    export circuit isSameValue(a: CoinInfo, b: CoinInfo): Boolean {
+        return eqValue(a, b);
+    } 
+} 
