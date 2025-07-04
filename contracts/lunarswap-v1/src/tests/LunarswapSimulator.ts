@@ -20,8 +20,8 @@ import {
 	Contract,
 	type Ledger,
 	type Pair,
-	ledger,
 	type QualifiedCoinInfo,
+	ledger,
 } from "../artifacts/Lunarswap/contract/index.cjs";
 import type { IContractSimulator } from "../types/test";
 import {
@@ -144,6 +144,54 @@ export class LunarswapSimulator
 			liquidity,
 			amountAMin,
 			amountBMin,
+			to,
+		);
+		this.circuitContext = result.context;
+	}
+
+	public swapExactTokensForTokens(
+		tokenIn: CoinInfo,
+		tokenOut: CoinInfo,
+		amountIn: bigint,
+		amountOutMin: bigint,
+		to: Either<ZswapCoinPublicKey, ContractAddress>,
+		sender?: CoinPublicKey,
+	): void {
+		const result = this.contract.circuits.swapExactTokensForTokens(
+			{
+				...this.circuitContext,
+				currentZswapLocalState: sender
+					? emptyZswapLocalState(sender)
+					: this.circuitContext.currentZswapLocalState,
+			},
+			tokenIn,
+			tokenOut,
+			amountIn,
+			amountOutMin,
+			to,
+		);
+		this.circuitContext = result.context;
+	}
+
+	public swapTokensForExactTokens(
+		tokenIn: CoinInfo,
+		tokenOut: CoinInfo,
+		amountOut: bigint,
+		amountInMax: bigint,
+		to: Either<ZswapCoinPublicKey, ContractAddress>,
+		sender?: CoinPublicKey,
+	): void {
+		const result = this.contract.circuits.swapTokensForExactTokens(
+			{
+				...this.circuitContext,
+				currentZswapLocalState: sender
+					? emptyZswapLocalState(sender)
+					: this.circuitContext.currentZswapLocalState,
+			},
+			tokenIn,
+			tokenOut,
+			amountOut,
+			amountInMax,
 			to,
 		);
 		this.circuitContext = result.context;

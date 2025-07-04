@@ -423,13 +423,15 @@ module LunarswapPair {
 
     // TODO: support flash swap that requires contracts to contracts calls.
     export circuit swap(
-        amount0Out: Uint<128>,
-        amount1Out: Uint<128>,
-        to: Either<ZswapCoinPublicKey, ContractAddress>,
         identity: Bytes<32>,
         pair: Pair,
+        balance0: Uint<128>,
+        balance1: Uint<128>,
+        amount0Out: Uint<128>,
+        amount1Out: Uint<128>,
         reserve0: Uint<128>,
         reserve1: Uint<128>,
+        to: Either<ZswapCoinPublicKey, ContractAddress>,
     ): Pair {
         assert (amount0Out > 0 || amount1Out > 0) "LunarswapPair: swap() - Insufficient output amount";
         assert (amount0Out < reserve0 && amount1Out < reserve1) "LunarswapPair: swap() - Insufficient liquidity";
@@ -453,16 +455,16 @@ module LunarswapPair {
             send(outputQualifiedCoin, to, amount1Out);
         }
 
-        const balance0 = amount0Out > 0 ? MathU128_sub(reserve0, amount0Out) : reserve0;
-        const balance1 = amount1Out > 0 ? MathU128_sub(reserve1, amount1Out) : reserve1;
+        const updatedBalance0 = amount0Out > 0 ? MathU128_sub(balance0, amount0Out) : balance0;
+        const updatedBalance1 = amount1Out > 0 ? MathU128_sub(balance1, amount1Out) : balance1;
 
-        const amount0In = balance0 > MathU128_sub(reserve0, amount0Out) ? MathU128_sub(balance0, MathU128_sub(reserve0, amount0Out)) : 0;
-        const amount1In = balance1 > MathU128_sub(reserve1, amount1Out) ? MathU128_sub(balance1, MathU128_sub(reserve1, amount1Out)) : 0;
+        const amount0In = updatedBalance0 > MathU128_sub(reserve0, amount0Out) ? MathU128_sub(updatedBalance0, MathU128_sub(reserve0, amount0Out)) : 0;
+        const amount1In = updatedBalance1 > MathU128_sub(reserve1, amount1Out) ? MathU128_sub(updatedBalance1, MathU128_sub(reserve1, amount1Out)) : 0;
 
         assert (amount0In > 0 || amount1In > 0) "LunarswapPair: swap() - Insufficient input amount";
 
-        const balance0Adjusted = MathU128_sub(MathU128_mulChecked(balance0, 1000), MathU128_mulChecked(amount0In, 3));
-        const balance1Adjusted = MathU128_sub(MathU128_mulChecked(balance1, 1000), MathU128_mulChecked(amount1In, 3));
+        const balance0Adjusted = MathU128_sub(MathU128_mulChecked(updatedBalance0, 1000), MathU128_mulChecked(amount0In, 3));
+        const balance1Adjusted = MathU128_sub(MathU128_mulChecked(updatedBalance1, 1000), MathU128_mulChecked(amount1In, 3));
 
         assert (
             MathU128_mulChecked(balance0Adjusted, balance1Adjusted)
@@ -473,7 +475,7 @@ module LunarswapPair {
             )
         ) "LunarswapPair: swap() - k";
 
-        return _update(pair, false, amount0In, amount1In, balance0, balance1, reserve0, reserve1, pair.kLast);
+        return _update(pair, false, amount0In, amount1In, updatedBalance0, updatedBalance1, reserve0, reserve1, pair.kLast);
     }
 
     /**

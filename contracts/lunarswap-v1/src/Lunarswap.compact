@@ -201,24 +201,92 @@ export circuit removeLiquidity(
     return [amountA, amountB];
 }
 
+/**
+ * @title swapExactTokensForTokens circuit
+ * @description Swaps an exact amount of input tokens for a minimum amount of output tokens.
+ * 
+ * @remarks
+ * This circuit handles the complete swap process. It receives the input tokens,
+ * calculates the exact amount of output tokens, and returns the amount of input tokens
+ * used.
+ *
+ * @circuitInfo k=11, rows=4000
+ *
+ * @param {CoinInfo} tokenIn - The input token.
+ * @param {CoinInfo} tokenOut - The output token.
+ * @param {Uint<128>} amountIn - The amount of input tokens to swap.
+ * @param {Uint<128>} amountOutMin - The minimum amount of output tokens to receive.
+ * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The recipient of the output tokens.
+ *
+ * @returns {Uint<128>} - The amount of input tokens used.
+ */
 export circuit swapExactTokensForTokens(
     tokenIn: CoinInfo,
     tokenOut: CoinInfo,
     amountIn: Uint<128>,
     amountOutMin: Uint<128>,
     to: Either<ZswapCoinPublicKey, ContractAddress>,
-): [] {
-    return [];
+): Uint<128> {
+    assert (tokenIn.color != tokenOut.color) "Lunarswap: swapExactTokensForTokens() - Identical addresses";
+    const [token0, token1] = LunarswapLibrary_sortCoins(tokenIn, tokenOut);
+    const identity = LunarswapLibrary_getIdentity(token0, token1);
+    const pair = LunarswapFactory_getPair(identity);
+    const [reserve0, reserve1] = LunarswapFactory_getReserves(identity, token0, token1);
+    return LunarswapRouter_swapExactTokensForTokens(
+        identity,
+        pair,
+        tokenIn,
+        tokenOut,
+        amountIn,
+        amountOutMin,
+        reserve0,
+        reserve1,
+        to
+    );
 }
 
+/**
+ * @title swapTokensForExactTokens circuit
+ * @description Swaps an amount of input tokens for an exact amount of output tokens.
+ * 
+ * @remarks
+ * This circuit handles the complete swap process. It receives the input tokens,
+ * calculates the exact amount of input tokens, and returns the amount of output tokens
+ * received.
+ *
+ * @circuitInfo k=11, rows=4000
+ *
+ * @param {CoinInfo} tokenIn - The input token.
+ * @param {CoinInfo} tokenOut - The output token.
+ * @param {Uint<128>} amountOut - The amount of output tokens to receive.
+ * @param {Uint<128>} amountInMax - The maximum amount of input tokens to use.
+ * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The recipient of the output tokens.
+ *
+ * @returns {Uint<128>} - The amount of input tokens used.
+ */
 export circuit swapTokensForExactTokens(
     tokenIn: CoinInfo,
     tokenOut: CoinInfo,
-    amountIn: Uint<128>,
-    amountOutMin: Uint<128>,
+    amountOut: Uint<128>,
+    amountInMax: Uint<128>,
     to: Either<ZswapCoinPublicKey, ContractAddress>,
-): [] {
-    return [];
+): Uint<128> {
+    assert (tokenIn.color != tokenOut.color) "Lunarswap: swapTokensForExactTokens() - Identical addresses";
+    const [token0, token1] = LunarswapLibrary_sortCoins(tokenIn, tokenOut);
+    const identity = LunarswapLibrary_getIdentity(token0, token1);
+    const pair = LunarswapFactory_getPair(identity);
+    const [reserve0, reserve1] = LunarswapFactory_getReserves(identity, token0, token1);
+    return LunarswapRouter_swapTokensForExactTokens(
+        identity,
+        pair,
+        tokenIn,
+        tokenOut,
+        amountOut,
+        amountInMax,
+        reserve0,
+        reserve1,
+        to
+    );
 }
 
 /**

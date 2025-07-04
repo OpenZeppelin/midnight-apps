@@ -18,6 +18,7 @@ module LunarswapRouter {
     import CompactStandardLibrary;
     
     import "./openzeppelin/Utils";
+    import "./node_modules/@midnight-dapps/math-contracts/dist/MathU128";
     
     import LunarswapLibrary prefix LunarswapLibrary_;
     import LunarswapFactory prefix LunarswapFactory_;
@@ -232,7 +233,7 @@ module LunarswapRouter {
         to: Either<ZswapCoinPublicKey, ContractAddress>,
     ): [Uint<128>, Uint<128>] {
         const totalSupply = LunarswapLiquidity_totalSupply(identity);
-        
+
         assert (totalSupply.value > 0) "LunarswapRouter: totalSupply is zero";
         assert (totalSupply.color == liquidity.color) "LunarswapRouter: mismatched LP token color";
         assert (totalSupply.nonce == liquidity.nonce) "LunarswapRouter: mismatched LP token nonce";
@@ -257,5 +258,141 @@ module LunarswapRouter {
         return [amount0, amount1];
     }
 
+    /**
+     * @title swapExactTokensForTokens circuit
+     * @description Swaps an exact amount of input tokens for a minimum amount of output tokens.
+     * 
+     * @remarks
+     * This circuit handles the complete swap process. It receives the input tokens,
+     * calculates the exact amount of output tokens, and returns the amount of input tokens
+     * used.
+     *
+     * @circuitInfo k=11, rows=4000
+     *
+     * @param {Bytes<32>} identity - The unique identity hash of the pair.
+     * @param {Pair} pair - The current pair state.
+     * @param {CoinInfo} tokenIn - The input token.
+     * @param {CoinInfo} tokenOut - The output token.
+     * @param {Uint<128>} amountIn - The amount of input tokens to swap.
+     * @param {Uint<128>} amountOutMin - The minimum amount of output tokens to receive.
+     * @param {Uint<128>} reserve0 - The current reserve of token0.
+     * @param {Uint<128>} reserve1 - The current reserve of token1.
+     * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The recipient of the output tokens.
+     *
+     * @returns {Uint<128>} - The amount of input tokens used.
+     */
+    export circuit swapExactTokensForTokens(
+        identity: Bytes<32>,
+        pair: LunarswapPair_Pair,
+        tokenIn: CoinInfo,
+        tokenOut: CoinInfo,
+        amountIn: Uint<128>,
+        amountOutMin: Uint<128>,
+        reserve0: Uint<128>,
+        reserve1: Uint<128>,
+        to: Either<ZswapCoinPublicKey, ContractAddress>,
+    ): Uint<128> {
+        const [token0, token1] = LunarswapLibrary_sortCoins(tokenIn, tokenOut);
+        const [reserveIn, reserveOut] = (token0.color == tokenIn.color) ? [reserve0, reserve1] : [reserve1, reserve0];
+        const amountOut = LunarswapLibrary_getAmountOut(amountIn, reserveIn, reserveOut);
 
+        assert (amountOut >= amountOutMin) "LunarswapRouter: swapExactTokensForTokens() - Insufficient output amount";
+
+        const splitTokenIn = LunarswapLibrary_splitCoin(tokenIn, amountIn);
+        receive(splitTokenIn.used);
+        if (splitTokenIn.remainder.value > 0) {
+            send_immediate(splitTokenIn.remainder, to, splitTokenIn.remainder.value);
+        }
+
+        const isToken0 = token0.color == tokenIn.color;
+
+        // Calculate intermediate balances (after input is received but before output is sent)
+        const [balance0, balance1] = isToken0
+            ? [addChecked(reserve0, splitTokenIn.used.value), reserve1]
+            : [reserve0, addChecked(reserve1, splitTokenIn.used.value)];
+
+        const [amount0Out, amount1Out] = isToken0 ? [0 as Uint<128>, amountOut] : [amountOut, 0 as Uint<128>];
+        const updatedPair = LunarswapPair_swap(
+            identity,
+            pair,
+            balance0,
+            balance1,
+            amount0Out,
+            amount1Out,
+            reserve0,
+            reserve1,
+            to
+        );
+        LunarswapFactory_updatePair(updatedPair, identity);
+        return amountOut;
+    }
+
+    /**
+     * @title swapTokensForExactTokens circuit
+     * @description Swaps an amount of input tokens for an exact amount of output tokens.
+     * 
+     * @remarks
+     * This circuit handles the complete swap process. It receives the input tokens,
+     * calculates the exact amount of input tokens, and returns the amount of output tokens
+     * received.
+     *
+     * @circuitInfo k=11, rows=4000
+     *
+     * @param {Bytes<32>} identity - The unique identity hash of the pair.
+     * @param {Pair} pair - The current pair state.
+     * @param {CoinInfo} tokenIn - The input token.
+     * @param {CoinInfo} tokenOut - The output token.
+     * @param {Uint<128>} amountOut - The amount of output tokens to receive.
+     * @param {Uint<128>} amountInMax - The maximum amount of input tokens to use.
+     * @param {Uint<128>} reserve0 - The current reserve of token0.
+     * @param {Uint<128>} reserve1 - The current reserve of token1.
+     * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The recipient of the output tokens.
+     *
+     * @returns {Uint<128>} - The amount of input tokens used.
+     */
+    export circuit swapTokensForExactTokens(
+        identity: Bytes<32>,
+        pair: LunarswapPair_Pair,
+        tokenIn: CoinInfo,
+        tokenOut: CoinInfo,
+        amountOut: Uint<128>,
+        amountInMax: Uint<128>,
+        reserve0: Uint<128>,
+        reserve1: Uint<128>,
+        to: Either<ZswapCoinPublicKey, ContractAddress>,
+    ): Uint<128> {
+        const [token0, token1] = LunarswapLibrary_sortCoins(tokenIn, tokenOut);
+        const [reserveIn, reserveOut] = (token0.color == tokenIn.color) ? [reserve0, reserve1] : [reserve1, reserve0];
+        const amountIn = LunarswapLibrary_getAmountIn(amountOut, reserveIn, reserveOut);
+
+        assert (amountIn <= amountInMax) "LunarswapRouter: swapTokensForExactTokens() - Insufficient input amount";
+
+        const splitTokenIn = LunarswapLibrary_splitCoin(tokenIn, amountIn);
+        receive(splitTokenIn.used);
+        if (splitTokenIn.remainder.value > 0) {
+            send_immediate(splitTokenIn.remainder, to, splitTokenIn.remainder.value);
+        }
+
+        const isToken0 = token0.color == tokenIn.color;
+
+        // Calculate intermediate balances (after input is received but before output is sent)
+        const [balance0, balance1] = isToken0
+            ? [addChecked(reserve0, splitTokenIn.used.value), reserve1]
+            : [reserve0, addChecked(reserve1, splitTokenIn.used.value)];
+
+        const [amount0Out, amount1Out] = isToken0 ? [0 as Uint<128>, amountOut] : [amountOut, 0 as Uint<128>];
+        const updatedPair = LunarswapPair_swap(
+            identity,
+            pair,
+            balance0,
+            balance1,
+            amount0Out,
+            amount1Out,
+            reserve0,
+            reserve1,
+            to
+        );
+        LunarswapFactory_updatePair(updatedPair, identity);
+        return amountIn;
+    }
 }

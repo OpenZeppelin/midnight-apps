@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { calculateLiquidityAmounts, SLIPPAGE_TOLERANCE, calculateAmountOut } from "./liquidityCalculations";
+import { calculateAddLiquidityAmounts, SLIPPAGE_TOLERANCE, calculateAmountOut } from "./index";
 
 describe("Liquidity Calculations", () => {
-	describe("calculateLiquidityAmounts", () => {
+	describe("calculateAddLiquidityAmounts", () => {
 		it("should calculate amounts for existing pair", () => {
-			const result = calculateLiquidityAmounts(1000n, 1000n, 2000n, 1000n, 50);
+			const result = calculateAddLiquidityAmounts(1000n, 1000n, 2000n, 1000n, 50);
 			expect(result.amountAOptimal).toBe(1000n);
 			expect(result.amountBOptimal).toBe(500n);
 			expect(result.amountAMin).toBe(995n);
@@ -12,7 +12,7 @@ describe("Liquidity Calculations", () => {
 		});
 
 		it("should calculate amounts for new pair", () => {
-			const result = calculateLiquidityAmounts(2000n, 1000n, 0n, 0n, 50);
+			const result = calculateAddLiquidityAmounts(2000n, 1000n, 0n, 0n, 50);
 			expect(result.amountAOptimal).toBe(2000n);
 			expect(result.amountBOptimal).toBe(1000n);
 			expect(result.amountAMin).toBe(1990n);
@@ -23,14 +23,14 @@ describe("Liquidity Calculations", () => {
 			const reserves = { usdc: 10000n, night: 5000n };
 			const desired = { usdc: 1000n, night: 1000n };
 
-			const veryLow = calculateLiquidityAmounts(
+			const veryLow = calculateAddLiquidityAmounts(
 				desired.usdc,
 				desired.night,
 				reserves.usdc,
 				reserves.night,
 				SLIPPAGE_TOLERANCE.VERY_LOW,
 			);
-			const low = calculateLiquidityAmounts(
+			const low = calculateAddLiquidityAmounts(
 				desired.usdc,
 				desired.night,
 				reserves.usdc,
