@@ -70,8 +70,32 @@ export class MathU256Simulator
     return this.circuitContext.originalState;
   }
 
+  public MODULUS(): bigint {
+    const result = this.contract.circuits.MODULUS(this.circuitContext);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public MODULUS_U256(): U256 {
+    const result = this.contract.circuits.MODULUS_U256(this.circuitContext);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
   public ZERO_U256(): U256 {
     const result = this.contract.circuits.ZERO_U256(this.circuitContext);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public fromU256(a: U256): bigint {
+    const result = this.contract.circuits.fromU256(this.circuitContext, a);
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
+  public toU256(a: bigint): U256 {
+    const result = this.contract.circuits.toU256(this.circuitContext, a);
     this.circuitContext = result.context;
     return result.result;
   }
@@ -166,6 +190,15 @@ export class MathU256Simulator
     return result.result;
   }
 
+  public isExceedingFieldSize(a: U256): boolean {
+    const result = this.contract.circuits.isExceedingFieldSize(
+      this.circuitContext,
+      a,
+    );
+    this.circuitContext = result.context;
+    return result.result;
+  }
+
   public isLowestLimbOnly(val: U256, limbValue: bigint): boolean {
     const result = this.contract.circuits.isLowestLimbOnly(
       this.circuitContext,
@@ -212,18 +245,6 @@ export class MathU256Simulator
       value,
       divisor,
     );
-    this.circuitContext = result.context;
-    return result.result;
-  }
-
-  public fromU256(a: U256): bigint {
-    const result = this.contract.circuits.fromU256(this.circuitContext, a);
-    this.circuitContext = result.context;
-    return result.result;
-  }
-
-  public toU256(a: bigint): U256 {
-    const result = this.contract.circuits.toU256(this.circuitContext, a);
     this.circuitContext = result.context;
     return result.result;
   }
