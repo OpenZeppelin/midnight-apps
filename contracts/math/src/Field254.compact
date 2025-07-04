@@ -71,7 +71,7 @@ module Field254 {
      *
      * @param {Field} a - The field value to convert.
      *
-     * @throws {Error} "MathU256: reconstruction mismatch" if the conversion is not lossless.
+     * @throws {Error} "MathU256: reconstruction mismatch" if the conversion loses bits.
      *
      * @returns {U256} The U256 struct representation of the field value.
      */
