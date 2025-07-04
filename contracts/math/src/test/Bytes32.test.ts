@@ -266,6 +266,102 @@ describe('Bytes32', () => {
         const b = createPatternBytes(0xfe, 31);
         expect(bytes32Simulator.eq(a, b)).toBe(false);
       });
+
+      test('should return false when comparing different overflow values (2^254 + 1 vs 2^254 + 1000)', () => {
+        const overflow1 = createBytes(2n ** 254n + 1n);
+        const overflow2 = createBytes(2n ** 254n + 1000n);
+
+        expect(bytes32Simulator.eq(overflow1, overflow2)).toBe(false);
+      });
+
+      test('should return false when comparing different overflow values (2^254 + 1000 vs 2^254 + 2000)', () => {
+        const overflow1 = createBytes(2n ** 254n + 1000n);
+        const overflow2 = createBytes(2n ** 254n + 2000n);
+
+        expect(bytes32Simulator.eq(overflow1, overflow2)).toBe(false);
+      });
+
+      test('should return false when comparing 2^254 vs 2^254 + 1', () => {
+        const overflow = createBytes(2n ** 254n);
+        const overflowPlusOne = createBytes(2n ** 254n + 1n);
+
+        expect(bytes32Simulator.eq(overflow, overflowPlusOne)).toBe(false);
+      });
+
+      test('should return false when comparing 2^254 + 1 vs 2^255', () => {
+        const overflowPlusOne = createBytes(2n ** 254n + 1n);
+        const twoTo255 = createBytes(2n ** 255n);
+
+        expect(bytes32Simulator.eq(overflowPlusOne, twoTo255)).toBe(false);
+      });
+
+      test('should return false when comparing 2^255 vs 2^256 - 1', () => {
+        const twoTo255 = createBytes(2n ** 255n);
+        const max256Bit = createBytes(2n ** 256n - 1n);
+
+        expect(bytes32Simulator.eq(twoTo255, max256Bit)).toBe(false);
+      });
+
+      test('should return false when comparing overflow with valid field value', () => {
+        const validField = createMaxFieldBytes(); // 2^254 - 1 (valid)
+        const overflow = createBytes(2n ** 254n); // 2^254 (overflow)
+
+        expect(bytes32Simulator.eq(validField, overflow)).toBe(false);
+      });
+
+      test('should return false when comparing zero with overflow value', () => {
+        const zero = new Uint8Array(32);
+        const overflow = createBytes(2n ** 254n);
+
+        expect(bytes32Simulator.eq(zero, overflow)).toBe(false);
+      });
+
+      test('should return true when comparing overflow value with itself', () => {
+        const overflow = createBytes(2n ** 254n + 1n);
+
+        expect(bytes32Simulator.eq(overflow, overflow)).toBe(true);
+      });
+
+      test('should return false when comparing 2^256 - 1 with 2^254 + 1', () => {
+        const max256Bit = createBytes(2n ** 256n - 1n);
+        const overflowPlusOne = createBytes(2n ** 254n + 1n);
+
+        expect(bytes32Simulator.eq(max256Bit, overflowPlusOne)).toBe(false);
+      });
+
+      test('should return false when comparing 2^256 - 1 with 2^255', () => {
+        const max256Bit = createBytes(2n ** 256n - 1n);
+        const twoTo255 = createBytes(2n ** 255n);
+
+        expect(bytes32Simulator.eq(max256Bit, twoTo255)).toBe(false);
+      });
+
+      test('should return true when comparing 2^256 - 1 with itself', () => {
+        const max256Bit = createBytes(2n ** 256n - 1n);
+
+        expect(bytes32Simulator.eq(max256Bit, max256Bit)).toBe(true);
+      });
+
+      test('should return false when comparing 2^256 - 1 with zero', () => {
+        const max256Bit = createBytes(2n ** 256n - 1n);
+        const zero = new Uint8Array(32);
+
+        expect(bytes32Simulator.eq(max256Bit, zero)).toBe(false);
+      });
+
+      test('should return false when comparing 2^256 - 1 with valid field value', () => {
+        const max256Bit = createBytes(2n ** 256n - 1n);
+        const validField = createMaxFieldBytes(); // 2^254 - 1
+
+        expect(bytes32Simulator.eq(max256Bit, validField)).toBe(false);
+      });
+
+      test('should return false when comparing 2^256 - 1 with 2^254', () => {
+        const max256Bit = createBytes(2n ** 256n - 1n);
+        const overflow = createBytes(2n ** 254n);
+
+        expect(bytes32Simulator.eq(max256Bit, overflow)).toBe(false);
+      });
     });
   });
 
