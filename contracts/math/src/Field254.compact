@@ -92,9 +92,9 @@ module Field254 {
         };
 
         // build low-half and high-half as full U256s
-        const lowU256 = U256 { 
-            low: lowU128, 
-            high: U128 { low: 0, high: 0 } 
+        const lowU256 = U256 {
+            low: lowU128,
+            high: U128 { low: 0, high: 0 }
         };
         const highU256 = U256 { 
             low: U128 { low: 0, high: 0 }, 
