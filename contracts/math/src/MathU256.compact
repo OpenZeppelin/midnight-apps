@@ -197,7 +197,7 @@ module MathU256 {
         };
         const reconstructed = add(highU256, lowU256);
 
-        // verify we recovered the original a exactly
+        // verify we recovered the original `a` exactly
         assert(eq(reconstructed, result)) "MathU256: conversion invalid";
 
         return result;
