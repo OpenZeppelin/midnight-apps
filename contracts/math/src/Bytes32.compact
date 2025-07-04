@@ -39,7 +39,7 @@ module Bytes32 {
     import Field254 prefix Field254_;
     
     /**
-     * @title toBytes circuit
+     * @title fromBytes circuit
      * @description Converts Bytes<32> to a Field using field conversion.
      * 
      * @remarks
