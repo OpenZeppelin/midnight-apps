@@ -1,0 +1,68 @@
+// SPDX-License-Identifier: MIT
+pragma language_version >= 0.15.0;
+
+/**
+ * @title IUint256
+ * @dev Interface for 256-bit unsigned integer operations using the U256 struct.
+ *
+ * The U256 struct represents a 256-bit unsigned integer as two U128 structs:
+ * - `low`: The least significant 128 bits (bits 0-127).
+ * - `high`: The most significant 128 bits (bits 128-255).
+ *
+ * This interface enables arithmetic, division, square root, and utility operations on 256-bit numbers,
+ * facilitating environments that natively support only 128-bit or 64-bit integers.
+ */
+module IUint256 {
+    import IUint128; 
+        
+    export struct U256 {
+        /**
+         * @description The least significant 128 bits (bits 0-127) of the 256-bit number
+         */
+        low: U128,
+        /**
+         * @description The most significant 128 bits (bits 128-255) of the 256-bit number
+         */
+        high: U128 
+    }
+
+    /**
+     * @description A struct representing the result of a division operation on U256 values.
+     */
+    export struct DivResultU256 {
+        /**
+         * @description The quotient result of the division operation
+         */
+        quotient: U256,
+        /**
+         * @description The remainder result of the division operation
+         */
+        remainder: U256
+    }
+
+    /**
+     * @description Computes division of two U256 values locally (off-chain).
+     *
+     * @param a The number to divide.
+     * @param b The number to divide by.
+     * @returns DivResultU256 The quotient and remainder of the division as U256 structs.
+     */
+    export witness divU256Locally(a: U256, b: U256): DivResultU256;
+
+    /**
+     * @description Computes the square root of a U256 value locally (off-chain).
+     *
+     * @param radicand The number to compute the square root of.
+     * @returns Uint<128> The square root of radicand.
+     */
+    export witness sqrtU256Locally(radicand: U256): Uint<128>;
+
+    /**
+     * @description Computes division of two Uint<254> values locally (off-chain).
+     *
+     * @param a The Uint<254> value to divide.
+     * @param b The Uint<254> value to divide by.
+     * @returns DivResultU256 The quotient and remainder of the division as U256 structs.
+     */
+    export witness divUint254Locally(a: Uint<254>, b: Uint<254>): DivResultU256;
+}

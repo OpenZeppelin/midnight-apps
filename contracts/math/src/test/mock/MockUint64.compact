@@ -1,0 +1,46 @@
+pragma language_version >= 0.15.0;
+
+import CompactStandardLibrary;
+import "../../interfaces/IUint64";
+
+import "../../Uint64" prefix Uint64_;
+
+export circuit add(a: Uint<64>, b: Uint<64>): Uint<128> {
+    return Uint64_add(a, b);
+}
+
+export circuit sub(a: Uint<64>, b: Uint<64>): Uint<64> {
+    return Uint64_sub(a, b);
+}
+
+export circuit mul(a: Uint<64>, b: Uint<64>): Uint<128> {
+    return Uint64_mul(a, b);
+}
+
+export circuit div(a: Uint<64>, b: Uint<64>): Uint<64> {
+    return disclose(Uint64_div(a, b));
+}
+
+export circuit rem(a: Uint<64>, b: Uint<64>): Uint<64> {
+    return disclose(Uint64_rem(a, b));
+}
+
+export circuit divRem(a: Uint<64>, b: Uint<64>): DivResultU64 {
+    return disclose(Uint64_divRem(a, b));
+}
+
+export circuit sqrt(radical: Uint<64>): Uint<32> {
+    return disclose(Uint64_sqrt(radical));
+}
+
+export circuit isMultiple(value: Uint<64>, b: Uint<64>): Boolean {
+    return disclose(Uint64_isMultiple(value, b));
+}
+
+export circuit min(a: Uint<64>, b: Uint<64>): Uint<64> {
+    return Uint64_min(a, b);
+}
+
+export circuit max(a: Uint<64>, b: Uint<64>): Uint<64> {
+    return Uint64_max(a, b);
+}
