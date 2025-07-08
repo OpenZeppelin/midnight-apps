@@ -38,21 +38,27 @@ pragma language_version >= 0.14.0;
  * - Slippage protection with minimum amount requirements
  * - Access control for administrative functions
  * - Overflow protection with checked arithmetic
+ * 
+ * TODO: export Fee circuits.
+ * TODO: should use initializeble module for all the submodules.
+ * TODO: use Coin and QualifiedCoin Math modules.
+ * TODO: should support remove liquidity.
+ * TODO: should support swap.
+ * TODO: should support deadline.
  */
 
 import CompactStandardLibrary;
 
-import "./node_modules/@midnight-dapps/math-contracts/dist/IUint128";
-import "./node_modules/@midnight-dapps/math-contracts/dist/IMathU128";
+import "./node_modules/@midnight-dapps/math-contracts/dist/interfaces/IUint128";
 
 import LunarswapRouter prefix LunarswapRouter_;
-import LunarswapLpTokens prefix LunarswapLpTokens_;
+import LunarswapLiquidity prefix LunarswapLiquidity_;
 import LunarswapFactory prefix LunarswapFactory_;
 import LunarswapLibrary prefix LunarswapLibrary_;
 import LunarswapPair;
 
 export { U128, DivResultU128 };
-export { CoinInfo, Either, ZswapCoinPublicKey, ContractAddress };
+export { CoinInfo, QualifiedCoinInfo, Either, ZswapCoinPublicKey, ContractAddress };
 export { Pair };
 
 /**
@@ -113,7 +119,7 @@ constructor(
  * @throws {Error} "LunarswapRouter: Insufficient A amount" if the calculated amount is below minimum.
  * @throws {Error} "LunarswapRouter: Insufficient B amount" if the calculated amount is below minimum.
  *
- * @returns [] - No return values.
+ * @returns [Uint<128>, Uint<128>, Uint<128>] - The amounts of tokenA and tokenB used and the liquidity minted.
  */
 export circuit addLiquidity(
     tokenA: CoinInfo,
@@ -121,12 +127,20 @@ export circuit addLiquidity(
     amountAMin: Uint<128>,
     amountBMin: Uint<128>,
     to: Either<ZswapCoinPublicKey, ContractAddress>,
-): [] {
+): [Uint<128>, Uint<128>, Uint<128>] {
     assert (tokenA.color != tokenB.color) "Lunarswap: addLiquidity() - Identical addresses";
     const [token0, token1, amount0Min, amount1Min] = LunarswapLibrary_sortCoinsAndAmounts(tokenA, tokenB, amountAMin, amountBMin);
     const identity = LunarswapLibrary_getIdentity(token0, token1);
-    disclose(LunarswapRouter_addLiquidity(identity, token0, token1, amount0Min, amount1Min, to));
-    return [];
+    return disclose(
+        LunarswapRouter_addLiquidity(
+            identity,
+            token0,
+            token1,
+            amount0Min,
+            amount1Min,
+            to
+        )
+    );
 }
 
 /**
@@ -237,7 +251,7 @@ export circuit getPairIdentity(tokenA: CoinInfo, tokenB: CoinInfo): Bytes<32> {
 }
 
 /**
- * @title getLpTokenName circuit
+ * @title getLiquidityTokenName circuit
  * @description Returns the name of the LP token.
  * 
  * @remarks
@@ -247,12 +261,12 @@ export circuit getPairIdentity(tokenA: CoinInfo, tokenB: CoinInfo): Bytes<32> {
  *
  * @returns {Opaque<"string">} - The LP token name.
  */
-export circuit getLpTokenName(): Opaque<"string"> {
-    return LunarswapLpTokens_name();
+export circuit getLiquidityTokenName(): Opaque<"string"> {
+    return LunarswapLiquidity_name();
 }
 
 /**
- * @title getLpTokenSymbol circuit
+ * @title getLiquidityTokenSymbol circuit
  * @description Returns the symbol of the LP token.
  * 
  * @remarks
@@ -262,12 +276,12 @@ export circuit getLpTokenName(): Opaque<"string"> {
  *
  * @returns {Opaque<"string">} - The LP token symbol.
  */
-export circuit getLpTokenSymbol(): Opaque<"string"> {
-    return LunarswapLpTokens_symbol();
+export circuit getLiquidityTokenSymbol(): Opaque<"string"> {
+    return LunarswapLiquidity_symbol();
 }
 
 /**
- * @title getLpTokenDecimals circuit
+ * @title getLiquidityTokenDecimals circuit
  * @description Returns the number of decimals for LP tokens.
  * 
  * @remarks
@@ -277,12 +291,12 @@ export circuit getLpTokenSymbol(): Opaque<"string"> {
  *
  * @returns {Uint<8>} - The number of decimal places for LP tokens.
  */
-export circuit getLpTokenDecimals(): Uint<8> {
-    return LunarswapLpTokens_decimals();
+export circuit getLiquidityTokenDecimals(): Uint<8> {
+    return LunarswapLiquidity_decimals();
 }
 
 /**
- * @title getLpTokenTotalSupply circuit
+ * @title getLiquidityTotalSupply circuit
  * @description Returns the total supply of LP tokens for a specific pair.
  * 
  * @remarks
@@ -295,9 +309,9 @@ export circuit getLpTokenDecimals(): Uint<8> {
  *
  * @throws {Error} "LunarswapLpTokens: totalSupply() - Lp token not found" if the LP token doesn't exist.
  *
- * @returns {Uint<128>} - The total supply of LP tokens for the pair.
+ * @returns {QualifiedCoinInfo} - The total supply of LP tokens for the pair.
  */
-export circuit getLpTokenTotalSupply(tokenA: CoinInfo, tokenB: CoinInfo): Uint<128> {
+export circuit getLiquidityTotalSupply(tokenA: CoinInfo, tokenB: CoinInfo): QualifiedCoinInfo {
     const identity = getPairIdentity(tokenA, tokenB);
-    return LunarswapLpTokens_totalSupply(identity);
+    return LunarswapLiquidity_totalSupply(identity);
 }

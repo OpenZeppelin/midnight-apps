@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 pragma language_version >= 0.14.0;
 
 /**
@@ -20,10 +22,16 @@ pragma language_version >= 0.14.0;
 module LunarswapLibrary {
     import CompactStandardLibrary;
 
-    import "../node_modules/@midnight-dapps/math-contracts/dist/MathU128" prefix MathU128_;
+    import "../node_modules/@midnight-dapps/math-contracts/dist/Uint128" prefix Uint128_;
     import "../node_modules/@midnight-dapps/math-contracts/dist/Bytes32" prefix Bytes32_;
 
-    // Struct for split coin result
+    /**
+     * @struct SplitCoinResult
+     * @description Represents the result of splitting a coin into two parts: used amount and remainder.
+     * 
+     * @field {CoinInfo} used - The coin with the specified amount.
+     * @field {CoinInfo} remainder - The coin with the remaining value.
+     */
     export struct SplitCoinResult {
         used: CoinInfo,
         remainder: CoinInfo
@@ -40,8 +48,6 @@ module LunarswapLibrary {
      *
      * Requirements:
      * - The amount to split must not exceed the coin's value
-     *
-     * @circuitInfo k=11, rows=1000
      *
      * @param {CoinInfo} _coin   - The coin to split.
      * @param {Uint<128>} _amount - The amount to extract from the coin.
@@ -77,8 +83,6 @@ module LunarswapLibrary {
      * Requirements:
      * - The coins must have different colors
      *
-     * @circuitInfo k=11, rows=600
-     *
      * @param {CoinInfo} _tokenA - The first token to sort.
      * @param {CoinInfo} _tokenB - The second token to sort.
      *
@@ -107,8 +111,6 @@ module LunarswapLibrary {
      *
      * Requirements:
      * - The coins must have different colors
-     *
-     * @circuitInfo k=11, rows=800
      *
      * @param {CoinInfo} _tokenA   - The first token to sort.
      * @param {CoinInfo} _tokenB   - The second token to sort.
@@ -146,8 +148,6 @@ module LunarswapLibrary {
      * Requirements:
      * - The coins must have different colors
      *
-     * @circuitInfo k=11, rows=700
-     *
      * @param {QualifiedCoinInfo} _tokenA - The first qualified token to sort.
      * @param {QualifiedCoinInfo} _tokenB - The second qualified token to sort.
      *
@@ -170,8 +170,6 @@ module LunarswapLibrary {
      * This circuit creates a new coin with an increased value by adding the specified
      * amount to the original coin's value. The new coin has a different nonce.
      *
-     * @circuitInfo k=11, rows=600
-     *
      * @param {CoinInfo} _coin   - The original coin.
      * @param {Uint<128>} _amount - The amount to add to the coin.
      *
@@ -181,7 +179,7 @@ module LunarswapLibrary {
     export circuit addToCoin(_coin: CoinInfo, _amount: Uint<128>): CoinInfo {
         return CoinInfo {
             color: _coin.color,
-            value: MathU128_addChecked(_coin.value, _amount),
+            value: Uint128_addChecked(_coin.value, _amount),
             nonce: evolve_nonce(0, _coin.nonce)
         };
     }
@@ -194,8 +192,6 @@ module LunarswapLibrary {
      * This circuit is functionally identical to addToCoin, creating a new coin with
      * an increased value by adding the specified amount to the original coin's value.
      *
-     * @circuitInfo k=11, rows=600
-     *
      * @param {CoinInfo} _coin   - The original coin.
      * @param {Uint<128>} _amount - The amount to add to the coin.
      *
@@ -205,7 +201,7 @@ module LunarswapLibrary {
     export circuit addCoinValue(_coin: CoinInfo, _amount: Uint<128>): CoinInfo {
         return CoinInfo {
             color: _coin.color,
-            value: MathU128_addChecked(_coin.value, _amount),
+            value: Uint128_addChecked(_coin.value, _amount),
             nonce: evolve_nonce(0, _coin.nonce)
         };
     }
@@ -219,8 +215,6 @@ module LunarswapLibrary {
      * specified amount to the original coin's value. The new coin maintains the same
      * color and Merkle tree index but has a different nonce.
      *
-     * @circuitInfo k=11, rows=700
-     *
      * @param {QualifiedCoinInfo} _coin   - The original qualified coin.
      * @param {Uint<128>} _amount - The amount to add to the coin.
      *
@@ -229,7 +223,7 @@ module LunarswapLibrary {
     export circuit addQualifiedCoinValue(_coin: QualifiedCoinInfo, _amount: Uint<128>): QualifiedCoinInfo {
         return QualifiedCoinInfo {
             color: _coin.color,
-            value: MathU128_addChecked(_coin.value, _amount),
+            value: Uint128_addChecked(_coin.value, _amount),
             nonce: evolve_nonce(0, _coin.nonce),
             mt_index: 0
         };
@@ -243,8 +237,6 @@ module LunarswapLibrary {
      * This circuit creates a deterministic hash that uniquely identifies a trading pair
      * by combining a constant prefix with the sorted token colors. This ensures consistent
      * pair identification across the protocol.
-     *
-     * @circuitInfo k=11, rows=800
      *
      * @param {CoinInfo} token0 - The first token in the pair (sorted).
      * @param {CoinInfo} token1 - The second token in the pair (sorted).
@@ -267,8 +259,6 @@ module LunarswapLibrary {
      * @remarks
      * This circuit creates a deterministic hash for qualified token pairs, similar to
      * getIdentity but for QualifiedCoinInfo types which include Merkle tree indices.
-     *
-     * @circuitInfo k=11, rows=800
      *
      * @param {QualifiedCoinInfo} token0 - The first qualified token in the pair (sorted).
      * @param {QualifiedCoinInfo} token1 - The second qualified token in the pair (sorted).
@@ -295,8 +285,6 @@ module LunarswapLibrary {
      * - The input amount must be greater than zero
      * - Both reserves must be greater than zero
      *
-     * @circuitInfo k=11, rows=1000
-     *
      * @param {Uint<128>} amount0  - The input amount of token0.
      * @param {Uint<128>} reserve0 - The current reserve of token0.
      * @param {Uint<128>} reserve1 - The current reserve of token1.
@@ -309,8 +297,8 @@ module LunarswapLibrary {
     export circuit quote(amount0: Uint<128>, reserve0: Uint<128>, reserve1: Uint<128>): Uint<128> {
         assert (amount0 > 0) "LunarswapLibrary: quote() - Insufficient amount";
         assert (reserve0 > 0 && reserve1 > 0) "LunarswapLibrary: quote() - Insufficient liquidity";
-        return disclose(MathU128_div(
-            MathU128_mulChecked(amount0, reserve1),
+        return disclose(Uint128_div(
+            Uint128_mulChecked(amount0, reserve1),
             reserve0
         ));
     }
@@ -323,8 +311,6 @@ module LunarswapLibrary {
      * This circuit converts a regular CoinInfo to a QualifiedCoinInfo by adding a
      * Merkle tree index. This is useful when working with shielded operations that
      * require qualified coin information.
-     *
-     * @circuitInfo k=11, rows=500
      *
      * @param {CoinInfo} _coin - The coin to convert.
      *
@@ -346,8 +332,6 @@ module LunarswapLibrary {
      * @remarks
      * This circuit converts a QualifiedCoinInfo to a regular CoinInfo by removing
      * the Merkle tree index. This is useful when working with unshielded operations.
-     *
-     * @circuitInfo k=11, rows=500
      *
      * @param {QualifiedCoinInfo} _coin - The qualified coin to convert.
      *

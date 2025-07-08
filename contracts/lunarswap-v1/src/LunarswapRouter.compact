@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 pragma language_version >= 0.14.0;
 
 /**
@@ -17,8 +19,6 @@ pragma language_version >= 0.14.0;
 module LunarswapRouter {
     import CompactStandardLibrary;
     
-    import "./openzeppelin/Utils";
-    
     import LunarswapLibrary prefix LunarswapLibrary_;
     import LunarswapFactory prefix LunarswapFactory_;
     import LunarswapPair prefix LunarswapPair_;
@@ -32,8 +32,6 @@ module LunarswapRouter {
      * This circuit sets up the initial configuration for the router by initializing
      * both the factory and fee management systems. It should only be called once
      * during contract deployment.
-     *
-     * @circuitInfo k=11, rows=2000
      *
      * @param {Bytes<32>} lpTokenNonce      - The nonce for LP token generation.
      * @param {Opaque<"string">} lpTokenName - The name of the LP token.
@@ -66,13 +64,10 @@ module LunarswapRouter {
      * recipient.
      *
      * TODO: Maybe we can add a deadline for the router if passed then router considered expired.
-     * TODO: Maybe I should replace all those params with witnesses.
      *
      * Requirements:
      * - The pair must exist or be created during this operation
      * - The calculated amounts must meet minimum requirements
-     *
-     * @circuitInfo k=11, rows=4000
      *
      * @param {Bytes<32>} identity - The unique identity hash of the pair.
      * @param {CoinInfo} token0    - The first token to add liquidity for.
@@ -81,10 +76,10 @@ module LunarswapRouter {
      * @param {Uint<128>} amount1Min - The minimum amount of token1 to add.
      * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The recipient of the LP tokens.
      *
-     * @throws {Error} "LunarswapRouter: Insufficient A amount" if calculated amount is below minimum.
-     * @throws {Error} "LunarswapRouter: Insufficient B amount" if calculated amount is below minimum.
+     * @throws {Error} "LunarswapRouter: addLiquidity() - Insufficient token 0 amount" if calculated amount is below minimum.
+     * @throws {Error} "LunarswapRouter: addLiquidity() - Insufficient token 1 amount" if calculated amount is below minimum.
      *
-     * @returns [] - No return values.
+     * @returns [Uint<128>, Uint<128>, Uint<128>] - The amounts of token0 and token1 used and the liquidity minted.
      */
     export circuit addLiquidity(
         identity: Bytes<32>,
@@ -93,7 +88,7 @@ module LunarswapRouter {
         amount0Min: Uint<128>,
         amount1Min: Uint<128>,
         to: Either<ZswapCoinPublicKey, ContractAddress>,
-    ): [] {
+    ): [Uint<128>, Uint<128>, Uint<128>] {
         // Compute the optimal amounts to add, given the sorted tokens and min amounts
         const [amount0Optimal, amount1Optimal, reserve0, reserve1] = _addLiquidity(
             token0,
@@ -122,19 +117,19 @@ module LunarswapRouter {
         // Sort tokens before getting identity and updating pair
         const pair = LunarswapFactory_getPair(identity);
         // Mint LP tokens and update the pair with the optimal amounts
-        const updatedPair = LunarswapPair_mint(
+        const [updatedPair, liquidity] = LunarswapPair_mint(
             to,
             identity,
             pair,
-            token0,
-            token1,
+            splitToken0.used,
+            splitToken1.used,
             reserve0,
             reserve1,
             amount0Optimal,
             amount1Optimal
         );
         LunarswapFactory_updatePair(updatedPair, identity);
-        return [];
+        return [amount0Optimal, amount1Optimal, liquidity];
     } 
 
     /**
@@ -150,8 +145,6 @@ module LunarswapRouter {
      * - The calculated amounts must meet minimum requirements
      * - The amounts must not exceed desired amounts
      *
-     * @circuitInfo k=11, rows=2000
-     *
      * @param {CoinInfo} token0        - The first token in the pair.
      * @param {CoinInfo} token1        - The second token in the pair.
      * @param {Uint<128>} amount0Desired - The desired amount of token0.
@@ -160,8 +153,8 @@ module LunarswapRouter {
      * @param {Uint<128>} amount1Min     - The minimum amount of token1 to add.
      * @param {Bytes<32>} identity       - The unique identity hash of the pair.
      *
-     * @throws {Error} "LunarswapRouter: Insufficient B amount" if calculated amount1 is below minimum.
-     * @throws {Error} "LunarswapRouter: Insufficient A amount" if calculated amount0 is below minimum or exceeds desired.
+     * @throws {Error} "LunarswapRouter: _addLiquidity() - Insufficient token 1 amount" if calculated amount1 is below minimum.
+     * @throws {Error} "LunarswapRouter: _addLiquidity() - Insufficient token 0 amount" if calculated amount0 is below minimum or exceeds desired.
      *
      * @returns {[Uint<128>, Uint<128>, Uint<128>, Uint<128>]} - The optimal amounts and reserves [amount0Optimal, amount1Optimal, reserve0, reserve1].
      */
@@ -184,12 +177,12 @@ module LunarswapRouter {
             } else {
                 const amount1Optimal = LunarswapLibrary_quote(amount0Desired, reserve0, reserve1);
                 if (amount1Optimal <= amount1Desired) {
-                    assert (amount1Optimal >= amount1Min) "LunarswapRouter: Insufficient B amount";
+                    assert (amount1Optimal >= amount1Min) "LunarswapRouter: _addLiquidity() - Insufficient token 1 amount";
                     return [amount0Desired, amount1Optimal, reserve0, reserve1];
                 } else {
                     const amount0Optimal = LunarswapLibrary_quote(amount1Desired, reserve1, reserve0);
-                    assert (amount0Optimal <= amount0Desired) "LunarswapRouter: Insufficient A amount";
-                    assert (amount0Optimal >= amount0Min) "LunarswapRouter: Insufficient A amount";
+                    assert (amount0Optimal <= amount0Desired) "LunarswapRouter: _addLiquidity() - Insufficient token 0 amount";
+                    assert (amount0Optimal >= amount0Min) "LunarswapRouter: _addLiquidity() - Insufficient token 0 amount";
                     return [amount0Optimal, amount1Optimal, reserve0, reserve1];
                 }
             } 

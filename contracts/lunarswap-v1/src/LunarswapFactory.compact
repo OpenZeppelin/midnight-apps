@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 pragma language_version >= 0.14.0;
 
 /**
@@ -23,12 +25,27 @@ module LunarswapFactory {
     import LunarswapPair prefix LunarswapPair_;  
     import LunarswapLibrary prefix LunarswapLibrary_;
 
+    /**
+     * @struct SortedCoins
+     * @description Represents a pair of tokens sorted in a deterministic order.
+     * 
+     * @field {CoinInfo} token0 - The first token in the sorted pair (lowest address or color).
+     * @field {CoinInfo} token1 - The second token in the sorted pair (highest address or color).
+     *
+     * @remarks
+     * This struct is used to ensure that token pairs are always handled in a consistent order
+     * throughout the protocol, which is critical for deterministic pair identification and storage.
+     */
     export struct SortedCoins {
         token0: CoinInfo,
         token1: CoinInfo
     }
 
-    // TODO: that is a public ledger, should be private.
+    /**
+     * @ledger liquidityPool
+     * @description Stores all trading pairs in the factory.
+     * @type {Map<Bytes<32>, LunarswapPair_Pair>}
+     */
     export ledger liquidityPool: Map<Bytes<32>, LunarswapPair_Pair>;
 
     /**
@@ -38,8 +55,6 @@ module LunarswapFactory {
      * @remarks
      * This circuit sets up the initial configuration for LP tokens including name,
      * symbol, decimals, and nonce. It should only be called once during contract deployment.
-     *
-     * @circuitInfo k=11, rows=1200
      *
      * @param {Bytes<32>} lpTokenNonce      - The nonce for LP token generation.
      * @param {Opaque<"string">} lpTokenName - The name of the LP token.
@@ -64,8 +79,6 @@ module LunarswapFactory {
      * @remarks
      * This circuit provides a count of all registered trading pairs stored in the liquidity pool.
      *
-     * @circuitInfo k=11, rows=300
-     *
      * @returns {Uint<64>} - The total number of trading pairs.
      */
     export circuit getAllPairLength(): Uint<64> {
@@ -79,8 +92,6 @@ module LunarswapFactory {
      * @remarks
      * This circuit verifies whether a pair with the specified identity hash exists
      * in the liquidity pool.
-     *
-     * @circuitInfo k=11, rows=400
      *
      * @param {Bytes<32>} identity - The unique identity hash of the pair.
      *
@@ -97,8 +108,6 @@ module LunarswapFactory {
      * @remarks
      * This circuit returns the complete pair data including reserves and metadata.
      * The pair must exist for this circuit to succeed.
-     *
-     * @circuitInfo k=11, rows=600
      *
      * @param {Bytes<32>} identity - The unique identity hash of the pair.
      *
@@ -118,8 +127,6 @@ module LunarswapFactory {
      * @remarks
      * This circuit retrieves the reserves for a pair identified by its identity hash
      * and token information. The reserves are returned in the order of token0 and token1.
-     *
-     * @circuitInfo k=11, rows=800
      *
      * @param {Bytes<32>} identity - The unique identity hash of the pair.
      * @param {CoinInfo} token0    - The first token in the pair.
@@ -147,19 +154,18 @@ module LunarswapFactory {
      * - The token colors must be valid (non-zero)
      * - The pair must not already exist
      *
-     * @circuitInfo k=11, rows=1500
-     *
      * @param {Bytes<32>} identity - The unique identity hash for the new pair.
      * @param {CoinInfo} token0    - The first token in the pair.
      * @param {CoinInfo} token1    - The second token in the pair.
      *
-     * @throws {Error} "LunarswapFactory: Invalid token color" if either token color is zero.
+     * @throws {Error} "LunarswapFactory: createPair() - Invalid token color" if either token color is zero.
      *
      * @returns [] - No return values.
      */
     export circuit createPair(identity: Bytes<32>, token0: CoinInfo, token1: CoinInfo): [] {
         // TODO: I am not sure if the Coin.Color can be set to zero.
-        assert (!Utils_isKeyOrAddressZero(right<ZswapCoinPublicKey, ContractAddress>( ContractAddress { bytes: token0.color }))) "LunarswapFactory: Invalid token color";
+        // TODO: should use OZ deployed contract instead of Utils_isKeyOrAddressZero
+        assert (!Utils_isKeyOrAddressZero(right<ZswapCoinPublicKey, ContractAddress>( ContractAddress { bytes: token0.color }))) "LunarswapFactory: createPair() - Invalid token color";
         const pair = LunarswapPair_initializePair(identity, token0, token1); 
         return liquidityPool.insert(identity, pair);
     }
@@ -174,8 +180,6 @@ module LunarswapFactory {
      *
      * Requirements:
      * - The pair must already exist in the liquidity pool
-     *
-     * @circuitInfo k=11, rows=1000
      *
      * @param {LunarswapPair_Pair} pair     - The updated pair data.
      * @param {Bytes<32>} identity          - The unique identity hash of the pair.
@@ -200,8 +204,6 @@ module LunarswapFactory {
      *
      * Requirements:
      * - The pair must exist in the liquidity pool
-     *
-     * @circuitInfo k=11, rows=800
      *
      * @param {LunarswapPair_Pair} pair - The pair to remove.
      *

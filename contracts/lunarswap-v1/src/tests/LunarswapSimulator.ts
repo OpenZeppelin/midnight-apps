@@ -20,6 +20,7 @@ import {
 	Contract,
 	type Ledger,
 	type Pair,
+	type QualifiedCoinInfo,
 	ledger,
 } from "../artifacts/Lunarswap/contract/index.cjs";
 import type { IContractSimulator } from "../types/test";
@@ -82,22 +83,6 @@ export class LunarswapSimulator
 		return this.circuitContext.originalState;
 	}
 
-	public isPairExists(
-		tokenA: CoinInfo,
-		tokenB: CoinInfo,
-		sender?: CoinPublicKey,
-	): boolean {
-		const context = sender
-			? {
-					...this.circuitContext,
-					currentZswapLocalState: emptyZswapLocalState(sender),
-				}
-			: this.circuitContext;
-		const result = this.contract.circuits.isPairExists(context, tokenA, tokenB);
-		this.circuitContext = result.context;
-		return result.result;
-	}
-
 	public addLiquidity(
 		tokenA: CoinInfo,
 		tokenB: CoinInfo,
@@ -105,7 +90,7 @@ export class LunarswapSimulator
 		amountBMin: bigint,
 		to: Either<ZswapCoinPublicKey, ContractAddress>,
 		sender?: CoinPublicKey,
-	): void {
+	): [bigint, bigint, bigint] {
 		const result = this.contract.circuits.addLiquidity(
 			{
 				...this.circuitContext,
@@ -120,6 +105,23 @@ export class LunarswapSimulator
 			to,
 		);
 		this.circuitContext = result.context;
+		return result.result;
+	}
+
+	public isPairExists(
+		tokenA: CoinInfo,
+		tokenB: CoinInfo,
+		sender?: CoinPublicKey,
+	): boolean {
+		const context = sender
+			? {
+					...this.circuitContext,
+					currentZswapLocalState: emptyZswapLocalState(sender),
+				}
+			: this.circuitContext;
+		const result = this.contract.circuits.isPairExists(context, tokenA, tokenB);
+		this.circuitContext = result.context;
+		return result.result;
 	}
 
 	public getPair(
@@ -190,54 +192,54 @@ export class LunarswapSimulator
 		return result.result;
 	}
 
-	public getLpTokenName(sender?: CoinPublicKey): string {
+	public getLiquidityTokenName(sender?: CoinPublicKey): string {
 		const context = sender
 			? {
 					...this.circuitContext,
 					currentZswapLocalState: emptyZswapLocalState(sender),
 				}
 			: this.circuitContext;
-		const result = this.contract.circuits.getLpTokenName(context);
+		const result = this.contract.circuits.getLiquidityTokenName(context);
 		this.circuitContext = result.context;
 		return result.result;
 	}
 
-	public getLpTokenSymbol(sender?: CoinPublicKey): string {
+	public getLiquidityTokenSymbol(sender?: CoinPublicKey): string {
 		const context = sender
 			? {
 					...this.circuitContext,
 					currentZswapLocalState: emptyZswapLocalState(sender),
 				}
 			: this.circuitContext;
-		const result = this.contract.circuits.getLpTokenSymbol(context);
+		const result = this.contract.circuits.getLiquidityTokenSymbol(context);
 		this.circuitContext = result.context;
 		return result.result;
 	}
 
-	public getLpTokenDecimals(sender?: CoinPublicKey): bigint {
+	public getLiquidityTokenDecimals(sender?: CoinPublicKey): bigint {
 		const context = sender
 			? {
 					...this.circuitContext,
 					currentZswapLocalState: emptyZswapLocalState(sender),
 				}
 			: this.circuitContext;
-		const result = this.contract.circuits.getLpTokenDecimals(context);
+		const result = this.contract.circuits.getLiquidityTokenDecimals(context);
 		this.circuitContext = result.context;
 		return result.result;
 	}
 
-	public getLpTokenTotalSupply(
+	public getLiquidityTotalSupply(
 		tokenA: CoinInfo,
 		tokenB: CoinInfo,
 		sender?: CoinPublicKey,
-	): bigint {
+	): QualifiedCoinInfo {
 		const context = sender
 			? {
 					...this.circuitContext,
 					currentZswapLocalState: emptyZswapLocalState(sender),
 				}
 			: this.circuitContext;
-		const result = this.contract.circuits.getLpTokenTotalSupply(
+		const result = this.contract.circuits.getLiquidityTotalSupply(
 			context,
 			tokenA,
 			tokenB,
