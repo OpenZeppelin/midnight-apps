@@ -7,7 +7,6 @@ pragma language_version >= 0.14.0;
  */
 module AccessControl {
     import CompactStandardLibrary;
-    import "../node_modules/@midnight-dapps/structs-contracts/dist/Queue"<Uint<64>> prefix Queue_;
 
     /**
      * @description Defines the possible roles a user can have in the system.
@@ -33,23 +32,10 @@ module AccessControl {
     export ledger roleCommits: MerkleTree<10, Bytes<32>>;
 
     /**
-     * @description A set of nullifiers tracking granted user-role pairs to prevent duplicate role assignments.
+     * @description A set of nullifiers tracking used user-role pairs to prevent duplicate role assignments.
      * @type {Set<Bytes<32>>}
-     * @remarks - Uses a hash of user, role, and secret key (without index) to uniquely identify role assignments.
-     *          Inserted during grantRole and removed during revokeRole.
-     *          - Used within grantRole for preventing double assignment. Note the difference with 
-     *          `userRoleIndexNullifier` which can't be used inside grantRole to check the same issue, because
-     *          when granting new role for a user there won't be an index existing yet. 
      */
-    export ledger userRoleNullifier: Set<Bytes<32>>;
-
-    /**
-     * @description A set of nullifiers tracking user-role-index triplets to ensure accurate role revocation.
-     * @type {Set<Bytes<32>>}
-     * @remarks Uses a hash of user, role, index, and secret key to bind a role to its specific Merkle tree index.
-     *          Inserted during grantRole and removed during revokeRole to validate index-specific revocation.
-     */
-    export ledger userRoleIndexNullifier: Set<Bytes<32>>;
+    export ledger roleNullifiers: Set<Bytes<32>>;
 
     /**
      * @description Counter tracking the next available index for inserting into the role tree.
@@ -95,11 +81,7 @@ module AccessControl {
      * @param {ZswapCoinPublicKey} user - The public key of the user to grant the role to.
      * @param {Role} role - The role to grant (Admin, Lp, Trader, or None).
      * @returns {[]} - An empty array indicating success.
-     * @throws {RoleError} - If the contract is not initialized, caller is not Admin, role tree is full,
-     *                       or the role is already granted (checked via userRoleNullifier).
-     * @remarks Inserts the role commitment into the Merkle tree at either the next index (if queue is empty)
-     *          or a reused index from the queue. Adds nullifiers to both userRoleNullifier (role-based)
-     *          and userRoleIndexNullifier (index-specific) to track the assignment.
+     * @throws {RoleError} - If the contract is not initialized, caller is not Admin, or the role tree is full.
      */
     export circuit grantRole(user: ZswapCoinPublicKey, role: Role): [] { 
         assert (isInitialized) "AccessControl: Role contract is not initialized yet!";
@@ -114,35 +96,22 @@ module AccessControl {
      * @param {Role} role - The role to grant.
      * @returns {[]} - An empty array indicating success.
      */
-    circuit _grantRole(user: ZswapCoinPublicKey, role: Role): [] {  
-        const nullifier = hashNullifier(user, role, none<Uint<64>>());
-        assert (!userRoleNullifier.member(nullifier)) "AccessControl: Role already granted!";
+    circuit _grantRole(user: ZswapCoinPublicKey, role: Role): [] {
+        assert (!roleCommits.is_full()) "AccessControl: Role commitments tree is full!";
+
+        const nullifier = hashNullifier(user, role);
+        const isExist = roleNullifiers.member(nullifier);
+        assert (!roleNullifiers.member(nullifier)) "AccessControl: Role already granted!";
+    
+        roleNullifiers.insert(disclose(nullifier));
 
         const userRoleCommit = hashUserRole(user, role);
+        const currentIndex = index;
 
-        if (Queue_isEmpty()) {
-            assert (!roleCommits.is_full()) "AccessControl: Role commitments tree is full!";
-            roleCommits.insert_index(userRoleCommit, index);
-            updateRole(userRoleCommit, role, index);
-            
-            const nullifier = hashNullifier(user, role, some<Uint<64>>(index));
-            userRoleIndexNullifier.insert(disclose(nullifier));
+        roleCommits.insert_index(userRoleCommit, currentIndex);
+        updateRole(userRoleCommit, role, currentIndex);
 
-            index.increment(1);
-        } else {
-            const currentAvailableIndex = Queue_dequeue();
-            assert (currentAvailableIndex.is_some) "AccessControl: issue with the access Queue.";
-            
-            roleCommits.insert_index(userRoleCommit, currentAvailableIndex.value);
-            updateRole(userRoleCommit, role, currentAvailableIndex.value);
-            
-            const nullifier = hashNullifier(user, role, some<Uint<64>>(currentAvailableIndex.value));
-            userRoleIndexNullifier.insert(disclose(nullifier));
-        }
-
-        userRoleNullifier.insert(disclose(nullifier));
-
-        return [];
+        return index.increment(1);
     }
 
     /**
@@ -153,44 +122,43 @@ module AccessControl {
      * @throws {RoleError} - If the contract is not initialized, caller is not Admin, or user lacks the role.
      * @todo Implement revocation logic with a queue for index reuse.
      */
-    export circuit revokeRole(user: ZswapCoinPublicKey, role: Role, index: Uint<64>): [] {
+    circuit revokeRole(user: ZswapCoinPublicKey, role: Role): [] {
         assert (isInitialized) "AccessControl: Role contract is not initialized yet!";
         assert (onlyAdmin()) "AccessControl: Caller does not have an Admin role!";
-
-        return _revokeRole(user, role, index);
+        assert (hasRole(user, role)) "AccessControl: User does not have a role!";
     }
 
     /**
-     * @description Revokes a role from a user, restricted to Admin callers.
-     * @param {ZswapCoinPublicKey} user - The public key of the user to revoke the role from.
+     * @description Internal helper to revoke a role (not implemented).
+     * @param {ZswapCoinPublicKey} user - The public key of the user.
      * @param {Role} role - The role to revoke.
-     * @param {Uint<64>} index - The Merkle tree index where the role was granted.
      * @returns {[]} - An empty array indicating success.
-     * @throws {RoleError} - If the contract is not initialized, caller is not Admin, user lacks the role,
-     *                       or the provided index does not match the role’s assignment (checked via userRoleIndexNullifier).
-     * @remarks Removes the role from the Merkle tree, enqueues the index for reuse, and deletes the corresponding
-     *          nullifiers from both userRoleNullifier and userRoleIndexNullifier.
+     * @todo Implement using a queue to manage freed indices.
      */
-    circuit _revokeRole(user: ZswapCoinPublicKey, role: Role, index: Uint<64>): [] {        
-        const nullifierWithIndex = hashNullifier(user, role, some<Uint<64>>(index));
-        assert (userRoleIndexNullifier.member(nullifierWithIndex)) "AccessControl: User does not have a role!";
-
-        assert (hasRole(user, role)) "AccessControl: User does not have a role!";
-
-        Queue_enqueue(index);
-        // TODO: Tried using roleCommit.insert_index_default(index);
-        // But got this error in the test: Error: Expected a cell
-        roleCommits.insert_index(pad(32, "0"), index);
-        userRoleIndexNullifier.remove(disclose(nullifierWithIndex));
-
-        const nullifier = hashNullifier(user, role, none<Uint<64>>());
-        userRoleNullifier.remove(disclose(nullifier));
-
-        // Update witness locally
+    circuit _revokeRole(user: ZswapCoinPublicKey, role: Role): [] {
         const userRoleCommit = hashUserRole(user, role);
-        updateRole(userRoleCommit, Role.None, index);
+        /// TODO: A Queue is needed.
+    }
 
-        return [];
+    /**
+     * @description Computes a commitment hash for a user and role.
+     * @param {ZswapCoinPublicKey} user - The public key of the user.
+     * @param {Role} role - The role to hash.
+     * @returns {Bytes<32>} - A 32-byte hash of the user-role pair.
+     * @todo Revisit to add salt or randomness for privacy.
+     */
+    export circuit hashUserRole(user: ZswapCoinPublicKey, role: Role): Bytes<32> {
+        // TODO: Revisit to enhance privacy by adding salt or randomness for shielding user identity
+        return persistent_hash<Vector<2, Bytes<32>>>([user.bytes, hashRole(role)]);
+    }
+
+    /**
+     * @description Hashes a role enum value.
+     * @param {Role} role - The role to hash.
+     * @returns {Bytes<32>} - A 32-byte hash of the role.
+     */
+    circuit hashRole(role: Role): Bytes<32> {
+        return persistent_hash<Vector<1, Role>>([role]);
     }
 
     /**
@@ -228,6 +196,7 @@ module AccessControl {
     circuit hasRole(user: ZswapCoinPublicKey, role: Role): Boolean {
         const userRoleCommit = hashUserRole(user, role);
         const userRolePath = getRolePath(userRoleCommit);
+        const ind = index;
 
         assert (
             userRolePath.is_some && 
@@ -239,51 +208,11 @@ module AccessControl {
     }
 
     /**
-     * @description Computes a commitment hash for a user and role.
-     * @param {ZswapCoinPublicKey} user - The public key of the user.
-     * @param {Role} role - The role to hash.
-     * @returns {Bytes<32>} - A 32-byte hash of the user-role pair.
-     * @todo Revisit to add salt or randomness for privacy.
-     */
-    export circuit hashUserRole(user: ZswapCoinPublicKey, role: Role): Bytes<32> {
-        // TODO: Revisit to enhance privacy by adding salt or randomness for shielding user identity
-        return persistent_hash<Vector<2, Bytes<32>>>([user.bytes, hashRole(role)]);
-    }
-
-    /**
      * @description Computes a nullifier for a user and role using secret knowledge.
      */
-    circuit hashNullifier(user: ZswapCoinPublicKey, role: Role, index: Maybe<Uint<64>>): Bytes<32> {
+    circuit hashNullifier(user: ZswapCoinPublicKey, role: Role): Bytes<32> {
         const sk = getSecretKey();
-        if (index.is_some) {
-            return persistent_hash<Vector<5, Bytes<32>>>([
-                pad(32, "role-nullifier"), 
-                hashRole(role), 
-                user.bytes, 
-                hashIndex(index.value), 
-                sk
-            ]);
-        } else {
-            return persistent_hash<Vector<4, Bytes<32>>>([
-                pad(32, "role-nullifier"), 
-                hashRole(role), 
-                user.bytes, 
-                sk
-            ]);
-        }
-    }
-
-    /**
-     * @description Hashes a role enum value.
-     * @param {Role} role - The role to hash.
-     * @returns {Bytes<32>} - A 32-byte hash of the role.
-     */
-    circuit hashRole(role: Role): Bytes<32> {
-        return persistent_hash<Vector<1, Role>>([role]);
-    }
-
-    circuit hashIndex(index: Uint<64>): Bytes<32> {
-        return persistent_hash<Vector<1, Uint<64>>>([index]);
+        return persistent_hash<Vector<4, Bytes<32>>>([pad(32, "role-nullifier"), hashRole(role), user.bytes, sk]);
     }
 
     // TODO: Should be in a general Compact utils contract for MerkleTree.

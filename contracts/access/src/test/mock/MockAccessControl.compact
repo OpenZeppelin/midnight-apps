@@ -32,7 +32,3 @@ constructor(initialAdmin: ZswapCoinPublicKey) {
 export circuit testGrantRole(user: ZswapCoinPublicKey, role: AccessControl_Role): [] {
     return AccessControl_grantRole(user, role);
 }
-
-export circuit revokeRole(user: ZswapCoinPublicKey, role: AccessControl_Role, index: Uint<64>): [] {
-    return AccessControl_revokeRole(user, role, index);
-}

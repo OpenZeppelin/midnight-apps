@@ -120,24 +120,4 @@ export class AccessControlContractSimulator
     ).context;
     return this.circuitContext;
   }
-
-  public revokeRole(
-    user: ZswapCoinPublicKey,
-    role: AccessControl_Role,
-    index: bigint,
-    sender?: CoinPublicKey,
-  ): CircuitContext<AccessContractPrivateState> {
-    this.circuitContext = this.contract.impureCircuits.revokeRole(
-      {
-        ...this.circuitContext,
-        currentZswapLocalState: sender
-          ? emptyZswapLocalState(sender)
-          : this.circuitContext.currentZswapLocalState,
-      },
-      user,
-      role,
-      index,
-    ).context;
-    return this.circuitContext;
-  }
 }
