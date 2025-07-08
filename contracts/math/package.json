@@ -7,7 +7,7 @@
   "scripts": {
     "compact": "pnpm exec compact-compiler",
     "compact:fast": "pnpm exec compact-compiler --skip-zk",
-    "build": "pnpm exec compact-builder && tsc",
+    "build": "rm -rf dist && pnpm exec compact-builder && tsc",
     "test": "vitest run --printConsoleTrace",
     "test:watch": "vitest watch",
     "test:ui": "vitest --ui",

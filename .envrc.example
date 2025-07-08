@@ -1,1 +1,2 @@
 export GITHUB_TOKEN=ghp_
+export LONG_TESTS=true

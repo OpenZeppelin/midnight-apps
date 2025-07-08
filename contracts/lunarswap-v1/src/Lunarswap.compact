@@ -1,0 +1,317 @@
+// SPDX-License-Identifier: MIT
+
+pragma language_version >= 0.14.0;
+
+/**
+ *  _    _   _ _   _    _    ____  ______        ___    ____    __     ___ 
+ * | |  | | | | \ | |  / \  |  _ \/ ___\ \      / / \  |  _ \   \ \   / / |
+ * | |  | | | |  \| | / _ \ | |_) \___ \\ \ /\ / / _ \ | |_) |___\ \ / /| |
+ * | |__| |_| | |\  |/ ___ \|  _ < ___) |\ V  V / ___ \|  __/_____\ V / | |
+ * |_____\___/|_| \_/_/   \_\_| \_\____/  \_/\_/_/   \_\_|         \_/  |_|
+ * 
+ * @title Lunarswap-V1
+ * @description Main Lunarswap protocol contract implementing a decentralized exchange (DEX) 
+ * with automated market maker (AMM) functionality.
+ * 
+ * @remarks
+ * This is the primary entry point for the Lunarswap protocol, providing a comprehensive interface
+ * for decentralized trading and liquidity provision. The protocol implements a constant product
+ * AMM similar to Uniswap V2, with support for shielded transactions and privacy-preserving features.
+ * 
+ * Key Features:
+ * - Automated market making with constant product formula
+ * - Liquidity provision and LP token minting
+ * - Pair management and reserve tracking
+ * - Protocol fee collection and distribution
+ * - Shielded transaction support
+ * - Price oracle functionality through cumulative price tracking
+ * 
+ * Architecture:
+ * - Factory pattern for pair creation and management
+ * - Router for user-facing operations
+ * - Library for mathematical utilities and token operations
+ * - Fee management system for protocol sustainability
+ * - LP token system for liquidity provider rewards
+ * 
+ * Security Features:
+ * - Reentrancy protection through UTXO model
+ * - Slippage protection with minimum amount requirements
+ * - Access control for administrative functions
+ * - Overflow protection with checked arithmetic
+ * 
+ * TODO: export Fee circuits.
+ * TODO: should use initializeble module for all the submodules.
+ * TODO: use Coin and QualifiedCoin Math modules.
+ * TODO: should support remove liquidity.
+ * TODO: should support swap.
+ * TODO: should support deadline.
+ */
+
+import CompactStandardLibrary;
+
+import "./node_modules/@midnight-dapps/math-contracts/dist/interfaces/IUint128";
+
+import LunarswapRouter prefix LunarswapRouter_;
+import LunarswapLiquidity prefix LunarswapLiquidity_;
+import LunarswapFactory prefix LunarswapFactory_;
+import LunarswapLibrary prefix LunarswapLibrary_;
+import LunarswapPair;
+
+export { U128, DivResultU128 };
+export { CoinInfo, QualifiedCoinInfo, Either, ZswapCoinPublicKey, ContractAddress };
+export { Pair };
+
+/**
+ * @title Lunarswap constructor
+ * @description Initializes the Lunarswap protocol with LP token configuration and fee setter.
+ * 
+ * @remarks
+ * This constructor sets up the initial state of the Lunarswap protocol including:
+ * - LP token configuration (name, symbol, decimals, nonce)
+ * - Fee setter address for protocol fee management
+ *
+ * @param {Opaque<"string">} liquidityTokenName     - The name of the LP token.
+ * @param {Opaque<"string">} liquidityTokenSymbol   - The symbol of the LP token.
+ * @param {Bytes<32>} liquidityTokenNonce           - The nonce for LP token generation.
+ * @param {Uint<8>} liquidityTokenDecimals          - The number of decimals for LP tokens.
+ * @param {ZswapCoinPublicKey} feeToSetter   - The address that can set protocol fees.
+ *
+ * @returns [] - No return values.
+ */
+constructor(
+    liquidityTokenName: Opaque<"string">,
+    liquidityTokenSymbol: Opaque<"string">,
+    liquidityTokenNonce: Bytes<32>,
+    liquidityTokenDecimals: Uint<8>,
+    feeToSetter: ZswapCoinPublicKey
+) {
+    return LunarswapRouter_initialize(
+        liquidityTokenNonce,
+        liquidityTokenName,
+        liquidityTokenSymbol,
+        liquidityTokenDecimals,
+        feeToSetter
+    );
+}
+
+/**
+ * @title addLiquidity circuit
+ * @description Adds liquidity to a trading pair and mints LP tokens.
+ * 
+ * @remarks
+ * This circuit allows users to provide liquidity to a trading pair by depositing
+ * both tokens and receiving LP tokens in return. The amounts are optimized to maintain
+ * the current price ratio, and any excess tokens are returned to the user.
+ *
+ * Requirements:
+ * - `tokenA` and `tokenB` must be different tokens
+ * - The amounts must meet the minimum requirements specified
+ *
+ * @circuitInfo k=18, rows=216540
+ *
+ * @param {CoinInfo} tokenA - The first token to add liquidity for.
+ * @param {CoinInfo} tokenB - The second token to add liquidity for.
+ * @param {Uint<128>} amountAMin - The minimum amount of tokenA to add.
+ * @param {Uint<128>} amountBMin - The minimum amount of tokenB to add.
+ * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The recipient of the LP tokens.
+ *
+ * @throws {Error} "Lunarswap: addLiquidity() - Identical addresses" if tokenA and tokenB are the same.
+ * @throws {Error} "LunarswapRouter: Insufficient A amount" if the calculated amount is below minimum.
+ * @throws {Error} "LunarswapRouter: Insufficient B amount" if the calculated amount is below minimum.
+ *
+ * @returns [Uint<128>, Uint<128>, Uint<128>] - The amounts of tokenA and tokenB used and the liquidity minted.
+ */
+export circuit addLiquidity(
+    tokenA: CoinInfo,
+    tokenB: CoinInfo,
+    amountAMin: Uint<128>,
+    amountBMin: Uint<128>,
+    to: Either<ZswapCoinPublicKey, ContractAddress>,
+): [Uint<128>, Uint<128>, Uint<128>] {
+    assert (tokenA.color != tokenB.color) "Lunarswap: addLiquidity() - Identical addresses";
+    const [token0, token1, amount0Min, amount1Min] = LunarswapLibrary_sortCoinsAndAmounts(tokenA, tokenB, amountAMin, amountBMin);
+    const identity = LunarswapLibrary_getIdentity(token0, token1);
+    return disclose(
+        LunarswapRouter_addLiquidity(
+            identity,
+            token0,
+            token1,
+            amount0Min,
+            amount1Min,
+            to
+        )
+    );
+}
+
+/**
+ * @title isPairExists circuit
+ * @description Checks if a trading pair exists for the given token combination.
+ * 
+ * @remarks
+ * This circuit sorts the tokens to ensure consistent pair identification and checks
+ * if a pair exists in the factory for the sorted token combination.
+ *
+ * @circuitInfo k=14, rows=14922
+ *
+ * @param {CoinInfo} tokenA - The first token in the pair.
+ * @param {CoinInfo} tokenB - The second token in the pair.
+ *
+ * @returns {Boolean} - True if the pair exists, false otherwise.
+ */
+export circuit isPairExists(tokenA: CoinInfo, tokenB: CoinInfo): Boolean {
+    const [token0, token1] = LunarswapLibrary_sortCoins(tokenA, tokenB);
+    const identity = LunarswapLibrary_getIdentity(token0, token1);
+    return LunarswapFactory_isIdentityExists(identity);
+}
+
+/**
+ * @title getAllPairLength circuit
+ * @description Returns the total number of trading pairs in the protocol.
+ * 
+ * @remarks
+ * This circuit provides a count of all registered trading pairs in the Lunarswap factory.
+ *
+ * @circuitInfo k=10, rows=34
+ *
+ * @returns {Uint<64>} - The total number of trading pairs.
+ */
+export circuit getAllPairLength(): Uint<64> {
+    return LunarswapFactory_getAllPairLength();
+}
+
+/**
+ * @title getPair circuit
+ * @description Retrieves the pair information for a given token combination.
+ * 
+ * @remarks
+ * This circuit sorts the tokens and retrieves the pair data from the factory.
+ * The pair must exist for this circuit to succeed.
+ *
+ * @circuitInfo k=14, rows=15119
+ *
+ * @param {CoinInfo} tokenA - The first token in the pair.
+ * @param {CoinInfo} tokenB - The second token in the pair.
+ *
+ * @throws {Error} "LunarswapFactory: getPair() - Pair does not exist" if the pair doesn't exist.
+ *
+ * @returns {Pair} - The pair information including reserves and metadata.
+ */
+export circuit getPair(tokenA: CoinInfo, tokenB: CoinInfo): Pair {
+    const [token0, token1] = LunarswapLibrary_sortCoins(tokenA, tokenB);
+    const identity = LunarswapLibrary_getIdentity(token0, token1);
+    return LunarswapFactory_getPair(identity);
+}
+
+/**
+ * @title getPairReserves circuit
+ * @description Returns the current reserves for a trading pair.
+ * 
+ * @remarks
+ * This circuit retrieves the reserves for a pair and returns them in the same order
+ * as the input tokens, regardless of how they were sorted internally.
+ *
+ * @circuitInfo k=14, rows=14981
+ *
+ * @param {CoinInfo} tokenA - The first token in the pair.
+ * @param {CoinInfo} tokenB - The second token in the pair.
+ *
+ * @throws {Error} "LunarswapFactory: getPair() - Pair does not exist" if the pair doesn't exist.
+ *
+ * @returns {[Uint<128>, Uint<128>]} - The reserves for tokenA and tokenB respectively.
+ */
+export circuit getPairReserves(tokenA: CoinInfo, tokenB: CoinInfo): [Uint<128>, Uint<128>] {
+    const [token0, token1] = LunarswapLibrary_sortCoins(tokenA, tokenB);
+    const identity = LunarswapLibrary_getIdentity(token0, token1);
+    const [reserve0, reserve1] = LunarswapFactory_getReserves(identity, token0, token1);
+    if (tokenA.color == token0.color) {
+        return [reserve0, reserve1];
+    } else {
+        return [reserve1, reserve0];
+    }
+}
+
+/**
+ * @title getPairIdentity circuit
+ * @description Generates the unique identity hash for a token pair.
+ * 
+ * @remarks
+ * This circuit creates a deterministic hash that uniquely identifies a trading pair
+ * by sorting the tokens and computing a hash of their colors.
+ *
+ * @circuitInfo k=14, rows=14936
+ *
+ * @param {CoinInfo} tokenA - The first token in the pair.
+ * @param {CoinInfo} tokenB - The second token in the pair.
+ *
+ * @returns {Bytes<32>} - The unique identity hash for the pair.
+ */
+export circuit getPairIdentity(tokenA: CoinInfo, tokenB: CoinInfo): Bytes<32> {
+    const [token0, token1] = LunarswapLibrary_sortCoins(tokenA, tokenB);
+    return LunarswapLibrary_getIdentity(token0, token1);
+}
+
+/**
+ * @title getLiquidityTokenName circuit
+ * @description Returns the name of the LP token.
+ * 
+ * @remarks
+ * This circuit retrieves the configured name for liquidity provider tokens.
+ *
+ * @circuitInfo k=10, rows=34
+ *
+ * @returns {Opaque<"string">} - The LP token name.
+ */
+export circuit getLiquidityTokenName(): Opaque<"string"> {
+    return LunarswapLiquidity_name();
+}
+
+/**
+ * @title getLiquidityTokenSymbol circuit
+ * @description Returns the symbol of the LP token.
+ * 
+ * @remarks
+ * This circuit retrieves the configured symbol for liquidity provider tokens.
+ *
+ * @circuitInfo k=10, rows=34
+ *
+ * @returns {Opaque<"string">} - The LP token symbol.
+ */
+export circuit getLiquidityTokenSymbol(): Opaque<"string"> {
+    return LunarswapLiquidity_symbol();
+}
+
+/**
+ * @title getLiquidityTokenDecimals circuit
+ * @description Returns the number of decimals for LP tokens.
+ * 
+ * @remarks
+ * This circuit retrieves the configured decimal places for liquidity provider tokens.
+ *
+ * @circuitInfo k=10, rows=33
+ *
+ * @returns {Uint<8>} - The number of decimal places for LP tokens.
+ */
+export circuit getLiquidityTokenDecimals(): Uint<8> {
+    return LunarswapLiquidity_decimals();
+}
+
+/**
+ * @title getLiquidityTotalSupply circuit
+ * @description Returns the total supply of LP tokens for a specific pair.
+ * 
+ * @remarks
+ * This circuit retrieves the total supply of liquidity provider tokens for a given trading pair.
+ *
+ * @circuitInfo k=14, rows=14998
+ *
+ * @param {CoinInfo} tokenA - The first token in the pair.
+ * @param {CoinInfo} tokenB - The second token in the pair.
+ *
+ * @throws {Error} "LunarswapLpTokens: totalSupply() - Lp token not found" if the LP token doesn't exist.
+ *
+ * @returns {QualifiedCoinInfo} - The total supply of LP tokens for the pair.
+ */
+export circuit getLiquidityTotalSupply(tokenA: CoinInfo, tokenB: CoinInfo): QualifiedCoinInfo {
+    const identity = getPairIdentity(tokenA, tokenB);
+    return LunarswapLiquidity_totalSupply(identity);
+}
