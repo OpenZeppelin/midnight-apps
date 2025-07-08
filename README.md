@@ -6,13 +6,13 @@ This monorepo contains experimental sample projects built on top of the Midnight
 
 ## Smart Contracts
 
-### 🌑 Lunarswap V2
+### 🌑 Lunarswap V1
 **A decentralized exchange (DEX) protocol with privacy-preserving features**
 
-- **Location**: `contracts/lunarswap-v2/`
-- **Documentation**: [📖 Lunarswap V2 README](contracts/lunarswap-v2/README.md)
+- **Location**: `contracts/lunarswap-v1/`
+- **Documentation**: [📖 Lunarswap V2 README](contracts/lunarswap-v1/README.md)
 
-Lunarswap V2 is a next-generation DEX that combines automated market making with privacy features. Based on Uniswap V2 architecture, it's adapted for the Midnight Network with UTXO-based token management and shielded transactions.
+Lunarswap V1 is a next-generation DEX that combines automated market making with privacy features. Based on Uniswap V2 architecture, it's adapted for the Midnight Network with UTXO-based token management and shielded transactions.
 
 **Key Features:**
 - Automated market making with constant product formula
