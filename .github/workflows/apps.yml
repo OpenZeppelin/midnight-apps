@@ -1,4 +1,4 @@
-name: Apps Pipeline
+name: Apps
 
 on:
   push:
@@ -11,8 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  apps:
-    name: Apps Pipeline
+  pipeline:
     runs-on: ubuntu-22.04
     timeout-minutes: 20
 

@@ -1,4 +1,4 @@
-name: Commit Lint
+name: Commit 
 
 on:
   push:
@@ -12,7 +12,6 @@ concurrency:
 
 jobs:
   lint:
-    name: Lint Commits
     runs-on: ubuntu-22.04
 
     steps:

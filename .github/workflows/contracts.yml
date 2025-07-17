@@ -1,4 +1,4 @@
-name: Contracts Pipeline
+name: Contracts
 
 on:
   pull_request:
@@ -12,8 +12,7 @@ env:
   LANGUAGE_VERSION: "0.15.0"
 
 jobs:
-  contracts:
-    name: Contracts Pipeline
+  pipeline:
     runs-on: ubuntu-22.04
     timeout-minutes: 15
 

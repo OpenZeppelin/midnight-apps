@@ -11,8 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  checks:
-    name: Run Checks
+  pipeline:
     runs-on: ubuntu-22.04
 
     steps:
