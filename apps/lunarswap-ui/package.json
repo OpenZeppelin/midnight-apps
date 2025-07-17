@@ -6,7 +6,6 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "types": "tsc -p tsconfig.json --noEmit",
     "fmt": "biome format --write",
     "lint": "biome lint",
     "lint:fix": "biome check --write",

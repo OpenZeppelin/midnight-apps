@@ -43,10 +43,7 @@
     },
     "types": {
       "outputs": [],
-      "cache": false,
-      "dependsOn": [
-        "compact"
-      ]
+      "cache": false
     },
     "precommit": {
       "dependsOn": [],

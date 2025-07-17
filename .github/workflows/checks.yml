@@ -32,6 +32,10 @@ jobs:
         run: pnpm fmt
         timeout-minutes: 10
 
+      - name: Type check
+        run: pnpm types
+        timeout-minutes: 10
+
       - name: Cleanup on failure
         if: failure()
         run: |
