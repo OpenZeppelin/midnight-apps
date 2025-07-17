@@ -1,4 +1,4 @@
-name: Apps Build
+name: Apps Pipeline
 
 on:
   push:
@@ -7,13 +7,14 @@ on:
     branches: [main]
 
 concurrency:
-  group: apps-build-${{ github.run_id }}-${{ github.ref }}
+  group: apps-${{ github.run_id }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build Applications
+  apps:
+    name: Apps Pipeline
     runs-on: ubuntu-22.04
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repository
@@ -26,6 +27,7 @@ jobs:
 
       - name: Build apps
         run: pnpm build:apps
+        timeout-minutes: 10
 
       - name: Check for build artifacts
         run: |
@@ -40,9 +42,31 @@ jobs:
           echo "Application build artifacts:"
           find apps -name ".next" -type d -exec ls -la {} \;
 
+      - name: Run app tests
+        run: pnpm test:apps
+        timeout-minutes: 10
+
       - name: Upload build artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: apps-builds
           path: apps/*/.next/
           retention-days: 7
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apps-test-results
+          path: |
+            apps/*/coverage/
+            apps/*/test-results/
+          retention-days: 7
+
+      - name: Cleanup on failure
+        if: failure()
+        run: |
+          echo "Apps pipeline failed. Cleaning up..."
+          rm -rf apps/*/.next/
+ 
