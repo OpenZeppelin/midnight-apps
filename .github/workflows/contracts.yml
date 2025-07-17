@@ -43,7 +43,7 @@ jobs:
           curl -Ls "$DOWNLOAD_URL" -o "$COMPACT_HOME/compactc.zip"
 
           echo "📦 Extracting..."
-          unzip -q "$COMPACT_HOME/compactc.zip" -d "$COMPACT_HOME"
+          unzip -qo "$COMPACT_HOME/compactc.zip" -d "$COMPACT_HOME"
           chmod +x "$COMPACT_HOME"/{compactc,compactc.bin,zkir}
 
           echo "📁 Setting environment variables..."
