@@ -68,6 +68,9 @@ importers:
       '@midnight-ntwrk/dapp-connector-api':
         specifier: ^3.0.0
         version: 3.0.0(rxjs@7.8.2)
+      '@midnight-ntwrk/ledger':
+        specifier: ^4.0.0
+        version: 4.0.0
       '@midnight-ntwrk/wallet-api':
         specifier: ^3.0.0
         version: 3.5.0(rxjs@7.8.2)
@@ -206,6 +209,9 @@ importers:
       recharts:
         specifier: 3.0.2
         version: 3.0.2(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react-is@18.3.1)(react@19.1.0)(redux@5.0.1)
+      rxjs:
+        specifier: ^7.8.2
+        version: 7.8.2
       sonner:
         specifier: ^2.0.5
         version: 2.0.5(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -877,6 +883,9 @@ packages:
 
   '@midnight-ntwrk/dapp-connector-api@3.0.0':
     resolution: {integrity: sha512-A/AhsNjibrOSaUiPhQhxANeW9178uYnzeBFBf30YCvyvWg0YWCbhQfc7dRpiL7iBoX3Sxt9mtf+Svx4ZygLajg==}
+
+  '@midnight-ntwrk/ledger@4.0.0':
+    resolution: {integrity: sha512-cnJisY8uQ4NO54miDnjs/ov6n102ZPfKEPxtiDKVEdlKijcc70jz/CI2yBCc0itlwwaqma7FM2Ou5N4pWpbwbg==}
 
   '@midnight-ntwrk/midnight-js-network-id@2.0.1':
     resolution: {integrity: sha512-+44m2asyD4SeQ7tNl1y0ZaVEuuRFaKk8iwrdoU5gigVyg0RnHPi1Dn6FfDsWqb+Sdb9Zm7gawzysz5/Zj+/uug==}
@@ -4062,6 +4071,8 @@ snapshots:
       ts-custom-error: 3.3.1
     transitivePeerDependencies:
       - rxjs
+
+  '@midnight-ntwrk/ledger@4.0.0': {}
 
   '@midnight-ntwrk/midnight-js-network-id@2.0.1': {}
 

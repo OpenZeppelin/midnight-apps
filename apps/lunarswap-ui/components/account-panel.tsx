@@ -1,13 +1,16 @@
 'use client';
 
 import { useWallet } from '@/hooks/use-wallet';
+import { useWalletRx } from '@/hooks/use-wallet-rx';
 import { ChevronLeft, ChevronsRight, LogOut, Settings, Copy } from 'lucide-react';
 import { NetworkSelector } from './network-selector';
 import { Identicon } from './identicon';
 import toast from 'react-hot-toast';
 import { Button } from './ui/button';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ThemeToggle } from './theme-toggle';
+import { BalanceDisplay } from './balance-display';
+import { AccountDetailsModal } from './account-details-modal';
 
 export function AccountPanel({
   isVisible,
@@ -19,7 +22,16 @@ export function AccountPanel({
   onDisconnect: () => void;
 }) {
   const { walletAddress, walletState } = useWallet();
+  const { transactionCount, error, refresh } = useWalletRx();
   const [view, setView] = useState<'main' | 'settings'>('main');
+  const [showAccountDetails, setShowAccountDetails] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isVisible) {
+      refresh();
+    }
+  }, [isVisible, refresh]);
 
   const formatAddress = (address: string | undefined) => {
     if (!address) return { coinPublicKey: '', encryptionPublicKey: '' };
@@ -38,12 +50,15 @@ export function AccountPanel({
 
   const walletInfo = formatAddress(walletState?.address);
 
-  const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      toast.success(`${label} copied to clipboard`);
-    }).catch(() => {
-      toast.error('Could not copy to clipboard');
-    });
+  const copyToClipboard = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedField(label);
+      // Clear the copied state after 2 seconds
+      setTimeout(() => setCopiedField(null), 2000);
+    } catch (error) {
+      console.error('Failed to copy:', error);
+    }
   };
 
   if (!isVisible) {
@@ -78,56 +93,73 @@ export function AccountPanel({
             {walletAddress && <Identicon address={walletAddress} size={64} />}
           </div>
         </div>
-        <p className="font-semibold text-lg">{walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : '...'}</p>
-        <p className="text-4xl font-bold mt-2">0 <span className="text-2xl font-medium text-muted-foreground">DUST</span></p>
-      </div>
-
-      <div className="px-6 space-y-4 mt-6">
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium text-muted-foreground">Coin Public Key</h4>
-          <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
-            <code className="text-xs flex-1 break-all text-left">{walletInfo.coinPublicKey}</code>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => copyToClipboard(walletInfo.coinPublicKey, 'Coin public key')}
-              className="h-8 w-8"
-            >
-              <Copy className="h-4 w-4" />
-            </Button>
-          </div>
+        <button 
+          type="button"
+          onClick={() => setShowAccountDetails(true)}
+          className="font-medium text-base hover:text-primary transition-colors cursor-pointer flex items-center gap-2 group"
+          title="Click to view account details"
+        >
+          <span className="font-mono text-muted-foreground">
+            {walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-5)}` : '...'}
+          </span>
+          <span className="text-xs text-muted-foreground group-hover:text-primary transition-colors opacity-60">
+            details
+          </span>
+        </button>
+        
+        {/* Balance Display */}
+        <div className="mt-4">
+          <BalanceDisplay 
+            showSyncStatus={true}
+            showRefreshButton={true}
+            className="text-4xl"
+          />
         </div>
 
-        {walletInfo.encryptionPublicKey && (
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium text-muted-foreground">Encryption Public Key</h4>
-            <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
-              <code className="text-xs flex-1 break-all text-left">{walletInfo.encryptionPublicKey}</code>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => copyToClipboard(walletInfo.encryptionPublicKey, 'Encryption public key')}
-                className="h-8 w-8"
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
-            </div>
+        {/* Transaction Count */}
+        <div className="mt-2 text-sm text-muted-foreground">
+          {transactionCount} transaction{transactionCount !== 1 ? 's' : ''}
+        </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="mt-4 p-3 bg-red-50 dark:bg-red-950/20 rounded-lg text-sm">
+            <div className="text-red-700 dark:text-red-400 font-medium">Sync Error</div>
+            <div className="text-red-600 dark:text-red-300">{error}</div>
           </div>
         )}
 
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium text-muted-foreground">Full Address</h4>
-          <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
-            <code className="text-xs flex-1 break-all text-left">{walletState?.address}</code>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => copyToClipboard(walletState?.address || '', 'Full address')}
-              className="h-8 w-8"
-            >
-              <Copy className="h-4 w-4" />
-            </Button>
-          </div>
+        <div className="px-6 space-y-4 mt-6">
+          {walletInfo.encryptionPublicKey && (
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium text-muted-foreground">Encryption Public Key</h4>
+              <button
+                type="button"
+                onClick={() => copyToClipboard(walletInfo.encryptionPublicKey, 'Encryption public key')}
+                className={`w-full p-3 rounded-lg transition-all duration-200 text-left group relative overflow-hidden ${
+                  copiedField === 'Encryption public key'
+                    ? 'bg-green-50 dark:bg-green-950/20'
+                    : 'bg-muted/50 hover:bg-muted'
+                }`}
+                title="Click to copy encryption public key"
+              >
+                <code className={`text-xs break-all font-mono transition-all duration-200 ${
+                  copiedField === 'Encryption public key'
+                    ? 'text-green-700 dark:text-green-300 blur-sm'
+                    : 'group-hover:text-primary'
+                }`}>
+                  {walletInfo.encryptionPublicKey}
+                </code>
+                {copiedField === 'Encryption public key' && (
+                  <div className="absolute inset-0 bg-green-500/10 flex items-center justify-center">
+                    <span className="text-xs font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/50 px-2 py-1 rounded">
+                      ✓ Copied!
+                    </span>
+                  </div>
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </>
@@ -149,8 +181,15 @@ export function AccountPanel({
   );
 
   return (
-    <div className="fixed top-0 right-0 h-full w-80 bg-background/90 dark:bg-gray-900/80 backdrop-blur-md z-50 flex flex-col transition-transform transform translate-x-0">
-      {view === 'main' ? <MainView /> : <SettingsView />}
-    </div>
+    <>
+      <div className="fixed top-0 right-0 h-full w-80 bg-background/90 dark:bg-gray-900/80 backdrop-blur-md z-50 flex flex-col transition-transform transform translate-x-0">
+        {view === 'main' ? <MainView /> : <SettingsView />}
+      </div>
+      <AccountDetailsModal
+        isOpen={showAccountDetails}
+        onClose={() => setShowAccountDetails(false)}
+        walletState={walletState}
+      />
+    </>
   );
 } 

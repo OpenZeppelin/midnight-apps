@@ -359,7 +359,7 @@ export function WalletConnect() {
             <div className="w-8 h-8 rounded-full overflow-hidden">
               {walletAddress && <Identicon address={walletAddress} size={32} />}
             </div>
-            <span className="font-semibold text-sm">{walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : '...'}</span>
+            <span className="font-medium text-sm text-muted-foreground">{walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : '...'}</span>
           </button>
         );
 

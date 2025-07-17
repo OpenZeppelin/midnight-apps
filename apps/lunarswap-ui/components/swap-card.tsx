@@ -17,17 +17,26 @@ import { ArrowDown, Fuel, Info, Settings } from 'lucide-react';
 import { useState } from 'react';
 import { TokenInput } from './token-input';
 import { TokenSelectModal } from './token-select-modal';
+import { useWallet } from '@/hooks/use-wallet';
+
+interface Token {
+  symbol: string;
+  name: string;
+  logo: string;
+  balance: string;
+}
 
 export function SwapCard() {
+  const { isWalletConnected } = useWallet();
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [selectingToken, setSelectingToken] = useState<'from' | 'to'>('from');
-  const [fromToken, setFromToken] = useState({
+  const [fromToken, setFromToken] = useState<Token>({
     symbol: 'NIGHT',
     name: 'Midnight',
     logo: '/placeholder.svg?height=24&width=24',
     balance: '1.56',
   });
-  const [toToken, setToToken] = useState({
+  const [toToken, setToToken] = useState<Token>({
     symbol: 'USDC',
     name: 'USD Coin',
     logo: '/placeholder.svg?height=24&width=24',
@@ -36,7 +45,7 @@ export function SwapCard() {
   const [fromAmount, setFromAmount] = useState('');
   const [toAmount, setToAmount] = useState('');
 
-  const handleTokenSelect = (token: any) => {
+  const handleTokenSelect = (token: Token) => {
     if (selectingToken === 'from') {
       setFromToken(token);
     } else {
@@ -65,17 +74,22 @@ export function SwapCard() {
   const gasPrice = '$0.01234';
 
   return (
-    <>
-      <Card className="bg-transparent border border-gray-200/50 dark:border-blue-900/30 rounded-2xl overflow-hidden">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <h2 className="text-xl font-bold">Swap</h2>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-          >
-            <Settings className="h-5 w-5" />
-          </Button>
+    <TooltipProvider>
+      <Card className="w-full max-w-md mx-auto border-0 shadow-none bg-transparent">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Swap</h2>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Swap settings</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <TokenInput
@@ -165,6 +179,6 @@ export function SwapCard() {
         onClose={() => setShowTokenModal(false)}
         onSelect={handleTokenSelect}
       />
-    </>
+    </TooltipProvider>
   );
 }

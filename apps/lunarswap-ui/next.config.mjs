@@ -18,6 +18,7 @@ const nextConfig = {
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
+    asyncWebAssembly: true,
   },
   devIndicators: {
     buildActivity: false,
