@@ -26,39 +26,6 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/setup
 
-      - name: Install Compact compiler
-        id: setup
-        shell: bash
-        run: |
-          set -euo pipefail
-          # Create directory for compiler
-          COMPACT_HOME="$HOME/compactc"
-          mkdir -p "$COMPACT_HOME"
-
-          # Create URL
-          ZIP_FILE="compactc_v${COMPILER_VERSION}_x86_64-unknown-linux-musl.zip"
-          DOWNLOAD_URL="https://d3fazakqrumx6p.cloudfront.net/artifacts/compiler/compactc_${COMPILER_VERSION}/${ZIP_FILE}"
-
-          echo "⬇️ Downloading Compact compiler..."
-          curl -Ls "$DOWNLOAD_URL" -o "$COMPACT_HOME/compactc.zip"
-
-          echo "📦 Extracting..."
-          unzip -qo "$COMPACT_HOME/compactc.zip" -d "$COMPACT_HOME"
-          chmod +x "$COMPACT_HOME"/{compactc,compactc.bin,zkir}
-
-          echo "📁 Setting environment variables..."
-          echo "COMPACT_HOME=$COMPACT_HOME" >> "$GITHUB_ENV"
-          echo "$COMPACT_HOME" >> "$GITHUB_PATH"
-
-          echo "✅ Verifying installation..."
-          if [ ! -f "$COMPACT_HOME/compactc" ]; then
-            echo "::error::❌ compactc not found in $COMPACT_HOME"
-            exit 1
-          fi
-
-          echo "🤖 Testing installation..."
-          "$COMPACT_HOME/compactc" --version
-
       - name: Check compiler and language version
         run: |
             COMPILER_OUTPUT=$(compactc --version)
