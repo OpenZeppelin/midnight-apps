@@ -87,13 +87,13 @@ jobs:
 
           compile() {
             echo "⚙️ Running Compact compilation..."
-            if ! output=$(turbo compact --concurrency=1 2>&1); then
+            if ! output=$(pnpm compact --concurrency=1 2>&1); then
               echo "❌ Compilation failed."
               if echo "$output" | grep -q "Hash mismatch" && [ -d "$HOME/.cache/midnight/zk-params" ]; then
                 echo "⚠️ Hash mismatch detected *and* zk-params exists. Removing cache..."
                 rm -rf "$HOME/.cache/midnight/zk-params"
                 echo "::notice::♻️ Retrying compilation after clearing zk-params..."
-                turbo compact --concurrency=1 || { echo "::error::❌ Retry also failed."; exit 1; }
+                pnpm compact --concurrency=1 || { echo "::error::❌ Retry also failed."; exit 1; }
               else
                 echo "🚫 Compilation failed for another reason or zk-params missing. No retry."
                 exit 1
@@ -104,7 +104,7 @@ jobs:
           compile
 
       - name: Run type checks
-        run: turbo types
+        run: pnpm types
 
       - name: Run tests
-        run: turbo test:contracts
+        run: pnpm test:contracts
