@@ -54,13 +54,13 @@ jobs:
 
           compile() {
             echo "⚙️ Running Compact compilation..."
-            if ! pnpm compact --concurrency=1; then
+            if ! pnpm compact; then
               echo "❌ Compilation failed."
               if [ -d "$HOME/.cache/midnight/zk-params" ]; then
                 echo "⚠️ zk-params exists. Removing cache and retrying..."
                 rm -rf "$HOME/.cache/midnight/zk-params"
                 echo "::notice::♻️ Retrying compilation after clearing zk-params..."
-                pnpm compact --concurrency=1 || { echo "::error::❌ Retry also failed."; exit 1; }
+                pnpm compact || { echo "::error::❌ Retry also failed."; exit 1; }
               else
                 echo "🚫 Compilation failed and zk-params missing. No retry."
                 exit 1
