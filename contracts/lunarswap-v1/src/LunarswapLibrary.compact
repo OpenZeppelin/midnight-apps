@@ -1,0 +1,474 @@
+pragma language_version >= 0.14.0;
+
+/**
+ * @title LunarswapLibrary
+ * @description Utility library providing mathematical functions, token operations, and helper functions for the Lunarswap protocol.
+ * 
+ * @remarks
+ * The LunarswapLibrary contains essential utility functions used throughout the Lunarswap protocol.
+ * It provides mathematical operations, token manipulation utilities, sorting functions, and identity
+ * generation that are fundamental to the protocol's operation.
+ * 
+ * Key Functionalities:
+ * - Mathematical operations (addition, multiplication, division, square root)
+ * - Token sorting and ordering utilities
+ * - Coin splitting and value manipulation
+ * - Pair identity generation and management
+ * - Price calculation and quoting
+ * - Type conversion between CoinInfo and QualifiedCoinInfo
+ */
+module LunarswapLibrary {
+    import CompactStandardLibrary;
+
+    import "../node_modules/@midnight-dapps/math-contracts/dist/MathU128" prefix MathU128_;
+    import "../node_modules/@midnight-dapps/math-contracts/dist/Bytes32" prefix Bytes32_;
+
+    // Struct for split coin result
+    export struct SplitCoinResult {
+        used: CoinInfo,
+        remainder: CoinInfo
+    }
+
+    export struct SplitQualifiedCoinResult {
+        used: QualifiedCoinInfo,
+        remainder: QualifiedCoinInfo
+    }
+
+    /**
+     * @title splitCoin circuit
+     * @description Splits a coin into two parts: used amount and remainder.
+     * 
+     * @remarks
+     * This circuit divides a coin into two new coins: one with the specified amount
+     * and another with the remaining value. Both coins maintain the same color but
+     * have different nonces.
+     *
+     * Requirements:
+     * - The amount to split must not exceed the coin's value
+     *
+     * @circuitInfo k=11, rows=1000
+     *
+     * @param {CoinInfo} _coin   - The coin to split.
+     * @param {Uint<128>} _amount - The amount to extract from the coin.
+     *
+     * @throws {Error} "LunarswapLibrary: splitCoin() - Insufficient amount" if amount exceeds coin value.
+     *
+     * @returns {SplitCoinResult} - The split result containing used and remainder coins.
+     */
+    export circuit splitCoin(coin: CoinInfo, amount: Uint<128>): SplitCoinResult {
+        assert amount <= coin.value "LunarswapLibrary: splitCoin() - Insufficient amount";
+        const used = CoinInfo {
+            color: coin.color,
+            value: amount,
+            nonce: evolve_nonce(0, coin.nonce)
+        };
+        const remainder = CoinInfo {
+            color: coin.color,
+            value: MathU128_sub(coin.value, amount),
+            nonce: evolve_nonce(1, coin.nonce)
+        };
+        return SplitCoinResult { used, remainder };
+    }
+
+    /**
+     * @title splitQualifiedCoin circuit
+     * @description Splits a QualifiedCoinInfo into two parts: used amount and remainder.
+     * 
+     * @remarks
+     * This circuit divides a QualifiedCoinInfo into two new QualifiedCoinInfo objects: one with the specified amount
+     * and another with the remaining value. Both coins maintain the same color and contract address but
+     * have different nonces.
+     *
+     * Requirements:
+     * - The amount to split must not exceed the coin's value
+     *
+     * @circuitInfo k=11, rows=1000
+     *
+     * @param {QualifiedCoinInfo} _coin   - The qualified coin to split.
+     * @param {Uint<128>} _amount - The amount to extract from the qualified coin.
+     *
+     * @throws {Error} "LunarswapLibrary: splitQualifiedCoin() - Insufficient amount" if amount exceeds coin value.
+     *
+     * @returns {{used: QualifiedCoinInfo, remainder: QualifiedCoinInfo}} - The split result containing used and remainder qualified coins.
+     */
+    export circuit splitQualifiedCoin(qualifiedCoin: QualifiedCoinInfo, amount: Uint<128>): SplitQualifiedCoinResult {
+        assert amount <= qualifiedCoin.value "LunarswapLibrary: splitQualifiedCoin() - Insufficient amount";
+        const used = QualifiedCoinInfo {
+            color: qualifiedCoin.color,
+            value: amount,
+            nonce: evolve_nonce(0, qualifiedCoin.nonce),
+            mt_index: qualifiedCoin.mt_index
+        };
+        const remainder = QualifiedCoinInfo {
+            color: qualifiedCoin.color,
+            value: MathU128_sub(qualifiedCoin.value, amount),
+            nonce: evolve_nonce(1, qualifiedCoin.nonce),
+            mt_index: qualifiedCoin.mt_index
+        };
+        return SplitQualifiedCoinResult { used, remainder };
+    }
+
+    /**
+     * @title sortCoins circuit
+     * @description Sorts two coins to ensure consistent ordering in pair operations.
+     * 
+     * @remarks
+     * This circuit sorts coins by their color values to ensure deterministic ordering
+     * in pair operations. The token with the smaller color becomes token0, and the
+     * larger becomes token1.
+     *
+     * Requirements:
+     * - The coins must have different colors
+     *
+     * @circuitInfo k=11, rows=600
+     *
+     * @param {CoinInfo} _tokenA - The first token to sort.
+     * @param {CoinInfo} _tokenB - The second token to sort.
+     *
+     * @throws {Error} "LunarswapLibrary: sortCoins() - Identical addresses" if tokens have same color.
+     *
+     * @returns {[CoinInfo, CoinInfo]} - The sorted tokens [token0, token1].
+     */
+    // Helper circuit to sort two coins
+    // TODO: I think it worth adding this as a generic utility for ContractAddress
+    export circuit sortCoins(_tokenA: CoinInfo, _tokenB: CoinInfo): [CoinInfo, CoinInfo] {
+        assert (_tokenA.color != _tokenB.color) "LunarswapLibrary: sortCoins() - Identical addresses";
+        const token0 = disclose(Bytes32_lt(_tokenA.color, _tokenB.color)) ? _tokenA : _tokenB;
+        const token1 = disclose(Bytes32_lt(_tokenA.color, _tokenB.color)) ? _tokenB : _tokenA;
+
+        return [token0, token1];
+    }
+
+    /**
+     * @title sortCoinsAndAmounts circuit
+     * @description Sorts coins and their corresponding amounts to maintain consistency.
+     * 
+     * @remarks
+     * This circuit sorts both coins and their amounts together to ensure the amounts
+     * correspond to the correct sorted tokens. This is essential for maintaining
+     * proper token ordering in pair operations.
+     *
+     * Requirements:
+     * - The coins must have different colors
+     *
+     * @circuitInfo k=11, rows=800
+     *
+     * @param {CoinInfo} _tokenA   - The first token to sort.
+     * @param {CoinInfo} _tokenB   - The second token to sort.
+     * @param {Uint<128>} _amountA - The amount corresponding to tokenA.
+     * @param {Uint<128>} _amountB - The amount corresponding to tokenB.
+     *
+     * @throws {Error} "LunarswapLibrary: sortCoinsAndAmounts() - Identical addresses" if tokens have same color.
+     *
+     * @returns {[CoinInfo, CoinInfo, Uint<128>, Uint<128>]} - The sorted tokens and amounts [token0, token1, amount0, amount1].
+     */
+    export circuit sortCoinsAndAmounts(
+        _tokenA: CoinInfo, 
+        _tokenB: CoinInfo, 
+        _amountA: Uint<128>, 
+        _amountB: Uint<128>
+    ): [CoinInfo, CoinInfo, Uint<128>, Uint<128>] {
+        assert (_tokenA.color != _tokenB.color) "LunarswapLibrary: sortCoinsAndAmounts() - Identical addresses";
+        if (disclose(Bytes32_lt(_tokenA.color, _tokenB.color))) {
+            // tokenA is token0
+            return [_tokenA, _tokenB, _amountA, _amountB];
+        } else {
+            // tokenB is token0
+            return [_tokenB, _tokenA, _amountB, _amountA];
+        }
+    }
+
+    /**
+     * @title sortQualifiedCoins circuit
+     * @description Sorts two qualified coins to ensure consistent ordering.
+     * 
+     * @remarks
+     * This circuit sorts qualified coins by their color values, similar to sortCoins
+     * but for QualifiedCoinInfo types which include Merkle tree indices.
+     *
+     * Requirements:
+     * - The coins must have different colors
+     *
+     * @circuitInfo k=11, rows=700
+     *
+     * @param {QualifiedCoinInfo} _tokenA - The first qualified token to sort.
+     * @param {QualifiedCoinInfo} _tokenB - The second qualified token to sort.
+     *
+     * @throws {Error} "LunarswapLibrary: sortQualifiedCoins() - Identical addresses" if tokens have same color.
+     *
+     * @returns {[QualifiedCoinInfo, QualifiedCoinInfo]} - The sorted qualified tokens [token0, token1].
+     */
+    export circuit sortQualifiedCoins(_tokenA: QualifiedCoinInfo, _tokenB: QualifiedCoinInfo): [QualifiedCoinInfo, QualifiedCoinInfo] {
+        assert (_tokenA.color != _tokenB.color) "LunarswapLibrary: sortQualifiedCoins() - Identical addresses";
+        const token0 = disclose(Bytes32_lt(_tokenA.color, _tokenB.color)) ? _tokenA : _tokenB;
+        const token1 = disclose(Bytes32_lt(_tokenA.color, _tokenB.color)) ? _tokenB : _tokenA;
+        return [token0, token1];
+    } 
+
+    /**
+     * @title addCoinValue circuit
+     * @description Adds a value to a coin and returns a new CoinInfo.
+     * 
+     * @remarks
+     * This circuit is functionally identical to addToCoin, creating a new coin with
+     * an increased value by adding the specified amount to the original coin's value.
+     *
+     * @circuitInfo k=11, rows=600
+     *
+     * @param {CoinInfo} _coin   - The original coin.
+     * @param {Uint<128>} _amount - The amount to add to the coin.
+     *
+     * @returns {CoinInfo} - A new coin with the increased value.
+     */
+    // Helper circuit to update a coin's value and return a new CoinInfo
+    export circuit addCoinValue(_coin: CoinInfo, _amount: Uint<128>): CoinInfo {
+        return CoinInfo {
+            color: _coin.color,
+            value: MathU128_addChecked(_coin.value, _amount),
+            nonce: evolve_nonce(0, _coin.nonce)
+        };
+    }
+
+    /**
+     * @title addQualifiedCoinValue circuit
+     * @description Adds a value to a qualified coin and returns a new QualifiedCoinInfo.
+     * 
+     * @remarks
+     * This circuit creates a new qualified coin with an increased value by adding the
+     * specified amount to the original coin's value. The new coin maintains the same
+     * color and Merkle tree index but has a different nonce.
+     *
+     * @circuitInfo k=11, rows=700
+     *
+     * @param {QualifiedCoinInfo} _coin   - The original qualified coin.
+     * @param {Uint<128>} _amount - The amount to add to the coin.
+     *
+     * @returns {QualifiedCoinInfo} - A new qualified coin with the increased value.
+     */
+    export circuit addQualifiedCoinValue(coin: QualifiedCoinInfo, amount: Uint<128>): QualifiedCoinInfo {
+        return QualifiedCoinInfo {
+            color: coin.color,
+            value: MathU128_addChecked(coin.value, amount),
+            nonce: evolve_nonce(0, coin.nonce),
+            mt_index: coin.mt_index
+        };
+    }
+
+    /**
+     * @title subQualifiedCoinValue circuit
+     * @description Subtracts a value from a qualified coin and returns a new QualifiedCoinInfo.
+     * 
+     * @remarks
+     * This circuit creates a new qualified coin with a decreased value by subtracting the
+     * specified amount from the original coin's value. The new coin maintains the same
+     * color and Merkle tree index but has a different nonce.
+     *
+     * @circuitInfo k=11, rows=700
+     *
+     * @param {QualifiedCoinInfo} _coin   - The original qualified coin.
+     * @param {Uint<128>} _amount - The amount to subtract from the coin.
+     *
+     * @returns {QualifiedCoinInfo} - A new qualified coin with the decreased value.
+     */
+    export circuit subQualifiedCoinValue(coin: QualifiedCoinInfo, amount: Uint<128>): QualifiedCoinInfo {
+        assert amount <= coin.value "LunarswapLibrary: subQualifiedCoinValue() - Insufficient amount";
+        return QualifiedCoinInfo {
+            color: coin.color,
+            value: MathU128_sub(coin.value, amount),
+            nonce: evolve_nonce(0, coin.nonce),
+            mt_index: coin.mt_index
+        };
+    }
+
+    /**
+     * @title getIdentity circuit
+     * @description Generates a unique identity hash for a token pair.
+     * 
+     * @remarks
+     * This circuit creates a deterministic hash that uniquely identifies a trading pair
+     * by combining a constant prefix with the sorted token colors. This ensures consistent
+     * pair identification across the protocol.
+     *
+     * @circuitInfo k=11, rows=800
+     *
+     * @param {CoinInfo} token0 - The first token in the pair (sorted).
+     * @param {CoinInfo} token1 - The second token in the pair (sorted).
+     *
+     * @returns {Bytes<32>} - The unique identity hash for the pair.
+     */
+    export circuit getIdentity(token0: CoinInfo, token1: CoinInfo): Bytes<32> {
+        // TODO: maybe we can use another cheaper way here.
+        return persistent_hash<Vector<3, Bytes<32>>>([
+            pad(32, "pair-hash"), 
+            token0.color, 
+            token1.color
+        ]);
+    }
+
+    /**
+     * @title getQualifiedIdentity circuit
+     * @description Generates a unique identity hash for a qualified token pair.
+     * 
+     * @remarks
+     * This circuit creates a deterministic hash for qualified token pairs, similar to
+     * getIdentity but for QualifiedCoinInfo types which include Merkle tree indices.
+     *
+     * @circuitInfo k=11, rows=800
+     *
+     * @param {QualifiedCoinInfo} token0 - The first qualified token in the pair (sorted).
+     * @param {QualifiedCoinInfo} token1 - The second qualified token in the pair (sorted).
+     *
+     * @returns {Bytes<32>} - The unique identity hash for the qualified pair.
+     */
+    export circuit getQualifiedIdentity(token0: QualifiedCoinInfo, token1: QualifiedCoinInfo): Bytes<32> {
+        return persistent_hash<Vector<3, Bytes<32>>>([
+            pad(32, "pair-hash"), 
+            token0.color, 
+            token1.color
+        ]);
+    }
+
+    /**
+     * @title quote circuit
+     * @description Calculates the expected output amount for a given input amount and reserves.
+     * 
+     * @remarks
+     * This circuit implements the constant product formula to calculate the expected
+     * output amount when swapping tokens. It uses the formula: amount1 = (amount0 * reserve1) / reserve0.
+     *
+     * Requirements:
+     * - The input amount must be greater than zero
+     * - Both reserves must be greater than zero
+     *
+     * @circuitInfo k=11, rows=1000
+     *
+     * @param {Uint<128>} amount0  - The input amount of token0.
+     * @param {Uint<128>} reserve0 - The current reserve of token0.
+     * @param {Uint<128>} reserve1 - The current reserve of token1.
+     *
+     * @throws {Error} "LunarswapLibrary: quote() - Insufficient amount" if amount0 is zero.
+     * @throws {Error} "LunarswapLibrary: quote() - Insufficient liquidity" if reserves are zero.
+     *
+     * @returns {Uint<128>} - The expected output amount of token1.
+     */
+    export circuit quote(amount0: Uint<128>, reserve0: Uint<128>, reserve1: Uint<128>): Uint<128> {
+        assert (amount0 > 0) "LunarswapLibrary: quote() - Insufficient amount";
+        assert (reserve0 > 0 && reserve1 > 0) "LunarswapLibrary: quote() - Insufficient liquidity";
+        return disclose(MathU128_div(
+            MathU128_mulChecked(amount0, reserve1),
+            reserve0
+        ));
+    }
+
+    /**
+     * @title getAmountOut circuit
+     * @description Calculates the expected output amount for a given input amount and reserves.
+     * 
+     * @remarks
+     * This circuit implements the constant product formula to calculate the expected
+     * output amount when swapping tokens. The calculation is as follows:
+     *   amountInWithFee = amountIn * 997
+     *   numerator = amountInWithFee * reserveOut
+     *   denominator = reserveIn * 1000 + amountInWithFee
+     *   amountOut = numerator / denominator
+     *
+     * @circuitInfo k=11, rows=1000
+     *
+     * @param {Uint<128>} amountIn  - The input amount of token0.
+     * @param {Uint<128>} reserveIn - The current reserve of token0.
+     * @param {Uint<128>} reserveOut - The current reserve of token1.
+     *
+     * @throws {Error} "LunarswapLibrary: getAmountOut() - Insufficient amount" if amountIn is zero.
+     * @throws {Error} "LunarswapLibrary: getAmountOut() - Insufficient liquidity" if reserves are zero.
+     *
+     * @returns {Uint<128>} - The expected output amount of token1.
+     */
+    export circuit getAmountOut(amountIn: Uint<128>, reserveIn: Uint<128>, reserveOut: Uint<128>): Uint<128> {
+        assert (amountIn > 0) "LunarswapLibrary: getAmountOut() - Insufficient amount";
+        assert (reserveIn > 0 && reserveOut > 0) "LunarswapLibrary: getAmountOut() - Insufficient liquidity";
+        const amountInWithFee = MathU128_mulChecked(amountIn, 997);
+        const numerator = MathU128_mulChecked(amountInWithFee, reserveOut);
+        const denominator = MathU128_addChecked(MathU128_mulChecked(reserveIn, 1000), amountInWithFee);
+        return disclose(MathU128_div(numerator, denominator));
+    }
+
+    /**
+     * @title getAmountIn circuit
+     * @description Calculates the expected input amount for a given output amount and reserves.
+     * 
+     * @remarks
+     * This circuit implements the constant product formula to calculate the expected 
+     * input amount when swapping tokens. The calculation is as follows:
+     *   amountOutWithFee = amountOut * 997
+     *   numerator = amountOutWithFee * reserveIn * 1000
+     *   denominator = reserveOut * amountOutWithFee - 997
+     *   amountIn = numerator / denominator + 1
+     *
+     * @circuitInfo k=11, rows=1000
+     *
+     * @param {Uint<128>} amountOut  - The output amount of token1.
+     * @param {Uint<128>} reserveIn - The current reserve of token0.
+     * @param {Uint<128>} reserveOut - The current reserve of token1.
+     *
+     * @throws {Error} "LunarswapLibrary: getAmountIn() - Insufficient amount" if amountOut is zero.
+     * @throws {Error} "LunarswapLibrary: getAmountIn() - Insufficient liquidity" if reserves are zero.
+     *
+     * @returns {Uint<128>} - The expected input amount of token0.
+     */
+    export circuit getAmountIn(amountOut: Uint<128>, reserveIn: Uint<128>, reserveOut: Uint<128>): Uint<128> {
+        assert (amountOut > 0) "LunarswapLibrary: getAmountIn() - Insufficient amount";
+        assert (reserveIn > 0 && reserveOut > 0) "LunarswapLibrary: getAmountIn() - Insufficient liquidity";
+        const numerator = MathU128_mulChecked(MathU128_mulChecked(reserveIn, amountOut), 1000);
+        const denominator = MathU128_mulChecked(MathU128_sub(reserveOut, amountOut), 997);
+        return MathU128_addChecked(
+            disclose(MathU128_div(numerator, denominator)),
+            1
+        );
+    }
+
+    /**
+     * @title upcastCoinInfo circuit
+     * @description Converts a CoinInfo to a QualifiedCoinInfo.
+     * 
+     * @remarks
+     * This circuit converts a regular CoinInfo to a QualifiedCoinInfo by adding a
+     * Merkle tree index. This is useful when working with shielded operations that
+     * require qualified coin information.
+     *
+     * @circuitInfo k=11, rows=500
+     *
+     * @param {CoinInfo} _coin - The coin to convert.
+     *
+     * @returns {QualifiedCoinInfo} - The converted qualified coin with mt_index set to 0.
+     */
+    export circuit upcastCoinInfo(_coin: CoinInfo): QualifiedCoinInfo {
+        return QualifiedCoinInfo {
+            color: _coin.color,
+            value: _coin.value,
+            nonce: evolve_nonce(0, _coin.nonce),
+            mt_index: 0
+        };
+    }
+
+    /**
+     * @title downcastCoinInfo circuit
+     * @description Converts a QualifiedCoinInfo to a CoinInfo.
+     * 
+     * @remarks
+     * This circuit converts a QualifiedCoinInfo to a regular CoinInfo by removing
+     * the Merkle tree index. This is useful when working with unshielded operations.
+     *
+     * @circuitInfo k=11, rows=500
+     *
+     * @param {QualifiedCoinInfo} _coin - The qualified coin to convert.
+     *
+     * @returns {CoinInfo} - The converted regular coin without mt_index.
+     */
+    export circuit downcastCoinInfo(_coin: QualifiedCoinInfo): CoinInfo {
+        return CoinInfo {
+            color: _coin.color,
+            value: _coin.value,
+            nonce: evolve_nonce(0, _coin.nonce)
+        };
+    }
+}

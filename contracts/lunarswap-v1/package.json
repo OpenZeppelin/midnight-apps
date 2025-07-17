@@ -1,0 +1,55 @@
+{
+	"name": "@midnight-dapps/lunarswap-v1",
+	"version": "1.0.0-alpha.1",
+	"description": "Compacts contracts for LunarSwapV1 UTXO",
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		},
+		"./artifacts/*": "./dist/artifacts/*",
+		"./keys/*": "./dist/artifacts/Lunarswap/keys/*",
+		"./zkir/*": "./dist/artifacts/Lunarswap/zkir/*"
+	},
+	"scripts": {
+		"compact": "pnpm exec compact-compiler",
+		"compact:fast": "pnpm exec compact-compiler --skip-zk",
+		"build": "pnpm exec compact-builder && tsc",
+		"test": "vitest run --printConsoleTrace",
+		"test:coverage": "vitest run --coverage --printConsoleTrace",
+		"test:watch": "vitest --printConsoleTrace",
+		"test:ui": "vitest --ui",
+		"coverage:html": "vitest run --coverage --reporter=html",
+		"coverage:open": "xdg-open coverage/index.html 2>/dev/null || open coverage/index.html 2>/dev/null || start coverage/index.html 2>/dev/null || echo 'Please open coverage/index.html in your browser'",
+		"types": "tsc -p tsconfig.json --noEmit",
+		"fmt": "biome format --write",
+		"lint": "biome lint",
+		"lint:fix": "biome check --write",
+		"precommit": "lint-staged --no-stash && pnpm run types"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"packageManager": "pnpm@10.4.1",
+	"devDependencies": {
+		"@types/node": "^22.13.10",
+		"@vitest/coverage-v8": "^3.1.4",
+		"@vitest/ui": "^3.2.4",
+		"typescript": "^5.8.2",
+		"vitest": "^3.2.4"
+	},
+	"dependencies": {
+		"@midnight-dapps/access-contract": "workspace:^",
+		"@midnight-dapps/compact": "workspace:^",
+		"@midnight-dapps/compact-std": "workspace:^",
+		"@midnight-dapps/math-contracts": "workspace:^",
+		"@midnight-dapps/structs-contracts": "workspace:^",
+		"@midnight-dapps/lunarswap-sdk": "workspace:^",
+		"@midnight-ntwrk/compact-runtime": "^0.8.0",
+		"@midnight-ntwrk/midnight-js-network-id": "^0.2.5",
+		"@midnight-ntwrk/zswap": "^3.0.6"
+	}
+}

@@ -1,0 +1,38 @@
+{
+  "name": "@midnight-dapps/shielded-token-contract",
+  "version": "1.0.0-alpha.1",
+  "private": true,
+  "description": "Shielded Fungible Token contract for Midnight DApps",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "compact": "pnpm exec compact-compiler",
+    "compact:fast": "pnpm exec compact-compiler --skip-zk",
+    "build": "pnpm exec compact-builder && tsc",
+    "test": "vitest run --printConsoleTrace",
+    "types": "tsc -p tsconfig.json --noEmit",
+    "fmt": "biome format --write",
+    "lint": "biome lint",
+    "lint:fix": "biome check --write",
+    "precommit": "lint-staged --no-stash && pnpm run types"
+  },
+  "keywords": ["midnight", "shielded", "token", "fungible"],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.4.1",
+  "devDependencies": {
+    "@types/node": "^22.15.29",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4"
+  },
+  "dependencies": {
+    "@midnight-dapps/biome-config": "workspace:^",
+    "@midnight-dapps/compact": "workspace:^",
+    "@midnight-dapps/compact-std": "workspace:^",
+    "@midnight-ntwrk/compact-runtime": "^0.8.1",
+    "@midnight-ntwrk/midnight-js-network-id": "^2.0.1",
+    "@midnight-ntwrk/zswap": "^4.0.0",
+    "@midnight-ntwrk/wallet-sdk-address-format": "2.0.0"
+  }
+} 

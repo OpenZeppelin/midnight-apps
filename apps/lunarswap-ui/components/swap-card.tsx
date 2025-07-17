@@ -13,10 +13,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { ArrowDown, Fuel, Info, Settings } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowDown, Fuel, Info, Settings, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { TokenInput } from './token-input';
 import { TokenSelectModal } from './token-select-modal';
+import { useMidnightTransaction } from '@/hooks/use-midnight-transaction';
+import { useWallet } from '@/hooks/use-wallet';
+import { createContractIntegration } from '@/lib/contract-integration';
+import toast from 'react-hot-toast';
 
 interface Token {
   symbol: string;
@@ -26,6 +30,11 @@ interface Token {
 }
 
 export function SwapCard() {
+  const { isWalletConnected, walletState } = useWallet();
+  const { transactionState, executeTransaction, resetTransaction } =
+    useMidnightTransaction();
+  const [isHydrated, setIsHydrated] = useState(false);
+
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [selectingToken, setSelectingToken] = useState<'from' | 'to'>('from');
   const [fromToken, setFromToken] = useState<Token>({
@@ -63,13 +72,74 @@ export function SwapCard() {
     setToAmount(value ? (Number.parseFloat(value) * 1800).toString() : '');
   };
 
-  const handleSwap = () => {
-    // Swap logic would go here
-    alert('Swap functionality would be implemented here');
+  const handleSwap = async () => {
+    if (!isWalletConnected) {
+      toast.error('Please connect your wallet first');
+      return;
+    }
+
+    if (!fromAmount || !toAmount) {
+      toast.error('Please enter valid amounts');
+      return;
+    }
+
+    try {
+      const result = await executeTransaction(async (providers, walletAPI) => {
+        // Create contract integration
+        const contractIntegration = createContractIntegration(
+          providers,
+          walletAPI,
+        );
+
+        // Execute the actual swap transaction
+        const swapResult = await contractIntegration.executeSwap({
+          tokenIn: fromToken.symbol,
+          tokenOut: toToken.symbol,
+          amountIn: fromAmount,
+          amountOutMin: toAmount, // In real implementation, calculate minimum based on slippage
+          recipient: walletState?.address || '',
+          deadline: Math.floor(Date.now() / 1000) + 1200, // 20 minutes from now
+        });
+
+        return swapResult;
+      });
+
+      if (result) {
+        toast.success('Swap completed successfully!');
+        // Reset form
+        setFromAmount('');
+        setToAmount('');
+        resetTransaction();
+      }
+    } catch (error) {
+      console.error('Swap failed:', error);
+      toast.error('Swap failed. Please try again.');
+    }
   };
 
   // Simulated gas price - in a real app, this would come from an API
   const gasPrice = '$0.01234';
+
+  const getButtonText = () => {
+    if (!isHydrated) return 'Loading...';
+    if (!isWalletConnected) return 'Connect Wallet';
+    if (!fromAmount) return 'Enter an amount';
+    if (transactionState.status === 'preparing') return 'Preparing...';
+    if (transactionState.status === 'proving') return 'Generating Proof...';
+    if (transactionState.status === 'submitting') return 'Submitting...';
+    return 'Swap';
+  };
+
+  const isButtonDisabled = () => {
+    return (
+      !isHydrated ||
+      !isWalletConnected ||
+      !fromAmount ||
+      transactionState.status === 'preparing' ||
+      transactionState.status === 'proving' ||
+      transactionState.status === 'submitting'
+    );
+  };
 
   return (
     <TooltipProvider>
@@ -136,6 +206,18 @@ export function SwapCard() {
               </div>
             </div>
           )}
+
+          {transactionState.error && (
+            <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
+              {transactionState.error}
+            </div>
+          )}
+
+          {transactionState.txHash && (
+            <div className="text-sm text-green-600 bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
+              Transaction successful! Hash: {transactionState.txHash}
+            </div>
+          )}
         </CardContent>
         <CardFooter className="flex flex-col gap-3">
           <TooltipProvider>
@@ -163,11 +245,16 @@ export function SwapCard() {
           </TooltipProvider>
 
           <Button
-            className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 dark:from-blue-600 dark:to-indigo-600 dark:hover:from-blue-700 dark:hover:to-indigo-700 text-white font-medium py-6 rounded-xl"
-            disabled={!fromAmount}
+            className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 dark:from-blue-600 dark:to-indigo-600 dark:hover:from-blue-700 dark:hover:to-indigo-700 text-white font-medium py-6 rounded-xl disabled:opacity-50"
+            disabled={isButtonDisabled()}
             onClick={handleSwap}
           >
-            {!fromAmount ? 'Enter an amount' : 'Swap'}
+            {(transactionState.status === 'preparing' ||
+              transactionState.status === 'proving' ||
+              transactionState.status === 'submitting') && (
+              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+            )}
+            {getButtonText()}
           </Button>
         </CardFooter>
       </Card>

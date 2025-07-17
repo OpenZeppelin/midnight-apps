@@ -6,6 +6,10 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./artifacts": "./dist/artifacts/index.js"
+  },
   "scripts": {
     "prepare": "pnpm build",
     "compact": "pnpm exec compact-compiler",

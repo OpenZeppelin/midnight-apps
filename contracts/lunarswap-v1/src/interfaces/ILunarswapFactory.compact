@@ -1,0 +1,14 @@
+pragma language_version >= 0.14.0;
+
+module ILunarswapFactory {
+    import CompactStandardLibrary;
+    
+    import "./ILunarswapPair";
+
+    export struct SortedCoins {
+        token0: CoinInfo,
+        token1: CoinInfo
+    }
+
+    export ledger pool: Map<Bytes<32>, Pair>;
+}

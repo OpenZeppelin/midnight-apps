@@ -20,6 +20,37 @@ const nextConfig = {
     parallelServerCompiles: true,
     asyncWebAssembly: true,
   },
+  webpack: (config, { isServer }) => {
+    config.experiments = {
+      ...config.experiments,
+      asyncWebAssembly: true,
+    };
+
+    config.module.rules.push({
+      test: /\.wasm$/,
+      type: 'webassembly/async',
+    });
+
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        crypto: false,
+        stream: false,
+        url: false,
+        zlib: false,
+        http: false,
+        https: false,
+        assert: false,
+        os: false,
+        path: false,
+      };
+    }
+
+    return config;
+  },
   devIndicators: {
     buildActivity: false,
     buildActivityPosition: 'bottom-left',

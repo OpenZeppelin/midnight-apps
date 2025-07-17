@@ -1,0 +1,37 @@
+{
+  "name": "@midnight-dapps/shielded-token-api",
+  "version": "1.0.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc --project tsconfig.build.json",
+    "fmt": "biome format --write",
+    "lint": "biome lint",
+    "lint:fix": "biome lint --write",
+    "precommit": "lint-staged && pnpm run types",
+    "types": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@midnight-dapps/compact-std": "workspace:*",
+    "@midnight-dapps/shielded-token-contract": "workspace:*",
+    "@midnight-ntwrk/compact-runtime": "^0.8.1",
+    "@midnight-ntwrk/ledger": "^4.0.0",
+    "@midnight-ntwrk/midnight-js-contracts": "^2.0.2",
+    "@midnight-ntwrk/midnight-js-types": "^2.0.2",
+    "pino": "^9.7.0",
+    "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.7",
+    "eslint": "^9.30.0",
+    "typescript": "^5.8.3"
+  }
+} 

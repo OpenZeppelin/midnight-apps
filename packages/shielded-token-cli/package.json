@@ -1,0 +1,52 @@
+{
+  "name": "@midnight-dapps/shielded-token-cli",
+  "version": "1.0.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "testnet-local": "node --experimental-specifier-resolution=node --loader ts-node/esm src/testnet-local.ts",
+    "testnet-remote": "node --experimental-specifier-resolution=node --loader ts-node/esm src/testnet-remote.ts",
+    "testnet-remote-ps": "cp -r proof-server-testnet.yml ./dist/ && node --experimental-specifier-resolution=node --loader ts-node/esm src/testnet-remote-ps.ts",
+    "deploy": "node --experimental-specifier-resolution=node --loader ts-node/esm src/deploy.ts",
+    "burn": "node --experimental-specifier-resolution=node --loader ts-node/esm src/burn.ts",
+    "info": "node --experimental-specifier-resolution=node --loader ts-node/esm src/info.ts",
+    "build": "rm -rf dist && tsc --project tsconfig.build.json",
+    "fmt": "biome format --write",
+    "lint": "biome lint",
+    "lint:fix": "biome lint --write",
+    "precommit": "lint-staged && pnpm run types",
+    "types": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@midnight-dapps/biome-config": "workspace:*",
+    "@midnight-dapps/compact-std": "workspace:*",
+    "@midnight-dapps/shielded-token-api": "workspace:*",
+    "@midnight-dapps/shielded-token-contract": "workspace:*",
+    "@midnight-ntwrk/compact-runtime": "^0.8.1",
+    "@midnight-ntwrk/ledger": "^4.0.0",
+    "@midnight-ntwrk/midnight-js-contracts": "^2.0.2",
+    "@midnight-ntwrk/midnight-js-http-client-proof-provider": "^2.0.2",
+    "@midnight-ntwrk/midnight-js-indexer-public-data-provider": "^2.0.2",
+    "@midnight-ntwrk/midnight-js-level-private-state-provider": "^2.0.2",
+    "@midnight-ntwrk/midnight-js-network-id": "^2.0.2",
+    "@midnight-ntwrk/midnight-js-node-zk-config-provider": "^2.0.2",
+    "@midnight-ntwrk/midnight-js-types": "^2.0.2",
+    "@midnight-ntwrk/midnight-js-utils": "^2.0.2",
+    "@midnight-ntwrk/wallet": "^5.0.0",
+    "@midnight-ntwrk/wallet-api": "^5.0.0",
+    "@midnight-ntwrk/wallet-sdk-address-format": "^2.0.0",
+    "@midnight-ntwrk/zswap": "^4.0.0",
+    "pino": "^9.7.0",
+    "pino-pretty": "^13.0.0",
+    "rxjs": "^7.8.1",
+    "testcontainers": "^10.28.0",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.7",
+    "@types/ws": "^8.5.10",
+    "eslint": "^9.30.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+} 

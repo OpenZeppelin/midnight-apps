@@ -1,1 +1,3 @@
 export GITHUB_TOKEN=ghp_
+export LONG_TESTS=true
+export LUNARSWAP_TEST_SEED=your_test_seed_here_64_hex_char
