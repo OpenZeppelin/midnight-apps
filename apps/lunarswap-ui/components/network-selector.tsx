@@ -83,10 +83,10 @@ export function NetworkSelector() {
               </div>
               {!isNetworkSynced && (
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={syncWithWallet}
-                  className="h-6 text-xs"
+                  className="w-full h-8 text-xs font-medium bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/20 dark:hover:bg-blue-950/40 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300"
                 >
                   Sync Now
                 </Button>

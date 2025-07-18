@@ -1,5 +1,9 @@
 'use client';
 
+import type {
+  DAppConnectorWalletAPI,
+  DAppConnectorWalletState,
+} from '@midnight-ntwrk/dapp-connector-api';
 import {
   type PropsWithChildren,
   createContext,
@@ -9,7 +13,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import type { DAppConnectorWalletAPI, WalletState } from './types';
+import { connectToWallet, disconnectWallet } from './wallet-utils';
 
 type WalletConnectionStatusType =
   | 'disconnected'
@@ -39,8 +43,8 @@ export interface WalletContextType {
   walletAddress: string | null;
 
   // Contains the wallet state, including the sync progress (coins, balances, etc.)
-  walletState: WalletState | null;
-  setWalletState: (state: WalletState | null) => void;
+  walletState: DAppConnectorWalletState | null;
+  setWalletState: (state: DAppConnectorWalletState | null) => void;
 
   // wallet connection status
   walletConnectionStatus: WalletConnectionStatusType;
@@ -74,19 +78,20 @@ export const WalletProvider: React.FC<Readonly<WalletProviderProps>> = ({
     }
     return null;
   });
-  const [walletState, setWalletState] = useState<WalletState | null>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const savedState = localStorage.getItem(
-          WALLET_STORAGE_KEYS.WALLET_STATE,
-        );
-        return savedState ? JSON.parse(savedState) : null;
-      } catch {
-        return null;
+  const [walletState, setWalletState] =
+    useState<DAppConnectorWalletState | null>(() => {
+      if (typeof window !== 'undefined') {
+        try {
+          const savedState = localStorage.getItem(
+            WALLET_STORAGE_KEYS.WALLET_STATE,
+          );
+          return savedState ? JSON.parse(savedState) : null;
+        } catch {
+          return null;
+        }
       }
-    }
-    return null;
-  });
+      return null;
+    });
   const [walletConnectionStatus, setWalletConnectionStatus] =
     useState<WalletConnectionStatusType>(() => {
       if (typeof window !== 'undefined') {
@@ -172,57 +177,14 @@ export const WalletProvider: React.FC<Readonly<WalletProviderProps>> = ({
         setWalletConnectionStatus('connecting');
 
         try {
-          // Check if Midnight Lace wallet is still available
-          const midnight = window.midnight;
-          if (!midnight?.mnLace) {
-            console.warn('Midnight Lace wallet not found during reconnection');
-            setWalletConnectionStatus('disconnected');
-            setWalletState(null);
-            setWalletAddress(null);
-            return;
-          }
-
-          const connector = midnight.mnLace;
-
-          // Check if already enabled with timeout
-          const isEnabled = await Promise.race([
-            connector.isEnabled(),
-            new Promise((_, reject) =>
-              setTimeout(
-                () =>
-                  reject(new Error('Timeout checking if wallet is enabled')),
-                10000,
-              ),
-            ),
-          ]);
-          if (!isEnabled) {
-            setWalletConnectionStatus('disconnected');
-            setWalletState(null);
-            setWalletAddress(null);
-            return;
-          }
-
-          // Enable the wallet with timeout
-          const reconnectedWallet = (await Promise.race([
-            connector.enable(),
-            new Promise((_, reject) =>
-              setTimeout(
-                () => reject(new Error('Timeout enabling wallet')),
-                15000,
-              ),
-            ),
-          ])) as DAppConnectorWalletAPI;
-
-          // Get current wallet state with timeout
-          const currentState: WalletState = (await Promise.race([
-            reconnectedWallet.state(),
-            new Promise((_, reject) =>
-              setTimeout(
-                () => reject(new Error('Timeout getting wallet state')),
-                10000,
-              ),
-            ),
-          ])) as WalletState;
+          // Use the shared connectToWallet utility
+          const { wallet: reconnectedWallet, state: currentState } =
+            await connectToWallet({
+              checkExisting: true,
+              enableTimeout: 15000,
+              stateTimeout: 10000,
+              isEnabledTimeout: 10000,
+            });
 
           // Verify the wallet address matches what we saved
           if (currentState.address === walletState.address) {
@@ -253,14 +215,17 @@ export const WalletProvider: React.FC<Readonly<WalletProviderProps>> = ({
   }, [isHydrated, walletConnectionStatus, walletState, wallet]);
 
   // Enhanced setters that clear localStorage when disconnecting
-  const handleSetWalletState = useCallback((state: WalletState | null) => {
-    setWalletState(state);
-    if (!state) {
-      setWalletAddress(null);
-    } else {
-      setWalletAddress(state.address || null);
-    }
-  }, []);
+  const handleSetWalletState = useCallback(
+    (state: DAppConnectorWalletState | null) => {
+      setWalletState(state);
+      if (!state) {
+        setWalletAddress(null);
+      } else {
+        setWalletAddress(state.address || null);
+      }
+    },
+    [],
+  );
 
   const handleSetWalletConnectionStatus = useCallback(
     (status: WalletConnectionStatusType) => {
@@ -272,18 +237,8 @@ export const WalletProvider: React.FC<Readonly<WalletProviderProps>> = ({
         setWalletState(null);
         setWalletAddress(null);
 
-        // Clear localStorage
-        if (typeof window !== 'undefined') {
-          try {
-            localStorage.removeItem(WALLET_STORAGE_KEYS.WALLET_STATE);
-            localStorage.removeItem(WALLET_STORAGE_KEYS.WALLET_ADDRESS);
-          } catch (error) {
-            console.warn(
-              'Failed to clear wallet data from localStorage:',
-              error,
-            );
-          }
-        }
+        // Use the shared disconnect utility
+        disconnectWallet();
       }
     },
     [],

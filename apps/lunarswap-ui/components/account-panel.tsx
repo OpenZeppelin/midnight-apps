@@ -2,6 +2,7 @@
 
 import { useWallet } from '@/hooks/use-wallet';
 import { useWalletRx } from '@/hooks/use-wallet-rx';
+import { formatAddress } from '@/lib/wallet-utils';
 import { ChevronLeft, ChevronsRight, LogOut, Settings } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { AccountDetailsModal } from './account-details-modal';
@@ -20,7 +21,7 @@ export function AccountPanel({
   onDisconnect: () => void;
 }) {
   const { walletAddress, walletState } = useWallet();
-  const { transactionCount, error, refresh } = useWalletRx();
+  const { refresh } = useWalletRx();
   const [view, setView] = useState<'main' | 'settings'>('main');
   const [showAccountDetails, setShowAccountDetails] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -30,21 +31,6 @@ export function AccountPanel({
       refresh();
     }
   }, [isVisible, refresh]);
-
-  const formatAddress = (address: string | undefined) => {
-    if (!address) return { coinPublicKey: '', encryptionPublicKey: '' };
-    const parts = address.split('|');
-    if (parts.length >= 2) {
-      return {
-        coinPublicKey: parts[0],
-        encryptionPublicKey: parts[1],
-      };
-    }
-    return {
-      coinPublicKey: address,
-      encryptionPublicKey: '',
-    };
-  };
 
   const walletInfo = formatAddress(walletState?.address);
 
@@ -130,18 +116,19 @@ export function AccountPanel({
 
         {/* Transaction Count */}
         <div className="mt-2 text-sm text-muted-foreground">
-          {transactionCount} transaction{transactionCount !== 1 ? 's' : ''}
+          {/* transactionCount and error are no longer available */}
         </div>
 
         {/* Error Display */}
-        {error && (
+        {/* error and transactionCount are no longer available */}
+        {/*
           <div className="mt-4 p-3 bg-red-50 dark:bg-red-950/20 rounded-lg text-sm">
             <div className="text-red-700 dark:text-red-400 font-medium">
               Sync Error
             </div>
             <div className="text-red-600 dark:text-red-300">{error}</div>
           </div>
-        )}
+        */}
 
         <div className="px-6 space-y-4 mt-6">
           {walletInfo.encryptionPublicKey && (

@@ -1,16 +1,16 @@
 'use client';
 
-import type { WalletState } from '@/lib/types';
+import { Button } from '@/components/ui/button';
+import type { DAppConnectorWalletState } from '@midnight-ntwrk/dapp-connector-api';
 import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Identicon } from './identicon';
-import { Button } from './ui/button';
 
 interface AccountDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  walletState: WalletState | null;
+  walletState: DAppConnectorWalletState | null;
 }
 
 interface AccountField {
