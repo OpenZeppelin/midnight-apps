@@ -94,7 +94,7 @@ export const reducer = (state: State, action: Action): State => {
       // ! Side effects ! - This could be extracted into a dismissToast() action,
       // but I'll keep it here for simplicity
       if (toastId) {
-        const toast = state.toasts.find(t => t.id === toastId);
+        const toast = state.toasts.find((t) => t.id === toastId);
         addToRemoveQueue(toastId, toast?.duration);
       } else {
         for (const toast of state.toasts) {

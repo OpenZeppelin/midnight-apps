@@ -1,8 +1,7 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import type { SyncProgress, WalletState } from '@/lib/types';
 import { nativeToken } from '@/lib/utils';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useWallet } from './use-wallet';
-import type { WalletState, SyncProgress } from '@/lib/types';
-import { serializeBigInts } from '@/lib/utils';
 
 interface WalletRxState {
   state: WalletState | null;
@@ -57,14 +56,15 @@ export function useWalletRx(): WalletRxState & WalletRxActions {
         const walletState = await wallet.state();
         setState(walletState);
         setError(null);
-        
+
         // Log balance information like the example script
         if (walletState.balances) {
           const nativeBalance = walletState.balances[nativeToken()];
-          console.log(`Native balance: ${nativeBalance}, balances: ${JSON.stringify(serializeBigInts(walletState.balances))}`);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch wallet state');
+        setError(
+          err instanceof Error ? err.message : 'Failed to fetch wallet state',
+        );
       }
     };
 
@@ -133,10 +133,8 @@ export function useWalletRx(): WalletRxState & WalletRxActions {
           if (walletState.syncProgress?.synced) {
             const balance = walletState.balances;
             const nativeBalance = balance[nativeToken()];
-            
+
             // Log balance information like the example script
-            console.log(`Native balance: ${nativeBalance}, balances: ${JSON.stringify(serializeBigInts(balance))}`);
-            
             if (nativeBalance === undefined || nativeBalance === BigInt(0)) {
               // Check again in 10 seconds
               setTimeout(checkFunds, 10000);
@@ -201,14 +199,15 @@ export function useWalletRx(): WalletRxState & WalletRxActions {
       const walletState = await wallet.state();
       setState(walletState);
       setError(null);
-      
+
       // Log balance information like the example script
       if (walletState.balances) {
         const nativeBalance = walletState.balances[nativeToken()];
-        console.log(`Native balance: ${nativeBalance}, balances: ${JSON.stringify(serializeBigInts(walletState.balances))}`);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to refresh wallet state');
+      setError(
+        err instanceof Error ? err.message : 'Failed to refresh wallet state',
+      );
       throw err;
     }
   }, [wallet]);
@@ -222,11 +221,11 @@ export function useWalletRx(): WalletRxState & WalletRxActions {
     allBalances,
     transactionCount,
     error,
-    
+
     // Actions
     waitForSync,
     waitForFunds,
     waitForSyncProgress,
     refresh,
   };
-} 
+}

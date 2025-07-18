@@ -4,8 +4,6 @@ import { useWalletRx } from '@/hooks/use-wallet-rx';
 import { RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { nativeToken } from '@/lib/utils';
-import { useEffect } from 'react';
 
 interface BalanceDisplayProps {
   showSyncStatus?: boolean;
@@ -14,19 +12,14 @@ interface BalanceDisplayProps {
   className?: string;
 }
 
-export function BalanceDisplay({ 
-  showSyncStatus = true, 
+export function BalanceDisplay({
+  showSyncStatus = true,
   showRefreshButton = true,
   showAllBalances = false,
-  className = ''
+  className = '',
 }: BalanceDisplayProps) {
-  const { 
-    nativeBalance, 
-    allBalances,
-    isSynced, 
-    syncProgress,
-    refresh 
-  } = useWalletRx();
+  const { nativeBalance, allBalances, isSynced, syncProgress, refresh } =
+    useWalletRx();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefresh = async () => {
@@ -46,18 +39,18 @@ export function BalanceDisplay({
 
   const formatBalance = (balance: bigint | null): string => {
     if (balance === null) return '0';
-    
+
     // Convert bigint to string with proper formatting
     // For now, just convert to string. You might want to add decimal handling
     // based on token decimals (e.g., divide by 10^18 for tokens with 18 decimals)
     const balanceStr = balance.toString();
-    
+
     // Add basic formatting for large numbers
     if (balanceStr.length > 12) {
       // For very large numbers, show in scientific notation or with commas
       return Number(balanceStr).toLocaleString();
     }
-    
+
     return balanceStr;
   };
 
@@ -74,9 +67,7 @@ export function BalanceDisplay({
         <span className="text-2xl font-bold">
           {formatBalance(nativeBalance)}
         </span>
-        <span className="text-lg font-medium text-muted-foreground">
-          DUST
-        </span>
+        <span className="text-lg font-medium text-muted-foreground">DUST</span>
         {showRefreshButton && (
           <button
             type="button"
@@ -85,7 +76,9 @@ export function BalanceDisplay({
             className="p-1 rounded-full hover:bg-muted disabled:opacity-50 transition-colors"
             title="Refresh balance"
           >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}
+            />
           </button>
         )}
       </div>
@@ -109,7 +102,9 @@ export function BalanceDisplay({
       {showSyncStatus && (
         <div className="flex items-center gap-2 mt-1 text-sm">
           <span className="text-muted-foreground">Status:</span>
-          <span className={`font-medium ${isSynced ? 'text-green-600' : 'text-yellow-600'}`}>
+          <span
+            className={`font-medium ${isSynced ? 'text-green-600' : 'text-yellow-600'}`}
+          >
             {getSyncStatusText()}
           </span>
         </div>
@@ -126,4 +121,4 @@ export function BalanceDisplay({
       )}
     </div>
   );
-} 
+}

@@ -1,6 +1,5 @@
 'use client';
 
-import { useVersion } from '@/lib/version-context';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -9,8 +8,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Check, ChevronsUpDown, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useVersion } from '@/lib/version-context';
+import { Check, ChevronsUpDown, ExternalLink } from 'lucide-react';
 
 export function VersionSwitcher() {
   const { version, setVersion } = useVersion();
@@ -27,25 +27,55 @@ export function VersionSwitcher() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56 border-border" sideOffset={8}>
-        <DropdownMenuItem onClick={() => setVersion('V1')} className="items-start cursor-pointer">
-          <Check className={cn('mr-2 h-4 w-4 flex-shrink-0 mt-1', version === 'V1' ? 'opacity-100' : 'opacity-0')} />
+        <DropdownMenuItem
+          onClick={() => setVersion('V1')}
+          className="items-start cursor-pointer"
+        >
+          <Check
+            className={cn(
+              'mr-2 h-4 w-4 flex-shrink-0 mt-1',
+              version === 'V1' ? 'opacity-100' : 'opacity-0',
+            )}
+          />
           <div>
             <p className="font-semibold leading-none">V1</p>
-            <p className="text-xs text-muted-foreground mt-1">Unpermissioned Unshielded</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Unpermissioned Unshielded
+            </p>
           </div>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setVersion('V2')} className="items-start cursor-pointer">
-          <Check className={cn('mr-2 h-4 w-4 flex-shrink-0 mt-1', version === 'V2' ? 'opacity-100' : 'opacity-0')} />
+        <DropdownMenuItem
+          onClick={() => setVersion('V2')}
+          className="items-start cursor-pointer"
+        >
+          <Check
+            className={cn(
+              'mr-2 h-4 w-4 flex-shrink-0 mt-1',
+              version === 'V2' ? 'opacity-100' : 'opacity-0',
+            )}
+          />
           <div>
             <p className="font-semibold leading-none">V2</p>
-            <p className="text-xs text-muted-foreground mt-1">Unpermissioned Shielded</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Unpermissioned Shielded
+            </p>
           </div>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setVersion('V3')} className="items-start cursor-pointer">
-          <Check className={cn('mr-2 h-4 w-4 flex-shrink-0 mt-1', version === 'V3' ? 'opacity-100' : 'opacity-0')} />
+        <DropdownMenuItem
+          onClick={() => setVersion('V3')}
+          className="items-start cursor-pointer"
+        >
+          <Check
+            className={cn(
+              'mr-2 h-4 w-4 flex-shrink-0 mt-1',
+              version === 'V3' ? 'opacity-100' : 'opacity-0',
+            )}
+          />
           <div>
             <p className="font-semibold leading-none">V3</p>
-            <p className="text-xs text-muted-foreground mt-1">Permissioned Shielded</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Permissioned Shielded
+            </p>
           </div>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -63,4 +93,4 @@ export function VersionSwitcher() {
       </DropdownMenuContent>
     </DropdownMenu>
   );
-} 
+}

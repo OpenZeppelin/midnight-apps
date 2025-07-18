@@ -7,13 +7,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Check, ChevronDown, Wifi, WifiOff } from 'lucide-react';
 import { useNetwork } from '@/hooks/use-network';
 import { useWallet } from '@/hooks/use-wallet';
-import { useState, useEffect } from 'react';
+import { Check, ChevronDown, Wifi, WifiOff } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export function NetworkSelector() {
-  const { currentNetwork, setCurrentNetwork, availableNetworks, isNetworkSynced, syncWithWallet } = useNetwork();
+  const {
+    currentNetwork,
+    setCurrentNetwork,
+    availableNetworks,
+    isNetworkSynced,
+    syncWithWallet,
+  } = useNetwork();
   const { isWalletConnected } = useWallet();
   const [isHydrated, setIsHydrated] = useState(false);
 
@@ -22,9 +28,11 @@ export function NetworkSelector() {
     setIsHydrated(true);
   }, []);
 
-  const handleNetworkChange = async (network: typeof availableNetworks[0]) => {
+  const handleNetworkChange = async (
+    network: (typeof availableNetworks)[0],
+  ) => {
     setCurrentNetwork(network);
-    
+
     // If wallet is connected, try to sync with the new network
     if (isWalletConnected) {
       await syncWithWallet();
@@ -64,9 +72,13 @@ export function NetworkSelector() {
               <div className="flex items-center gap-2 mb-1">
                 <span className="font-medium">Wallet Sync:</span>
                 {isNetworkSynced ? (
-                  <span className="text-green-600 dark:text-green-400">Synced</span>
+                  <span className="text-green-600 dark:text-green-400">
+                    Synced
+                  </span>
                 ) : (
-                  <span className="text-red-600 dark:text-red-400">Not Synced</span>
+                  <span className="text-red-600 dark:text-red-400">
+                    Not Synced
+                  </span>
                 )}
               </div>
               {!isNetworkSynced && (

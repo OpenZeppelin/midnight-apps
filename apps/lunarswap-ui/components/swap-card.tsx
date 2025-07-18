@@ -17,7 +17,6 @@ import { ArrowDown, Fuel, Info, Settings } from 'lucide-react';
 import { useState } from 'react';
 import { TokenInput } from './token-input';
 import { TokenSelectModal } from './token-select-modal';
-import { useWallet } from '@/hooks/use-wallet';
 
 interface Token {
   symbol: string;
@@ -27,7 +26,6 @@ interface Token {
 }
 
 export function SwapCard() {
-  const { isWalletConnected } = useWallet();
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [selectingToken, setSelectingToken] = useState<'from' | 'to'>('from');
   const [fromToken, setFromToken] = useState<Token>({

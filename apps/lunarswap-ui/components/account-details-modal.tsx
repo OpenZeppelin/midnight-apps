@@ -1,12 +1,11 @@
 'use client';
 
-import { Copy, X } from 'lucide-react';
-import { Button } from './ui/button';
-import toast from 'react-hot-toast';
-import { Identicon } from './identicon';
 import type { WalletState } from '@/lib/types';
-import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { Identicon } from './identicon';
+import { Button } from './ui/button';
 
 interface AccountDetailsModalProps {
   isOpen: boolean;
@@ -22,7 +21,11 @@ interface AccountField {
   type: 'address' | 'coin' | 'encryption';
 }
 
-export function AccountDetailsModal({ isOpen, onClose, walletState }: AccountDetailsModalProps) {
+export function AccountDetailsModal({
+  isOpen,
+  onClose,
+  walletState,
+}: AccountDetailsModalProps) {
   const [mounted, setMounted] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [showLegacy, setShowLegacy] = useState<Record<string, boolean>>({});
@@ -40,7 +43,7 @@ export function AccountDetailsModal({ isOpen, onClose, walletState }: AccountDet
 
     document.body.style.overflow = 'hidden';
     document.body.style.pointerEvents = 'none';
-    
+
     const style = document.createElement('style');
     style.id = 'modal-overlay-style';
     style.textContent = `
@@ -74,7 +77,7 @@ export function AccountDetailsModal({ isOpen, onClose, walletState }: AccountDet
     `;
     document.head.appendChild(style);
     document.addEventListener('keydown', handleEscape);
-    
+
     return () => {
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = 'unset';
@@ -118,59 +121,62 @@ export function AccountDetailsModal({ isOpen, onClose, walletState }: AccountDet
       value: walletState.address || '',
       description: 'Your main wallet address',
       type: 'address',
-      isLegacy: false
+      isLegacy: false,
     },
     {
       label: 'Address (Legacy)',
       value: walletState.addressLegacy || '',
       description: 'Legacy format wallet address',
       type: 'address',
-      isLegacy: true
+      isLegacy: true,
     },
     {
       label: 'Coin Public Key',
       value: walletState.coinPublicKey || '',
       description: 'Public key for coin operations',
       type: 'coin',
-      isLegacy: false
+      isLegacy: false,
     },
     {
       label: 'Coin Public Key (Legacy)',
       value: walletState.coinPublicKeyLegacy || '',
       description: 'Legacy format coin public key',
       type: 'coin',
-      isLegacy: true
+      isLegacy: true,
     },
     {
       label: 'Encryption Public Key',
       value: walletState.encryptionPublicKey || '',
       description: 'Public key for encryption operations',
       type: 'encryption',
-      isLegacy: false
+      isLegacy: false,
     },
     {
       label: 'Encryption Public Key (Legacy)',
       value: walletState.encryptionPublicKeyLegacy || '',
       description: 'Legacy format encryption public key',
       type: 'encryption',
-      isLegacy: true
-    }
+      isLegacy: true,
+    },
   ];
 
-  const groupedFields = accountFields.reduce((acc, field) => {
-    if (!acc[field.type]) acc[field.type] = [];
-    acc[field.type].push(field);
-    return acc;
-  }, {} as Record<string, AccountField[]>);
+  const groupedFields = accountFields.reduce(
+    (acc, field) => {
+      if (!acc[field.type]) acc[field.type] = [];
+      acc[field.type].push(field);
+      return acc;
+    },
+    {} as Record<string, AccountField[]>,
+  );
 
   const modalContent = (
     <dialog
       className="fixed inset-0 bg-black/80 backdrop-blur-lg z-[99999] flex items-center justify-center p-4 border-0 pointer-events-auto animate-in fade-in duration-200"
-      style={{ 
-        position: 'fixed', 
-        top: '0px', 
-        left: '0px', 
-        right: '0px', 
+      style={{
+        position: 'fixed',
+        top: '0px',
+        left: '0px',
+        right: '0px',
         bottom: '0px',
         width: '100vw',
         height: '100vh',
@@ -178,7 +184,7 @@ export function AccountDetailsModal({ isOpen, onClose, walletState }: AccountDet
         pointerEvents: 'auto',
         backgroundColor: 'rgba(0, 0, 0, 0.8)',
         margin: '0',
-        padding: '0'
+        padding: '0',
       }}
       onClick={handleBackdropClick}
       onKeyDown={handleBackdropKeyDown}
@@ -187,11 +193,11 @@ export function AccountDetailsModal({ isOpen, onClose, walletState }: AccountDet
       open
       data-modal-portal
     >
-      <div 
+      <div
         className="bg-background rounded-xl shadow-2xl w-full max-w-4xl max-h-[80vh] overflow-hidden relative pointer-events-auto"
-        style={{ 
+        style={{
           zIndex: 100000,
-          pointerEvents: 'auto'
+          pointerEvents: 'auto',
         }}
         onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.stopPropagation()}
@@ -202,9 +208,16 @@ export function AccountDetailsModal({ isOpen, onClose, walletState }: AccountDet
               <Identicon address={walletState.address || ''} size={40} />
             </div>
             <div className="min-w-0 flex-1">
-              <h2 id="modal-title" className="text-lg font-bold text-foreground truncate">Account Details</h2>
+              <h2
+                id="modal-title"
+                className="text-lg font-bold text-foreground truncate"
+              >
+                Account Details
+              </h2>
               <p className="text-xs text-muted-foreground font-mono truncate">
-                {walletState.address ? `${walletState.address.slice(0, 10)}...${walletState.address.slice(-10)}` : '...'}
+                {walletState.address
+                  ? `${walletState.address.slice(0, 10)}...${walletState.address.slice(-10)}`
+                  : '...'}
               </p>
             </div>
           </div>
@@ -223,20 +236,25 @@ export function AccountDetailsModal({ isOpen, onClose, walletState }: AccountDet
           <div className="space-y-6">
             {Object.entries(groupedFields).map(([type, fields]) => (
               <div key={type} className="space-y-2">
-                {fields.map((field, index) => (
+                {fields.map((field, _index) => (
                   <div key={field.label} className="relative">
                     {!field.isLegacy && (
                       <div className="bg-card border rounded-lg p-3 hover:bg-muted/30 transition-colors">
                         <div className="flex items-start gap-2">
                           <div className="w-6 h-6 rounded-full overflow-hidden border border-primary/20 shrink-0 mt-0.5">
-                            <Identicon address={field.value || walletState.address || ''} size={24} />
+                            <Identicon
+                              address={field.value || walletState.address || ''}
+                              size={24}
+                            />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                               <span className="font-semibold text-foreground text-sm">
                                 {field.label}
                               </span>
-                              <span className="text-xs text-muted-foreground">• Main</span>
+                              <span className="text-xs text-muted-foreground">
+                                • Main
+                              </span>
                             </div>
                             {field.description && (
                               <p className="text-xs text-muted-foreground mb-2 leading-relaxed">
@@ -245,7 +263,9 @@ export function AccountDetailsModal({ isOpen, onClose, walletState }: AccountDet
                             )}
                             <button
                               type="button"
-                              onClick={() => copyToClipboard(field.value, field.label)}
+                              onClick={() =>
+                                copyToClipboard(field.value, field.label)
+                              }
                               className={`w-full p-2 rounded-md transition-all duration-200 text-left group relative overflow-hidden ${
                                 copiedField === field.label
                                   ? 'bg-green-50 dark:bg-green-950/20'
@@ -254,13 +274,17 @@ export function AccountDetailsModal({ isOpen, onClose, walletState }: AccountDet
                               disabled={!field.value}
                               title={`Click to copy ${field.label.toLowerCase()}`}
                             >
-                              <code className={`text-xs break-all font-mono leading-relaxed transition-all duration-200 ${
-                                copiedField === field.label
-                                  ? 'text-green-700 dark:text-green-300 blur-sm'
-                                  : 'text-foreground group-hover:text-primary'
-                              }`}>
+                              <code
+                                className={`text-xs break-all font-mono leading-relaxed transition-all duration-200 ${
+                                  copiedField === field.label
+                                    ? 'text-green-700 dark:text-green-300 blur-sm'
+                                    : 'text-foreground group-hover:text-primary'
+                                }`}
+                              >
                                 {field.value || (
-                                  <span className="text-muted-foreground italic">Not available</span>
+                                  <span className="text-muted-foreground italic">
+                                    Not available
+                                  </span>
                                 )}
                               </code>
                               {copiedField === field.label && (
@@ -271,13 +295,17 @@ export function AccountDetailsModal({ isOpen, onClose, walletState }: AccountDet
                                 </div>
                               )}
                             </button>
-                            {fields.some(f => f.isLegacy && f.type === field.type) && (
+                            {fields.some(
+                              (f) => f.isLegacy && f.type === field.type,
+                            ) && (
                               <button
                                 type="button"
                                 onClick={() => toggleLegacy(field.type)}
                                 className="text-xs text-primary hover:underline mt-2"
                               >
-                                {showLegacy[field.type] ? 'Hide Legacy' : 'Show Legacy'}
+                                {showLegacy[field.type]
+                                  ? 'Hide Legacy'
+                                  : 'Show Legacy'}
                               </button>
                             )}
                           </div>
@@ -290,14 +318,21 @@ export function AccountDetailsModal({ isOpen, onClose, walletState }: AccountDet
                           <div className="bg-muted/20 border border-dashed border-muted-foreground/30 rounded-lg p-3 hover:bg-muted/40 transition-colors animate-in fade-in slide-in-from-top-2 duration-200">
                             <div className="flex items-start gap-2">
                               <div className="w-5 h-5 rounded-full overflow-hidden border border-muted-foreground/30 shrink-0 mt-0.5">
-                                <Identicon address={field.value || walletState.address || ''} size={20} />
+                                <Identicon
+                                  address={
+                                    field.value || walletState.address || ''
+                                  }
+                                  size={20}
+                                />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1">
                                   <span className="font-medium text-foreground text-sm">
                                     {field.label}
                                   </span>
-                                  <span className="text-xs text-muted-foreground">• Legacy</span>
+                                  <span className="text-xs text-muted-foreground">
+                                    • Legacy
+                                  </span>
                                 </div>
                                 {field.description && (
                                   <p className="text-xs text-muted-foreground mb-2 leading-relaxed">
@@ -306,7 +341,9 @@ export function AccountDetailsModal({ isOpen, onClose, walletState }: AccountDet
                                 )}
                                 <button
                                   type="button"
-                                  onClick={() => copyToClipboard(field.value, field.label)}
+                                  onClick={() =>
+                                    copyToClipboard(field.value, field.label)
+                                  }
                                   className={`w-full p-2 rounded-md transition-all duration-200 text-left group relative overflow-hidden ${
                                     copiedField === field.label
                                       ? 'bg-green-50 dark:bg-green-950/20'
@@ -315,13 +352,17 @@ export function AccountDetailsModal({ isOpen, onClose, walletState }: AccountDet
                                   disabled={!field.value}
                                   title={`Click to copy ${field.label.toLowerCase()}`}
                                 >
-                                  <code className={`text-xs break-all font-mono leading-relaxed transition-all duration-200 ${
-                                    copiedField === field.label
-                                      ? 'text-green-700 dark:text-green-300 blur-sm'
-                                      : 'text-foreground group-hover:text-primary'
-                                  }`}>
+                                  <code
+                                    className={`text-xs break-all font-mono leading-relaxed transition-all duration-200 ${
+                                      copiedField === field.label
+                                        ? 'text-green-700 dark:text-green-300 blur-sm'
+                                        : 'text-foreground group-hover:text-primary'
+                                    }`}
+                                  >
                                     {field.value || (
-                                      <span className="text-muted-foreground italic">Not available</span>
+                                      <span className="text-muted-foreground italic">
+                                        Not available
+                                      </span>
                                     )}
                                   </code>
                                   {copiedField === field.label && (

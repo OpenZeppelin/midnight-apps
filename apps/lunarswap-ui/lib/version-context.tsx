@@ -1,6 +1,12 @@
 'use client';
 
-import { createContext, useContext, useState, useMemo, type ReactNode } from 'react';
+import {
+  type ReactNode,
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+} from 'react';
 
 // Define the possible versions
 export type AppVersion = 'V1' | 'V2' | 'V3';
@@ -21,9 +27,7 @@ export function VersionProvider({ children }: { children: ReactNode }) {
   const value = useMemo(() => ({ version, setVersion }), [version]);
 
   return (
-    <VersionContext.Provider value={value}>
-      {children}
-    </VersionContext.Provider>
+    <VersionContext.Provider value={value}>{children}</VersionContext.Provider>
   );
 }
 
@@ -34,4 +38,4 @@ export function useVersion() {
     throw new Error('useVersion must be used within a VersionProvider');
   }
   return context;
-} 
+}

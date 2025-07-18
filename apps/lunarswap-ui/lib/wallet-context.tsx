@@ -1,9 +1,21 @@
 'use client';
 
-import { type PropsWithChildren, createContext, useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import {
+  type PropsWithChildren,
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { DAppConnectorWalletAPI, WalletState } from './types';
 
-type WalletConnectionStatusType = 'disconnected' | 'connecting' | 'connected' | 'error';
+type WalletConnectionStatusType =
+  | 'disconnected'
+  | 'connecting'
+  | 'connected'
+  | 'error';
 
 // Constants for localStorage keys
 const WALLET_STORAGE_KEYS = {
@@ -18,7 +30,7 @@ const WALLET_STORAGE_KEYS = {
 export interface WalletContextType {
   // Direct access to wallet instance for transactions
   wallet: DAppConnectorWalletAPI | null;
-  
+
   // Setters to save wallet when connected
   setWallet: (wallet: DAppConnectorWalletAPI | null) => void;
 
@@ -35,14 +47,18 @@ export interface WalletContextType {
   setWalletConnectionStatus: (status: WalletConnectionStatusType) => void;
 }
 
-export const WalletContext = createContext<WalletContextType | undefined>(undefined);
+export const WalletContext = createContext<WalletContextType | undefined>(
+  undefined,
+);
 
 export interface WalletProviderProps extends PropsWithChildren {}
 
-export const WalletProvider: React.FC<Readonly<WalletProviderProps>> = ({ children }) => {
+export const WalletProvider: React.FC<Readonly<WalletProviderProps>> = ({
+  children,
+}) => {
   // Add hydration state to prevent SSR issues
   const [isHydrated, setIsHydrated] = useState(false);
-  
+
   // Add reconnection flag to prevent infinite loops
   const isReconnecting = useRef(false);
 
@@ -61,7 +77,9 @@ export const WalletProvider: React.FC<Readonly<WalletProviderProps>> = ({ childr
   const [walletState, setWalletState] = useState<WalletState | null>(() => {
     if (typeof window !== 'undefined') {
       try {
-        const savedState = localStorage.getItem(WALLET_STORAGE_KEYS.WALLET_STATE);
+        const savedState = localStorage.getItem(
+          WALLET_STORAGE_KEYS.WALLET_STATE,
+        );
         return savedState ? JSON.parse(savedState) : null;
       } catch {
         return null;
@@ -69,17 +87,20 @@ export const WalletProvider: React.FC<Readonly<WalletProviderProps>> = ({ childr
     }
     return null;
   });
-  const [walletConnectionStatus, setWalletConnectionStatus] = useState<WalletConnectionStatusType>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const savedStatus = localStorage.getItem(WALLET_STORAGE_KEYS.CONNECTION_STATUS);
-        return (savedStatus as WalletConnectionStatusType) || 'disconnected';
-      } catch {
-        return 'disconnected';
+  const [walletConnectionStatus, setWalletConnectionStatus] =
+    useState<WalletConnectionStatusType>(() => {
+      if (typeof window !== 'undefined') {
+        try {
+          const savedStatus = localStorage.getItem(
+            WALLET_STORAGE_KEYS.CONNECTION_STATUS,
+          );
+          return (savedStatus as WalletConnectionStatusType) || 'disconnected';
+        } catch {
+          return 'disconnected';
+        }
       }
-    }
-    return 'disconnected';
-  });
+      return 'disconnected';
+    });
 
   // Mark as hydrated after initial render
   useEffect(() => {
@@ -90,9 +111,15 @@ export const WalletProvider: React.FC<Readonly<WalletProviderProps>> = ({ childr
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
-        localStorage.setItem(WALLET_STORAGE_KEYS.CONNECTION_STATUS, walletConnectionStatus);
+        localStorage.setItem(
+          WALLET_STORAGE_KEYS.CONNECTION_STATUS,
+          walletConnectionStatus,
+        );
       } catch (error) {
-        console.warn('Failed to save wallet connection status to localStorage:', error);
+        console.warn(
+          'Failed to save wallet connection status to localStorage:',
+          error,
+        );
       }
     }
   }, [walletConnectionStatus]);
@@ -102,7 +129,10 @@ export const WalletProvider: React.FC<Readonly<WalletProviderProps>> = ({ childr
     if (typeof window !== 'undefined') {
       try {
         if (walletState) {
-          localStorage.setItem(WALLET_STORAGE_KEYS.WALLET_STATE, JSON.stringify(walletState));
+          localStorage.setItem(
+            WALLET_STORAGE_KEYS.WALLET_STATE,
+            JSON.stringify(walletState),
+          );
         } else {
           localStorage.removeItem(WALLET_STORAGE_KEYS.WALLET_STATE);
         }
@@ -117,7 +147,10 @@ export const WalletProvider: React.FC<Readonly<WalletProviderProps>> = ({ childr
     if (typeof window !== 'undefined') {
       try {
         if (walletAddress) {
-          localStorage.setItem(WALLET_STORAGE_KEYS.WALLET_ADDRESS, walletAddress);
+          localStorage.setItem(
+            WALLET_STORAGE_KEYS.WALLET_ADDRESS,
+            walletAddress,
+          );
         } else {
           localStorage.removeItem(WALLET_STORAGE_KEYS.WALLET_ADDRESS);
         }
@@ -132,20 +165,12 @@ export const WalletProvider: React.FC<Readonly<WalletProviderProps>> = ({ childr
     if (!isHydrated) return; // Don't attempt reconnection during SSR or initial hydration
     if (isReconnecting.current) return; // Prevent multiple simultaneous reconnection attempts
 
-    console.log('Reconnection effect triggered:', {
-      walletConnectionStatus,
-      hasWalletState: !!walletState,
-      hasWallet: !!wallet,
-      isReconnecting: isReconnecting.current
-    });
-
     const attemptReconnection = async () => {
       // Only attempt reconnection if we have a saved connected state and we're not already connected
       if (walletConnectionStatus === 'connected' && walletState && !wallet) {
-        console.log('Attempting to reconnect wallet from saved state...');
         isReconnecting.current = true;
         setWalletConnectionStatus('connecting');
-        
+
         try {
           // Check if Midnight Lace wallet is still available
           const midnight = window.midnight;
@@ -158,14 +183,19 @@ export const WalletProvider: React.FC<Readonly<WalletProviderProps>> = ({ childr
           }
 
           const connector = midnight.mnLace;
-          
+
           // Check if already enabled with timeout
           const isEnabled = await Promise.race([
             connector.isEnabled(),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout checking if wallet is enabled')), 10000))
+            new Promise((_, reject) =>
+              setTimeout(
+                () =>
+                  reject(new Error('Timeout checking if wallet is enabled')),
+                10000,
+              ),
+            ),
           ]);
           if (!isEnabled) {
-            console.log('Wallet is not enabled, clearing saved state');
             setWalletConnectionStatus('disconnected');
             setWalletState(null);
             setWalletAddress(null);
@@ -173,20 +203,29 @@ export const WalletProvider: React.FC<Readonly<WalletProviderProps>> = ({ childr
           }
 
           // Enable the wallet with timeout
-          const reconnectedWallet = await Promise.race([
+          const reconnectedWallet = (await Promise.race([
             connector.enable(),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout enabling wallet')), 15000))
-          ]) as DAppConnectorWalletAPI;
-          
+            new Promise((_, reject) =>
+              setTimeout(
+                () => reject(new Error('Timeout enabling wallet')),
+                15000,
+              ),
+            ),
+          ])) as DAppConnectorWalletAPI;
+
           // Get current wallet state with timeout
-          const currentState: WalletState = await Promise.race([
+          const currentState: WalletState = (await Promise.race([
             reconnectedWallet.state(),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout getting wallet state')), 10000))
-          ]) as WalletState;
-          
+            new Promise((_, reject) =>
+              setTimeout(
+                () => reject(new Error('Timeout getting wallet state')),
+                10000,
+              ),
+            ),
+          ])) as WalletState;
+
           // Verify the wallet address matches what we saved
           if (currentState.address === walletState.address) {
-            console.log('Wallet reconnected successfully');
             setWallet(reconnectedWallet);
             setWalletState(currentState);
             setWalletAddress(currentState.address || null);
@@ -205,12 +244,6 @@ export const WalletProvider: React.FC<Readonly<WalletProviderProps>> = ({ childr
         } finally {
           isReconnecting.current = false;
         }
-      } else {
-        console.log('Skipping reconnection - conditions not met:', {
-          walletConnectionStatus,
-          hasWalletState: !!walletState,
-          hasWallet: !!wallet
-        });
       }
     };
 
@@ -229,44 +262,61 @@ export const WalletProvider: React.FC<Readonly<WalletProviderProps>> = ({ childr
     }
   }, []);
 
-  const handleSetWalletConnectionStatus = useCallback((status: WalletConnectionStatusType) => {
-    setWalletConnectionStatus(status);
-    
-    // Clear all wallet data when disconnecting
-    if (status === 'disconnected') {
-      setWallet(null);
-      setWalletState(null);
-      setWalletAddress(null);
-      
-      // Clear localStorage
-      if (typeof window !== 'undefined') {
-        try {
-          localStorage.removeItem(WALLET_STORAGE_KEYS.WALLET_STATE);
-          localStorage.removeItem(WALLET_STORAGE_KEYS.WALLET_ADDRESS);
-        } catch (error) {
-          console.warn('Failed to clear wallet data from localStorage:', error);
+  const handleSetWalletConnectionStatus = useCallback(
+    (status: WalletConnectionStatusType) => {
+      setWalletConnectionStatus(status);
+
+      // Clear all wallet data when disconnecting
+      if (status === 'disconnected') {
+        setWallet(null);
+        setWalletState(null);
+        setWalletAddress(null);
+
+        // Clear localStorage
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.removeItem(WALLET_STORAGE_KEYS.WALLET_STATE);
+            localStorage.removeItem(WALLET_STORAGE_KEYS.WALLET_ADDRESS);
+          } catch (error) {
+            console.warn(
+              'Failed to clear wallet data from localStorage:',
+              error,
+            );
+          }
         }
       }
-    }
-  }, []);
+    },
+    [],
+  );
 
   // Computed values
   const isWalletConnected = walletConnectionStatus === 'connected';
 
-  const contextValue: WalletContextType = useMemo(() => ({
-    wallet,
-    setWallet: setWallet,
-    isWalletConnected,
-    walletAddress,
-    walletState,
-    setWalletState: handleSetWalletState,
-    walletConnectionStatus,
-    setWalletConnectionStatus: handleSetWalletConnectionStatus,
-  }), [wallet, isWalletConnected, walletAddress, walletState, handleSetWalletState, walletConnectionStatus, handleSetWalletConnectionStatus]);
+  const contextValue: WalletContextType = useMemo(
+    () => ({
+      wallet,
+      setWallet: setWallet,
+      isWalletConnected,
+      walletAddress,
+      walletState,
+      setWalletState: handleSetWalletState,
+      walletConnectionStatus,
+      setWalletConnectionStatus: handleSetWalletConnectionStatus,
+    }),
+    [
+      wallet,
+      isWalletConnected,
+      walletAddress,
+      walletState,
+      handleSetWalletState,
+      walletConnectionStatus,
+      handleSetWalletConnectionStatus,
+    ],
+  );
 
   return (
     <WalletContext.Provider value={contextValue}>
       {children}
     </WalletContext.Provider>
   );
-}; 
+};

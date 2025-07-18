@@ -1,9 +1,9 @@
 'use client';
 
-import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Moon, Sun } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -16,7 +16,7 @@ export function ThemeToggle() {
         onClick={() => setTheme('light')}
         className={cn(
           'flex items-center justify-center text-muted-foreground',
-          theme === 'light' && 'bg-background text-foreground'
+          theme === 'light' && 'bg-background text-foreground',
         )}
         aria-label="Set light theme"
       >
@@ -28,7 +28,7 @@ export function ThemeToggle() {
         onClick={() => setTheme('dark')}
         className={cn(
           'flex items-center justify-center text-muted-foreground',
-          theme === 'dark' && 'bg-background text-foreground'
+          theme === 'dark' && 'bg-background text-foreground',
         )}
         aria-label="Set dark theme"
       >
@@ -40,7 +40,7 @@ export function ThemeToggle() {
         onClick={() => setTheme('system')}
         className={cn(
           'text-muted-foreground',
-          theme === 'system' && 'bg-background text-foreground'
+          theme === 'system' && 'bg-background text-foreground',
         )}
       >
         Auto

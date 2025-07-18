@@ -60,4 +60,4 @@ export interface MidnightWindow {
 // Extend the global Window interface
 declare global {
   interface Window extends MidnightWindow {}
-} 
+}

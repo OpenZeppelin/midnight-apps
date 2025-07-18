@@ -2,15 +2,13 @@
 
 import { useWallet } from '@/hooks/use-wallet';
 import { useWalletRx } from '@/hooks/use-wallet-rx';
-import { ChevronLeft, ChevronsRight, LogOut, Settings, Copy } from 'lucide-react';
-import { NetworkSelector } from './network-selector';
-import { Identicon } from './identicon';
-import toast from 'react-hot-toast';
-import { Button } from './ui/button';
-import { useState, useEffect } from 'react';
-import { ThemeToggle } from './theme-toggle';
-import { BalanceDisplay } from './balance-display';
+import { ChevronLeft, ChevronsRight, LogOut, Settings } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { AccountDetailsModal } from './account-details-modal';
+import { BalanceDisplay } from './balance-display';
+import { Identicon } from './identicon';
+import { NetworkSelector } from './network-selector';
+import { ThemeToggle } from './theme-toggle';
 
 export function AccountPanel({
   isVisible,
@@ -39,12 +37,12 @@ export function AccountPanel({
     if (parts.length >= 2) {
       return {
         coinPublicKey: parts[0],
-        encryptionPublicKey: parts[1]
+        encryptionPublicKey: parts[1],
       };
     }
     return {
       coinPublicKey: address,
-      encryptionPublicKey: ''
+      encryptionPublicKey: '',
     };
   };
 
@@ -64,7 +62,7 @@ export function AccountPanel({
   if (!isVisible) {
     return null;
   }
-  
+
   const handleDisconnect = () => {
     onDisconnect();
     onClose();
@@ -73,15 +71,27 @@ export function AccountPanel({
   const MainView = () => (
     <>
       <div className="flex items-center justify-between p-4">
-        <button type="button" onClick={onClose} className="p-2 rounded-full hover:bg-muted">
+        <button
+          type="button"
+          onClick={onClose}
+          className="p-2 rounded-full hover:bg-muted"
+        >
           <ChevronsRight className="h-5 w-5" />
         </button>
         <div className="flex items-center gap-2">
-          <button type="button" onClick={() => setView('settings')} className="p-2 rounded-full hover:bg-muted">
+          <button
+            type="button"
+            onClick={() => setView('settings')}
+            className="p-2 rounded-full hover:bg-muted"
+          >
             <Settings className="h-5 w-5" />
           </button>
           <NetworkSelector />
-          <button type="button" onClick={handleDisconnect} className="p-2 rounded-full hover:bg-muted text-destructive">
+          <button
+            type="button"
+            onClick={handleDisconnect}
+            className="p-2 rounded-full hover:bg-muted text-destructive"
+          >
             <LogOut className="h-5 w-5" />
           </button>
         </div>
@@ -93,23 +103,25 @@ export function AccountPanel({
             {walletAddress && <Identicon address={walletAddress} size={64} />}
           </div>
         </div>
-        <button 
+        <button
           type="button"
           onClick={() => setShowAccountDetails(true)}
           className="font-medium text-base hover:text-primary transition-colors cursor-pointer flex items-center gap-2 group"
           title="Click to view account details"
         >
           <span className="font-mono text-muted-foreground">
-            {walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-5)}` : '...'}
+            {walletAddress
+              ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-5)}`
+              : '...'}
           </span>
           <span className="text-xs text-muted-foreground group-hover:text-primary transition-colors opacity-60">
             details
           </span>
         </button>
-        
+
         {/* Balance Display */}
         <div className="mt-4">
-          <BalanceDisplay 
+          <BalanceDisplay
             showSyncStatus={true}
             showRefreshButton={true}
             className="text-4xl"
@@ -124,7 +136,9 @@ export function AccountPanel({
         {/* Error Display */}
         {error && (
           <div className="mt-4 p-3 bg-red-50 dark:bg-red-950/20 rounded-lg text-sm">
-            <div className="text-red-700 dark:text-red-400 font-medium">Sync Error</div>
+            <div className="text-red-700 dark:text-red-400 font-medium">
+              Sync Error
+            </div>
             <div className="text-red-600 dark:text-red-300">{error}</div>
           </div>
         )}
@@ -132,10 +146,17 @@ export function AccountPanel({
         <div className="px-6 space-y-4 mt-6">
           {walletInfo.encryptionPublicKey && (
             <div className="space-y-2">
-              <h4 className="text-sm font-medium text-muted-foreground">Encryption Public Key</h4>
+              <h4 className="text-sm font-medium text-muted-foreground">
+                Encryption Public Key
+              </h4>
               <button
                 type="button"
-                onClick={() => copyToClipboard(walletInfo.encryptionPublicKey, 'Encryption public key')}
+                onClick={() =>
+                  copyToClipboard(
+                    walletInfo.encryptionPublicKey,
+                    'Encryption public key',
+                  )
+                }
                 className={`w-full p-3 rounded-lg transition-all duration-200 text-left group relative overflow-hidden ${
                   copiedField === 'Encryption public key'
                     ? 'bg-green-50 dark:bg-green-950/20'
@@ -143,11 +164,13 @@ export function AccountPanel({
                 }`}
                 title="Click to copy encryption public key"
               >
-                <code className={`text-xs break-all font-mono transition-all duration-200 ${
-                  copiedField === 'Encryption public key'
-                    ? 'text-green-700 dark:text-green-300 blur-sm'
-                    : 'group-hover:text-primary'
-                }`}>
+                <code
+                  className={`text-xs break-all font-mono transition-all duration-200 ${
+                    copiedField === 'Encryption public key'
+                      ? 'text-green-700 dark:text-green-300 blur-sm'
+                      : 'group-hover:text-primary'
+                  }`}
+                >
                   {walletInfo.encryptionPublicKey}
                 </code>
                 {copiedField === 'Encryption public key' && (
@@ -168,13 +191,19 @@ export function AccountPanel({
   const SettingsView = () => (
     <>
       <div className="flex items-center p-4">
-        <button type="button" onClick={() => setView('main')} className="p-2 rounded-full hover:bg-muted">
+        <button
+          type="button"
+          onClick={() => setView('main')}
+          className="p-2 rounded-full hover:bg-muted"
+        >
           <ChevronLeft className="h-5 w-5" />
         </button>
         <h3 className="text-lg font-semibold mx-auto">Settings</h3>
       </div>
       <div className="p-6">
-        <h4 className="text-sm font-medium text-muted-foreground mb-2">Theme</h4>
+        <h4 className="text-sm font-medium text-muted-foreground mb-2">
+          Theme
+        </h4>
         <ThemeToggle />
       </div>
     </>
@@ -192,4 +221,4 @@ export function AccountPanel({
       />
     </>
   );
-} 
+}

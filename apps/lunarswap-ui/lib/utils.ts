@@ -17,9 +17,11 @@ export function nativeToken(): string {
  * Serializes bigint values in an object to strings for JSON serialization
  * This matches the pattern used in the example script
  */
-export function serializeBigInts(obj: Record<string, unknown>): Record<string, unknown> {
+export function serializeBigInts(
+  obj: Record<string, unknown>,
+): Record<string, unknown> {
   const result: Record<string, unknown> = {};
-  
+
   for (const [key, value] of Object.entries(obj)) {
     if (typeof value === 'bigint') {
       result[key] = value.toString();
@@ -29,6 +31,6 @@ export function serializeBigInts(obj: Record<string, unknown>): Record<string, u
       result[key] = value;
     }
   }
-  
+
   return result;
 }

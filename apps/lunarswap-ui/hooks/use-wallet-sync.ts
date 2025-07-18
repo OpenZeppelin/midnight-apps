@@ -1,16 +1,11 @@
-import { useWalletRx } from './use-wallet-rx';
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useWalletRx } from './use-wallet-rx';
 
 export function useWalletSync() {
-  const { 
-    isSynced, 
-    syncProgress, 
-    nativeBalance,
-    waitForSync, 
-    waitForFunds 
-  } = useWalletRx();
-  
+  const { isSynced, syncProgress, nativeBalance, waitForSync, waitForFunds } =
+    useWalletRx();
+
   const [isSyncing, setIsSyncing] = useState(false);
   const [isWaitingForFunds, setIsWaitingForFunds] = useState(false);
 
@@ -60,17 +55,17 @@ export function useWalletSync() {
     isWalletSynced: isSynced,
     syncProgress,
     nativeTokenBalance: nativeBalance,
-    
+
     // Loading states
     isSyncing,
     isWaitingForFunds,
-    
+
     // Actions
     syncWallet,
     waitForWalletFunds,
-    
+
     // Utilities
     getSyncStatusText,
     getSyncStatusColor,
   };
-} 
+}
