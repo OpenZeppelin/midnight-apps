@@ -11,8 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  checks:
-    name: Run Checks
+  pipeline:
     runs-on: ubuntu-22.04
 
     steps:
@@ -30,6 +29,10 @@ jobs:
 
       - name: Format
         run: pnpm fmt
+        timeout-minutes: 10
+
+      - name: Type check
+        run: pnpm types
         timeout-minutes: 10
 
       - name: Cleanup on failure

@@ -5,7 +5,7 @@ import { TopPoolsList } from '@/components/pool/top-pools-list';
 import { StarsBackground } from '@/components/stars-background';
 
 export const metadata = {
-  title: 'LunarSwap | Pool',
+  title: 'Lunarswap | Pool',
   description:
     'Provide liquidity and earn fees on the most celestial DEX in the galaxy',
 };

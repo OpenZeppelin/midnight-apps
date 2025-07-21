@@ -1,13 +1,12 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Menu, Settings } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Logo } from './logo';
-import { NetworkSelector } from './network-selector';
-import { ThemeToggle } from './theme-toggle';
+import { VersionSwitcher } from './version-switcher';
 import { WalletConnect } from './wallet-connect';
 
 export function Header() {
@@ -20,7 +19,7 @@ export function Header() {
   }, [pathname]);
 
   return (
-    <header className="fixed top-0 left-0 right-0 border-b border-gray-200/50 dark:border-gray-800/50 bg-white/70 dark:bg-gray-900/70 backdrop-blur-md z-50">
+    <header className="fixed top-0 left-0 right-0 bg-white/70 dark:bg-gray-900/70 backdrop-blur-md z-50">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-8">
@@ -57,15 +56,7 @@ export function Header() {
             </nav>
           </div>
           <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <NetworkSelector />
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-            >
-              <Settings className="h-5 w-5" />
-            </Button>
+            <VersionSwitcher />
             <WalletConnect />
             <Button
               variant="ghost"

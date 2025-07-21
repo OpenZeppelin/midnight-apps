@@ -17,7 +17,7 @@
     "fmt": "turbo run fmt",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
-    "types": "turbo run types",
+    "types": "pnpm compact:fast && turbo run types",
     "precommit": "turbo run precommit"
   },
   "keywords": [],
