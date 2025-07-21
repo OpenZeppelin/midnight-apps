@@ -25,6 +25,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Build apps
+        id: build
         run: pnpm build:apps
         timeout-minutes: 10
 
@@ -46,7 +47,7 @@ jobs:
         timeout-minutes: 10
 
       - name: Upload build artifacts
-        if: always()
+        if: steps.build.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: apps-builds
@@ -54,7 +55,7 @@ jobs:
           retention-days: 7
 
       - name: Upload test results
-        if: always()
+        if: steps.build.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: apps-test-results
