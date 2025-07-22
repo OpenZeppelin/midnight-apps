@@ -6,11 +6,11 @@
   "main": "index.js",
   "scripts": {
     "prepare": "is-ci || husky",
-    "compact": "turbo run compact",
+    "compact": "for d in ./contracts/*; do if [ -d \"$d\" ]; then cd \"$d\" && pnpm compact && cd - > /dev/null; fi; done",
     "compact:fast": "turbo run compact -- --skip-zk",
     "compact:version": "turbo run compact -- --version",
     "compact:language-version": "turbo run compact -- --language-version",
-    "build:contracts": "turbo run build --filter './contracts/*'",
+    "build:contracts": "for d in ./contracts/*; do if [ -d \"$d\" ]; then cd \"$d\" && pnpm build && cd - > /dev/null; fi; done",
     "build:apps": "turbo run build --filter './apps/*'",
     "test:contracts": "turbo run test --filter './contracts/*'",
     "test:apps": "turbo run test --filter './apps/*'",

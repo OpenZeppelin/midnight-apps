@@ -39,21 +39,26 @@ nvm use 22.14.0
 
 4. **Build Contracts Packages**:
    ```bash
-   pnpm build:contracts
+   # Navigate to each contract package and run build
+   cd contracts/access && pnpm build 
+   cd ../math && pnpm build
+   cd ../structs && pnpm build
    ```
-   - Runs `turbo run build`, which compiles `.compact` files (via `compact`) and builds all projects (e.g., TypeScript compilation, artifact copying).
-
+   - **Note**: Running `pnpm build:contracts`, `pnpm compact`, `pnpm compact:fast`, `pnpm compact:version`, or `pnpm compact:language-version` from the root may cause repetitive output due to Turbo's logging behavior. It's recommended to compile contracts individually from within each package directory.
+   - **Feature Request**: A logging output mode flag is being requested to fix Turbo animation log flooding. See [GitHub Issue #1188](https://github.com/midnightntwrk/compactc/issues/1188) for more details.
+   
 ### Tasks with Turbo
 Turbo manages tasks across the monorepo, defined in `turbo.json`. Key tasks:
 
 - **`compact`**:
   - Compiles `.compact` files using `compact-compile`.
-  - Run: `pnpm compact`.
+  - Run: `pnpm compact` (from within individual packages).
+  - **Note**: Running from root with `pnpm compact`, `pnpm compact:fast`, `pnpm compact:version`, or `pnpm compact:language-version` may cause output repetition issues.
 
 - **`build`**:
   - **`build:contracts`**
     - Builds contracts projects, including TypeScript compilation and artifact copying, after running `compact`.
-    - Run: `pnpm build:contracts`.
+    - Run: `pnpm build:contracts` (may cause output repetition - use individual package compilation instead).
     - Dependencies: Ensures `compact` tasks complete first.
   - **`build:apps`**
     - Builds apps projects.
