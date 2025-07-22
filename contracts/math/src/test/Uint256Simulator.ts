@@ -21,20 +21,20 @@ import {
 } from '../artifacts/MockUint256/contract/index.cjs';
 import type { IContractSimulator } from '../types/test';
 import {
-  MathU256ContractPrivateState,
-  MathU256Witnesses,
-} from '../witnesses/MathU256';
+  Uint256ContractPrivateState,
+  Uint256Witnesses,
+} from '../witnesses/Uint256';
 
-export class MathU256Simulator
-  implements IContractSimulator<MathU256ContractPrivateState, Ledger>
+export class Uint256Simulator
+  implements IContractSimulator<Uint256ContractPrivateState, Ledger>
 {
-  readonly contract: Contract<MathU256ContractPrivateState>;
+  readonly contract: Contract<Uint256ContractPrivateState>;
   readonly contractAddress: string;
-  circuitContext: CircuitContext<MathU256ContractPrivateState>;
+  circuitContext: CircuitContext<Uint256ContractPrivateState>;
 
   constructor() {
-    this.contract = new Contract<MathU256ContractPrivateState>(
-      MathU256Witnesses(),
+    this.contract = new Contract<Uint256ContractPrivateState>(
+      Uint256Witnesses(),
     );
     const {
       currentPrivateState,
@@ -42,7 +42,7 @@ export class MathU256Simulator
       currentZswapLocalState,
     } = this.contract.initialState(
       constructorContext(
-        MathU256ContractPrivateState.generate(),
+        Uint256ContractPrivateState.generate(),
         sampleCoinPublicKey(),
       ),
     );
@@ -62,7 +62,7 @@ export class MathU256Simulator
     return ledger(this.circuitContext.transactionContext.state);
   }
 
-  public getCurrentPrivateState(): MathU256ContractPrivateState {
+  public getCurrentPrivateState(): Uint256ContractPrivateState {
     return this.circuitContext.currentPrivateState;
   }
 
@@ -250,7 +250,7 @@ export class MathU256Simulator
   }
 }
 
-export function createMaliciousSimulator({
+export function createMaliciousUint256Simulator({
   mockSqrtU256,
   mockDivU256,
   mockDivU128,
@@ -261,27 +261,27 @@ export function createMaliciousSimulator({
     a: bigint,
     b: bigint,
   ) => { quotient: bigint; remainder: bigint };
-}): MathU256Simulator {
+}): Uint256Simulator {
   const MAX_U64 = 2n ** 64n - 1n;
 
-  const baseWitnesses = MathU256Witnesses();
+  const baseWitnesses = Uint256Witnesses();
 
   const witnesses = {
     ...baseWitnesses,
     ...(mockSqrtU256 && {
       sqrtU256Locally(
-        context: WitnessContext<Ledger, MathU256ContractPrivateState>,
+        context: WitnessContext<Ledger, Uint256ContractPrivateState>,
         radicand: U256,
-      ): [MathU256ContractPrivateState, bigint] {
+      ): [Uint256ContractPrivateState, bigint] {
         return [context.privateState, mockSqrtU256(radicand)];
       },
     }),
     ...(mockDivU256 && {
       divU256Locally(
-        context: WitnessContext<Ledger, MathU256ContractPrivateState>,
+        context: WitnessContext<Ledger, Uint256ContractPrivateState>,
         a: U256,
         b: U256,
-      ): [MathU256ContractPrivateState, DivResultU256] {
+      ): [Uint256ContractPrivateState, DivResultU256] {
         const { quotient, remainder } = mockDivU256(a, b);
 
         const qLow = quotient & ((1n << 128n) - 1n);
@@ -318,10 +318,10 @@ export function createMaliciousSimulator({
     }),
     ...(mockDivU128 && {
       divU128Locally(
-        context: WitnessContext<Ledger, MathU256ContractPrivateState>,
+        context: WitnessContext<Ledger, Uint256ContractPrivateState>,
         a: bigint,
         b: bigint,
-      ): [MathU256ContractPrivateState, DivResultU128] {
+      ): [Uint256ContractPrivateState, DivResultU128] {
         const { quotient, remainder } = mockDivU128(a, b);
         return [
           context.privateState,
@@ -339,25 +339,25 @@ export function createMaliciousSimulator({
       },
     }),
     divUint128Locally(
-      context: WitnessContext<Ledger, MathU256ContractPrivateState>,
+      context: WitnessContext<Ledger, Uint256ContractPrivateState>,
       a: bigint,
       b: bigint,
-    ): [MathU256ContractPrivateState, DivResultU128] {
+    ): [Uint256ContractPrivateState, DivResultU128] {
       return baseWitnesses.divUint128Locally(context, a, b);
     },
   };
 
-  const contract = new Contract<MathU256ContractPrivateState>(witnesses);
+  const contract = new Contract<Uint256ContractPrivateState>(witnesses);
 
   const { currentPrivateState, currentContractState, currentZswapLocalState } =
     contract.initialState(
       constructorContext(
-        MathU256ContractPrivateState.generate(),
+        Uint256ContractPrivateState.generate(),
         sampleCoinPublicKey(),
       ),
     );
 
-  const badSimulator = new MathU256Simulator();
+  const badSimulator = new Uint256Simulator();
   Object.defineProperty(badSimulator, 'contract', {
     value: contract,
     writable: false,

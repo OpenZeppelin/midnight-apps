@@ -1,8 +1,8 @@
 import { Header } from '@/components/header';
+import { NewPositionWizard } from '@/components/pool/new-position-wizard';
 import { PoolPositions } from '@/components/pool/pool-positions';
 import { TokenRewards } from '@/components/pool/token-rewards';
 import { TopPoolsList } from '@/components/pool/top-pools-list';
-import { NewPositionWizard } from '@/components/pool/new-position-wizard';
 import { StarsBackground } from '@/components/stars-background';
 
 export const metadata = {

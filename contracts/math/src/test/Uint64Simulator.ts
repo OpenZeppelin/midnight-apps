@@ -17,28 +17,26 @@ import {
 } from '../artifacts/MockUint64/contract/index.cjs';
 import type { IContractSimulator } from '../types/test';
 import {
-  MathU64ContractPrivateState,
-  MathU64Witnesses,
-} from '../witnesses/MathU64';
+  Uint64ContractPrivateState,
+  Uint64Witnesses,
+} from '../witnesses/Uint64';
 
-export class MathContractSimulator
-  implements IContractSimulator<MathU64ContractPrivateState, Ledger>
+export class Uint64ContractSimulator
+  implements IContractSimulator<Uint64ContractPrivateState, Ledger>
 {
-  readonly contract: Contract<MathU64ContractPrivateState>;
+  readonly contract: Contract<Uint64ContractPrivateState>;
   readonly contractAddress: string;
-  circuitContext: CircuitContext<MathU64ContractPrivateState>;
+  circuitContext: CircuitContext<Uint64ContractPrivateState>;
 
   constructor() {
-    this.contract = new Contract<MathU64ContractPrivateState>(
-      MathU64Witnesses(),
-    );
+    this.contract = new Contract<Uint64ContractPrivateState>(Uint64Witnesses());
     const {
       currentPrivateState,
       currentContractState,
       currentZswapLocalState,
     } = this.contract.initialState(
       constructorContext(
-        MathU64ContractPrivateState.generate(),
+        Uint64ContractPrivateState.generate(),
         sampleCoinPublicKey(),
       ),
     );
@@ -59,7 +57,7 @@ export class MathContractSimulator
     return ledger(this.circuitContext.transactionContext.state);
   }
 
-  public getCurrentPrivateState(): MathU64ContractPrivateState {
+  public getCurrentPrivateState(): Uint64ContractPrivateState {
     return this.circuitContext.currentPrivateState;
   }
 
@@ -128,50 +126,47 @@ export class MathContractSimulator
   }
 }
 
-export function createMaliciousSimulator({
+export function createMaliciousUint64Simulator({
   mockSqrt,
   mockDiv,
 }: {
   mockSqrt?: (radicand: bigint) => bigint;
   mockDiv?: (a: bigint, b: bigint) => { quotient: bigint; remainder: bigint };
-}): MathContractSimulator {
-  const baseWitnesses = MathU64Witnesses();
+}): Uint64ContractSimulator {
+  const baseWitnesses = Uint64Witnesses();
 
-  const witnesses = (): ReturnType<typeof MathU64Witnesses> => ({
+  const witnesses = (): ReturnType<typeof Uint64Witnesses> => ({
     ...baseWitnesses,
     ...(mockSqrt && {
       sqrtU64Locally(
-        context: WitnessContext<Ledger, MathU64ContractPrivateState>,
+        context: WitnessContext<Ledger, Uint64ContractPrivateState>,
         radicand: bigint,
-      ): [MathU64ContractPrivateState, bigint] {
+      ): [Uint64ContractPrivateState, bigint] {
         return [context.privateState, mockSqrt(radicand)];
       },
     }),
     ...(mockDiv && {
       divU64Locally(
-        context: WitnessContext<Ledger, MathU64ContractPrivateState>,
+        context: WitnessContext<Ledger, Uint64ContractPrivateState>,
         a: bigint,
         b: bigint,
-      ): [
-        MathU64ContractPrivateState,
-        { quotient: bigint; remainder: bigint },
-      ] {
+      ): [Uint64ContractPrivateState, { quotient: bigint; remainder: bigint }] {
         return [context.privateState, mockDiv(a, b)];
       },
     }),
   });
 
-  const contract = new Contract<MathU64ContractPrivateState>(witnesses());
+  const contract = new Contract<Uint64ContractPrivateState>(witnesses());
 
   const { currentPrivateState, currentContractState, currentZswapLocalState } =
     contract.initialState(
       constructorContext(
-        MathU64ContractPrivateState.generate(),
+        Uint64ContractPrivateState.generate(),
         sampleCoinPublicKey(),
       ),
     );
 
-  const badSimulator = new MathContractSimulator();
+  const badSimulator = new Uint64ContractSimulator();
   Object.defineProperty(badSimulator, 'contract', {
     value: contract,
     writable: false,

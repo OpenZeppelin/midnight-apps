@@ -1,24 +1,24 @@
 import type {
-	ContractAddress,
-	ZswapCoinPublicKey,
-} from "@midnight-dapps/compact-std";
+  ContractAddress,
+  ZswapCoinPublicKey,
+} from '@midnight-dapps/compact-std';
 import {
-	convert_bigint_to_Uint8Array,
-	encodeCoinPublicKey,
-	encodeContractAddress,
-} from "@midnight-ntwrk/compact-runtime";
+  convert_bigint_to_Uint8Array,
+  encodeCoinPublicKey,
+  encodeContractAddress,
+} from '@midnight-ntwrk/compact-runtime';
 
-const PREFIX_ADDRESS = "0200";
+const PREFIX_ADDRESS = '0200';
 
 export const pad = (s: string, n: number): Uint8Array => {
-	const encoder = new TextEncoder();
-	const utf8Bytes = encoder.encode(s);
-	if (n < utf8Bytes.length) {
-		throw new Error(`The padded length n must be at least ${utf8Bytes.length}`);
-	}
-	const paddedArray = new Uint8Array(n);
-	paddedArray.set(utf8Bytes);
-	return paddedArray;
+  const encoder = new TextEncoder();
+  const utf8Bytes = encoder.encode(s);
+  if (n < utf8Bytes.length) {
+    throw new Error(`The padded length n must be at least ${utf8Bytes.length}`);
+  }
+  const paddedArray = new Uint8Array(n);
+  paddedArray.set(utf8Bytes);
+  return paddedArray;
 };
 
 /**
@@ -27,8 +27,8 @@ export const pad = (s: string, n: number): Uint8Array => {
  * @returns Encoded `ZswapCoinPublicKey`.
  */
 export const encodeToPK = (str: string): ZswapCoinPublicKey => {
-	const toHex = Buffer.from(str, "ascii").toString("hex");
-	return { bytes: encodeCoinPublicKey(String(toHex).padStart(64, "0")) };
+  const toHex = Buffer.from(str, 'ascii').toString('hex');
+  return { bytes: encodeCoinPublicKey(String(toHex).padStart(64, '0')) };
 };
 
 /**
@@ -38,9 +38,9 @@ export const encodeToPK = (str: string): ZswapCoinPublicKey => {
  * @returns Encoded `ZswapCoinPublicKey`.
  */
 export const encodeToAddress = (str: string): ContractAddress => {
-	const toHex = Buffer.from(str, "ascii").toString("hex");
-	const fullAddress = PREFIX_ADDRESS + String(toHex).padStart(64, "0");
-	return { bytes: encodeContractAddress(fullAddress) };
+  const toHex = Buffer.from(str, 'ascii').toString('hex');
+  const fullAddress = PREFIX_ADDRESS + String(toHex).padStart(64, '0');
+  return { bytes: encodeContractAddress(fullAddress) };
 };
 
 /**
@@ -50,11 +50,11 @@ export const encodeToAddress = (str: string): ContractAddress => {
  * @returns Defined Either object for ZswapCoinPublicKey.
  */
 export const createEitherTestUser = (str: string) => {
-	return {
-		is_left: true,
-		left: encodeToPK(str),
-		right: encodeToAddress(""),
-	};
+  return {
+    is_left: true,
+    left: encodeToPK(str),
+    right: encodeToAddress(''),
+  };
 };
 
 /**
@@ -64,21 +64,21 @@ export const createEitherTestUser = (str: string) => {
  * @returns Defined Either object for ContractAddress.
  */
 export const createEitherTestContractAddress = (str: string) => {
-	return {
-		is_left: false,
-		left: encodeToPK(""),
-		right: encodeToAddress(str),
-	};
+  return {
+    is_left: false,
+    left: encodeToPK(''),
+    right: encodeToAddress(str),
+  };
 };
 
 export const ZERO_KEY = {
-	is_left: true,
-	left: { bytes: convert_bigint_to_Uint8Array(32, BigInt(0)) },
-	right: encodeToAddress(""),
+  is_left: true,
+  left: { bytes: convert_bigint_to_Uint8Array(32, BigInt(0)) },
+  right: encodeToAddress(''),
 };
 
 export const ZERO_ADDRESS = {
-	is_left: false,
-	left: encodeToPK(""),
-	right: { bytes: convert_bigint_to_Uint8Array(32, BigInt(0)) },
+  is_left: false,
+  left: encodeToPK(''),
+  right: { bytes: convert_bigint_to_Uint8Array(32, BigInt(0)) },
 };

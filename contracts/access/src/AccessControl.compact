@@ -7,7 +7,7 @@ pragma language_version >= 0.14.0;
  */
 module AccessControl {
     import CompactStandardLibrary;
-    import "../node_modules/@midnight-dapps/structs-contracts/dist/Queue"<Uint<64>> prefix Queue_;
+    import "../node_modules/@midnight-dapps/structs/dist/Queue"<Uint<64>> prefix Queue_;
 
     /**
      * @description Defines the possible roles a user can have in the system.

@@ -1,7 +1,6 @@
 import type {
   MidnightProviders,
   UnprovenTransaction,
-  BalancedTransaction,
 } from '@midnight-ntwrk/midnight-js-types';
 import type { DAppConnectorWalletAPI } from './types';
 
@@ -125,7 +124,7 @@ export class LunarswapContractIntegration {
    * Create a swap transaction (placeholder - replace with actual contract call)
    */
   private async createSwapTransaction(
-    params: any,
+    _params: any,
   ): Promise<UnprovenTransaction> {
     // This is where you would create the actual swap transaction
     // using the Midnight.js contract APIs
@@ -140,7 +139,7 @@ export class LunarswapContractIntegration {
    * Create an add liquidity transaction (placeholder - replace with actual contract call)
    */
   private async createAddLiquidityTransaction(
-    params: any,
+    _params: any,
   ): Promise<UnprovenTransaction> {
     // This is where you would create the actual add liquidity transaction
     // using the Midnight.js contract APIs
@@ -154,7 +153,7 @@ export class LunarswapContractIntegration {
   /**
    * Calculate pool address for token pair
    */
-  private calculatePoolAddress(tokenA: string, tokenB: string): string {
+  private calculatePoolAddress(_tokenA: string, _tokenB: string): string {
     // This should use the actual factory contract to calculate pool address
     // For now, returning a placeholder
     return `0x${Math.random().toString(16).substr(2, 40)}`;

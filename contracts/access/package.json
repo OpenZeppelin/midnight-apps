@@ -1,11 +1,20 @@
 {
-  "name": "@midnight-dapps/access-contract",
+  "name": "@midnight-dapps/access",
   "version": "1.0.0-alpha.1",
   "private": true,
   "description": "Compacts for implementing LunarSwap DEX",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./artifacts/*": "./dist/artifacts/*",
+    "./keys/*": "./dist/artifacts/keys/*",
+    "./zkir/*": "./dist/artifacts/zkir/*"
+  },
   "scripts": {
     "compact": "pnpm exec compact-compiler",
     "build": "pnpm exec compact-builder && tsc",
@@ -29,6 +38,7 @@
     "@midnight-dapps/biome-config": "workspace:^",
     "@midnight-dapps/compact": "workspace:^",
     "@midnight-dapps/compact-std": "workspace:^",
+    "@midnight-dapps/structs": "workspace:^",
     "@midnight-ntwrk/compact-runtime": "^0.8.1",
     "@midnight-ntwrk/midnight-js-network-id": "^2.0.1",
     "@midnight-ntwrk/zswap": "^4.0.0"

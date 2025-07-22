@@ -9,14 +9,14 @@ import {
   MAX_UINT256,
 } from '../utils/consts';
 import {
-  MathU256Simulator,
-  createMaliciousSimulator,
+  Uint256Simulator,
+  createMaliciousUint256Simulator,
 } from './Uint256Simulator';
 
-let mathSimulator: MathU256Simulator;
+let mathSimulator: Uint256Simulator;
 
 const setup = () => {
-  mathSimulator = new MathU256Simulator();
+  mathSimulator = new Uint256Simulator();
 };
 
 // Helper to convert bigint to U256
@@ -662,7 +662,7 @@ describe('MathU256', () => {
     });
 
     test('div: should fail when remainder >= divisor', () => {
-      const sim = createMaliciousSimulator({
+      const sim = createMaliciousUint256Simulator({
         mockDivU256: () => ({ quotient: 1n, remainder: 10n }),
       });
       const a = toU256(20n);
@@ -671,7 +671,7 @@ describe('MathU256', () => {
     });
 
     test('div: should fail when quotient * b + remainder != a', () => {
-      const sim = createMaliciousSimulator({
+      const sim = createMaliciousUint256Simulator({
         mockDivU256: () => ({ quotient: 1n, remainder: 2n }), // 1*5+2 = 7 != 20
       });
       const a = toU256(20n);
@@ -739,7 +739,7 @@ describe('MathU256', () => {
     });
 
     test('rem: should fail when remainder >= divisor', () => {
-      const sim = createMaliciousSimulator({
+      const sim = createMaliciousUint256Simulator({
         mockDivU256: () => ({ quotient: 0n, remainder: 10n }),
       });
       const a = toU256(10n);
@@ -748,7 +748,7 @@ describe('MathU256', () => {
     });
 
     test('rem: should fail when quotient * b + remainder != a', () => {
-      const sim = createMaliciousSimulator({
+      const sim = createMaliciousUint256Simulator({
         mockDivU256: () => ({ quotient: 1n, remainder: 2n }),
       });
       const a = toU256(8n);
@@ -823,7 +823,7 @@ describe('MathU256', () => {
     });
 
     test('divRem: should fail when remainder >= divisor', () => {
-      const sim = createMaliciousSimulator({
+      const sim = createMaliciousUint256Simulator({
         mockDivU256: () => ({ quotient: 3n, remainder: 9n }),
       });
       const a = toU256(24n);
@@ -832,7 +832,7 @@ describe('MathU256', () => {
     });
 
     test('divRem: should fail when quotient * b + remainder != a', () => {
-      const sim = createMaliciousSimulator({
+      const sim = createMaliciousUint256Simulator({
         mockDivU256: () => ({ quotient: 3n, remainder: 2n }),
       });
       const a = toU256(25n);
@@ -884,7 +884,7 @@ describe('MathU256', () => {
     });
 
     test('sqrt: should fail if malicious witness overestimates root', () => {
-      const sim = createMaliciousSimulator({
+      const sim = createMaliciousUint256Simulator({
         mockSqrtU256: () => 3n, // sqrt(8) should be 2
       });
       const a = toU256(8n);
@@ -892,7 +892,7 @@ describe('MathU256', () => {
     });
 
     test('sqrt: should fail if malicious witness underestimates root', () => {
-      const sim = createMaliciousSimulator({
+      const sim = createMaliciousUint256Simulator({
         mockSqrtU256: () => 1n, // sqrt(5) should be 2
       });
       const a = toU256(5n);

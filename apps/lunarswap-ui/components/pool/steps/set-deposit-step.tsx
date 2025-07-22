@@ -3,12 +3,12 @@
 import { Button } from '@/components/ui/button';
 import { CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Loader2 } from 'lucide-react';
-import Image from 'next/image';
-import { useState, useEffect } from 'react';
 import { useMidnightTransaction } from '@/hooks/use-midnight-transaction';
 import { useWallet } from '@/hooks/use-wallet';
 import { createContractIntegration } from '@/lib/contract-integration';
+import { Loader2 } from 'lucide-react';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 interface SetDepositStepProps {

@@ -1,9 +1,20 @@
 {
-  "name": "@midnight-dapps/structs-contracts",
+  "name": "@midnight-dapps/structs",
   "version": "1.0.0-alpha.1",
   "private": true,
   "description": "Compacts contracts for Data structures i.e. Queue",
   "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./artifacts/*": "./dist/artifacts/*",
+    "./keys/*": "./dist/artifacts/keys/*",
+    "./zkir/*": "./dist/artifacts/zkir/*"
+  },
   "scripts": {
     "compact": "pnpm exec compact-compiler",
     "build": "pnpm exec compact-builder && tsc",

@@ -32,6 +32,10 @@ export circuit totalSupply(): Uint<128> {
     return ShieldedFungibleToken_totalSupply();
 }
 
+export circuit type(): Bytes<32> {
+    return ShieldedFungibleToken_type();
+}
+
 export circuit mint(
     recipient: Either<ZswapCoinPublicKey, ContractAddress>,
     amount: Uint<128>

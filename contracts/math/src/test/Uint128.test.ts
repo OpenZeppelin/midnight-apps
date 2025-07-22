@@ -8,14 +8,14 @@ import {
   MAX_UINT128,
 } from '../utils/consts';
 import {
-  MathU128Simulator,
-  createMaliciousSimulator,
+  Uint128Simulator,
+  createMaliciousUint128Simulator,
 } from './Uint128Simulator';
 
-let mathSimulator: MathU128Simulator;
+let mathSimulator: Uint128Simulator;
 
 const setup = () => {
-  mathSimulator = new MathU128Simulator();
+  mathSimulator = new Uint128Simulator();
 };
 
 describe('MathU128', () => {
@@ -52,7 +52,7 @@ describe('MathU128', () => {
     });
 
     test('should fail when reconstruction is invalid', () => {
-      const badSimulator = createMaliciousSimulator({
+      const badSimulator = createMaliciousUint128Simulator({
         mockDiv: () => ({ quotient: 1n, remainder: 1n }),
       });
       expect(() => badSimulator.toU128(123n)).toThrow(
@@ -652,7 +652,7 @@ describe('MathU128', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      const sim = createMaliciousSimulator({
+      const sim = createMaliciousUint128Simulator({
         mockDiv: () => ({
           quotient: 1n,
           remainder: 5n, // invalid: remainder == divisor
@@ -721,7 +721,7 @@ describe('MathU128', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      const sim = createMaliciousSimulator({
+      const sim = createMaliciousUint128Simulator({
         mockDiv: () => ({
           quotient: 1n,
           remainder: 5n, // divisor = 5n, remainder == 5n → invalid
@@ -777,7 +777,7 @@ describe('MathU128', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      const sim = createMaliciousSimulator({
+      const sim = createMaliciousUint128Simulator({
         mockDiv: () => ({
           quotient: 1n,
           remainder: 10n, // too big
@@ -846,7 +846,7 @@ describe('MathU128', () => {
     });
 
     test('remU128 should fail when remainder >= divisor', () => {
-      const sim = createMaliciousSimulator({
+      const sim = createMaliciousUint128Simulator({
         mockDiv: () => ({
           quotient: 1n,
           remainder: 10n, // too big
@@ -1004,14 +1004,14 @@ describe('MathU128', () => {
     });
 
     test('should fail if sqrt witness overestimates (root^2 > radicand)', () => {
-      const sim = createMaliciousSimulator({
+      const sim = createMaliciousUint128Simulator({
         mockSqrt: () => 11n, // 11^2 = 121 > 100
       });
       expect(() => sim.sqrt(100n)).toThrow('MathU128: sqrt overestimate');
     });
 
     test('should fail if sqrt witness underestimates (next^2 <= radicand)', () => {
-      const sim = createMaliciousSimulator({
+      const sim = createMaliciousUint128Simulator({
         mockSqrt: () => 9n, // (9+1)^2 = 100 <= 100
       });
       expect(() => sim.sqrt(100n)).toThrow('MathU128: sqrt underestimate');

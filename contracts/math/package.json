@@ -1,5 +1,5 @@
 {
-  "name": "@midnight-dapps/math-contracts",
+  "name": "@midnight-dapps/math",
   "version": "1.0.0-alpha.1",
   "private": true,
   "description": "Compacts contracts math operations.",

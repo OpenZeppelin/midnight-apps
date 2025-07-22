@@ -1,10 +1,10 @@
 import {
-	type CircuitContext,
-	type CoinPublicKey,
-	QueryContext,
-	emptyZswapLocalState,
-} from "@midnight-ntwrk/compact-runtime";
-import type { IContractSimulator } from "../types";
+  type CircuitContext,
+  type CoinPublicKey,
+  QueryContext,
+  emptyZswapLocalState,
+} from '@midnight-ntwrk/compact-runtime';
+import type { IContractSimulator } from '../types';
 
 // TODO: that is being used in contracts/access and contracts/data-structure,
 // should be moved to unified shared pkg.
@@ -22,18 +22,18 @@ import type { IContractSimulator } from "../types";
  * @returns A new `CircuitContext` with the sender and updated context values.
  */
 export function useCircuitContextSender<
-	P,
-	L,
-	C extends IContractSimulator<P, L>,
+  P,
+  L,
+  C extends IContractSimulator<P, L>,
 >(contract: C, sender: CoinPublicKey): CircuitContext<P> {
-	const currentPrivateState = contract.getCurrentPrivateState();
-	const originalState = contract.getCurrentContractState();
-	const contractAddress = contract.contractAddress;
+  const currentPrivateState = contract.getCurrentPrivateState();
+  const originalState = contract.getCurrentContractState();
+  const contractAddress = contract.contractAddress;
 
-	return {
-		originalState,
-		currentPrivateState,
-		transactionContext: new QueryContext(originalState.data, contractAddress),
-		currentZswapLocalState: emptyZswapLocalState(sender),
-	};
+  return {
+    originalState,
+    currentPrivateState,
+    transactionContext: new QueryContext(originalState.data, contractAddress),
+    currentZswapLocalState: emptyZswapLocalState(sender),
+  };
 }

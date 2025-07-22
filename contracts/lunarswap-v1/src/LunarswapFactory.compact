@@ -83,7 +83,7 @@ module LunarswapFactory {
      */
     export circuit isIdentityExists(identity: Bytes<32>): Boolean {
         return pool.member(identity);
-    }
+    } 
 
     /**
      * @title getPair circuit

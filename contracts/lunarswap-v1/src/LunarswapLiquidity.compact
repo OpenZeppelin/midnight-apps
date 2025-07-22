@@ -21,15 +21,17 @@ module LunarswapLiquidity {
     import CompactStandardLibrary;
 
     import "./openzeppelin/ShieldedERC20" prefix ShieldedERC20_;
-    import "./node_modules/@midnight-dapps/math-contracts/dist/MathU128";
+    import "./node_modules/@midnight-dapps/math/dist/Uint128" prefix Uint128_;
+    import "./node_modules/@midnight-dapps/math/dist/Bytes32" prefix Bytes32_;
 
     export ledger _counter: Counter;
     export ledger _nonce: Bytes<32>;
     // That is a map of all the liquidity LP tokens, the key is the pair hash.
     export ledger _totalSupply: Map<Bytes<32>, QualifiedCoinInfo>;
-    export sealed ledger _name: Opaque<"string">;
-    export sealed ledger _symbol: Opaque<"string">;
-    export sealed ledger _decimals: Uint<8>;
+    export ledger _name: Opaque<"string">;
+    export ledger _symbol: Opaque<"string">;
+    export ledger _decimals: Uint<8>;
+    export ledger _type: Bytes<32>;
 
 
     /**
@@ -39,8 +41,6 @@ module LunarswapLiquidity {
      * @remarks
      * This circuit sets up the initial configuration for LP tokens including name,
      * symbol, decimals, and nonce. It should only be called once during contract deployment.
-     *
-     * @circuitInfo k=11, rows=800
      *
      * @param {Bytes<32>} nonce_      - The nonce for LP token generation.
      * @param {Opaque<"string">} name_ - The name of the LP token.
@@ -73,8 +73,6 @@ module LunarswapLiquidity {
      * Requirements:
      * - The pair identity must not already have LP tokens initialized
      *
-     * @circuitInfo k=11, rows=600
-     *
      * @param {Bytes<32>} identity - The unique identity hash of the trading pair.
      *
      * @throws {Error} "LunarswapLiquidity: initializePairLpToken() - Lp token already exists" if LP tokens already exist for this pair.
@@ -94,8 +92,6 @@ module LunarswapLiquidity {
      * @remarks
      * This circuit retrieves the configured name for liquidity provider tokens.
      *
-     * @circuitInfo k=11, rows=200
-     *
      * @returns {Opaque<"string">} - The LP token name.
      */
     export circuit name(): Opaque<"string"> {
@@ -108,8 +104,6 @@ module LunarswapLiquidity {
      * 
      * @remarks
      * This circuit retrieves the configured symbol for liquidity provider tokens.
-     *
-     * @circuitInfo k=11, rows=200
      *
      * @returns {Opaque<"string">} - The LP token symbol.
      */
@@ -124,12 +118,23 @@ module LunarswapLiquidity {
      * @remarks
      * This circuit retrieves the configured decimal places for liquidity provider tokens.
      *
-     * @circuitInfo k=11, rows=200
-     *
      * @returns {Uint<8>} - The number of decimal places for LP tokens.
      */
     export circuit decimals(): Uint<8> {
         return _decimals;
+    }
+
+    /**
+     * @title type circuit
+     * @description Returns the type of the LP token.
+     * 
+     * @remarks
+     * This circuit retrieves the configured type for liquidity provider tokens.
+     *
+     * @returns {Bytes<32>} - The type of the LP token.
+     */
+    export circuit type(): Bytes<32> {
+        return _type;
     }
 
     /**
@@ -142,8 +147,6 @@ module LunarswapLiquidity {
      *
      * Requirements:
      * - The pair identity must have LP tokens initialized
-     *
-     * @circuitInfo k=11, rows=400
      *
      * @param {Bytes<32>} identity - The unique identity hash of the trading pair.
      *
@@ -168,8 +171,6 @@ module LunarswapLiquidity {
      * - The pair identity must have LP tokens initialized
      * - The amount must be greater than zero
      *
-     * @circuitInfo k=11, rows=1500
-     *
      * @param {Bytes<32>} identity - The unique identity hash of the trading pair.
      * @param {Either<ZswapCoinPublicKey, ContractAddress>} recipient - The recipient of the minted LP tokens.
      * @param {Uint<128>} amount - The amount of LP tokens to mint.
@@ -184,11 +185,15 @@ module LunarswapLiquidity {
         _counter.increment(1);
         const newNonce = evolve_nonce(_counter, _nonce);
         const ret = mint_token(identity, amount, newNonce, recipient);
+
+        if (Bytes32_isZero(_type)) {
+            _type = ret.color;
+        }
         
         const newTotalSupply = QualifiedCoinInfo {
             nonce: ret.nonce,
             color: ret.color,
-            value: addChecked(_totalSupply.lookup(identity).value, amount),
+            value: Uint128_addChecked(_totalSupply.lookup(identity).value, amount),
             mt_index: _totalSupply.lookup(identity).mt_index,
         };
         _totalSupply.insert(identity, newTotalSupply);
@@ -208,8 +213,6 @@ module LunarswapLiquidity {
      * Requirements:
      * - The coin value must be sufficient for the burn amount
      * - The pair identity must have LP tokens initialized
-     *
-     * @circuitInfo k=11, rows=1800
      *
      * @param {Bytes<32>} identity - The unique identity hash of the trading pair.
      * @param {CoinInfo} coin - The LP token coin to burn.
@@ -233,7 +236,7 @@ module LunarswapLiquidity {
         const newTotalSupply = QualifiedCoinInfo {
             nonce: coin.nonce,
             color: coin.color,
-            value: sub(_totalSupply.lookup(identity).value, amount),
+            value: Uint128_sub(_totalSupply.lookup(identity).value, amount),
             mt_index: _totalSupply.lookup(identity).mt_index, // TODO: needs review
         };
         _totalSupply.insert(identity, newTotalSupply);

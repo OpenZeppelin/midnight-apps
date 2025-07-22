@@ -90,10 +90,19 @@ module Queue<T> {
     export ledger tail: Counter;
 
     /**
+     * @title enqueue circuit
      * @description Adds an element to the back of the queue.
+     *
+     * @remarks
+     * - Inserts the item at the current `tail` position and increments `tail`.
+     * - Time complexity: O(1).
+     * - If the `tail` counter has reached its maximum value (`2^64 - 1`), the function will assert and fail.
+     *
+     * @circuitInfo k = 10, rows = 54
+     *
      * @param item - The element to enqueue.
-     * @remarks Inserts the item at the current `tail` position 
-     * and increments `tail`. Time complexity: O(1).
+     *
+     * @returns {[]} - An empty array.
      */
     export circuit enqueue(item: T): [] {
         // TODO: test tail overflow, currently that will be an infeasible test.
@@ -105,14 +114,19 @@ module Queue<T> {
     }
 
     /**
-     * @description Removes and returns the element at the 
-     * front of the queue.
-     * @returns {Maybe<T>} The dequeued element wrapped in 
-     * `Maybe`, or `none<T>` if the queue is empty.
-     * @remarks Removes the element at `head`, increments 
-     * `head`, and returns the value. Shifting is omitted due 
-     * to Compact’s lack of iteration; keys remain sparse. 
-     * Time complexity: O(1) without shifting.
+     * @title dequeue circuit
+     * @description Removes and returns the element at the front of the queue.
+     *
+     * @remarks
+     * - Removes the element at `head`, increments `head`, and returns the value.
+     * - If the queue is empty (`head == tail`), returns `none<T>()`.
+     * - Shifting of keys is not performed due to Compact's lack of iteration; keys may become sparse.
+     * - Time complexity: O(1).
+     * - If the `head` counter has reached its maximum value (`2^64 - 1`), the function will assert and fail.
+     *
+     * @circuitInfo k = 10, rows = 250
+     *
+     * @returns {Maybe<T>} - `some<T>(value)` containing the dequeued element if the queue is not empty.
      */
     export circuit dequeue(): Maybe<T> {
         if (isEmpty()) {
@@ -132,11 +146,16 @@ module Queue<T> {
     }
 
     /**
+     * @title isEmpty circuit
      * @description Checks if the queue is empty.
-     * @returns {Boolean} True if the queue is empty (head == 
-     * tail), false otherwise.
-     * @remarks Relies on comparing `head` and `tail` counters. 
-     * Time complexity: O(1).
+     *
+     * @remarks
+     * - Relies on comparing `head` and `tail` counters.
+     * - Time complexity: O(1).
+     *
+     * @circuitInfo k = 10, rows = 37
+     *
+     * @returns {Boolean} - `true` if the queue is empty (`head == tail`), otherwise `false`.
      */
     export circuit isEmpty(): Boolean {
         return head == tail;

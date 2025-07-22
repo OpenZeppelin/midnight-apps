@@ -13,14 +13,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { ArrowDown, Fuel, Info, Settings, Loader2 } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { TokenInput } from './token-input';
-import { TokenSelectModal } from './token-select-modal';
 import { useMidnightTransaction } from '@/hooks/use-midnight-transaction';
 import { useWallet } from '@/hooks/use-wallet';
 import { createContractIntegration } from '@/lib/contract-integration';
+import { ArrowDown, Fuel, Info, Loader2, Settings } from 'lucide-react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { TokenInput } from './token-input';
+import { TokenSelectModal } from './token-select-modal';
 
 interface Token {
   symbol: string;
@@ -33,7 +33,7 @@ export function SwapCard() {
   const { isWalletConnected, walletState } = useWallet();
   const { transactionState, executeTransaction, resetTransaction } =
     useMidnightTransaction();
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [isHydrated] = useState(false);
 
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [selectingToken, setSelectingToken] = useState<'from' | 'to'>('from');

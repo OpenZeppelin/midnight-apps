@@ -1,11 +1,20 @@
 {
-  "name": "@midnight-dapps/shielded-token-contract",
+  "name": "@midnight-dapps/shielded-token",
   "version": "1.0.0-alpha.1",
   "private": true,
   "description": "Shielded Fungible Token contract for Midnight DApps",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./artifacts/*": "./dist/artifacts/*",
+    "./keys/*": "./dist/artifacts/ShieldedToken/keys/*",
+    "./zkir/*": "./dist/artifacts/ShieldedToken/zkir/*"
+  },
   "scripts": {
     "compact": "pnpm exec compact-compiler",
     "compact:fast": "pnpm exec compact-compiler --skip-zk",
@@ -30,9 +39,10 @@
     "@midnight-dapps/biome-config": "workspace:^",
     "@midnight-dapps/compact": "workspace:^",
     "@midnight-dapps/compact-std": "workspace:^",
+    "@midnight-dapps/math": "workspace:^",
     "@midnight-ntwrk/compact-runtime": "^0.8.1",
     "@midnight-ntwrk/midnight-js-network-id": "^2.0.1",
     "@midnight-ntwrk/zswap": "^4.0.0",
     "@midnight-ntwrk/wallet-sdk-address-format": "2.0.0"
   }
-} 
+}

@@ -20,8 +20,8 @@ module LunarswapPair {
     import CompactStandardLibrary;
     
     import "./openzeppelin/Utils";
-    import "../node_modules/@midnight-dapps/math-contracts/dist/MathU128" prefix MathU128_;
-    import "../node_modules/@midnight-dapps/math-contracts/dist/Max";
+    import "../node_modules/@midnight-dapps/math/dist/Uint128" prefix Uint128_;
+    import "../node_modules/@midnight-dapps/math/dist/Max";
     
     import "./interfaces/ILunarswapPair";
     
@@ -147,8 +147,8 @@ module LunarswapPair {
         amount1: Uint<128>
     ): Pair {
         // We use addChecked here because the max amount in CoinInfo is Uint<128>
-        const balance0 = MathU128_addChecked(reserve0, amount0);
-        const balance1 = MathU128_addChecked(reserve1, amount1);
+        const balance0 = Uint128_addChecked(reserve0, amount0);
+        const balance1 = Uint128_addChecked(reserve1, amount1);
 
         const [isFeeOn, kLast] = _mintFee(identity, reserve0, reserve1, pair.kLast);
         // TODO: review the risk of using totalSupply here. Because of the nature of UTXO that 
@@ -158,8 +158,8 @@ module LunarswapPair {
         if (totalSupply == 0) {
             // liquidity = (√amount0 * amount1) - MINIMUM_LIQUIDITY = Uint<128>
             // TODO: review disclose
-            const liquidity = MathU128_sub(
-                disclose(MathU128_sqrt(MathU128_mulChecked(amount0, amount1))), 
+            const liquidity = Uint128_sub(
+                disclose(Uint128_sqrt(Uint128_mulChecked(amount0, amount1))), 
                 MINIMUM_LIQUIDITY()
             );
             assert(liquidity > 0) "LunarswapPair: Insufficient liquidity minted";
@@ -182,9 +182,9 @@ module LunarswapPair {
             // TODO: In case of using Uint<128> for reserves that results a conflict with 
             // the ERC20 Compact standard, since the result here is Uint<256> while the max min tokens are Uint<128>
             // liquidity = ((amount0 * totalSupply / reserve0) ∧ ((amount1 * totalSupply) / reserve1) 
-            const liquidity = MathU128_min(
-                disclose(MathU128_div(MathU128_mulChecked(amount0, totalSupply), reserve0)),
-                disclose(MathU128_div(MathU128_mulChecked(amount1, totalSupply), reserve1))
+            const liquidity = Uint128_min(
+                disclose(Uint128_div(Uint128_mulChecked(amount0, totalSupply), reserve0)),
+                disclose(Uint128_div(Uint128_mulChecked(amount1, totalSupply), reserve1))
             ); 
             // TODO: that is TBD later in the future after doing benchmarks on the performance of MathU256
             assert (liquidity <= MAX_UINT128()) "LunarswapPair: liquidity overflows MAX_U128 supported size in ERC20";
@@ -233,15 +233,15 @@ module LunarswapPair {
         if (isFeeOn) {
             if (kLast != 0) {
                 // TODO: review disclose
-                const rootK = disclose(MathU128_sqrt(MathU128_mulChecked(reserve0, reserve1)));
+                const rootK = disclose(Uint128_sqrt(Uint128_mulChecked(reserve0, reserve1)));
                 // TODO: review disclose
-                const rootKLast = disclose(MathU128_sqrt(kLast));
+                const rootKLast = disclose(Uint128_sqrt(kLast));
                 if (rootK > rootKLast) {
                     // TODO: review the security of the totalSupply.
                     const totalSupply = LunarswapLiquidity_totalSupply(identity).value;
-                    const numerator = MathU128_mulChecked(MathU128_sub(rootK, rootKLast), totalSupply);
-                    const denominator = MathU128_addChecked(MathU128_mulChecked(rootK, 5), rootKLast);
-                    const liquidity = disclose(MathU128_div(numerator, denominator));
+                    const numerator = Uint128_mulChecked(Uint128_sub(rootK, rootKLast), totalSupply);
+                    const denominator = Uint128_addChecked(Uint128_mulChecked(rootK, 5), rootKLast);
+                    const liquidity = disclose(Uint128_div(numerator, denominator));
                     assert (liquidity <= MAX_UINT128()) "LunarswapPair: liquidity overflows MAX_U128 supported size in ERC20";
                     if (liquidity as Uint<128> > 0) {
                         // Mint Liquidity Tokens for the protocol fee recipient
@@ -353,8 +353,8 @@ module LunarswapPair {
     ): [Pair, Uint<128>, Uint<128>] {
         // Early validation: Calculate expected amounts and validate reserves
         const amount0 = disclose(
-            MathU128_div(
-                MathU128_mulChecked(
+            Uint128_div(
+                Uint128_mulChecked(
                     liquidity.value,
                     balance0
                 ),
@@ -362,8 +362,8 @@ module LunarswapPair {
             )
         );
         const amount1 = disclose(
-            MathU128_div(
-                MathU128_mulChecked(
+            Uint128_div(
+                Uint128_mulChecked(
                     liquidity.value,
                     balance1
                 ),
@@ -395,8 +395,8 @@ module LunarswapPair {
         {
             const amount0 = splitToken0.used.value;
             const amount1 = splitToken1.used.value;
-            const balance0 = MathU128_sub(reserve0, amount0);
-            const balance1 = MathU128_sub(reserve1, amount1);
+            const balance0 = Uint128_sub(reserve0, amount0);
+            const balance1 = Uint128_sub(reserve1, amount1);
             
             const updatedPair = _update(
                 pair,
@@ -447,22 +447,22 @@ module LunarswapPair {
             send(outputQualifiedCoin, to, amount1Out);
         }
 
-        const updatedBalance0 = amount0Out > 0 ? MathU128_sub(balance0, amount0Out) : balance0;
-        const updatedBalance1 = amount1Out > 0 ? MathU128_sub(balance1, amount1Out) : balance1;
+        const updatedBalance0 = amount0Out > 0 ? Uint128_sub(balance0, amount0Out) : balance0;
+        const updatedBalance1 = amount1Out > 0 ? Uint128_sub(balance1, amount1Out) : balance1;
 
-        const amount0In = updatedBalance0 > MathU128_sub(reserve0, amount0Out) ? MathU128_sub(updatedBalance0, MathU128_sub(reserve0, amount0Out)) : 0;
-        const amount1In = updatedBalance1 > MathU128_sub(reserve1, amount1Out) ? MathU128_sub(updatedBalance1, MathU128_sub(reserve1, amount1Out)) : 0;
+        const amount0In = updatedBalance0 > Uint128_sub(reserve0, amount0Out) ? Uint128_sub(updatedBalance0, Uint128_sub(reserve0, amount0Out)) : 0;
+        const amount1In = updatedBalance1 > Uint128_sub(reserve1, amount1Out) ? Uint128_sub(updatedBalance1, Uint128_sub(reserve1, amount1Out)) : 0;
 
         assert (amount0In > 0 || amount1In > 0) "LunarswapPair: swap() - Insufficient input amount";
 
-        const balance0Adjusted = MathU128_sub(MathU128_mulChecked(updatedBalance0, 1000), MathU128_mulChecked(amount0In, 3));
-        const balance1Adjusted = MathU128_sub(MathU128_mulChecked(updatedBalance1, 1000), MathU128_mulChecked(amount1In, 3));
+        const balance0Adjusted = Uint128_sub(Uint128_mulChecked(updatedBalance0, 1000), Uint128_mulChecked(amount0In, 3));
+        const balance1Adjusted = Uint128_sub(Uint128_mulChecked(updatedBalance1, 1000), Uint128_mulChecked(amount1In, 3));
 
         assert (
-            MathU128_mulChecked(balance0Adjusted, balance1Adjusted)
+            Uint128_mulChecked(balance0Adjusted, balance1Adjusted)
                 >=
-            MathU128_mulChecked(
-                MathU128_mulChecked(reserve0, reserve1),
+            Uint128_mulChecked(
+                Uint128_mulChecked(reserve0, reserve1),
                 1000000 // 1000 ** 2
             )
         ) "LunarswapPair: swap() - k";
@@ -550,14 +550,14 @@ module LunarswapPair {
         amount1In: Uint<128>,
     ): [Uint<128>, Uint<128>, Uint<128>, Uint<128>] {
         if (reserve0 != 0 && reserve1 != 0) {
-            const price0 = disclose(MathU128_div(reserve1, reserve0));
-            const price1 = disclose(MathU128_div(reserve0, reserve1));
+            const price0 = disclose(Uint128_div(reserve1, reserve0));
+            const price1 = disclose(Uint128_div(reserve0, reserve1));
 
-            const price0VolCumulative = MathU128_addChecked(pair.price0VolCumulative, MathU128_mulChecked(price0, amount0In));
-            const price1VolCumulative = MathU128_addChecked(pair.price1VolCumulative, MathU128_mulChecked(price1, amount1In));
+            const price0VolCumulative = Uint128_addChecked(pair.price0VolCumulative, Uint128_mulChecked(price0, amount0In));
+            const price1VolCumulative = Uint128_addChecked(pair.price1VolCumulative, Uint128_mulChecked(price1, amount1In));
 
-            const volume0Cumulative = MathU128_addChecked(pair.volume0Cumulative, amount0In);
-            const volume1Cumulative = MathU128_addChecked(pair.volume1Cumulative, amount1In);
+            const volume0Cumulative = Uint128_addChecked(pair.volume0Cumulative, amount0In);
+            const volume1Cumulative = Uint128_addChecked(pair.volume1Cumulative, amount1In);
             
             return [price0VolCumulative, price1VolCumulative, volume0Cumulative, volume1Cumulative];
         } else {
@@ -620,7 +620,7 @@ module LunarswapPair {
         reserve0: Uint<128>,
         reserve1: Uint<128>,
     ): Uint<128> {
-        return isFeeOn ? MathU128_mulChecked(reserve0, reserve1) : 0;
+        return isFeeOn ? Uint128_mulChecked(reserve0, reserve1) : 0;
     } 
 
     /**

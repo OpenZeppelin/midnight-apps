@@ -20,8 +20,8 @@ pragma language_version >= 0.14.0;
 module LunarswapLibrary {
     import CompactStandardLibrary;
 
-    import "../node_modules/@midnight-dapps/math-contracts/dist/MathU128" prefix MathU128_;
-    import "../node_modules/@midnight-dapps/math-contracts/dist/Bytes32" prefix Bytes32_;
+    import "../node_modules/@midnight-dapps/math/dist/Uint128" prefix Uint128_;
+    import "../node_modules/@midnight-dapps/math/dist/Bytes32" prefix Bytes32_;
 
     // Struct for split coin result
     export struct SplitCoinResult {
@@ -64,7 +64,7 @@ module LunarswapLibrary {
         };
         const remainder = CoinInfo {
             color: coin.color,
-            value: MathU128_sub(coin.value, amount),
+            value: Uint128_sub(coin.value, amount),
             nonce: evolve_nonce(1, coin.nonce)
         };
         return SplitCoinResult { used, remainder };
@@ -101,7 +101,7 @@ module LunarswapLibrary {
         };
         const remainder = QualifiedCoinInfo {
             color: qualifiedCoin.color,
-            value: MathU128_sub(qualifiedCoin.value, amount),
+            value: Uint128_sub(qualifiedCoin.value, amount),
             nonce: evolve_nonce(1, qualifiedCoin.nonce),
             mt_index: qualifiedCoin.mt_index
         };
@@ -224,7 +224,7 @@ module LunarswapLibrary {
     export circuit addCoinValue(_coin: CoinInfo, _amount: Uint<128>): CoinInfo {
         return CoinInfo {
             color: _coin.color,
-            value: MathU128_addChecked(_coin.value, _amount),
+            value: Uint128_addChecked(_coin.value, _amount),
             nonce: evolve_nonce(0, _coin.nonce)
         };
     }
@@ -248,7 +248,7 @@ module LunarswapLibrary {
     export circuit addQualifiedCoinValue(coin: QualifiedCoinInfo, amount: Uint<128>): QualifiedCoinInfo {
         return QualifiedCoinInfo {
             color: coin.color,
-            value: MathU128_addChecked(coin.value, amount),
+            value: Uint128_addChecked(coin.value, amount),
             nonce: evolve_nonce(0, coin.nonce),
             mt_index: coin.mt_index
         };
@@ -274,7 +274,7 @@ module LunarswapLibrary {
         assert amount <= coin.value "LunarswapLibrary: subQualifiedCoinValue() - Insufficient amount";
         return QualifiedCoinInfo {
             color: coin.color,
-            value: MathU128_sub(coin.value, amount),
+            value: Uint128_sub(coin.value, amount),
             nonce: evolve_nonce(0, coin.nonce),
             mt_index: coin.mt_index
         };
@@ -354,8 +354,8 @@ module LunarswapLibrary {
     export circuit quote(amount0: Uint<128>, reserve0: Uint<128>, reserve1: Uint<128>): Uint<128> {
         assert (amount0 > 0) "LunarswapLibrary: quote() - Insufficient amount";
         assert (reserve0 > 0 && reserve1 > 0) "LunarswapLibrary: quote() - Insufficient liquidity";
-        return disclose(MathU128_div(
-            MathU128_mulChecked(amount0, reserve1),
+        return disclose(Uint128_div(
+            Uint128_mulChecked(amount0, reserve1),
             reserve0
         ));
     }
@@ -386,10 +386,10 @@ module LunarswapLibrary {
     export circuit getAmountOut(amountIn: Uint<128>, reserveIn: Uint<128>, reserveOut: Uint<128>): Uint<128> {
         assert (amountIn > 0) "LunarswapLibrary: getAmountOut() - Insufficient amount";
         assert (reserveIn > 0 && reserveOut > 0) "LunarswapLibrary: getAmountOut() - Insufficient liquidity";
-        const amountInWithFee = MathU128_mulChecked(amountIn, 997);
-        const numerator = MathU128_mulChecked(amountInWithFee, reserveOut);
-        const denominator = MathU128_addChecked(MathU128_mulChecked(reserveIn, 1000), amountInWithFee);
-        return disclose(MathU128_div(numerator, denominator));
+        const amountInWithFee = Uint128_mulChecked(amountIn, 997);
+        const numerator = Uint128_mulChecked(amountInWithFee, reserveOut);
+        const denominator = Uint128_addChecked(Uint128_mulChecked(reserveIn, 1000), amountInWithFee);
+        return disclose(Uint128_div(numerator, denominator));
     }
 
     /**
@@ -418,10 +418,10 @@ module LunarswapLibrary {
     export circuit getAmountIn(amountOut: Uint<128>, reserveIn: Uint<128>, reserveOut: Uint<128>): Uint<128> {
         assert (amountOut > 0) "LunarswapLibrary: getAmountIn() - Insufficient amount";
         assert (reserveIn > 0 && reserveOut > 0) "LunarswapLibrary: getAmountIn() - Insufficient liquidity";
-        const numerator = MathU128_mulChecked(MathU128_mulChecked(reserveIn, amountOut), 1000);
-        const denominator = MathU128_mulChecked(MathU128_sub(reserveOut, amountOut), 997);
-        return MathU128_addChecked(
-            disclose(MathU128_div(numerator, denominator)),
+        const numerator = Uint128_mulChecked(Uint128_mulChecked(reserveIn, amountOut), 1000);
+        const denominator = Uint128_mulChecked(Uint128_sub(reserveOut, amountOut), 997);
+        return Uint128_addChecked(
+            disclose(Uint128_div(numerator, denominator)),
             1
         );
     }

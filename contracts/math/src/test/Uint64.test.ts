@@ -1,14 +1,14 @@
 import { beforeEach, describe, expect, test } from 'vitest';
 import { MAX_UINT32, MAX_UINT64 } from '../utils/consts';
 import {
-  MathContractSimulator,
-  createMaliciousSimulator,
+  Uint64ContractSimulator,
+  createMaliciousUint64Simulator,
 } from './Uint64Simulator';
 
-let mathSimulator: MathContractSimulator;
+let mathSimulator: Uint64ContractSimulator;
 
 const setup = () => {
-  mathSimulator = new MathContractSimulator();
+  mathSimulator = new Uint64ContractSimulator();
 };
 
 describe('MathU64', () => {
@@ -111,14 +111,14 @@ describe('MathU64', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      const badSimulator = createMaliciousSimulator({
+      const badSimulator = createMaliciousUint64Simulator({
         mockDiv: () => ({ quotient: 1n, remainder: 10n }), // 10n >= 5n
       });
       expect(() => badSimulator.div(10n, 5n)).toThrow('Math: remainder error');
     });
 
     test('should fail when quotient * b + remainder != a', () => {
-      const badSimulator = createMaliciousSimulator({
+      const badSimulator = createMaliciousUint64Simulator({
         mockDiv: () => ({ quotient: 1n, remainder: 1n }), // 1*5 + 1 = 6 ≠ 10
       });
       expect(() => badSimulator.div(10n, 5n)).toThrow('Math: division invalid');
@@ -161,14 +161,14 @@ describe('MathU64', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      const badSimulator = createMaliciousSimulator({
+      const badSimulator = createMaliciousUint64Simulator({
         mockDiv: () => ({ quotient: 1n, remainder: 5n }), // 5n >= 5n
       });
       expect(() => badSimulator.rem(10n, 5n)).toThrow('Math: remainder error');
     });
 
     test('should fail when quotient * b + remainder != a', () => {
-      const badSimulator = createMaliciousSimulator({
+      const badSimulator = createMaliciousUint64Simulator({
         mockDiv: () => ({ quotient: 0n, remainder: 2n }), // 0*5 + 2 = 2 ≠ 10
       });
       expect(() => badSimulator.rem(10n, 5n)).toThrow('Math: division invalid');
@@ -225,7 +225,7 @@ describe('MathU64', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      const badSimulator = createMaliciousSimulator({
+      const badSimulator = createMaliciousUint64Simulator({
         mockDiv: () => ({ quotient: 1n, remainder: 5n }), // 5n >= 5n
       });
       expect(() => badSimulator.divRem(10n, 5n)).toThrow(
@@ -234,7 +234,7 @@ describe('MathU64', () => {
     });
 
     test('should fail when quotient * b + remainder != a', () => {
-      const badSimulator = createMaliciousSimulator({
+      const badSimulator = createMaliciousUint64Simulator({
         mockDiv: () => ({ quotient: 2n, remainder: 0n }), // 2*5 = 10 OK, change to fail
       });
       expect(() => badSimulator.divRem(11n, 5n)).toThrow(
@@ -243,7 +243,7 @@ describe('MathU64', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      const badSimulator = createMaliciousSimulator({
+      const badSimulator = createMaliciousUint64Simulator({
         mockDiv: () => ({ quotient: 1n, remainder: 10n }), // 10n not < 5n
       });
 
@@ -306,7 +306,7 @@ describe('MathU64', () => {
     });
 
     test('should fail with overestimated root', () => {
-      const badSimulator = createMaliciousSimulator({
+      const badSimulator = createMaliciousUint64Simulator({
         mockSqrt: () => 5n, // 5^2 = 25 > 10
       });
 
@@ -314,7 +314,7 @@ describe('MathU64', () => {
     });
 
     test('should fail with underestimated root', () => {
-      const badSimulator = createMaliciousSimulator({
+      const badSimulator = createMaliciousUint64Simulator({
         mockSqrt: () => 3n, // 3^2 = 9 < 16
       });
 

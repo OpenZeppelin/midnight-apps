@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useWallet } from './use-wallet';
 import { createMidnightProviders } from '@/lib/midnight-providers';
 import type { DAppConnectorWalletAPI } from '@/lib/types';
+import { useCallback, useState } from 'react';
+import { useWallet } from './use-wallet';
 
 export type TransactionStatus =
   | 'idle'

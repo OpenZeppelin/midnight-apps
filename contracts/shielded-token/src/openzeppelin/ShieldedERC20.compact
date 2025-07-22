@@ -32,6 +32,7 @@ pragma language_version >= 0.15.0;
 module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
   import CompactStandardLibrary;
   import Utils prefix Utils_;
+  import "../../node_modules/@midnight-dapps/math/dist/Bytes32" prefix Bytes32_;
 
   // Public state
   export ledger _counter: Counter;
@@ -41,6 +42,7 @@ module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
   export sealed ledger _name: Opaque<"string">;
   export sealed ledger _symbol: Opaque<"string">;
   export sealed ledger _decimals: Uint<8>;
+  export ledger _type: Bytes<32>;
 
   /**
    * @description Initializes the contract by setting the initial nonce
@@ -90,6 +92,15 @@ module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
   }
 
   /**
+   * @description Returns the type of the token.
+   *
+   * @return {Bytes<32>} - The type of the token.
+   */
+  export circuit type(): Bytes<32> {
+    return _type;
+  }
+
+  /**
    * @description Returns the value of tokens in existence.
    * @notice The total supply accounting mechanism cannot be guaranteed to be accurate.
    * There is nothing to prevent users from directly sending tokens to the burn
@@ -119,6 +130,9 @@ module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
     const newNonce = evolve_nonce(_counter, _nonce);
     _nonce = newNonce;
     const ret = mint_token(_domain, amount, _nonce, recipient);
+    if (Bytes32_isZero(_type)) {
+      _type = ret.color;
+    }
     _totalSupply = _totalSupply + amount as Uint<128>;
     return ret;
   }

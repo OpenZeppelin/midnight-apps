@@ -42,8 +42,7 @@ pragma language_version >= 0.14.0;
 
 import CompactStandardLibrary;
 
-import "./node_modules/@midnight-dapps/math-contracts/dist/interfaces/IUint128";
-import "./node_modules/@midnight-dapps/math-contracts/dist/interfaces/IMathU128";
+import "./node_modules/@midnight-dapps/math/dist/interfaces/IUint128";
 
 import "./interfaces/ILunarswapPair";
 import "./interfaces/ILunarswapFactory";
@@ -301,7 +300,7 @@ export circuit swapTokensForExactTokens(
  * This circuit sorts the tokens to ensure consistent pair identification and checks
  * if a pair exists in the factory for the sorted token combination.
  *
- * @circuitInfo k=11, rows=800
+ * @circuitInfo k=14, rows=14922
  *
  * @param {CoinInfo} tokenA - The first token in the pair.
  * @param {CoinInfo} tokenB - The second token in the pair.
@@ -407,7 +406,7 @@ export circuit getPairIdentity(tokenA: CoinInfo, tokenB: CoinInfo): Bytes<32> {
  * @remarks
  * This circuit retrieves the configured name for liquidity provider tokens.
  *
- * @circuitInfo k=11, rows=300
+ * @circuitInfo k=10, rows=34
  *
  * @returns {Opaque<"string">} - The LP token name.
  */
@@ -422,7 +421,7 @@ export circuit getLpTokenName(): Opaque<"string"> {
  * @remarks
  * This circuit retrieves the configured symbol for liquidity provider tokens.
  *
- * @circuitInfo k=11, rows=300
+ * @circuitInfo k=10, rows=34
  *
  * @returns {Opaque<"string">} - The LP token symbol.
  */
@@ -437,12 +436,27 @@ export circuit getLpTokenSymbol(): Opaque<"string"> {
  * @remarks
  * This circuit retrieves the configured decimal places for liquidity provider tokens.
  *
- * @circuitInfo k=11, rows=200
+ * @circuitInfo k=10, rows=33
  *
  * @returns {Uint<8>} - The number of decimal places for LP tokens.
  */
 export circuit getLpTokenDecimals(): Uint<8> {
     return LunarswapLiquidity_decimals();
+}
+
+/**
+ * @title getLpTokenType circuit
+ * @description Returns the type of the LP token.
+ * 
+ * @remarks
+ * This circuit retrieves the configured type for liquidity provider tokens.
+ *
+ * @circuitInfo k=10, rows=56
+ *
+ * @returns {Bytes<32>} - The type of the LP token.
+ */
+export circuit getLpTokenType(): Bytes<32> {
+    return LunarswapLiquidity_type();
 }
 
 /**
@@ -452,7 +466,7 @@ export circuit getLpTokenDecimals(): Uint<8> {
  * @remarks
  * This circuit retrieves the total supply of liquidity provider tokens for a given trading pair.
  *
- * @circuitInfo k=11, rows=800
+ * @circuitInfo k=14, rows=14998
  *
  * @param {CoinInfo} tokenA - The first token in the pair.
  * @param {CoinInfo} tokenB - The second token in the pair.
