@@ -1,7 +1,7 @@
 'use client';
 
 import { createMidnightProviders } from '@/lib/midnight-providers';
-import type { DAppConnectorWalletAPI } from '@/lib/types';
+import type { DAppConnectorWalletAPI } from '@midnight-ntwrk/dapp-connector-api';
 import { useCallback, useState } from 'react';
 import { useWallet } from './use-wallet';
 

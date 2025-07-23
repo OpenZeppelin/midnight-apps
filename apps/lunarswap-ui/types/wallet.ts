@@ -1,5 +1,7 @@
 // Type definitions for Midnight Lace wallet integration
 
+import type { DAppConnectorWalletAPI } from "@midnight-ntwrk/dapp-connector-api";
+
 export interface WalletState {
   status: 'disconnected' | 'connecting' | 'connected' | 'error';
   address?: string;
@@ -9,16 +11,6 @@ export interface WalletState {
 export interface ServiceUriConfig {
   proverServerUri: string;
   // Add other service URIs as needed
-}
-
-export interface DAppConnectorWalletAPI {
-  state(): Promise<WalletState>;
-  // Midnight.js specific providers
-  publicDataProvider?: any;
-  walletProvider?: any;
-  midnightProvider?: any;
-  uris?: ServiceUriConfig;
-  // Add other wallet methods as needed
 }
 
 export interface MidnightLaceConnector {
@@ -37,4 +29,4 @@ export interface MidnightWindow {
 // Extend the global Window interface
 declare global {
   interface Window extends MidnightWindow {}
-}
+} 

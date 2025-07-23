@@ -2,8 +2,8 @@
 
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/hooks/use-wallet';
-import { cn } from '@/lib/utils';
-import { connectToWallet, disconnectWallet } from '@/lib/wallet-utils';
+import { cn } from '@/utils/cn';
+import { connectToWallet, disconnectWallet } from '@/utils/wallet-utils';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { AccountPanel } from './account-panel';

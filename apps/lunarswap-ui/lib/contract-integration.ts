@@ -2,7 +2,7 @@ import type {
   MidnightProviders,
   UnprovenTransaction,
 } from '@midnight-ntwrk/midnight-js-types';
-import type { DAppConnectorWalletAPI } from './types';
+import type { DAppConnectorWalletAPI } from '@midnight-ntwrk/dapp-connector-api';
 
 // Contract addresses for Lunarswap (you'll need to replace these with actual deployed contract addresses)
 export const LUNARSWAP_CONTRACTS = {

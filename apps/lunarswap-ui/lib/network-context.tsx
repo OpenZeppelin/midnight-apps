@@ -9,7 +9,7 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { type Network, detectWalletNetwork } from './wallet-utils';
+import { type Network, detectWalletNetwork } from '../utils/wallet-utils';
 
 export type NetworkContextType = {
   currentNetwork: Network;

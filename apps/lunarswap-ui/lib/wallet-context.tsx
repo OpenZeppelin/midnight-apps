@@ -13,7 +13,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { connectToWallet, disconnectWallet } from './wallet-utils';
+import { connectToWallet, disconnectWallet } from '../utils/wallet-utils';
 
 type WalletConnectionStatusType =
   | 'disconnected'
