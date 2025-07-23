@@ -45,7 +45,9 @@ export class PublicDataProviderWrapper implements PublicDataProvider {
     );
   }
 
-  queryDeployContractState(contractAddress: ContractAddress): Promise<ContractState | null> {
+  queryDeployContractState(
+    contractAddress: ContractAddress,
+  ): Promise<ContractState | null> {
     return retry(
       () => this.wrapped.queryDeployContractState(contractAddress),
       'queryDeployContractState',
@@ -53,7 +55,9 @@ export class PublicDataProviderWrapper implements PublicDataProvider {
     );
   }
 
-  watchForContractState(contractAddress: ContractAddress): Promise<ContractState> {
+  watchForContractState(
+    contractAddress: ContractAddress,
+  ): Promise<ContractState> {
     return retry(
       () => this.wrapped.watchForContractState(contractAddress),
       'watchForContractState',
@@ -61,7 +65,9 @@ export class PublicDataProviderWrapper implements PublicDataProvider {
     );
   }
 
-  watchForDeployTxData(contractAddress: ContractAddress): Promise<FinalizedTxData> {
+  watchForDeployTxData(
+    contractAddress: ContractAddress,
+  ): Promise<FinalizedTxData> {
     return retry(
       () => this.wrapped.watchForDeployTxData(contractAddress),
       'watchForDeployTxData',
@@ -77,7 +83,10 @@ export class PublicDataProviderWrapper implements PublicDataProvider {
     );
   }
 
-  contractStateObservable(address: ContractAddress, config: ContractStateObservableConfig): Observable<ContractState> {
+  contractStateObservable(
+    address: ContractAddress,
+    config: ContractStateObservableConfig,
+  ): Observable<ContractState> {
     return this.wrapped.contractStateObservable(address, config);
   }
 }

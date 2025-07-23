@@ -1,6 +1,6 @@
 // Type definitions for Midnight Lace wallet integration
 
-import type { DAppConnectorWalletAPI } from "@midnight-ntwrk/dapp-connector-api";
+import type { DAppConnectorWalletAPI } from '@midnight-ntwrk/dapp-connector-api';
 
 export interface WalletState {
   status: 'disconnected' | 'connecting' | 'connected' | 'error';
@@ -29,4 +29,4 @@ export interface MidnightWindow {
 // Extend the global Window interface
 declare global {
   interface Window extends MidnightWindow {}
-} 
+}

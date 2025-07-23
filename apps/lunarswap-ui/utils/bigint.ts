@@ -14,4 +14,4 @@ export function serializeBigInts(
   }
 
   return result;
-} 
+}
