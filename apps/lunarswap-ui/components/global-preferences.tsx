@@ -14,7 +14,7 @@ import { ThemeToggle } from './theme-toggle';
 import { useWallet } from '@/hooks/use-wallet';
 import { useVersion } from '@/lib/version-context';
 import { createContractIntegration, type ContractStatusInfo } from '@/lib/contract-integration';
-import { Settings, Check, Clock, AlertCircle, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Settings, Check, Clock, AlertCircle, CheckCircle, XCircle, Loader2, LayoutGrid, List, Globe, DollarSign } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -22,11 +22,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { cn } from '@/utils/cn';
 
-export function GlobalPreferences() {
+interface GlobalPreferencesProps {
+  inline?: boolean;
+  className?: string;
+}
+
+function PreferencesContent() {
   const { walletAPI, providers, isConnected } = useWallet();
   const { version, setVersion } = useVersion();
   const [animationsEnabled, setAnimationsEnabledState] = useState(true);
+  const [viewPreference, setViewPreferenceState] = useState<'horizontal' | 'vertical'>('horizontal');
   const [showContractDetails, setShowContractDetails] = useState(false);
   const [statusInfo, setStatusInfo] = useState<ContractStatusInfo>({ status: 'not-configured' });
   const [isLoading, setIsLoading] = useState(false);
@@ -73,6 +80,18 @@ export function GlobalPreferences() {
     }
   }, []);
 
+  // Load view preference setting from localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('lunarswap-view-preference');
+      if (stored === 'horizontal' || stored === 'vertical') {
+        setViewPreferenceState(stored);
+      }
+    } catch (error) {
+      console.warn('Failed to load view preference settings:', error);
+    }
+  }, []);
+
   // Save animation setting to localStorage
   const toggleAnimations = (enabled: boolean) => {
     setAnimationsEnabledState(enabled);
@@ -82,6 +101,18 @@ export function GlobalPreferences() {
       window.dispatchEvent(new CustomEvent('animations-toggled', { detail: { enabled } }));
     } catch (error) {
       console.warn('Failed to save animation settings:', error);
+    }
+  };
+
+  // Save view preference setting to localStorage
+  const setViewPreference = (preference: 'horizontal' | 'vertical') => {
+    setViewPreferenceState(preference);
+    try {
+      localStorage.setItem('lunarswap-view-preference', preference);
+      // Trigger a custom event to notify components about view preference change
+      window.dispatchEvent(new CustomEvent('view-preference-changed', { detail: { preference } }));
+    } catch (error) {
+      console.warn('Failed to save view preference settings:', error);
     }
   };
 
@@ -144,133 +175,182 @@ export function GlobalPreferences() {
 
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 px-2 hover:bg-muted rounded-full"
-          >
-            <Settings className="h-4 w-4" />
-            <span className="sr-only">Global preferences</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-80 bg-background/80 dark:bg-background/80 backdrop-blur-xl border-white/20 dark:border-gray-800/30 shadow-none drop-shadow-none"
-          style={{ boxShadow: 'none' }}
+      {/* Contract Status Section */}
+      <div className="px-2 py-2">
+        <div className="text-xs font-medium text-muted-foreground mb-2">
+          Contract Status
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowContractDetails(true)}
+          className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-colors text-left"
         >
-          <DropdownMenuLabel className="text-sm font-medium">
-            Global Preferences
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          
-          {/* Contract Status Section */}
-          <div className="px-2 py-2">
-            <div className="text-xs font-medium text-muted-foreground mb-2">
-              Contract Status
-            </div>
+          <div className="flex items-center gap-2">
+            {getStatusIcon(statusInfo.status)}
+            <span className={`text-sm font-medium ${getStatusColor(statusInfo.status)}`}>
+              {getStatusText(statusInfo.status)}
+            </span>
+          </div>
+          <Badge variant="outline" className="text-xs">
+            Details
+          </Badge>
+        </button>
+      </div>
+
+      <div className="h-px bg-border my-2" />
+
+      {/* Version Selection Section */}
+      <div className="px-2 py-2">
+        <div className="text-xs font-medium text-muted-foreground mb-2">
+          Version
+        </div>
+        <div className="space-y-1">
+          {versions.map((v) => (
             <button
+              key={v.id}
               type="button"
-              onClick={() => setShowContractDetails(true)}
-              className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-colors text-left"
+              onClick={() => !v.disabled && setVersion(v.id as 'V1' | 'V2' | 'V3')}
+              disabled={v.disabled}
+              className={`w-full flex items-center justify-between p-2 rounded-lg transition-colors text-left ${
+                v.disabled 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:bg-muted cursor-pointer'
+              }`}
             >
               <div className="flex items-center gap-2">
-                {getStatusIcon(statusInfo.status)}
-                <span className={`text-sm font-medium ${getStatusColor(statusInfo.status)}`}>
-                  {getStatusText(statusInfo.status)}
-                </span>
-              </div>
-              <Badge variant="outline" className="text-xs">
-                Details
-              </Badge>
-            </button>
-          </div>
-
-          <DropdownMenuSeparator />
-
-          {/* Version Selection Section */}
-          <div className="px-2 py-2">
-            <div className="text-xs font-medium text-muted-foreground mb-2">
-              Version
-            </div>
-            <div className="space-y-1">
-              {versions.map((v) => (
-                <button
-                  key={v.id}
-                  type="button"
-                  onClick={() => !v.disabled && setVersion(v.id as 'V1' | 'V2' | 'V3')}
-                  disabled={v.disabled}
-                  className={`w-full flex items-center justify-between p-2 rounded-lg transition-colors text-left ${
-                    v.disabled 
-                      ? 'opacity-50 cursor-not-allowed' 
-                      : 'hover:bg-muted cursor-pointer'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    {version === v.id ? (
-                      <Check className="h-4 w-4 text-blue-500" />
-                    ) : v.disabled ? (
-                      <Clock className="h-4 w-4 text-gray-400" />
-                    ) : (
-                      <div className="h-4 w-4" />
-                    )}
-                    <div>
-                      <div className="text-sm font-medium">{v.name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {v.description}
-                      </div>
-                    </div>
+                {version === v.id ? (
+                  <Check className="h-4 w-4 text-blue-500" />
+                ) : v.disabled ? (
+                  <Clock className="h-4 w-4 text-gray-400" />
+                ) : (
+                  <div className="h-4 w-4" />
+                )}
+                <div>
+                  <div className="text-sm font-medium">{v.name}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {v.description}
                   </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <DropdownMenuSeparator />
-
-          {/* Settings Section */}
-          <div className="px-2 py-2">
-            <div className="text-xs font-medium text-muted-foreground mb-2">
-              Settings
-            </div>
-            
-            {/* Theme Toggle */}
-            <div className="flex items-center justify-between p-2 rounded-lg">
-              <div className="flex flex-col">
-                <span className="text-sm font-medium">Theme</span>
-                <span className="text-xs text-muted-foreground">
-                  Choose your preferred theme
-                </span>
+                </div>
               </div>
-              <ThemeToggle />
-            </div>
+            </button>
+          ))}
+        </div>
+      </div>
 
-            {/* Background Animations Toggle */}
-            <div className="flex items-center justify-between p-2 rounded-lg">
-              <div className="flex flex-col">
-                <span className="text-sm font-medium">
-                  Background Animations
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  Show floating particles and stars
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => toggleAnimations(!animationsEnabled)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                  animationsEnabled ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'
-                }`}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    animationsEnabled ? 'translate-x-6' : 'translate-x-1'
-                  }`}
-                />
-              </button>
-            </div>
+      <div className="h-px bg-border my-2" />
+
+      {/* Settings Section */}
+      <div className="px-2 py-2">
+        <div className="text-xs font-medium text-muted-foreground mb-2">
+          Settings
+        </div>
+        
+        {/* Theme Toggle */}
+        <div className="flex items-center justify-between p-2 rounded-lg">
+          <div className="flex flex-col">
+            <span className="text-sm font-medium">Theme</span>
+            <span className="text-xs text-muted-foreground">
+              Choose your preferred theme
+            </span>
           </div>
-        </DropdownMenuContent>
-      </DropdownMenu>
+          <ThemeToggle />
+        </div>
+
+        {/* Background Animations Toggle */}
+        <div className="flex items-center justify-between p-2 rounded-lg">
+          <div className="flex flex-col">
+            <span className="text-sm font-medium">
+              Background Animations
+            </span>
+            <span className="text-xs text-muted-foreground">
+              Show floating particles and stars
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => toggleAnimations(!animationsEnabled)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+              animationsEnabled ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                animationsEnabled ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* View Preference Selection */}
+        <div className="flex items-center justify-between p-2 rounded-lg">
+          <div className="flex flex-col">
+            <span className="text-sm font-medium">Layout</span>
+            <span className="text-xs text-muted-foreground">
+              Choose layout orientation
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-2 rounded-lg bg-muted p-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setViewPreference('horizontal')}
+              className={cn(
+                'flex items-center justify-center text-muted-foreground',
+                viewPreference === 'horizontal' && 'bg-background text-foreground',
+              )}
+              aria-label="Set horizontal layout"
+            >
+              <LayoutGrid className="h-5 w-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setViewPreference('vertical')}
+              className={cn(
+                'flex items-center justify-center text-muted-foreground',
+                viewPreference === 'vertical' && 'bg-background text-foreground',
+              )}
+              aria-label="Set vertical layout"
+            >
+              <List className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Language Selection */}
+        <div className="flex items-center justify-between p-2 rounded-lg opacity-60">
+          <div className="flex flex-col">
+            <span className="text-sm font-medium">Language</span>
+            <span className="text-xs text-muted-foreground">
+              Choose your preferred language
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Globe className="h-5 w-5 text-muted-foreground" />
+            <Badge variant="secondary" className="text-xs">
+              <Clock className="h-3 w-3 mr-1" />
+              Coming Soon
+            </Badge>
+          </div>
+        </div>
+
+        {/* Currency Selection */}
+        <div className="flex items-center justify-between p-2 rounded-lg opacity-60">
+          <div className="flex flex-col">
+            <span className="text-sm font-medium">Currency</span>
+            <span className="text-xs text-muted-foreground">
+              Choose your preferred currency
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <DollarSign className="h-5 w-5 text-muted-foreground" />
+            <Badge variant="secondary" className="text-xs">
+              <Clock className="h-3 w-3 mr-1" />
+              Coming Soon
+            </Badge>
+          </div>
+        </div>
+      </div>
 
       {/* Contract Details Dialog */}
       <Dialog open={showContractDetails} onOpenChange={setShowContractDetails}>
@@ -330,6 +410,40 @@ export function GlobalPreferences() {
           </div>
         </DialogContent>
       </Dialog>
+    </>
+  );
+}
+
+export function GlobalPreferences({ inline = false, className = '' }: GlobalPreferencesProps = {}) {
+  if (inline) {
+    return (
+      <div className={className}>
+        <PreferencesContent />
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 px-2 hover:bg-muted rounded-full"
+          >
+            <Settings className="h-4 w-4" />
+            <span className="sr-only">Global preferences</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-80 bg-background/80 dark:bg-background/80 backdrop-blur-xl border-white/20 dark:border-gray-800/30 rounded-xl shadow-lg">
+          <DropdownMenuLabel className="text-sm font-medium">
+            Global Preferences
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <PreferencesContent />
+        </DropdownMenuContent>
+      </DropdownMenu>
     </>
   );
 } 

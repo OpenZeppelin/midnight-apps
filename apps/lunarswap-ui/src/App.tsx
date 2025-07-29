@@ -8,6 +8,8 @@ import { RuntimeConfigurationProvider } from '@/lib/runtime-configuration';
 import Home from '@/app/page';
 import PoolPage from '@/app/pool/page';
 import NewPositionPage from '@/app/pool/new/page';
+import TokensPage from '@/app/tokens/page';
+import ExplorePage from '@/app/explore/page';
 import '../app/globals.css';
 import pino from 'pino';
 
@@ -31,7 +33,8 @@ const App = () => {
                   <Route path="/" element={<Home />} />
                   <Route path="/pool" element={<PoolPage />} />
                   <Route path="/pool/new" element={<NewPositionPage />} />
-                  {/* TODO: Add more routes as needed */}
+                  <Route path="/tokens" element={<TokensPage />} />
+                  <Route path="/explore" element={<ExplorePage />} />
                 </Routes>
               </BrowserRouter>
             </NetworkProvider>

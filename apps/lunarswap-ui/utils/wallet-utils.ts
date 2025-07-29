@@ -153,6 +153,7 @@ export const disconnectWallet = () => {
       localStorage.removeItem('wallet_connection_status');
       localStorage.removeItem('wallet_state');
       localStorage.removeItem('wallet_address');
+      localStorage.removeItem('lace-wallet-connected');
     } catch (error) {
       console.warn('Failed to clear localStorage:', error);
     }

@@ -21,7 +21,7 @@ const logger = pino({
 // const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  title: 'Lunarswap | Decentralized Exchange',
+  title: 'Decentralized Exchange',
   description:
     'Swap tokens on the lunar surface with the most celestial DEX in the galaxy',
   icons: {

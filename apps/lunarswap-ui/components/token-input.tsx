@@ -35,7 +35,7 @@ export function TokenInput({
       <div className="flex justify-between">
         <Input
           type="text"
-          placeholder="0.0"
+          placeholder="0"
           value={amount}
           onChange={(e) => onChange(e.target.value)}
           className="border-0 bg-transparent text-2xl font-medium focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"

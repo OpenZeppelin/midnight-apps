@@ -495,6 +495,7 @@ export const DEMO_TOKENS = {
   TEURO: { symbol: 'TEURO', name: 'Test Euro', address: '02007285b48ebb1f85fc6cc7b1754a64deed1f2210b4c758a37309039510acb8781a', type: '02003af426c10783ffe699149c2ef39edb7a6e05e2a2bfe1c3a90e1add8a9d6e2dac' },
   TJPY: { symbol: 'TJPY', name: 'Test Japanese Yen', address: '02003854ada114516d9ebe65061da7c3f9f00830afdd47c749ed9e2836d36a026d01', type: '020011a6de51d7633b00f9c5f9408c836a5566870f9366f14022814735eec0663a0b' },
   TCNY: { symbol: 'TCNY', name: 'Test Chinese Yuan', address: '02001e10cca412097c53af918b4532865823e3850fbaf2f66203036acfab324df5c9', type: '0200e6b100604d6e10e080948e43cfc4aa1646e32d972d4aada3ac36ce430443911d' },
+  TARS: { symbol: 'TARS', name: 'Test Argentine Peso', address: '02009161411a0e1e51467c8559444efb09d6a372aca23b3e6613c5b9394ba3d4befd', type: '020063482c03ec84e6e9bf55ef1eef9ea431f2c434921fab43f9d4c3e60d884a4c6a' },
 } as const;
 
 // Contract addresses

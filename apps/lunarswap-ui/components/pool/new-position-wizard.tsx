@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { RotateCcw, Settings } from 'lucide-react';
+import { RotateCcw, Settings, X } from 'lucide-react';
 import { useState } from 'react';
 import { SelectPairStep } from './steps/select-pair-step';
 import { SetDepositStep } from './steps/set-deposit-step';
@@ -23,7 +23,11 @@ interface CompletePairData {
   version: string;
 }
 
-export function NewPositionWizard() {
+interface NewPositionWizardProps {
+  onClose?: () => void;
+}
+
+export function NewPositionWizard({ onClose }: NewPositionWizardProps) {
   const [currentStep, setCurrentStep] = useState<Step>('select-pair');
   const [pairData, setPairData] = useState<PairSelectionData>({
     tokenA: null,
@@ -111,19 +115,33 @@ export function NewPositionWizard() {
 
         {/* Right content area */}
         <div className="flex-1">
-          <div className="flex justify-end p-4 border-b border-gray-200 dark:border-gray-700">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleReset}
-              className="text-gray-500 mr-2"
-            >
-              <RotateCcw className="h-4 w-4 mr-1" />
-              Reset
-            </Button>
-            <Button variant="ghost" size="sm" className="text-gray-500">
-              <Settings className="h-4 w-4" />
-            </Button>
+          <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleReset}
+                className="text-gray-500"
+              >
+                <RotateCcw className="h-4 w-4 mr-1" />
+                Reset
+              </Button>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button variant="ghost" size="sm" className="text-gray-500">
+                <Settings className="h-4 w-4" />
+              </Button>
+              {onClose && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onClose}
+                  className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </div>
 
           {currentStep === 'select-pair' && (

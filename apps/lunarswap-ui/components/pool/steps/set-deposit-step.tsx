@@ -300,7 +300,7 @@ export function SetDepositStep({ pairData }: SetDepositStepProps) {
                 value={amountA}
                 onChange={(e) => setAmountA(e.target.value)}
                 className="text-2xl font-medium border-0 bg-transparent p-0 h-auto focus-visible:ring-0"
-                placeholder="0.0"
+                placeholder="0"
               />
               <div className="flex justify-between mt-2">
                 <span className="text-sm text-gray-500">{valueA}</span>
@@ -325,7 +325,7 @@ export function SetDepositStep({ pairData }: SetDepositStepProps) {
                 value={amountB}
                 onChange={(e) => setAmountB(e.target.value)}
                 className="text-2xl font-medium border-0 bg-transparent p-0 h-auto focus-visible:ring-0"
-                placeholder="0.0"
+                placeholder="0"
               />
               <div className="flex justify-between mt-2">
                 <span className="text-sm text-gray-500">{valueB}</span>

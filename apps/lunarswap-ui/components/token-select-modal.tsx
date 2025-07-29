@@ -35,6 +35,12 @@ const popularTokens = [
     type: '0200e6b100604d6e10e080948e43cfc4aa1646e32d972d4aada3ac36ce430443911d',
     address: '02001e10cca412097c53af918b4532865823e3850fbaf2f66203036acfab324df5c9',
   },
+  {
+    symbol: 'TARS',
+    name: 'Test Argentine Peso',
+    type: '020063482c03ec84e6e9bf55ef1eef9ea431f2c434921fab43f9d4c3e60d884a4c6a',
+    address: '02009161411a0e1e51467c8559444efb09d6a372aca23b3e6613c5b9394ba3d4befd',
+  },
 ];
 
 interface TokenSelectModalProps {

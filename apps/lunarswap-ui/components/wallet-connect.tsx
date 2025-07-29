@@ -23,6 +23,7 @@ export function WalletConnect({ onAccountPanelStateChange }: WalletConnectProps 
     address,
     walletAPI,
     shake,
+    disconnect: disconnectFromContext,
   } = useWallet();
 
   const [isHydrated, setIsHydrated] = useState(false);
@@ -98,7 +99,7 @@ export function WalletConnect({ onAccountPanelStateChange }: WalletConnectProps 
       await connectToWallet();
       
       // Store connection preference for future auto-connect (handled by wallet context)
-      localStorage.setItem('lunarswap-wallet-connected', 'true');
+      localStorage.setItem('lace-wallet-connected', 'true');
 
       // Show success toast
       toast.success('Successfully connected to Midnight Lace wallet', {
@@ -119,10 +120,10 @@ export function WalletConnect({ onAccountPanelStateChange }: WalletConnectProps 
     setShowWalletInfo(false);
     
     // Remove auto-connect preference
-    localStorage.removeItem('lunarswap-wallet-connected');
+    localStorage.removeItem('lace-wallet-connected');
     
     // Use the shared disconnect utility
-    disconnectWallet();
+    disconnectFromContext();
     
     // Show success toast
     toast.success('Wallet disconnected', {
@@ -268,6 +269,7 @@ export function WalletConnect({ onAccountPanelStateChange }: WalletConnectProps 
       <AccountPanel
         isVisible={showWalletInfo}
         onClose={() => setShowWalletInfo(false)}
+        onOpen={() => setShowWalletInfo(true)}
         onDisconnect={handleDisconnect}
       />
     </>

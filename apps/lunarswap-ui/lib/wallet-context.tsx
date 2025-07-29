@@ -79,6 +79,7 @@ interface MidnightWalletState {
   providers: LunarswapProviders;
   shake: () => void;
   callback: (action: ProviderCallbackAction) => void;
+  disconnect: () => void;
 }
 
 // Export the interface for external use
@@ -170,6 +171,16 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
   );
   const [walletAPI, setWalletAPI] = useState<WalletAPI | undefined>(undefined);
   const [floatingOpen, setFloatingOpen] = React.useState(true);
+
+  // Disconnect function to reset wallet state
+  const disconnect = useCallback(() => {
+    setAddress(undefined);
+    setWalletAPI(undefined);
+    setIsConnecting(false);
+    setWalletError(undefined);
+    setOpenWallet(false);
+    setProofServerIsOnline(false);
+  }, []);
 
   const privateStateProvider: PrivateStateProvider<
     typeof LunarswapPrivateStateId,
@@ -343,6 +354,7 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
       midnightProvider,
     },
     callback: providerCallback,
+    disconnect,
   });
 
   async function checkProofServerStatus(

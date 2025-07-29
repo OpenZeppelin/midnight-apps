@@ -4,13 +4,18 @@ import { StarsBackground } from '@/components/stars-background';
 import { MoonDustBackground } from '@/components/moon-dust-background';
 import { ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
 
 export const metadata = {
-  title: 'Lunarswap | New Position',
-  description: 'Create a new liquidity position on Lunarswap',
+  title: 'Create New Liquidity Position',
+  description: 'Create a new liquidity position on Lunarswap to earn trading fees. Provide liquidity to Midnight token pairs and start earning rewards.',
 };
 
 export default function NewPositionPage() {
+  useEffect(() => {
+    document.title = 'Create New Liquidity Position';
+  }, []);
+
   return (
     <div className="min-h-screen bg-white dark:bg-gradient-to-b dark:from-[#0f172a] dark:via-[#1e293b] dark:to-[#0f172a] text-foreground">
       <StarsBackground />

@@ -331,7 +331,7 @@ export function SwapCard() {
             amount={fromAmount}
             onChange={handleFromAmountChange}
             onSelectToken={() => openTokenModal('from')}
-            label="From"
+            label="Sell"
           />
           <div className="flex justify-center -my-2">
             <Button
@@ -367,7 +367,7 @@ export function SwapCard() {
             amount={toAmount}
             onChange={handleToAmountChange}
             onSelectToken={() => openTokenModal('to')}
-            label="To"
+            label="Buy"
           />
 
           {(fromAmount && toAmount) && (

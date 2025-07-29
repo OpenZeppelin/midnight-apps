@@ -3,18 +3,21 @@
 import { Logo } from '@/components/logo';
 import { WalletConnect } from '@/components/wallet-connect';
 import { GlobalPreferences } from '@/components/global-preferences';
+import { useWallet } from '@/hooks/use-wallet';
 import { cn } from '@/utils/cn';
 import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 
 const navItems = [
-  { href: '/', label: 'Swap' },
+  { href: '/', label: 'Trade' },
   { href: '/pool', label: 'Pool' },
+  { href: '/explore', label: 'Explore' },
 ];
 
 export function Header() {
   const location = useLocation();
   const [isAccountPanelOpen, setIsAccountPanelOpen] = useState(false);
+  const { isConnected } = useWallet();
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-white/30 dark:bg-gray-900/20 backdrop-blur-xl border-b border-white/20 dark:border-gray-800/30 z-50">
@@ -46,9 +49,9 @@ export function Header() {
             </nav>
           </div>
 
-          {/* Right side - Global Preferences and Wallet Connect */}
+          {/* Right side - Global Preferences (only when not connected) and Wallet Connect */}
           <div className="flex items-center space-x-2">
-            {!isAccountPanelOpen && <GlobalPreferences />}
+            {!isConnected && !isAccountPanelOpen && <GlobalPreferences />}
             <WalletConnect 
               onAccountPanelStateChange={setIsAccountPanelOpen}
             />
