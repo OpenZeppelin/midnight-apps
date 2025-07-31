@@ -13,9 +13,24 @@ import { Badge } from './ui/badge';
 import { ThemeToggle } from './theme-toggle';
 import { useWallet } from '../hooks/use-wallet';
 import { useVersion } from '../lib/version-context';
-import { createContractIntegration, type ContractStatusInfo } from '../lib/contract-integration';
+import {
+  createContractIntegration,
+  type ContractStatusInfo,
+} from '../lib/contract-integration';
 import { useRuntimeConfiguration } from '../lib/runtime-configuration';
-import { Settings, Check, Clock, AlertCircle, CheckCircle, XCircle, Loader2, LayoutGrid, List, Globe, DollarSign } from 'lucide-react';
+import {
+  Settings,
+  Check,
+  Clock,
+  AlertCircle,
+  CheckCircle,
+  XCircle,
+  Loader2,
+  LayoutGrid,
+  List,
+  Globe,
+  DollarSign,
+} from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -25,17 +40,36 @@ import {
 } from './ui/dialog';
 import { cn } from '../utils/cn';
 import { levelPrivateStateProvider } from '@midnight-ntwrk/midnight-js-level-private-state-provider';
-import { LunarswapContract, LunarswapPrivateStateId, LunarswapProviders } from '@midnight-dapps/lunarswap-api';
-import { PrivateStateProvider, ZKConfigProvider } from '@midnight-ntwrk/midnight-js-types';
+import {
+  LunarswapContract,
+  LunarswapPrivateStateId,
+  LunarswapProviders,
+} from '@midnight-dapps/lunarswap-api';
+import {
+  PrivateStateProvider,
+  ZKConfigProvider,
+} from '@midnight-ntwrk/midnight-js-types';
 import { LunarswapCircuitKeys } from '@midnight-dapps/lunarswap-api';
 import { ProofProvider } from '@midnight-ntwrk/midnight-js-types';
 import { ZkConfigProviderWrapper } from '@/providers/zk-config';
 import { proofClient } from '@/providers/proof';
-import { Contract, LunarswapPrivateState, LunarswapWitnesses } from '@midnight-dapps/lunarswap-v1';
-import { ContractProviders, findDeployedContract } from '@midnight-ntwrk/midnight-js-contracts';
+import {
+  Contract,
+  LunarswapPrivateState,
+  LunarswapWitnesses,
+} from '@midnight-dapps/lunarswap-v1';
+import {
+  ContractProviders,
+  findDeployedContract,
+} from '@midnight-ntwrk/midnight-js-contracts';
 import { configureProviders } from '@/lib/wallet-context';
 import { indexerPublicDataProvider } from '@midnight-ntwrk/midnight-js-indexer-public-data-provider';
-import { getLedgerNetworkId, getZswapNetworkId, NetworkId, setNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
+import {
+  getLedgerNetworkId,
+  getZswapNetworkId,
+  NetworkId,
+  setNetworkId,
+} from '@midnight-ntwrk/midnight-js-network-id';
 
 interface GlobalPreferencesProps {
   inline?: boolean;
@@ -47,19 +81,29 @@ function PreferencesContent() {
   const { version, setVersion } = useVersion();
   const runtimeConfig = useRuntimeConfiguration();
   const [animationsEnabled, setAnimationsEnabledState] = useState(true);
-  const [viewPreference, setViewPreferenceState] = useState<'horizontal' | 'vertical'>('horizontal');
+  const [viewPreference, setViewPreferenceState] = useState<
+    'horizontal' | 'vertical'
+  >('horizontal');
   const [showContractDetails, setShowContractDetails] = useState(false);
-  const [statusInfo, setStatusInfo] = useState<ContractStatusInfo>({ status: 'not-configured' });
+  const [statusInfo, setStatusInfo] = useState<ContractStatusInfo>({
+    status: 'not-configured',
+  });
   const [isLoading, setIsLoading] = useState(false);
 
   const checkContractStatus = useCallback(async () => {
     console.log('[ContractStatusIndicator] checkContractStatus called');
-    
-    if (!midnightWallet.walletAPI || !midnightWallet.isConnected || !runtimeConfig) {
-      console.log('[ContractStatusIndicator] Early return - missing dependencies');
-      setStatusInfo({ 
-        status: 'not-configured', 
-        message: 'Please connect your wallet first' 
+
+    if (
+      !midnightWallet.walletAPI ||
+      !midnightWallet.isConnected ||
+      !runtimeConfig
+    ) {
+      console.log(
+        '[ContractStatusIndicator] Early return - missing dependencies',
+      );
+      setStatusInfo({
+        status: 'not-configured',
+        message: 'Please connect your wallet first',
       });
       return;
     }
@@ -67,18 +111,22 @@ function PreferencesContent() {
     try {
       console.log('[ContractStatusIndicator] Starting contract status check');
 
-      const privateStateProvider: PrivateStateProvider<string, LunarswapPrivateState> = levelPrivateStateProvider({
+      const privateStateProvider: PrivateStateProvider<
+        string,
+        LunarswapPrivateState
+      > = levelPrivateStateProvider({
         privateStateStoreName: 'lunarswap-private-state',
       });
       const proofProvider: ProofProvider<LunarswapCircuitKeys> = proofClient(
         midnightWallet.walletAPI.uris.proverServerUri,
         midnightWallet.callback,
       );
-      const zkConfigProvider: ZKConfigProvider<LunarswapCircuitKeys> = new ZkConfigProviderWrapper(
-        window.location.origin,
-        fetch.bind(window),
-        midnightWallet.callback,
-      ); 
+      const zkConfigProvider: ZKConfigProvider<LunarswapCircuitKeys> =
+        new ZkConfigProviderWrapper(
+          window.location.origin,
+          fetch.bind(window),
+          midnightWallet.callback,
+        );
 
       const providers: LunarswapProviders = {
         ...midnightWallet.providers,
@@ -90,14 +138,20 @@ function PreferencesContent() {
         providers,
         midnightWallet.walletAPI,
         midnightWallet.callback,
-        runtimeConfig.LUNARSWAP_ADDRESS
+        runtimeConfig.LUNARSWAP_ADDRESS,
       );
-      
-      console.log('[ContractStatusIndicator] Created contract integration', contractIntegration);
+
+      console.log(
+        '[ContractStatusIndicator] Created contract integration',
+        contractIntegration,
+      );
 
       // Initialize the contract integration
       const status = await contractIntegration.initialize();
-      console.log('[ContractStatusIndicator] Contract initialization result:', status);
+      console.log(
+        '[ContractStatusIndicator] Contract initialization result:',
+        status,
+      );
 
       setStatusInfo(status);
     } catch (error) {
@@ -110,12 +164,22 @@ function PreferencesContent() {
     } finally {
       setIsLoading(false);
     }
-  }, [midnightWallet.walletAPI, midnightWallet.isConnected, midnightWallet.providers, midnightWallet.callback, runtimeConfig]);
+  }, [
+    midnightWallet.walletAPI,
+    midnightWallet.isConnected,
+    midnightWallet.providers,
+    midnightWallet.callback,
+    runtimeConfig,
+  ]);
 
   useEffect(() => {
-    console.log('[ContractStatusIndicator] useEffect triggered, calling checkContractStatus');
+    console.log(
+      '[ContractStatusIndicator] useEffect triggered, calling checkContractStatus',
+    );
     checkContractStatus();
-    console.log('[ContractStatusIndicator] useEffect triggered, checkContractStatus completed');
+    console.log(
+      '[ContractStatusIndicator] useEffect triggered, checkContractStatus completed',
+    );
   }, [checkContractStatus]);
   // Load animation setting from localStorage
   useEffect(() => {
@@ -145,9 +209,14 @@ function PreferencesContent() {
   const toggleAnimations = (enabled: boolean) => {
     setAnimationsEnabledState(enabled);
     try {
-      localStorage.setItem('lunarswap-animations-enabled', JSON.stringify(enabled));
+      localStorage.setItem(
+        'lunarswap-animations-enabled',
+        JSON.stringify(enabled),
+      );
       // Trigger a custom event to notify background components
-      window.dispatchEvent(new CustomEvent('animations-toggled', { detail: { enabled } }));
+      window.dispatchEvent(
+        new CustomEvent('animations-toggled', { detail: { enabled } }),
+      );
     } catch (error) {
       console.warn('Failed to save animation settings:', error);
     }
@@ -159,7 +228,9 @@ function PreferencesContent() {
     try {
       localStorage.setItem('lunarswap-view-preference', preference);
       // Trigger a custom event to notify components about view preference change
-      window.dispatchEvent(new CustomEvent('view-preference-changed', { detail: { preference } }));
+      window.dispatchEvent(
+        new CustomEvent('view-preference-changed', { detail: { preference } }),
+      );
     } catch (error) {
       console.warn('Failed to save view preference settings:', error);
     }
@@ -218,8 +289,18 @@ function PreferencesContent() {
 
   const versions = [
     { id: 'V1', name: 'V1', description: 'Unpermissioned Shielded' },
-    { id: 'V2', name: 'V2', description: 'Permissioned Shielded · Coming Soon', disabled: true },
-    { id: 'V3', name: 'V3', description: 'Unpermissioned Unshielded · Coming Soon', disabled: true },
+    {
+      id: 'V2',
+      name: 'V2',
+      description: 'Permissioned Shielded · Coming Soon',
+      disabled: true,
+    },
+    {
+      id: 'V3',
+      name: 'V3',
+      description: 'Unpermissioned Unshielded · Coming Soon',
+      disabled: true,
+    },
   ];
 
   return (
@@ -238,7 +319,9 @@ function PreferencesContent() {
             >
               <div className="flex items-center gap-2">
                 {getStatusIcon(statusInfo.status)}
-                <span className={`text-sm font-medium ${getStatusColor(statusInfo.status)}`}>
+                <span
+                  className={`text-sm font-medium ${getStatusColor(statusInfo.status)}`}
+                >
                   {getStatusText(statusInfo.status)}
                 </span>
               </div>
@@ -264,11 +347,13 @@ function PreferencesContent() {
                 <button
                   key={v.id}
                   type="button"
-                  onClick={() => !v.disabled && setVersion(v.id as 'V1' | 'V2' | 'V3')}
+                  onClick={() =>
+                    !v.disabled && setVersion(v.id as 'V1' | 'V2' | 'V3')
+                  }
                   disabled={v.disabled}
                   className={`w-full flex items-center justify-between p-2 rounded-lg transition-colors text-left ${
-                    v.disabled 
-                      ? 'opacity-50 cursor-not-allowed' 
+                    v.disabled
+                      ? 'opacity-50 cursor-not-allowed'
                       : 'hover:bg-muted cursor-pointer'
                   }`}
                 >
@@ -301,7 +386,7 @@ function PreferencesContent() {
         <div className="text-xs font-medium text-muted-foreground mb-2">
           Settings
         </div>
-        
+
         {/* Theme Toggle */}
         <div className="flex items-center justify-between p-2 rounded-lg">
           <div className="flex flex-col">
@@ -316,9 +401,7 @@ function PreferencesContent() {
         {/* Background Animations Toggle */}
         <div className="flex items-center justify-between p-2 rounded-lg">
           <div className="flex flex-col">
-            <span className="text-sm font-medium">
-              Background Animations
-            </span>
+            <span className="text-sm font-medium">Background Animations</span>
             <span className="text-xs text-muted-foreground">
               Show floating particles and stars
             </span>
@@ -353,7 +436,8 @@ function PreferencesContent() {
               onClick={() => setViewPreference('horizontal')}
               className={cn(
                 'flex items-center justify-center text-muted-foreground',
-                viewPreference === 'horizontal' && 'bg-background text-foreground',
+                viewPreference === 'horizontal' &&
+                  'bg-background text-foreground',
               )}
               aria-label="Set horizontal layout"
             >
@@ -365,7 +449,8 @@ function PreferencesContent() {
               onClick={() => setViewPreference('vertical')}
               className={cn(
                 'flex items-center justify-center text-muted-foreground',
-                viewPreference === 'vertical' && 'bg-background text-foreground',
+                viewPreference === 'vertical' &&
+                  'bg-background text-foreground',
               )}
               aria-label="Set vertical layout"
             >
@@ -421,13 +506,15 @@ function PreferencesContent() {
               Current status of the Lunarswap contract deployment
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
               <span className="text-sm font-medium">Status</span>
               <div className="flex items-center gap-2">
                 {getStatusIcon(statusInfo.status)}
-                <span className={`text-sm font-medium ${getStatusColor(statusInfo.status)}`}>
+                <span
+                  className={`text-sm font-medium ${getStatusColor(statusInfo.status)}`}
+                >
                   {getStatusText(statusInfo.status)}
                 </span>
               </div>
@@ -455,11 +542,12 @@ function PreferencesContent() {
 
             {statusInfo.status === 'not-configured' && (
               <div className="text-xs text-muted-foreground">
-                Contract address is configured but connection failed. Please check your network connection and try again.
-                <Button 
-                  onClick={checkContractStatus} 
+                Contract address is configured but connection failed. Please
+                check your network connection and try again.
+                <Button
+                  onClick={checkContractStatus}
                   disabled={isLoading}
-                  size="sm" 
+                  size="sm"
                   variant="outline"
                   className="mt-2 w-full"
                 >
@@ -470,7 +558,8 @@ function PreferencesContent() {
 
             {statusInfo.status === 'not-deployed' && (
               <div className="text-xs text-muted-foreground">
-                Contract is configured but not yet deployed. Use the CLI to deploy.
+                Contract is configured but not yet deployed. Use the CLI to
+                deploy.
               </div>
             )}
           </div>
@@ -480,7 +569,10 @@ function PreferencesContent() {
   );
 }
 
-export function GlobalPreferences({ inline = false, className = '' }: GlobalPreferencesProps = {}) {
+export function GlobalPreferences({
+  inline = false,
+  className = '',
+}: GlobalPreferencesProps = {}) {
   if (inline) {
     return (
       <div className={className}>
@@ -502,7 +594,10 @@ export function GlobalPreferences({ inline = false, className = '' }: GlobalPref
             <span className="sr-only">Global preferences</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-80 bg-background/80 dark:bg-background/80 backdrop-blur-xl border-white/20 dark:border-gray-800/30 rounded-xl shadow-lg">
+        <DropdownMenuContent
+          align="end"
+          className="w-80 bg-background/80 dark:bg-background/80 backdrop-blur-xl border-white/20 dark:border-gray-800/30 rounded-xl shadow-lg"
+        >
           <DropdownMenuLabel className="text-sm font-medium">
             Global Preferences
           </DropdownMenuLabel>
@@ -512,4 +607,4 @@ export function GlobalPreferences({ inline = false, className = '' }: GlobalPref
       </DropdownMenu>
     </>
   );
-} 
+}

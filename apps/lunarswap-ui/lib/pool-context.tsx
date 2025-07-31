@@ -1,7 +1,17 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { createContractIntegration, DEMO_TOKENS, LunarswapContractIntegration } from './contract-integration';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from 'react';
+import {
+  createContractIntegration,
+  DEMO_TOKENS,
+  LunarswapContractIntegration,
+} from './contract-integration';
 import { useWallet } from '../hooks/use-wallet';
 import { useRuntimeConfiguration } from './runtime-configuration';
 import type { Ledger, Pair } from '@midnight-dapps/lunarswap-v1';
@@ -12,7 +22,10 @@ interface PoolData {
   allPairs: Array<{ identity: string; pair: Pair }>;
   refreshPoolData: () => Promise<void>;
   checkPairExists: (tokenA: string, tokenB: string) => Promise<boolean>;
-  getPairReserves: (tokenA: string, tokenB: string) => Promise<[bigint, bigint] | null>;
+  getPairReserves: (
+    tokenA: string,
+    tokenB: string,
+  ) => Promise<[bigint, bigint] | null>;
 }
 
 const PoolContext = createContext<PoolData | null>(null);
@@ -34,8 +47,11 @@ export const PoolProvider: React.FC<PoolProviderProps> = ({ children }) => {
   const runtimeConfig = useRuntimeConfiguration();
   const [isLoading, setIsLoading] = useState(false);
   const [ledger, setLedger] = useState<Ledger | null>(null);
-  const [allPairs, setAllPairs] = useState<Array<{ identity: string; pair: Pair }>>([]);
-  const [contractIntegration, setContractIntegration] = useState<LunarswapContractIntegration | null>(null);
+  const [allPairs, setAllPairs] = useState<
+    Array<{ identity: string; pair: Pair }>
+  >([]);
+  const [contractIntegration, setContractIntegration] =
+    useState<LunarswapContractIntegration | null>(null);
 
   // Initialize contract integration
   useEffect(() => {
@@ -47,9 +63,9 @@ export const PoolProvider: React.FC<PoolProviderProps> = ({ children }) => {
 
       try {
         const integration = createContractIntegration(
-          providers, 
-          walletAPI.wallet, 
-          runtimeConfig.LUNARSWAP_ADDRESS
+          providers,
+          walletAPI.wallet,
+          runtimeConfig.LUNARSWAP_ADDRESS,
         );
         await integration.initialize();
         setContractIntegration(integration);
@@ -78,7 +94,7 @@ export const PoolProvider: React.FC<PoolProviderProps> = ({ children }) => {
         setAllPairs(pairs);
         console.log('Pool data refreshed:', {
           poolSize: poolLedger.pool.size(),
-          pairsCount: pairs.length
+          pairsCount: pairs.length,
         });
       }
     } catch (error) {
@@ -96,20 +112,29 @@ export const PoolProvider: React.FC<PoolProviderProps> = ({ children }) => {
   }, [contractIntegration, refreshPoolData]);
 
   // Check if a pair exists
-  const checkPairExists = useCallback(async (tokenA: string, tokenB: string): Promise<boolean> => {
-    if (!contractIntegration) {
-      return false;
-    }
-    return contractIntegration.isPairExists(tokenA, tokenB);
-  }, [contractIntegration]);
+  const checkPairExists = useCallback(
+    async (tokenA: string, tokenB: string): Promise<boolean> => {
+      if (!contractIntegration) {
+        return false;
+      }
+      return contractIntegration.isPairExists(tokenA, tokenB);
+    },
+    [contractIntegration],
+  );
 
   // Get pair reserves
-  const getPairReserves = useCallback(async (tokenA: string, tokenB: string): Promise<[bigint, bigint] | null> => {
-    if (!contractIntegration) {
-      return null;
-    }
-    return contractIntegration.getPairReserves(tokenA, tokenB);
-  }, [contractIntegration]);
+  const getPairReserves = useCallback(
+    async (
+      tokenA: string,
+      tokenB: string,
+    ): Promise<[bigint, bigint] | null> => {
+      if (!contractIntegration) {
+        return null;
+      }
+      return contractIntegration.getPairReserves(tokenA, tokenB);
+    },
+    [contractIntegration],
+  );
 
   const contextValue: PoolData = {
     isLoading,
@@ -121,9 +146,7 @@ export const PoolProvider: React.FC<PoolProviderProps> = ({ children }) => {
   };
 
   return (
-    <PoolContext.Provider value={contextValue}>
-      {children}
-    </PoolContext.Provider>
+    <PoolContext.Provider value={contextValue}>{children}</PoolContext.Provider>
   );
 };
 
@@ -131,7 +154,7 @@ export const PoolProvider: React.FC<PoolProviderProps> = ({ children }) => {
 export const getAvailableTokenPairs = () => {
   const tokens = Object.values(DEMO_TOKENS);
   const pairs: Array<{ tokenA: string; tokenB: string; name: string }> = [];
-  
+
   for (let i = 0; i < tokens.length; i++) {
     for (let j = i + 1; j < tokens.length; j++) {
       pairs.push({
@@ -141,6 +164,6 @@ export const getAvailableTokenPairs = () => {
       });
     }
   }
-  
+
   return pairs;
-}; 
+};

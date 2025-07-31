@@ -8,7 +8,8 @@ import { useEffect } from 'react';
 
 export const metadata = {
   title: 'Create New Liquidity Position',
-  description: 'Create a new liquidity position on Lunarswap to earn trading fees. Provide liquidity to Midnight token pairs and start earning rewards.',
+  description:
+    'Create a new liquidity position on Lunarswap to earn trading fees. Provide liquidity to Midnight token pairs and start earning rewards.',
 };
 
 export default function NewPositionPage() {

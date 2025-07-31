@@ -48,9 +48,7 @@ export function VersionSwitcher() {
           disabled
           className="items-start cursor-not-allowed opacity-50"
         >
-          <Clock
-            className="mr-2 h-4 w-4 flex-shrink-0 mt-1 text-orange-500"
-          />
+          <Clock className="mr-2 h-4 w-4 flex-shrink-0 mt-1 text-orange-500" />
           <div>
             <p className="font-semibold leading-none">V2</p>
             <p className="text-xs text-muted-foreground mt-1">
@@ -62,9 +60,7 @@ export function VersionSwitcher() {
           disabled
           className="items-start cursor-not-allowed opacity-50"
         >
-          <Clock
-            className="mr-2 h-4 w-4 flex-shrink-0 mt-1 text-orange-500"
-          />
+          <Clock className="mr-2 h-4 w-4 flex-shrink-0 mt-1 text-orange-500" />
           <div>
             <p className="font-semibold leading-none">V3</p>
             <p className="text-xs text-muted-foreground mt-1">

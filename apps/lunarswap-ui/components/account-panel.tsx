@@ -46,14 +46,17 @@ export function AccountPanel({
   }, [isVisible]);
 
   // Create a compatible wallet state object for the AccountDetailsModal
-  const walletState: DAppConnectorWalletState | null = walletAPI && address ? {
-    address,
-    addressLegacy: address, // Use the same address for legacy for now
-    coinPublicKey: walletAPI.coinPublicKey,
-    coinPublicKeyLegacy: walletAPI.coinPublicKey, // Use the same key for legacy for now
-    encryptionPublicKey: walletAPI.encryptionPublicKey,
-    encryptionPublicKeyLegacy: walletAPI.encryptionPublicKey, // Use the same key for legacy for now
-  } : null;
+  const walletState: DAppConnectorWalletState | null =
+    walletAPI && address
+      ? {
+          address,
+          addressLegacy: address, // Use the same address for legacy for now
+          coinPublicKey: walletAPI.coinPublicKey,
+          coinPublicKeyLegacy: walletAPI.coinPublicKey, // Use the same key for legacy for now
+          encryptionPublicKey: walletAPI.encryptionPublicKey,
+          encryptionPublicKeyLegacy: walletAPI.encryptionPublicKey, // Use the same key for legacy for now
+        }
+      : null;
 
   const walletInfo = formatAddress(address);
 
@@ -113,9 +116,7 @@ export function AccountPanel({
           title="Click to view account details"
         >
           <span className="font-mono text-muted-foreground">
-            {address
-              ? `${address.slice(0, 6)}...${address.slice(-5)}`
-              : '...'}
+            {address ? `${address.slice(0, 6)}...${address.slice(-5)}` : '...'}
           </span>
           <span className="text-xs text-muted-foreground group-hover:text-primary transition-colors opacity-60">
             details
@@ -176,19 +177,23 @@ export function AccountPanel({
     <>
       {/* Backdrop blur overlay */}
       {/* <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[9999]" /> */}
-      
+
       {/* External ">>" button - positioned on left side of the panel */}
       <button
         type="button"
         onClick={isVisible ? onClose : () => onOpen()}
         className="fixed top-4 right-80 h-12 w-8 bg-background dark:bg-gray-900 border border-border border-r-0 rounded-l-lg z-[10001] flex items-center justify-center hover:bg-muted transition-colors"
-        title={isVisible ? "Close account panel" : "Open account panel"}
+        title={isVisible ? 'Close account panel' : 'Open account panel'}
       >
-        <ChevronsRight className={`h-5 w-5 transition-transform ${isVisible ? 'rotate-180' : ''}`} />
+        <ChevronsRight
+          className={`h-5 w-5 transition-transform ${isVisible ? 'rotate-180' : ''}`}
+        />
       </button>
-      
+
       {/* Account Panel */}
-      <div className={`fixed top-0 right-4 h-screen w-80 bg-background dark:bg-gray-900 border border-border z-[10000] flex flex-col transition-transform transform ${isVisible ? 'translate-x-0' : 'translate-x-full'} rounded-l-xl shadow-lg overflow-hidden`}>
+      <div
+        className={`fixed top-0 right-4 h-screen w-80 bg-background dark:bg-gray-900 border border-border z-[10000] flex flex-col transition-transform transform ${isVisible ? 'translate-x-0' : 'translate-x-full'} rounded-l-xl shadow-lg overflow-hidden`}
+      >
         {currentPage === 'main' ? renderMainPage() : renderSettingsPage()}
       </div>
 
@@ -200,4 +205,3 @@ export function AccountPanel({
     </>
   );
 }
-

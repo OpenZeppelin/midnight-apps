@@ -77,20 +77,26 @@ export class ZkConfigProviderWrapper<
       'removeLiquidity',
       'getPair',
       'getLpTokenDecimals',
-      'swapExactTokensForTokens'
+      'swapExactTokensForTokens',
     ] as K[];
 
     // If this is a lunarswap contract (has all the expected circuits), use the correct order
-    const isLunarswap = lunarswapCircuitOrder.every(id => circuitIds.includes(id));
-    
+    const isLunarswap = lunarswapCircuitOrder.every((id) =>
+      circuitIds.includes(id),
+    );
+
     if (isLunarswap) {
-      console.log('[ZkConfigProviderWrapper] Using lunarswap circuit order for verifier keys');
-      const orderedCircuitIds = lunarswapCircuitOrder.filter(id => circuitIds.includes(id));
+      console.log(
+        '[ZkConfigProviderWrapper] Using lunarswap circuit order for verifier keys',
+      );
+      const orderedCircuitIds = lunarswapCircuitOrder.filter((id) =>
+        circuitIds.includes(id),
+      );
       const verifierKeys = await Promise.all(
         orderedCircuitIds.map(async (circuitId) => {
           const verifierKey = await this.getVerifierKey(circuitId);
           return [circuitId, verifierKey] as [K, VerifierKey];
-        })
+        }),
       );
       return verifierKeys;
     }
@@ -100,7 +106,7 @@ export class ZkConfigProviderWrapper<
       circuitIds.map(async (circuitId) => {
         const verifierKey = await this.getVerifierKey(circuitId);
         return [circuitId, verifierKey] as [K, VerifierKey];
-      })
+      }),
     );
     return verifierKeys;
   }

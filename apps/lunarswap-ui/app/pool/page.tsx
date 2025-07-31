@@ -33,7 +33,7 @@ export default function PoolPage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-3xl font-bold">Pools</h1>
-            <Button 
+            <Button
               onClick={() => setShowNewPosition(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
@@ -42,24 +42,30 @@ export default function PoolPage() {
             </Button>
           </div>
 
-          <div className={`${
-            viewPreference === 'horizontal' 
-              ? 'grid grid-cols-1 lg:grid-cols-3 gap-8' 
-              : 'space-y-8'
-          }`}>
-            {/* Main Content */}
-            <div className={`${
-              viewPreference === 'horizontal' 
-                ? 'lg:col-span-2 space-y-8' 
+          <div
+            className={`${
+              viewPreference === 'horizontal'
+                ? 'grid grid-cols-1 lg:grid-cols-3 gap-8'
                 : 'space-y-8'
-            }`}>
+            }`}
+          >
+            {/* Main Content */}
+            <div
+              className={`${
+                viewPreference === 'horizontal'
+                  ? 'lg:col-span-2 space-y-8'
+                  : 'space-y-8'
+              }`}
+            >
               <div>
                 <TokenRewards />
               </div>
 
               {showNewPosition && (
                 <div>
-                  <NewPositionWizard onClose={() => setShowNewPosition(false)} />
+                  <NewPositionWizard
+                    onClose={() => setShowNewPosition(false)}
+                  />
                 </div>
               )}
 
@@ -69,12 +75,16 @@ export default function PoolPage() {
             </div>
 
             {/* Top Pools */}
-            <div className={`${
-              viewPreference === 'horizontal' 
-                ? 'lg:col-span-1' 
-                : ''
-            }`}>
-              <div className={viewPreference === 'horizontal' ? 'sticky top-24' : ''}>
+            <div
+              className={`${
+                viewPreference === 'horizontal' ? 'lg:col-span-1' : ''
+              }`}
+            >
+              <div
+                className={
+                  viewPreference === 'horizontal' ? 'sticky top-24' : ''
+                }
+              >
                 <TopPoolsList />
               </div>
             </div>

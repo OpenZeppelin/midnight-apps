@@ -1,12 +1,7 @@
 'use client';
 
 import { Button } from './ui/button';
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from './ui/card';
+import { Card, CardContent, CardFooter, CardHeader } from './ui/card';
 import {
   Tooltip,
   TooltipContent,
@@ -14,14 +9,17 @@ import {
   TooltipTrigger,
 } from './ui/tooltip';
 import { useWallet } from '../hooks/use-wallet';
-import { createContractIntegration, DEMO_TOKENS } from '../lib/contract-integration';
+import {
+  createContractIntegration,
+  DEMO_TOKENS,
+} from '../lib/contract-integration';
 import { useRuntimeConfiguration } from '../lib/runtime-configuration';
-import { 
-  calculateAmountOut, 
+import {
+  calculateAmountOut,
   calculateAmountIn,
-  computeAmountOutMin, 
+  computeAmountOutMin,
   computeAmountInMax,
-  SLIPPAGE_TOLERANCE 
+  SLIPPAGE_TOLERANCE,
 } from '@midnight-dapps/lunarswap-sdk';
 import { ArrowDown, Fuel, Info, Settings, Loader2 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
@@ -49,12 +47,14 @@ export function SwapCard() {
   const [fromToken, setFromToken] = useState<Token>({
     symbol: 'TUSD',
     name: 'Test USD',
-    address: '020050fdd8e2eea82068e6bab6ad0c78ef7e0c050dd9fc1d0a32495c95310c4e1959',
+    address:
+      '020050fdd8e2eea82068e6bab6ad0c78ef7e0c050dd9fc1d0a32495c95310c4e1959',
   });
   const [toToken, setToToken] = useState<Token>({
     symbol: 'TEURO',
     name: 'Test Euro',
-    address: '02007285b48ebb1f85fc6cc7b1754a64deed1f2210b4c758a37309039510acb8781a',
+    address:
+      '02007285b48ebb1f85fc6cc7b1754a64deed1f2210b4c758a37309039510acb8781a',
   });
   const [fromAmount, setFromAmount] = useState('');
   const [toAmount, setToAmount] = useState('');
@@ -63,7 +63,9 @@ export function SwapCard() {
   const [isCalculating, setIsCalculating] = useState(false);
   const [isSwapping, setIsSwapping] = useState(false);
   const [slippageTolerance] = useState(SLIPPAGE_TOLERANCE.LOW); // 0.5% using SDK constant
-  const [poolReserves, setPoolReserves] = useState<[bigint, bigint] | null>(null);
+  const [poolReserves, setPoolReserves] = useState<[bigint, bigint] | null>(
+    null,
+  );
 
   // Prevent hydration mismatch
   useEffect(() => {
@@ -73,17 +75,21 @@ export function SwapCard() {
   // Check contract status when wallet connects
   useEffect(() => {
     const checkContractStatus = async () => {
-      if (!midnightWallet.walletAPI || !midnightWallet.isConnected || !runtimeConfig) {
+      if (
+        !midnightWallet.walletAPI ||
+        !midnightWallet.isConnected ||
+        !runtimeConfig
+      ) {
         setContractReady(false);
         return;
       }
 
       try {
         const contractIntegration = createContractIntegration(
-          midnightWallet.providers, 
-          midnightWallet.walletAPI, 
+          midnightWallet.providers,
+          midnightWallet.walletAPI,
           midnightWallet.callback,
-          runtimeConfig.LUNARSWAP_ADDRESS
+          runtimeConfig.LUNARSWAP_ADDRESS,
         );
         const status = await contractIntegration.initialize();
         setContractReady(status.status === 'connected');
@@ -94,28 +100,46 @@ export function SwapCard() {
     };
 
     checkContractStatus();
-  }, [midnightWallet.walletAPI, midnightWallet.providers, midnightWallet.isConnected, midnightWallet.callback, runtimeConfig]);
+  }, [
+    midnightWallet.walletAPI,
+    midnightWallet.providers,
+    midnightWallet.isConnected,
+    midnightWallet.callback,
+    runtimeConfig,
+  ]);
 
   // Fetch pool reserves when tokens change
   useEffect(() => {
     const fetchReserves = async () => {
-      if (!midnightWallet.walletAPI || !fromToken || !toToken || fromToken.symbol === toToken.symbol || !runtimeConfig) {
+      if (
+        !midnightWallet.walletAPI ||
+        !fromToken ||
+        !toToken ||
+        fromToken.symbol === toToken.symbol ||
+        !runtimeConfig
+      ) {
         setPoolReserves(null);
         return;
       }
 
       try {
         const contractIntegration = createContractIntegration(
-          midnightWallet.providers, 
-          midnightWallet.walletAPI, 
+          midnightWallet.providers,
+          midnightWallet.walletAPI,
           midnightWallet.callback,
-          runtimeConfig.LUNARSWAP_ADDRESS
+          runtimeConfig.LUNARSWAP_ADDRESS,
         );
         await contractIntegration.initialize();
-        
-        const exists = await contractIntegration.isPairExists(fromToken.symbol, toToken.symbol);
+
+        const exists = await contractIntegration.isPairExists(
+          fromToken.symbol,
+          toToken.symbol,
+        );
         if (exists) {
-          const reserves = await contractIntegration.getPairReserves(fromToken.symbol, toToken.symbol);
+          const reserves = await contractIntegration.getPairReserves(
+            fromToken.symbol,
+            toToken.symbol,
+          );
           setPoolReserves(reserves);
         } else {
           setPoolReserves(null);
@@ -127,87 +151,118 @@ export function SwapCard() {
     };
 
     fetchReserves();
-  }, [fromToken, toToken, midnightWallet.walletAPI, midnightWallet.providers, midnightWallet.callback, runtimeConfig]);
+  }, [
+    fromToken,
+    toToken,
+    midnightWallet.walletAPI,
+    midnightWallet.providers,
+    midnightWallet.callback,
+    runtimeConfig,
+  ]);
 
   // Calculate output amount for exact input using SDK
-  const calculateOutputAmount = useCallback((inputAmount: string): string => {
-    if (!inputAmount || !poolReserves || Number.parseFloat(inputAmount) <= 0) {
-      return '';
-    }
+  const calculateOutputAmount = useCallback(
+    (inputAmount: string): string => {
+      if (
+        !inputAmount ||
+        !poolReserves ||
+        Number.parseFloat(inputAmount) <= 0
+      ) {
+        return '';
+      }
 
-    try {
-      const amountIn = BigInt(Math.floor(Number.parseFloat(inputAmount) * 1e18));
-      const [reserveIn, reserveOut] = poolReserves;
-      
-      // Use SDK function with default 0.3% fee
-      const amountOut = calculateAmountOut(amountIn, reserveIn, reserveOut);
-      
-      return (Number(amountOut) / 1e18).toFixed(6);
-    } catch (error) {
-      console.error('Error calculating output amount:', error);
-      return '';
-    }
-  }, [poolReserves]);
+      try {
+        const amountIn = BigInt(
+          Math.floor(Number.parseFloat(inputAmount) * 1e18),
+        );
+        const [reserveIn, reserveOut] = poolReserves;
+
+        // Use SDK function with default 0.3% fee
+        const amountOut = calculateAmountOut(amountIn, reserveIn, reserveOut);
+
+        return (Number(amountOut) / 1e18).toFixed(6);
+      } catch (error) {
+        console.error('Error calculating output amount:', error);
+        return '';
+      }
+    },
+    [poolReserves],
+  );
 
   // Calculate input amount for exact output (reverse calculation)
-  const calculateInputAmount = useCallback((outputAmount: string): string => {
-    if (!outputAmount || !poolReserves || Number.parseFloat(outputAmount) <= 0) {
-      return '';
-    }
+  const calculateInputAmount = useCallback(
+    (outputAmount: string): string => {
+      if (
+        !outputAmount ||
+        !poolReserves ||
+        Number.parseFloat(outputAmount) <= 0
+      ) {
+        return '';
+      }
 
-    try {
-      const amountOut = BigInt(Math.floor(Number.parseFloat(outputAmount) * 1e18));
-      const [reserveIn, reserveOut] = poolReserves;
-      
-      // Use SDK function with default 0.3% fee
-      const amountIn = calculateAmountIn(amountOut, reserveIn, reserveOut);
-      
-      return (Number(amountIn) / 1e18).toFixed(6);
-    } catch (error) {
-      console.error('Error calculating input amount:', error);
-      return '';
-    }
-  }, [poolReserves]);
+      try {
+        const amountOut = BigInt(
+          Math.floor(Number.parseFloat(outputAmount) * 1e18),
+        );
+        const [reserveIn, reserveOut] = poolReserves;
+
+        // Use SDK function with default 0.3% fee
+        const amountIn = calculateAmountIn(amountOut, reserveIn, reserveOut);
+
+        return (Number(amountIn) / 1e18).toFixed(6);
+      } catch (error) {
+        console.error('Error calculating input amount:', error);
+        return '';
+      }
+    },
+    [poolReserves],
+  );
 
   // Handle from amount change (exact input)
-  const handleFromAmountChange = useCallback(async (value: string) => {
-    setFromAmount(value);
-    setActiveField('from');
-    setSwapType('EXACT_INPUT');
+  const handleFromAmountChange = useCallback(
+    async (value: string) => {
+      setFromAmount(value);
+      setActiveField('from');
+      setSwapType('EXACT_INPUT');
 
-    if (!value || !poolReserves) {
-      setToAmount('');
-      return;
-    }
+      if (!value || !poolReserves) {
+        setToAmount('');
+        return;
+      }
 
-    setIsCalculating(true);
-    try {
-      const calculatedToAmount = calculateOutputAmount(value);
-      setToAmount(calculatedToAmount);
-    } finally {
-      setIsCalculating(false);
-    }
-  }, [calculateOutputAmount, poolReserves]);
+      setIsCalculating(true);
+      try {
+        const calculatedToAmount = calculateOutputAmount(value);
+        setToAmount(calculatedToAmount);
+      } finally {
+        setIsCalculating(false);
+      }
+    },
+    [calculateOutputAmount, poolReserves],
+  );
 
   // Handle to amount change (exact output)
-  const handleToAmountChange = useCallback(async (value: string) => {
-    setToAmount(value);
-    setActiveField('to');
-    setSwapType('EXACT_OUTPUT');
+  const handleToAmountChange = useCallback(
+    async (value: string) => {
+      setToAmount(value);
+      setActiveField('to');
+      setSwapType('EXACT_OUTPUT');
 
-    if (!value || !poolReserves) {
-      setFromAmount('');
-      return;
-    }
+      if (!value || !poolReserves) {
+        setFromAmount('');
+        return;
+      }
 
-    setIsCalculating(true);
-    try {
-      const calculatedFromAmount = calculateInputAmount(value);
-      setFromAmount(calculatedFromAmount);
-    } finally {
-      setIsCalculating(false);
-    }
-  }, [calculateInputAmount, poolReserves]);
+      setIsCalculating(true);
+      try {
+        const calculatedFromAmount = calculateInputAmount(value);
+        setFromAmount(calculatedFromAmount);
+      } finally {
+        setIsCalculating(false);
+      }
+    },
+    [calculateInputAmount, poolReserves],
+  );
 
   const handleTokenSelect = (token: Token) => {
     if (selectingToken === 'from') {
@@ -216,7 +271,7 @@ export function SwapCard() {
       setToToken(token);
     }
     setShowTokenModal(false);
-    
+
     // Clear amounts when tokens change
     setFromAmount('');
     setToAmount('');
@@ -229,7 +284,12 @@ export function SwapCard() {
   };
 
   const handleSwap = async () => {
-    if (!midnightWallet.isConnected || !midnightWallet.walletAPI || !midnightWallet.address || !runtimeConfig) {
+    if (
+      !midnightWallet.isConnected ||
+      !midnightWallet.walletAPI ||
+      !midnightWallet.address ||
+      !runtimeConfig
+    ) {
       toast.error('Please connect your wallet first');
       return;
     }
@@ -247,50 +307,63 @@ export function SwapCard() {
     setIsSwapping(true);
     try {
       const contractIntegration = createContractIntegration(
-        midnightWallet.providers, 
-        midnightWallet.walletAPI, 
+        midnightWallet.providers,
+        midnightWallet.walletAPI,
         midnightWallet.callback,
-        runtimeConfig.LUNARSWAP_ADDRESS
+        runtimeConfig.LUNARSWAP_ADDRESS,
       );
       await contractIntegration.initialize();
 
       // Convert amounts to BigInt (assuming 18 decimals)
-      const fromAmountBigInt = BigInt(Math.floor(Number.parseFloat(fromAmount) * 1e18));
-      const toAmountBigInt = BigInt(Math.floor(Number.parseFloat(toAmount) * 1e18));
+      const fromAmountBigInt = BigInt(
+        Math.floor(Number.parseFloat(fromAmount) * 1e18),
+      );
+      const toAmountBigInt = BigInt(
+        Math.floor(Number.parseFloat(toAmount) * 1e18),
+      );
 
       if (swapType === 'EXACT_INPUT') {
         // User specified exact input amount, calculate minimum output with slippage using SDK
-        const amountOutMin = computeAmountOutMin(toAmountBigInt, slippageTolerance);
-        
+        const amountOutMin = computeAmountOutMin(
+          toAmountBigInt,
+          slippageTolerance,
+        );
+
         await contractIntegration.swapExactTokensForTokens(
           fromToken.symbol,
           toToken.symbol,
           fromAmountBigInt.toString(),
           amountOutMin.toString(),
-          midnightWallet.address
+          midnightWallet.address,
         );
 
-        toast.success(`Swapped ${fromAmount} ${fromToken.symbol} for ${toToken.symbol}`);
+        toast.success(
+          `Swapped ${fromAmount} ${fromToken.symbol} for ${toToken.symbol}`,
+        );
       } else {
         // User specified exact output amount, calculate maximum input with slippage using SDK
-        const amountInMax = computeAmountInMax(fromAmountBigInt, slippageTolerance);
-        
+        const amountInMax = computeAmountInMax(
+          fromAmountBigInt,
+          slippageTolerance,
+        );
+
         await contractIntegration.swapTokensForExactTokens(
           fromToken.symbol,
           toToken.symbol,
           toAmountBigInt.toString(),
           amountInMax.toString(),
-          midnightWallet.address
+          midnightWallet.address,
         );
 
-        toast.success(`Swapped ${fromToken.symbol} for ${toAmount} ${toToken.symbol}`);
+        toast.success(
+          `Swapped ${fromToken.symbol} for ${toAmount} ${toToken.symbol}`,
+        );
       }
 
       // Clear amounts after successful swap
       setFromAmount('');
       setToAmount('');
       setActiveField(null);
-
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       toast.error(`Swap failed: ${errorMsg}`);
@@ -301,7 +374,8 @@ export function SwapCard() {
   };
 
   const getExchangeRate = () => {
-    if (!fromAmount || !toAmount || Number.parseFloat(fromAmount) === 0) return null;
+    if (!fromAmount || !toAmount || Number.parseFloat(fromAmount) === 0)
+      return null;
     const rate = Number.parseFloat(toAmount) / Number.parseFloat(fromAmount);
     return `1 ${fromToken.symbol} = ${rate.toFixed(6)} ${toToken.symbol}`;
   };
@@ -314,7 +388,7 @@ export function SwapCard() {
     if (!poolReserves) return 'Pool not found';
     if (isCalculating) return 'Calculating...';
     if (isSwapping) return 'Swapping...';
-    
+
     if (swapType === 'EXACT_INPUT') {
       return `Swap ${fromAmount} ${fromToken.symbol}`;
     }
@@ -360,7 +434,7 @@ export function SwapCard() {
                 const tempToken = fromToken;
                 setFromToken(toToken);
                 setToToken(tempToken);
-                
+
                 // Swap amounts and maintain active field logic
                 if (activeField === 'from') {
                   setToAmount(fromAmount);
@@ -387,7 +461,7 @@ export function SwapCard() {
             label="Buy"
           />
 
-          {(fromAmount && toAmount) && (
+          {fromAmount && toAmount && (
             <div className="text-sm text-gray-500 dark:text-gray-400 pt-2">
               <div className="flex justify-between">
                 <span>Rate</span>
@@ -423,10 +497,9 @@ export function SwapCard() {
                 </TooltipTrigger>
                 <TooltipContent>
                   <p className="w-[200px] text-xs">
-                    {swapType === 'EXACT_INPUT' 
+                    {swapType === 'EXACT_INPUT'
                       ? 'You will receive at least the calculated amount minus slippage.'
-                      : 'You will pay at most the calculated amount plus slippage.'
-                    }
+                      : 'You will pay at most the calculated amount plus slippage.'}
                   </p>
                 </TooltipContent>
               </Tooltip>

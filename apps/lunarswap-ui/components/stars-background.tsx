@@ -47,10 +47,16 @@ export function StarsBackground() {
       setAnimationsEnabled(event.detail.enabled);
     };
 
-    window.addEventListener('animations-toggled', handleAnimationToggle as EventListener);
+    window.addEventListener(
+      'animations-toggled',
+      handleAnimationToggle as EventListener,
+    );
 
     return () => {
-      window.removeEventListener('animations-toggled', handleAnimationToggle as EventListener);
+      window.removeEventListener(
+        'animations-toggled',
+        handleAnimationToggle as EventListener,
+      );
     };
   }, []);
 

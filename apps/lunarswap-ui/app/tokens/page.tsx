@@ -3,7 +3,13 @@ import { Header } from '@/components/header';
 import { StarsBackground } from '@/components/stars-background';
 import { MoonDustBackground } from '@/components/moon-dust-background';
 import { Identicon } from '@/components/identicon';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,7 +26,8 @@ interface Token {
 
 export const metadata = {
   title: 'Explore & Manage Midnight Tokens',
-  description: 'Explore and manage all supported Midnight tokens on Lunarswap. View contract addresses, token types, and detailed information for TUSD, TEURO, TJPY, TCNY, and TARS.',
+  description:
+    'Explore and manage all supported Midnight tokens on Lunarswap. View contract addresses, token types, and detailed information for TUSD, TEURO, TJPY, TCNY, and TARS.',
 };
 
 function TokensContent() {
@@ -31,7 +38,9 @@ function TokensContent() {
   const viewPreference = useViewPreference();
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>(viewPreference === 'horizontal' ? 'grid' : 'list');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(
+    viewPreference === 'horizontal' ? 'grid' : 'list',
+  );
 
   // Update view mode when view preference changes
   useEffect(() => {
@@ -40,10 +49,11 @@ function TokensContent() {
 
   const tokens: Token[] = Object.values(DEMO_TOKENS);
 
-  const filteredTokens = tokens.filter((token) =>
-    token.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    token.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    token.address.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredTokens = tokens.filter(
+    (token) =>
+      token.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      token.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      token.address.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const copyToClipboard = async (text: string, fieldId: string) => {
@@ -63,7 +73,10 @@ function TokensContent() {
   const GridView = () => (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {filteredTokens.map((token) => (
-        <Card key={token.symbol} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-gray-200/50 dark:border-blue-900/30">
+        <Card
+          key={token.symbol}
+          className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-gray-200/50 dark:border-blue-900/30"
+        >
           <CardHeader className="pb-4">
             <div className="flex items-center space-x-3">
               <div className="relative h-12 w-12 rounded-full overflow-hidden">
@@ -78,7 +91,9 @@ function TokensContent() {
           <CardContent className="space-y-4">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-muted-foreground">Contract Address</span>
+                <span className="text-sm font-medium text-muted-foreground">
+                  Contract Address
+                </span>
                 <Badge variant="secondary" className="text-xs">
                   Contract
                 </Badge>
@@ -87,14 +102,18 @@ function TokensContent() {
                 <button
                   type="button"
                   className="w-full text-xs bg-gray-100 dark:bg-gray-700 p-2 rounded border text-wrap break-all cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-left font-mono"
-                  onClick={() => copyToClipboard(token.address, `${token.symbol}-address`)}
+                  onClick={() =>
+                    copyToClipboard(token.address, `${token.symbol}-address`)
+                  }
                   title="Click to copy address"
                 >
                   {formatAddress(token.address)}
                 </button>
                 {copiedField === `${token.symbol}-address` && (
                   <div className="absolute inset-0 bg-green-500/20 backdrop-blur-sm rounded border flex items-center justify-center">
-                    <span className="text-xs font-medium text-green-700 dark:text-green-300">Copied!</span>
+                    <span className="text-xs font-medium text-green-700 dark:text-green-300">
+                      Copied!
+                    </span>
                   </div>
                 )}
               </div>
@@ -102,7 +121,9 @@ function TokensContent() {
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-muted-foreground">Token Type</span>
+                <span className="text-sm font-medium text-muted-foreground">
+                  Token Type
+                </span>
                 <Badge variant="outline" className="text-xs">
                   Type
                 </Badge>
@@ -111,26 +132,25 @@ function TokensContent() {
                 <button
                   type="button"
                   className="w-full text-xs bg-gray-100 dark:bg-gray-700 p-2 rounded border text-wrap break-all cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-left font-mono"
-                  onClick={() => copyToClipboard(token.type, `${token.symbol}-type`)}
+                  onClick={() =>
+                    copyToClipboard(token.type, `${token.symbol}-type`)
+                  }
                   title="Click to copy type"
                 >
                   {formatAddress(token.type)}
                 </button>
                 {copiedField === `${token.symbol}-type` && (
                   <div className="absolute inset-0 bg-green-500/20 backdrop-blur-sm rounded border flex items-center justify-center">
-                    <span className="text-xs font-medium text-green-700 dark:text-green-300">Copied!</span>
+                    <span className="text-xs font-medium text-green-700 dark:text-green-300">
+                      Copied!
+                    </span>
                   </div>
                 )}
               </div>
             </div>
 
             <div className="pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full"
-                disabled
-              >
+              <Button variant="outline" size="sm" className="w-full" disabled>
                 <Clock className="h-3 w-3 mr-2" />
                 Explorer - Coming Soon
               </Button>
@@ -144,7 +164,10 @@ function TokensContent() {
   const ListView = () => (
     <div className="space-y-4">
       {filteredTokens.map((token) => (
-        <Card key={token.symbol} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-gray-200/50 dark:border-blue-900/30">
+        <Card
+          key={token.symbol}
+          className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-gray-200/50 dark:border-blue-900/30"
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
@@ -157,35 +180,42 @@ function TokensContent() {
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled
-                >
+                <Button variant="outline" size="sm" disabled>
                   <Clock className="h-3 w-3 mr-2" />
                   Explorer - Coming Soon
                 </Button>
               </div>
             </div>
-            
+
             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-muted-foreground">Contract Address</span>
-                  <Badge variant="secondary" className="text-xs">Contract</Badge>
+                  <span className="text-sm font-medium text-muted-foreground">
+                    Contract Address
+                  </span>
+                  <Badge variant="secondary" className="text-xs">
+                    Contract
+                  </Badge>
                 </div>
                 <div className="relative">
                   <button
                     type="button"
                     className="w-full text-xs bg-gray-100 dark:bg-gray-700 p-2 rounded border font-mono cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-left"
-                    onClick={() => copyToClipboard(token.address, `${token.symbol}-address-list`)}
+                    onClick={() =>
+                      copyToClipboard(
+                        token.address,
+                        `${token.symbol}-address-list`,
+                      )
+                    }
                     title="Click to copy address"
                   >
                     {token.address}
                   </button>
                   {copiedField === `${token.symbol}-address-list` && (
                     <div className="absolute inset-0 bg-green-500/20 backdrop-blur-sm rounded border flex items-center justify-center">
-                      <span className="text-xs font-medium text-green-700 dark:text-green-300">Copied!</span>
+                      <span className="text-xs font-medium text-green-700 dark:text-green-300">
+                        Copied!
+                      </span>
                     </div>
                   )}
                 </div>
@@ -193,21 +223,29 @@ function TokensContent() {
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-muted-foreground">Token Type</span>
-                  <Badge variant="outline" className="text-xs">Type</Badge>
+                  <span className="text-sm font-medium text-muted-foreground">
+                    Token Type
+                  </span>
+                  <Badge variant="outline" className="text-xs">
+                    Type
+                  </Badge>
                 </div>
                 <div className="relative">
                   <button
                     type="button"
                     className="w-full text-xs bg-gray-100 dark:bg-gray-700 p-2 rounded border font-mono cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-left"
-                    onClick={() => copyToClipboard(token.type, `${token.symbol}-type-list`)}
+                    onClick={() =>
+                      copyToClipboard(token.type, `${token.symbol}-type-list`)
+                    }
                     title="Click to copy type"
                   >
                     {token.type}
                   </button>
                   {copiedField === `${token.symbol}-type-list` && (
                     <div className="absolute inset-0 bg-green-500/20 backdrop-blur-sm rounded border flex items-center justify-center">
-                      <span className="text-xs font-medium text-green-700 dark:text-green-300">Copied!</span>
+                      <span className="text-xs font-medium text-green-700 dark:text-green-300">
+                        Copied!
+                      </span>
                     </div>
                   )}
                 </div>
@@ -229,7 +267,8 @@ function TokensContent() {
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">Supported Tokens</h1>
             <p className="text-muted-foreground">
-              Complete list of tokens available on Lunarswap with their contract addresses and types.
+              Complete list of tokens available on Lunarswap with their contract
+              addresses and types.
             </p>
           </div>
 
@@ -244,7 +283,7 @@ function TokensContent() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            
+
             <div className="flex items-center space-x-2 flex-shrink-0">
               <span className="text-sm text-muted-foreground">View:</span>
               <Button
@@ -275,9 +314,12 @@ function TokensContent() {
           {filteredTokens.length === 0 ? (
             <div className="text-center py-12">
               <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-muted-foreground mb-2">No tokens found</h3>
+              <h3 className="text-lg font-medium text-muted-foreground mb-2">
+                No tokens found
+              </h3>
               <p className="text-sm text-muted-foreground">
-                Try adjusting your search query or clear the search to see all tokens.
+                Try adjusting your search query or clear the search to see all
+                tokens.
               </p>
               {searchQuery && (
                 <Button
@@ -291,9 +333,7 @@ function TokensContent() {
               )}
             </div>
           ) : (
-            <>
-              {viewMode === 'grid' ? <GridView /> : <ListView />}
-            </>
+            <>{viewMode === 'grid' ? <GridView /> : <ListView />}</>
           )}
 
           <div className="mt-12 text-center">
@@ -303,8 +343,9 @@ function TokensContent() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-4">
-                  These are test tokens deployed on the Midnight testnet for development and testing purposes. 
-                  They have no real value and are used to demonstrate Lunarswap functionality.
+                  These are test tokens deployed on the Midnight testnet for
+                  development and testing purposes. They have no real value and
+                  are used to demonstrate Lunarswap functionality.
                 </p>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
@@ -327,4 +368,4 @@ function TokensContent() {
 
 export default function TokensPage() {
   return <TokensContent />;
-} 
+}

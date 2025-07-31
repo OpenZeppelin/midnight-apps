@@ -4,7 +4,10 @@ import { NetworkProvider } from '@/lib/network-context';
 import { VersionProvider } from '@/lib/version-context';
 import { MidnightWalletProvider } from '@/lib/wallet-context';
 import { ThemeProvider } from 'next-themes';
-import { RuntimeConfigurationProvider, useRuntimeConfiguration } from '@/lib/runtime-configuration';
+import {
+  RuntimeConfigurationProvider,
+  useRuntimeConfiguration,
+} from '@/lib/runtime-configuration';
 import Home from '@/app/page';
 import PoolPage from '@/app/pool/page';
 import NewPositionPage from '@/app/pool/new/page';
@@ -29,9 +32,7 @@ function AppWithLogger({ children }: { children: ReactNode }) {
   });
 
   return (
-    <MidnightWalletProvider logger={logger}>
-      {children}
-    </MidnightWalletProvider>
+    <MidnightWalletProvider logger={logger}>{children}</MidnightWalletProvider>
   );
 }
 

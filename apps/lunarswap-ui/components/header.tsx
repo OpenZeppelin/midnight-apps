@@ -52,9 +52,7 @@ export function Header() {
           {/* Right side - Global Preferences (only when not connected) and Wallet Connect */}
           <div className="flex items-center space-x-2">
             {!isConnected && !isAccountPanelOpen && <GlobalPreferences />}
-            <WalletConnect 
-              onAccountPanelStateChange={setIsAccountPanelOpen}
-            />
+            <WalletConnect onAccountPanelStateChange={setIsAccountPanelOpen} />
           </div>
         </div>
       </div>

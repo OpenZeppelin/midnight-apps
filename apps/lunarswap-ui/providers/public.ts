@@ -68,21 +68,35 @@ export class PublicDataProviderWrapper implements PublicDataProvider {
   watchForDeployTxData(
     contractAddress: ContractAddress,
   ): Promise<FinalizedTxData> {
-    console.log('[watchForDeployTxData] Step 1: Starting watchForDeployTxData', { contractAddress });
+    console.log(
+      '[watchForDeployTxData] Step 1: Starting watchForDeployTxData',
+      { contractAddress },
+    );
     return retry(
       () => {
-        console.log('[watchForDeployTxData] Step 2: Calling wrapped.watchForDeployTxData', { contractAddress });
+        console.log(
+          '[watchForDeployTxData] Step 2: Calling wrapped.watchForDeployTxData',
+          { contractAddress },
+        );
         return this.wrapped.watchForDeployTxData(contractAddress);
       },
       'watchForDeployTxData',
       this.logger,
-    ).then((result) => {
-      console.log('[watchForDeployTxData] Step 3: Successfully received FinalizedTxData', { contractAddress, result });
-      return result;
-    }).catch((error) => {
-      console.log('[watchForDeployTxData] Step 4: Error in watchForDeployTxData', { contractAddress, error });
-      throw error;
-    });
+    )
+      .then((result) => {
+        console.log(
+          '[watchForDeployTxData] Step 3: Successfully received FinalizedTxData',
+          { contractAddress, result },
+        );
+        return result;
+      })
+      .catch((error) => {
+        console.log(
+          '[watchForDeployTxData] Step 4: Error in watchForDeployTxData',
+          { contractAddress, error },
+        );
+        throw error;
+      });
   }
 
   watchForTxData(txId: TransactionId): Promise<FinalizedTxData> {

@@ -5,7 +5,18 @@ import type {
   ServiceUriConfig,
 } from '@midnight-ntwrk/dapp-connector-api';
 import type { Logger } from 'pino';
-import { concatMap, filter, firstValueFrom, interval, map, of, take, tap, throwError, timeout } from 'rxjs';
+import {
+  concatMap,
+  filter,
+  firstValueFrom,
+  interval,
+  map,
+  of,
+  take,
+  tap,
+  throwError,
+  timeout,
+} from 'rxjs';
 import { pipe as fnPipe } from 'fp-ts/function';
 import semver from 'semver';
 
@@ -78,9 +89,14 @@ export const connectToWallet = (
       tap((connectorAPI) => {
         logger.info(connectorAPI, 'Check for wallet connector API');
       }),
-      filter((connectorAPI): connectorAPI is DAppConnectorAPI => !!connectorAPI),
+      filter(
+        (connectorAPI): connectorAPI is DAppConnectorAPI => !!connectorAPI,
+      ),
       concatMap((connectorAPI) =>
-        semver.satisfies(connectorAPI.apiVersion, COMPATIBLE_CONNECTOR_API_VERSION)
+        semver.satisfies(
+          connectorAPI.apiVersion,
+          COMPATIBLE_CONNECTOR_API_VERSION,
+        )
           ? of(connectorAPI)
           : throwError(() => {
               logger.error(
@@ -97,7 +113,10 @@ export const connectToWallet = (
             }),
       ),
       tap((connectorAPI) => {
-        logger.info(connectorAPI, 'Compatible wallet connector API found. Connecting.');
+        logger.info(
+          connectorAPI,
+          'Compatible wallet connector API found. Connecting.',
+        );
       }),
       take(1),
       timeout({
@@ -106,7 +125,9 @@ export const connectToWallet = (
           throwError(() => {
             logger.error('Could not find wallet connector API');
 
-            return new Error('Could not find Midnight Lace wallet. Extension installed?');
+            return new Error(
+              'Could not find Midnight Lace wallet. Extension installed?',
+            );
           }),
       }),
       concatMap(async (connectorAPI) => {
@@ -121,7 +142,9 @@ export const connectToWallet = (
         with: () =>
           throwError(() => {
             logger.error('Wallet connector API has failed to respond');
-            return new Error('Midnight Lace wallet has failed to respond. Extension enabled?');
+            return new Error(
+              'Midnight Lace wallet has failed to respond. Extension enabled?',
+            );
           }),
       }),
       concatMap(async (connectorAPI) => {
@@ -138,7 +161,9 @@ export const connectToWallet = (
       concatMap(async ({ walletConnectorAPI, connectorAPI }) => {
         const uris = await connectorAPI.serviceUriConfig();
 
-        logger.info('Connected to wallet connector API and retrieved service configuration');
+        logger.info(
+          'Connected to wallet connector API and retrieved service configuration',
+        );
 
         return { wallet: walletConnectorAPI, uris };
       }),

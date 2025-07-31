@@ -52,7 +52,9 @@ export function NewPositionWizard({ onClose }: NewPositionWizardProps) {
   };
 
   // Type guard to check if pair data is complete
-  const isCompletePairData = (data: PairSelectionData): data is CompletePairData => {
+  const isCompletePairData = (
+    data: PairSelectionData,
+  ): data is CompletePairData => {
     return data.tokenA !== null && data.tokenB !== null;
   };
 
@@ -158,7 +160,10 @@ export function NewPositionWizard({ onClose }: NewPositionWizardProps) {
               <p className="text-gray-500 dark:text-gray-400 mb-4">
                 Please select both tokens before proceeding to deposit step.
               </p>
-              <Button onClick={() => setCurrentStep('select-pair')} variant="outline">
+              <Button
+                onClick={() => setCurrentStep('select-pair')}
+                variant="outline"
+              >
                 Back to Token Selection
               </Button>
             </div>

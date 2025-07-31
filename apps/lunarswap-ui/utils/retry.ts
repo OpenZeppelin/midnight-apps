@@ -1,4 +1,3 @@
-
 /**
  * Retries a promise-returning operation with exponential backoff.
  * Useful for network or async operations that may fail transiently.
@@ -22,7 +21,9 @@ export function retry<T>(
       currentDelay: number,
       isRetry: boolean,
     ) => {
-      console.log(`[${operationName}] Attempt ${retryCount + 1} of ${retries + 1}`);
+      console.log(
+        `[${operationName}] Attempt ${retryCount + 1} of ${retries + 1}`,
+      );
       operation()
         .then((result) => {
           if (isRetry) {
@@ -33,7 +34,9 @@ export function retry<T>(
           resolve(result);
         })
         .catch((error) => {
-          console.error(`[${operationName}] Operation failed: ${error.message}`);
+          console.error(
+            `[${operationName}] Operation failed: ${error.message}`,
+          );
 
           if (retryCount <= 0) {
             console.error(

@@ -17,7 +17,9 @@ interface WalletConnectProps {
   onAccountPanelStateChange?: (isOpen: boolean) => void;
 }
 
-export function WalletConnect({ onAccountPanelStateChange }: WalletConnectProps = {}) {
+export function WalletConnect({
+  onAccountPanelStateChange,
+}: WalletConnectProps = {}) {
   const {
     isConnected,
     isConnecting: walletContextConnecting,
@@ -43,7 +45,11 @@ export function WalletConnect({ onAccountPanelStateChange }: WalletConnectProps 
       if (userAgent.includes('firefox')) {
         return 'firefox';
       }
-      if (userAgent.includes('chrome') || userAgent.includes('chromium') || userAgent.includes('edge')) {
+      if (
+        userAgent.includes('chrome') ||
+        userAgent.includes('chromium') ||
+        userAgent.includes('edge')
+      ) {
         return 'chrome';
       }
       return 'other';
@@ -63,14 +69,13 @@ export function WalletConnect({ onAccountPanelStateChange }: WalletConnectProps 
       try {
         // Check if the Midnight Lace wallet is available
         const isAvailable = !!(
-          (typeof window !== 'undefined') && (
-            // Check for midnight.mnLace (correct property name)
-            (window.midnight?.mnLace) ||
+          typeof window !== 'undefined' &&
+          // Check for midnight.mnLace (correct property name)
+          (window.midnight?.mnLace ||
             // Check if midnight API exists at all
-            (typeof window.midnight !== 'undefined')
-          )
+            typeof window.midnight !== 'undefined')
         );
-        
+
         setWalletAvailable(isAvailable);
       } catch (error) {
         console.warn('Error checking wallet availability:', error);
@@ -99,7 +104,7 @@ export function WalletConnect({ onAccountPanelStateChange }: WalletConnectProps 
     try {
       const logger = pino({ level: 'info' });
       await connectToWallet(logger);
-      
+
       // Store connection preference for future auto-connect (handled by wallet context)
       localStorage.setItem('lace-wallet-connected', 'true');
 
@@ -120,13 +125,13 @@ export function WalletConnect({ onAccountPanelStateChange }: WalletConnectProps 
 
   const handleDisconnect = () => {
     setShowWalletInfo(false);
-    
+
     // Remove auto-connect preference
     localStorage.removeItem('lace-wallet-connected');
-    
+
     // Use the shared disconnect utility
     disconnectFromContext();
-    
+
     // Show success toast
     toast.success('Wallet disconnected', {
       duration: 2000,
@@ -251,9 +256,12 @@ export function WalletConnect({ onAccountPanelStateChange }: WalletConnectProps 
               <Download className="h-5 w-5 text-blue-500" />
             </div>
             <div>
-              <h4 className="font-medium text-sm mb-1">Install Midnight Lace Wallet</h4>
+              <h4 className="font-medium text-sm mb-1">
+                Install Midnight Lace Wallet
+              </h4>
               <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
-                Get the official Midnight Lace wallet for {getBrowserName()} to connect to Lunarswap and manage your digital assets.
+                Get the official Midnight Lace wallet for {getBrowserName()} to
+                connect to Lunarswap and manage your digital assets.
               </p>
               <Button
                 size="sm"

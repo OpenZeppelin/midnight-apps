@@ -46,7 +46,10 @@ import type {
   ProofProvider,
 } from '@midnight-ntwrk/midnight-js-types';
 import { PrivateDataProviderWrapper } from '@/providers/private';
-import { connectToWallet, type WalletConnectionResult } from '@/utils/wallet-utils';
+import {
+  connectToWallet,
+  type WalletConnectionResult,
+} from '@/utils/wallet-utils';
 import { ZkConfigProviderWrapper } from '@/providers/zk-config';
 import { PublicDataProviderWrapper } from '@/providers/public';
 import { noopProofClient } from '@/providers/proof';
@@ -260,7 +263,9 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
     [logger],
   );
 
-  const providerCallback: (action: ProviderCallbackAction) => void = (action: ProviderCallbackAction): void => {
+  const providerCallback: (action: ProviderCallbackAction) => void = (
+    action: ProviderCallbackAction,
+  ): void => {
     if (action === 'proveTxStarted') {
       setSnackBarText('Proving transaction...');
     } else if (action === 'proveTxDone') {
@@ -283,7 +288,6 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
       setSnackBarText(undefined);
     }
   };
-
 
   const zkConfigProvider = useMemo(
     () =>
@@ -430,7 +434,9 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
 
   async function connect(manual: boolean): Promise<void> {
     setIsConnecting(true);
-    let walletResult: { wallet: DAppConnectorWalletAPI; uris: ServiceUriConfig } | undefined;
+    let walletResult:
+      | { wallet: DAppConnectorWalletAPI; uris: ServiceUriConfig }
+      | undefined;
     try {
       walletResult = await connectToWallet(logger);
     } catch (e) {
@@ -443,9 +449,7 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
       if (manual) setOpenWallet(true);
       return;
     }
-    await checkProofServerStatus(
-      walletResult.uris.proverServerUri,
-    );
+    await checkProofServerStatus(walletResult.uris.proverServerUri);
     try {
       const reqState = await walletResult.wallet.state();
       setAddress(reqState.address);
