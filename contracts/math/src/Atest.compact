@@ -17,6 +17,15 @@ struct Pair {
 export ledger reserves: Map<Bytes<32>, Map<Bytes<32>, QualifiedCoinInfo>>;
 export ledger pool: Map<Bytes<32>, Pair>;
 
+circuit updateReserves(identity: Bytes<32>, token0: CoinInfo, token1: CoinInfo, isRemove: Bool): [] {
+    const foundPair = pool.lookup(identity);
+    reserves.lookup(identity).insert_coin(token0.color, token0, right<ZswapCoinPublicKey, ContractAddress>(kernel.self()));
+    reserves.lookup(identity).insert_coin(token1.color, token1, right<ZswapCoinPublicKey, ContractAddress>(kernel.self()));
+    return [];
+}
+
+circuit 
+
 circuit testPair(token0: CoinInfo, token1: CoinInfo): [] {
     const identity = persistent_hash<Vector<2, CoinInfo>>([token0, token1]);
     const foundPair = pool.lookup(identity);

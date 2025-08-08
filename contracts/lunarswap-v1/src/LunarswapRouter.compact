@@ -88,7 +88,7 @@ module LunarswapRouter {
      * @throws {Error} "LunarswapRouter: Insufficient A amount" if calculated amount is below minimum.
      * @throws {Error} "LunarswapRouter: Insufficient B amount" if calculated amount is below minimum.
      *
-     * @returns [] - No return values.
+     * @returns {Uint<128>} - The amount of liquidity minted.
      */
     export circuit addLiquidity(
         identity: Bytes<32>,
@@ -97,7 +97,7 @@ module LunarswapRouter {
         amount0Min: Uint<128>,
         amount1Min: Uint<128>,
         to: Either<ZswapCoinPublicKey, ContractAddress>,
-    ): [] {
+    ): Uint<128> {
         // Compute the optimal amounts to add, given the sorted tokens and min amounts
         const [amount0Optimal, amount1Optimal, reserve0, reserve1] = _addLiquidity(
             token0,
@@ -109,36 +109,43 @@ module LunarswapRouter {
             identity
         );
 
-        // Only receive the used amount of the tokenA, the remainder will be returned to the user
+        // Split the tokens into used and remainder
         const splitToken0 = LunarswapLibrary_splitCoin(token0, amount0Optimal);
+        const splitToken1 = LunarswapLibrary_splitCoin(token1, amount1Optimal);
+
+        // Receive the used amounts of the tokens
         receive(splitToken0.used);
+        receive(splitToken1.used);
+
+        // Sort tokens before getting identity and updating pair
+        const pair = LunarswapFactory_getPair(identity);
+
+        // Mint LP tokens and update the pair with the optimal amounts
+        const [updatedPair, liquidity] = LunarswapPair_mint(
+            to,
+            identity,
+            pair,
+            amount0Optimal,
+            amount1Optimal,
+            reserve0,
+            reserve1,
+        );
+
+        // Update the pair with the optimal amounts
+        LunarswapFactory_updatePair(identity, updatedPair);
+        LunarswapFactory_updateReserves(identity, splitToken0.used, splitToken1.used);
+
+        // Send the remainder of the tokens to the user
         if (splitToken0.remainder.value > 0) {
             send_immediate(splitToken0.remainder, to, splitToken0.remainder.value);
         }
 
-        // Only receive the used amount of the tokenB, the remainder will be returned to the user
-        const splitToken1 = LunarswapLibrary_splitCoin(token1, amount1Optimal);
-        receive(splitToken1.used);
+        // Send the remainder of the tokens to the user
         if (splitToken1.remainder.value > 0) {
             send_immediate(splitToken1.remainder, to, splitToken1.remainder.value);
-        }
+        } 
 
-        // Sort tokens before getting identity and updating pair
-        const pair = LunarswapFactory_getPair(identity);
-        // Mint LP tokens and update the pair with the optimal amounts
-        const updatedPair = LunarswapPair_mint(
-            to,
-            identity,
-            pair,
-            token0,
-            token1,
-            reserve0,
-            reserve1,
-            amount0Optimal,
-            amount1Optimal
-        );
-        LunarswapFactory_updatePair(updatedPair, identity);
-        return [];
+        return liquidity;
     } 
 
     /**
@@ -249,13 +256,16 @@ module LunarswapRouter {
             identity,
             pair,
             liquidity,
-            pair.token0,
-            pair.token1,
+            pair.token0Type,
+            pair.token1Type,
             reserve0,
             reserve1
         );
 
-        LunarswapFactory_updatePair(updatedPair, identity);
+        const reserve0 = 
+
+        LunarswapFactory_updatePair(identity, updatedPair);
+        LunarswapFactory_updateReserves(identity, amount0, amount1);
 
         return [amount0, amount1];
     }
@@ -325,7 +335,7 @@ module LunarswapRouter {
             reserve1,
             to
         );
-        LunarswapFactory_updatePair(updatedPair, identity);
+        LunarswapFactory_updatePair(identity, updatedPair, updatedToken0, updatedToken1);
         return amountOut;
     }
 
@@ -394,7 +404,7 @@ module LunarswapRouter {
             reserve1,
             to
         );
-        LunarswapFactory_updatePair(updatedPair, identity);
+        LunarswapFactory_updatePair(identity, updatedPair, updatedToken0, updatedToken1);
         return amountIn;
     }
 }

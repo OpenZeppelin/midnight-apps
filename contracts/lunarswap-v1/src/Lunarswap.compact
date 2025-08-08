@@ -120,7 +120,7 @@ constructor(
  * @throws {Error} "LunarswapRouter: Insufficient A amount" if the calculated amount is below minimum.
  * @throws {Error} "LunarswapRouter: Insufficient B amount" if the calculated amount is below minimum.
  *
- * @returns [] - No return values.
+ * @returns {Uint<128>} - The amount of liquidity minted.
  */
 export circuit addLiquidity(
     tokenA: CoinInfo,
@@ -128,7 +128,7 @@ export circuit addLiquidity(
     amountAMin: Uint<128>,
     amountBMin: Uint<128>,
     to: Either<ZswapCoinPublicKey, ContractAddress>,
-): [] {
+): Uint<128> {
     assert (tokenA.color != tokenB.color) "Lunarswap: addLiquidity() - Identical addresses";
     const [token0, token1, amount0Min, amount1Min] = LunarswapLibrary_sortCoinsAndAmounts(tokenA, tokenB, amountAMin, amountBMin);
     const identity = LunarswapLibrary_getIdentity(token0, token1);
@@ -366,9 +366,9 @@ export circuit getPair(tokenA: CoinInfo, tokenB: CoinInfo): Pair {
  *
  * @throws {Error} "LunarswapFactory: getPair() - Pair does not exist" if the pair doesn't exist.
  *
- * @returns {[Uint<128>, Uint<128>]} - The reserves for tokenA and tokenB respectively.
+ * @returns {[QualifiedCoinInfo, QualifiedCoinInfo]} - The reserves for tokenA and tokenB respectively.
  */
-export circuit getPairReserves(tokenA: CoinInfo, tokenB: CoinInfo): [Uint<128>, Uint<128>] {
+export circuit getPairReserves(tokenA: CoinInfo, tokenB: CoinInfo): [QualifiedCoinInfo, QualifiedCoinInfo] {
     const [token0, token1] = LunarswapLibrary_sortCoins(tokenA, tokenB);
     const identity = LunarswapLibrary_getIdentity(token0, token1);
     const [reserve0, reserve1] = LunarswapFactory_getReserves(identity, token0, token1);

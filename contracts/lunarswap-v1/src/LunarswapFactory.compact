@@ -122,12 +122,30 @@ module LunarswapFactory {
      *
      * @throws {Error} "LunarswapFactory: getPair() - Pair does not exist" if the pair doesn't exist.
      *
-     * @returns {[Uint<128>, Uint<128>]} - The reserves for token0 and token1 respectively.
+     * @returns {[QualifiedCoinInfo, QualifiedCoinInfo]} - The reserves for token0 and token1 respectively.
      */
-    export circuit getReserves(identity: Bytes<32>, token0: CoinInfo, token1: CoinInfo): [Uint<128>, Uint<128>] {
-        const pair = getPair(identity);
-        return [pair.token0.value, pair.token1.value];
-    } 
+    export circuit getReserves(identity: Bytes<32>, token0: CoinInfo, token1: CoinInfo): [QualifiedCoinInfo, QualifiedCoinInfo] {
+        assert (isIdentityExists(identity)) "LunarswapFactory: getReserves() - Pair does not exist";
+        const reserve0 = reserve.lookup(identity).lookup(token0.color);
+        const reserve1 = reserve.lookup(identity).lookup(token1.color);
+        return [reserve0, reserve1];
+    }
+
+    /**
+     * @title updateReserves circuit
+     * @description Updates the reserves for a given pair identity with new token0 and token1 CoinInfo.
+     *
+     * @param {Bytes<32>} identity - The unique identity hash of the pair.
+     * @param {CoinInfo} token0    - The first token's CoinInfo.
+     * @param {CoinInfo} token1    - The second token's CoinInfo.
+     *
+     * @returns [] - No return values.
+     */
+    export circuit updateReserves(identity: Bytes<32>, token0: CoinInfo, token1: CoinInfo): [] {
+        reserve.lookup(identity).insert_coin(token0.color, token0, right<ZswapCoinPublicKey, ContractAddress>(kernel.self()));
+        reserve.lookup(identity).insert_coin(token1.color, token1, right<ZswapCoinPublicKey, ContractAddress>(kernel.self()));
+        return [];
+    }
     
     /**
      * @title createPair circuit
@@ -156,7 +174,7 @@ module LunarswapFactory {
         assert (!Utils_isKeyOrAddressZero(right<ZswapCoinPublicKey, ContractAddress>( ContractAddress { bytes: token0.color }))) "LunarswapFactory: Invalid token color";
         const pair = LunarswapPair_initializePair(identity); 
         return pool.insert(identity, pair);
-    }
+    } 
 
     /**
      * @title updatePair circuit
@@ -178,20 +196,10 @@ module LunarswapFactory {
      *
      * @returns {Pair} - The updated pair data.
      */
-    export circuit updatePair(unsavedPair: UnsavedPair, identity: Bytes<32>): Pair {
+    export circuit updatePair(identity: Bytes<32>, pair: Pair): Pair {
         assert (isIdentityExists(identity)) "LunarswapFactory: updatePair() - Pair does not exist";
-        const existingPair = getPair(identity);
-        const updatedPair = Pair {
-            token0: pair.token0.write_coin()
-            token1: existingPair.token1,
-            price0VolCumulative: existingPair.price0VolCumulative,
-            price1VolCumulative: existingPair.price1VolCumulative,
-            volume0Cumulative: existingPair.volume0Cumulative,
-            volume1Cumulative: existingPair.volume1Cumulative,
-            kLast: existingPair.kLast,
-        };
-        pool.insert(identity, disclose(updatedPair));
-        return updatedPair;
+        pool.insert(identity, disclose(pair));
+        return pair;
     }
 
     /**
