@@ -1,103 +1,159 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '../../ui/button';
 import { CardContent, CardFooter } from '@/components/ui/card';
-import { HelpCircle } from 'lucide-react';
-import { useState } from 'react';
 import { TokenSelector } from '../token-selector';
-import { getTokenByName, type Token } from '@/lib/token-config';
+import { getTokenByName } from '../../../lib/token-config';
+import { useState, useEffect } from 'react';
+
+import type { Token as UiToken } from '@/lib/token-config';
+
+interface PairSelectionData {
+  tokenA: UiToken;
+  tokenB: UiToken;
+  fee: number;
+  version: string;
+}
 
 interface SelectPairStepProps {
-  onSubmit: (data: any) => void;
-  initialData: any;
+  onSubmit: (data: PairSelectionData) => void;
+  initialData?: Partial<PairSelectionData>;
 }
 
 export function SelectPairStep({ onSubmit, initialData }: SelectPairStepProps) {
-  // Set default tokens - first token is TUSD, second is empty
-  const [tokenA, setTokenA] = useState(
-    initialData.tokenA || getTokenByName('TUSD'),
+  const [tokenA, setTokenA] = useState<UiToken | null>(
+    initialData?.tokenA || getTokenByName('tDUST') || null
   );
-  const [tokenB, setTokenB] = useState(initialData.tokenB || null);
-  const [fee] = useState(initialData.fee);
-  const [version] = useState(initialData.version);
+  const [tokenB, setTokenB] = useState<UiToken | null>(
+    initialData?.tokenB || null
+  );
+  const [fee] = useState<number>(0.3); // Fixed fee at 0.3%
+  const [validationState, setValidationState] = useState<{
+    tokenA: string | null;
+    tokenB: string | null;
+    isValid: boolean | null;
+    tokenAExists: boolean;
+    tokenBExists: boolean;
+    symbolsDifferent: boolean;
+  }>({
+    tokenA: null,
+    tokenB: null,
+    isValid: null,
+    tokenAExists: false,
+    tokenBExists: false,
+    symbolsDifferent: true,
+  });
 
-  const handleTokenASelect = (token: Token) => {
-    // Check if the new token is the same as tokenB
-    if (tokenB && token.symbol === tokenB.symbol) {
-      // Reset tokenB since tokenA was changed last
-      setTokenB(null);
-    }
+  // Validate tokens whenever they change
+  useEffect(() => {
+    const tokenASymbol = tokenA?.symbol || null;
+    const tokenBSymbol = tokenB?.symbol || null;
+    const tokenAExists = !!tokenA;
+    const tokenBExists = !!tokenB;
+    const symbolsDifferent = tokenASymbol !== tokenBSymbol;
 
+    const isValid = tokenAExists && tokenBExists && symbolsDifferent;
+
+    setValidationState({
+      tokenA: tokenASymbol,
+      tokenB: tokenBSymbol,
+      isValid,
+      tokenAExists,
+      tokenBExists,
+      symbolsDifferent,
+    });
+  }, [tokenA, tokenB]);
+
+  const handleTokenASelect = (token: UiToken) => {
     setTokenA(token);
   };
 
-  const handleTokenBSelect = (token: Token) => {
-    // Check if the new token is the same as tokenA
+  const handleTokenBSelect = (token: UiToken) => {
+    // If the selected token is the same as tokenA, reset tokenA to null
     if (tokenA && token.symbol === tokenA.symbol) {
-      // Reset tokenA since tokenB was changed last
       setTokenA(null);
     }
-
     setTokenB(token);
   };
 
   const handleSubmit = () => {
-    onSubmit({ tokenA, tokenB, fee, version });
+    if (!tokenA || !tokenB) {
+      return;
+    }
+
+    const pairData: PairSelectionData = {
+      tokenA,
+      tokenB,
+      fee,
+      version: 'v1',
+    };
+
+    onSubmit(pairData);
   };
 
-  const isValid =
-    tokenA && tokenB && (!tokenA || !tokenB || tokenA.symbol !== tokenB.symbol);
+
 
   return (
     <>
-      <CardContent className="p-6">
-        <div className="mb-6">
-          <h3 className="text-lg font-medium mb-2">Select pair</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-            Choose the tokens you want to provide liquidity for. You can select
-            tokens on all supported networks.
+      <CardContent className="p-4">
+        <div className="mb-4">
+          <h3 className="text-base font-medium mb-2">Select token pair</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+            Choose the tokens you want to provide liquidity for.
           </p>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <TokenSelector
-                selectedToken={tokenA}
-                onSelectToken={handleTokenASelect}
-                placeholder="Choose token"
-                showTokenIcon={true}
-              />
-            </div>
-            <div>
-              <TokenSelector
-                selectedToken={tokenB}
-                onSelectToken={handleTokenBSelect}
-                placeholder="Choose token"
-                showTokenIcon={true}
-              />
-            </div>
-          </div>
-        </div>
+          <div className="space-y-3">
+            {/* Token selectors on the same line */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <div className="block text-xs font-medium mb-1">Token A</div>
+                <TokenSelector
+                  selectedToken={tokenA}
+                  onSelectToken={handleTokenASelect}
+                  showTokenIcon={false}
+                />
+              </div>
 
-        <div>
-          <h3 className="text-lg font-medium mb-2">Fee tier</h3>
-          <div className="flex items-center mb-2">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Fixed 0.3% fee for v1.
-            </p>
-            <div className="relative inline-flex group">
-              <HelpCircle className="h-4 w-4 ml-1 text-gray-400" />
-              <div className="absolute bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-xs p-2 rounded w-48">
-                The fee earned for providing liquidity
+              <div>
+                <div className="block text-xs font-medium mb-1">Token B</div>
+                <TokenSelector
+                  selectedToken={tokenB}
+                  onSelectToken={handleTokenBSelect}
+                  showTokenIcon={false}
+                />
+              </div>
+            </div>
+
+            {/* Fixed fee display */}
+            <div>
+              <div className="block text-xs font-medium mb-1">Fee Tier</div>
+              <div className="p-2 bg-gray-50 dark:bg-gray-800/50 rounded border border-gray-200 dark:border-gray-700">
+                <div className="text-xs text-gray-700 dark:text-gray-300">
+                  Fixed fee: <span className="font-medium">0.3%</span>
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  Standard fee for v1 pools
+                </div>
               </div>
             </div>
           </div>
+
+          {/* Validation Messages */}
+          {validationState.tokenA && validationState.tokenB && !validationState.symbolsDifferent && (
+            <div className="mt-3 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded">
+              <p className="text-xs text-red-800 dark:text-red-200">
+                ⚠️ Please select different tokens for the pair.
+              </p>
+            </div>
+          )}
         </div>
       </CardContent>
-      <CardFooter className="p-6 pt-0">
+
+      <CardFooter className="p-4 pt-0">
         <Button
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg disabled:opacity-50 transition-all duration-300 text-sm"
+          disabled={!validationState.isValid}
           onClick={handleSubmit}
-          disabled={!isValid}
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl"
         >
           Continue
         </Button>

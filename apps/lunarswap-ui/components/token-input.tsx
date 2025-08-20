@@ -2,7 +2,7 @@
 
 import { Input } from '@/components/ui/input';
 import { ChevronDown, Loader2 } from 'lucide-react';
-import { Identicon } from '@/components/identicon';
+import { TokenIcon } from '@/components/token-icon';
 
 interface TokenInputProps {
   token: {
@@ -18,6 +18,8 @@ interface TokenInputProps {
   disabled?: boolean;
   isActive?: boolean;
   isLoading?: boolean;
+  labelPosition?: 'top' | 'left';
+  labelAlignment?: 'left' | 'center';
 }
 
 export function TokenInput({
@@ -30,6 +32,8 @@ export function TokenInput({
   disabled = false,
   isActive = false,
   isLoading = false,
+  labelPosition = 'top',
+  labelAlignment = 'center',
 }: TokenInputProps) {
   return (
     <div
@@ -39,12 +43,19 @@ export function TokenInput({
           : 'bg-gray-100/80 dark:bg-gray-700/50' // Normal opacity when inactive
       }`}
     >
-      {label && (
-        <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+      {labelPosition === 'top' && label && (
+        <div className={`text-sm text-gray-500 dark:text-gray-400 mb-2 ${
+          labelAlignment === 'left' ? 'text-left' : 'text-center'
+        }`}>
           {label}
         </div>
       )}
       <div className="flex justify-between items-center gap-3">
+        {labelPosition === 'left' && label && (
+          <div className="text-sm text-gray-500 dark:text-gray-400 font-medium min-w-[40px]">
+            {label}
+          </div>
+        )}
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <Input
             type="text"
@@ -73,9 +84,7 @@ export function TokenInput({
           <div className="flex items-center gap-2 min-w-0 flex-1">
             {token ? (
               <>
-                <div className="relative h-6 w-6 rounded-full overflow-hidden flex-shrink-0">
-                  <Identicon address={token.address} size={24} />
-                </div>
+                <TokenIcon symbol={token.symbol} size={24} />
                 <span className="font-medium truncate">{token.symbol}</span>
               </>
             ) : (

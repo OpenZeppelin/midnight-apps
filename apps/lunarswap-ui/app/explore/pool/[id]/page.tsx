@@ -14,17 +14,9 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  ExternalLink,
-  Droplets,
-  Clock,
-  Repeat,
-} from 'lucide-react';
+import { ExternalLink, Droplets, Clock, Repeat } from 'lucide-react';
 import { useLunarswapContext } from '@/lib/lunarswap-context';
-import {
-  getTokenSymbolByColor,
-  getTokenNameByColor,
-} from '@/lib/token-utils';
+import { getTokenSymbolByColor, getTokenNameByColor } from '@/lib/token-utils';
 import { Identicon } from '@/components/identicon';
 import { SplitTokenIcon } from '@/components/pool/split-token-icon';
 import { LiquidityChart } from '@/components/pool/liquidity-chart';
@@ -91,7 +83,7 @@ export default function PoolDetailPage() {
   const getLpTokenType = () => {
     const pool = allPairs.find((p) => p.pairId === poolId);
     if (!pool) return '';
-    
+
     return Buffer.from(pool.pair.lpTokenType).toString('hex');
   };
 
@@ -111,7 +103,7 @@ export default function PoolDetailPage() {
     try {
       const token0Type = Buffer.from(pool.pair.token0Type).toString('hex');
       const token1Type = Buffer.from(pool.pair.token1Type).toString('hex');
-      
+
       const reserves = await lunarswap.getPairReserves(token0Type, token1Type);
       if (reserves) {
         setReserves(reserves);
@@ -308,18 +300,22 @@ export default function PoolDetailPage() {
               <div className="flex gap-2">
                 <Button
                   onClick={() => {
-                    const token0Type = Buffer.from(pool.pair.token0Type).toString('hex');
-                    const token1Type = Buffer.from(pool.pair.token1Type).toString('hex');
+                    const token0Type = Buffer.from(
+                      pool.pair.token0Type,
+                    ).toString('hex');
+                    const token1Type = Buffer.from(
+                      pool.pair.token1Type,
+                    ).toString('hex');
                     const token0Symbol = getTokenSymbolByColor(token0Type);
                     const token1Symbol = getTokenSymbolByColor(token1Type);
-                    
-                    navigate('/', { 
-                      state: { 
-                        fromToken: token0Symbol, 
+
+                    navigate('/', {
+                      state: {
+                        fromToken: token0Symbol,
                         toToken: token1Symbol,
                         fromTokenType: token0Type,
-                        toTokenType: token1Type
-                      } 
+                        toTokenType: token1Type,
+                      },
                     });
                   }}
                   className="flex-1 text-white bg-blue-600 hover:bg-blue-700"
@@ -329,18 +325,22 @@ export default function PoolDetailPage() {
                 </Button>
                 <Button
                   onClick={() => {
-                    const token0Type = Buffer.from(pool.pair.token0Type).toString('hex');
-                    const token1Type = Buffer.from(pool.pair.token1Type).toString('hex');
+                    const token0Type = Buffer.from(
+                      pool.pair.token0Type,
+                    ).toString('hex');
+                    const token1Type = Buffer.from(
+                      pool.pair.token1Type,
+                    ).toString('hex');
                     const token0Symbol = getTokenSymbolByColor(token0Type);
                     const token1Symbol = getTokenSymbolByColor(token1Type);
-                    
-                    navigate('/pool/new', { 
-                      state: { 
-                        tokenA: token0Symbol, 
+
+                    navigate('/pool/new', {
+                      state: {
+                        tokenA: token0Symbol,
                         tokenB: token1Symbol,
                         tokenAType: token0Type,
-                        tokenBType: token1Type
-                      } 
+                        tokenBType: token1Type,
+                      },
                     });
                   }}
                   className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
@@ -378,13 +378,15 @@ export default function PoolDetailPage() {
                       <div className="mb-3">
                         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                           {(() => {
-                            if (!reserves) return (
-                              <div className="flex h-2 rounded-full overflow-hidden">
-                                <div className="bg-gray-400 h-full w-full" />
-                              </div>
-                            );
-                            
-                            const totalValue = Number(reserves[0]) + Number(reserves[1]);
+                            if (!reserves)
+                              return (
+                                <div className="flex h-2 rounded-full overflow-hidden">
+                                  <div className="bg-gray-400 h-full w-full" />
+                                </div>
+                              );
+
+                            const totalValue =
+                              Number(reserves[0]) + Number(reserves[1]);
                             const token0Percentage =
                               totalValue > 0
                                 ? (Number(reserves[0]) / totalValue) * 100
@@ -410,9 +412,13 @@ export default function PoolDetailPage() {
                             <span className="text-xs text-muted-foreground">
                               {getToken0Symbol()} ({(() => {
                                 if (!reserves) return '0.0';
-                                const totalValue = Number(reserves[0]) + Number(reserves[1]);
+                                const totalValue =
+                                  Number(reserves[0]) + Number(reserves[1]);
                                 return totalValue > 0
-                                  ? ((Number(reserves[0]) / totalValue) * 100).toFixed(1)
+                                  ? (
+                                      (Number(reserves[0]) / totalValue) *
+                                      100
+                                    ).toFixed(1)
                                   : '50.0';
                               })()}%)
                             </span>
@@ -445,7 +451,9 @@ export default function PoolDetailPage() {
                             <span className="text-sm">{getToken0Symbol()}</span>
                           </div>
                           <span className="text-sm font-medium">
-                            {reserves ? formatReserve(reserves[0]) : 'Loading...'}
+                            {reserves
+                              ? formatReserve(reserves[0])
+                              : 'Loading...'}
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
@@ -454,7 +462,9 @@ export default function PoolDetailPage() {
                             <span className="text-sm">{getToken1Symbol()}</span>
                           </div>
                           <span className="text-sm font-medium">
-                            {reserves ? formatReserve(reserves[1]) : 'Loading...'}
+                            {reserves
+                              ? formatReserve(reserves[1])
+                              : 'Loading...'}
                           </span>
                         </div>
                       </div>
@@ -566,20 +576,18 @@ export default function PoolDetailPage() {
                       <button
                         type="button"
                         className="text-xs font-mono bg-gray-100 dark:bg-gray-800 p-2 rounded break-all cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors w-full text-left"
-                        onClick={() =>
-                          copyToClipboard(pool.pairId, 'pool-id')
-                        }
+                        onClick={() => copyToClipboard(pool.pairId, 'pool-id')}
                         title="Click to copy pool ID"
                       >
                         {pool.pairId}
                       </button>
-                                              {copiedField === 'pool-id' && (
-                          <div className="absolute inset-0 bg-green-500/20 backdrop-blur-sm rounded flex items-center justify-center">
-                            <span className="text-xs font-medium text-green-700 dark:text-green-300">
-                              Copied!
-                            </span>
-                          </div>
-                        )}
+                      {copiedField === 'pool-id' && (
+                        <div className="absolute inset-0 bg-green-500/20 backdrop-blur-sm rounded flex items-center justify-center">
+                          <span className="text-xs font-medium text-green-700 dark:text-green-300">
+                            Copied!
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
 

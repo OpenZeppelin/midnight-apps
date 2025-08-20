@@ -1,8 +1,9 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import React from 'react';
+import { Button } from './ui/button';
 import type { DAppConnectorWalletState } from '@midnight-ntwrk/dapp-connector-api';
-import { X } from 'lucide-react';
+import { X, Server, Database } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Identicon } from './identicon';
@@ -11,6 +12,13 @@ interface AccountDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   walletState: DAppConnectorWalletState | null;
+  walletAPI?: {
+    uris: {
+      proverServerUri?: string;
+      indexerUri?: string;
+      indexerWsUri?: string;
+    };
+  };
 }
 
 interface AccountField {
@@ -18,13 +26,14 @@ interface AccountField {
   value: string;
   description?: string;
   isLegacy?: boolean;
-  type: 'address' | 'coin' | 'encryption';
+  type: 'address' | 'coin' | 'encryption' | 'service';
 }
 
 export function AccountDetailsModal({
   isOpen,
   onClose,
   walletState,
+  walletAPI,
 }: AccountDetailsModalProps) {
   const [mounted, setMounted] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -158,6 +167,28 @@ export function AccountDetailsModal({
       type: 'encryption',
       isLegacy: true,
     },
+    // Service URLs
+    {
+      label: 'Proof Server',
+      value: walletAPI?.uris?.proverServerUri || 'http://localhost:6300',
+      description: 'ZK proof generation server',
+      type: 'service',
+      isLegacy: false,
+    },
+    {
+      label: 'Indexer HTTP',
+      value: walletAPI?.uris?.indexerUri || 'http://localhost:8088',
+      description: 'Blockchain data indexer (HTTP)',
+      type: 'service',
+      isLegacy: false,
+    },
+    {
+      label: 'Indexer WebSocket',
+      value: walletAPI?.uris?.indexerWsUri || 'ws://localhost:8088',
+      description: 'Blockchain data indexer (WebSocket)',
+      type: 'service',
+      isLegacy: false,
+    },
   ];
 
   const groupedFields = accountFields.reduce(
@@ -242,10 +273,20 @@ export function AccountDetailsModal({
                       <div className="bg-card border rounded-lg p-3 hover:bg-muted/30 transition-colors">
                         <div className="flex items-start gap-2">
                           <div className="w-6 h-6 rounded-full overflow-hidden border border-primary/20 shrink-0 mt-0.5">
-                            <Identicon
-                              address={field.value || walletState.address || ''}
-                              size={24}
-                            />
+                            {field.type === 'service' ? (
+                              <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                                {field.label.includes('Proof') ? (
+                                  <Server className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+                                ) : (
+                                  <Database className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+                                )}
+                              </div>
+                            ) : (
+                              <Identicon
+                                address={field.value || walletState.address || ''}
+                                size={24}
+                              />
+                            )}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
@@ -253,7 +294,7 @@ export function AccountDetailsModal({
                                 {field.label}
                               </span>
                               <span className="text-xs text-muted-foreground">
-                                • Main
+                                • {field.type === 'service' ? 'Service' : 'Main'}
                               </span>
                             </div>
                             {field.description && (

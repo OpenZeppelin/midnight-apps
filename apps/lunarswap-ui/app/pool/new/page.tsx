@@ -15,7 +15,7 @@ export const metadata = {
 
 export default function NewPositionPage() {
   const location = useLocation();
-  
+
   useEffect(() => {
     document.title = 'Create New Liquidity Position';
   }, []);

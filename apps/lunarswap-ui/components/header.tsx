@@ -9,7 +9,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 
 const navItems = [
-  { href: '/', label: 'Trade' },
+  { href: '/trade', label: 'Trade' },
   { href: '/explore', label: 'Explore' },
   { href: '/pool', label: 'Pool' },
 ];
@@ -19,8 +19,16 @@ export function Header() {
   const [isAccountPanelOpen, setIsAccountPanelOpen] = useState(false);
   const { isConnected } = useWallet();
 
+  // Check if we're on the landing page (home page)
+  const isLandingPage = location.pathname === '/';
+
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white/30 dark:bg-gray-900/20 backdrop-blur-xl border-b border-white/20 dark:border-gray-800/30 z-50">
+    <header className={cn(
+      "fixed top-0 left-0 right-0 z-50",
+      isLandingPage 
+        ? "bg-transparent border-transparent" 
+        : "backdrop-blur-xl border-b bg-white/30 dark:bg-gray-900/20 border-white/20 dark:border-gray-800/30"
+    )}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Left side - Logo and Navigation */}

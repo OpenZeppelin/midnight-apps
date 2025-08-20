@@ -1,5 +1,4 @@
 import React from 'react';
-import { Identicon } from '@/components/identicon';
 import { getTokenDetails } from '../../lib/token-utils';
 
 interface TokenIconProps {
@@ -29,7 +28,7 @@ export function TokenIcon({
 
   return (
     <div className={className}>
-      <Identicon address={tokenDetails.address} size={size} />
+      <TokenIcon symbol={tokenDetails.symbol} size={size} />
     </div>
   );
 }

@@ -9,13 +9,16 @@ import {
   RuntimeConfigurationProvider,
   useRuntimeConfiguration,
 } from '@/lib/runtime-configuration';
+import { Header } from '@/components/header';
 import Home from '@/app/page';
+import TradePage from '@/app/trade/page';
 import PoolPage from '@/app/pool/page';
 import NewPositionPage from '@/app/pool/new/page';
 import TokensPage from '@/app/tokens/page';
 import ExplorePage from '@/app/explore/page';
 import PoolDetailPage from '@/app/explore/pool/[id]/page';
 import '../app/globals.css';
+import './animations.css';
 import pino from 'pino';
 import type { ReactNode } from 'react';
 import type { NetworkId } from '@midnight-ntwrk/midnight-js-network-id';
@@ -49,6 +52,7 @@ const App = () => {
                 <BrowserRouter>
                   <Routes>
                     <Route path="/" element={<Home />} />
+                    <Route path="/trade" element={<TradePage />} />
                     <Route path="/pool" element={<PoolPage />} />
                     <Route path="/pool/new" element={<NewPositionPage />} />
                     <Route path="/tokens" element={<TokensPage />} />

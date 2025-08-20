@@ -27,6 +27,8 @@ interface LunarswapContextType {
   publicState: unknown | null;
   allPairs: Array<Pool>;
   refreshPublicState: () => Promise<void>;
+  pauseRefresh: () => void;
+  resumeRefresh: () => void;
 }
 
 const LunarswapContext = createContext<LunarswapContextType | null>(null);
@@ -70,6 +72,9 @@ export const LunarswapProvider = ({ children }: LunarswapProviderProps) => {
   const [publicState, setPublicState] = useState<unknown | null>(null);
   const [allPairs, setAllPairs] = useState<Array<Pool>>([]);
   const [allTokens, setAllTokens] = useState<Array<Token>>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const [isRefreshPaused, setIsRefreshPaused] = useState(false);
 
   // Initialize or update contract integration
   const initializeLunarswap = useCallback(async () => {
@@ -153,18 +158,38 @@ export const LunarswapProvider = ({ children }: LunarswapProviderProps) => {
 
   // Refresh public state
   const refreshPublicState = useCallback(async () => {
-    if (!lunarswap || status !== 'connected') {
+    if (!lunarswap || status !== 'connected' || isRefreshing) {
+      console.log('[LunarswapContext] Refresh blocked:', {
+        hasLunarswap: !!lunarswap,
+        status,
+        isRefreshing
+      });
       setPublicState(null);
       setAllPairs([]);
       return;
     }
 
+    // Prevent multiple simultaneous refreshes
+    if (isRefreshing) {
+      console.log('[LunarswapContext] Refresh already in progress, skipping...');
+      return;
+    }
+
+    // Add additional guard to prevent refresh during component transitions
+    if (isRefreshPaused) {
+      console.log('[LunarswapContext] Refresh paused, skipping...');
+      return;
+    }
+
+    setIsRefreshing(true);
+    setRetryCount(0);
+
     try {
       console.log('[LunarswapContext] Fetching public state...');
-      
+
       // Add a small delay to ensure contract is fully initialized
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       const state = await lunarswap.getPublicState();
       setPublicState(state);
 
@@ -178,21 +203,32 @@ export const LunarswapProvider = ({ children }: LunarswapProviderProps) => {
       }
     } catch (err) {
       console.error('[LunarswapContext] Failed to fetch public state:', err);
-      
-      // If contract is not initialized, try again after a longer delay
-      if (err instanceof Error && err.message.includes('Contract not initialized')) {
-        console.log('[LunarswapContext] Contract not initialized, retrying after delay...');
+
+      // If contract is not initialized, try again after a longer delay (but limit retries)
+      if (
+        err instanceof Error &&
+        err.message.includes('Contract not initialized') &&
+        retryCount < 3
+      ) {
+        console.log(
+          `[LunarswapContext] Contract not initialized, retrying after delay... (attempt ${retryCount + 1}/3)`,
+        );
+        setRetryCount(prev => prev + 1);
         setTimeout(() => {
-          if (status === 'connected' && lunarswap) {
+          if (status === 'connected' && lunarswap && !isRefreshing && !isRefreshPaused) {
             refreshPublicState();
           }
         }, 3000);
+      } else if (retryCount >= 3) {
+        console.log('[LunarswapContext] Max retries reached, stopping refresh attempts');
       }
-      
+
       setPublicState(null);
       setAllPairs([]);
+    } finally {
+      setIsRefreshing(false);
     }
-  }, [lunarswap, status]);
+  }, [lunarswap, status, isRefreshing, retryCount, isRefreshPaused]);
 
   // Initialize contract when dependencies change
   useEffect(() => {
@@ -217,27 +253,55 @@ export const LunarswapProvider = ({ children }: LunarswapProviderProps) => {
 
   // Fetch public state when contract is connected and refresh every 5 seconds
   useEffect(() => {
-    if (status === 'connected' && lunarswap) {
-      // Initial fetch with delay to ensure contract is ready
+    console.log('[LunarswapContext] Public state refresh effect triggered:', {
+      status,
+      hasLunarswap: !!lunarswap,
+      isRefreshPaused,
+      isRefreshing
+    });
+    
+    if (status === 'connected' && lunarswap && !isRefreshPaused && !isRefreshing) {
+      console.log('[LunarswapContext] Setting up refresh timers');
+      
+      // Add a longer delay to prevent immediate refresh when components mount
       const initialTimer = setTimeout(() => {
-        refreshPublicState();
-      }, 2000);
-      
-      // Set up 5-second interval for continuous updates
+        if (!isRefreshPaused && !isRefreshing) {
+          console.log('[LunarswapContext] Initial refresh timer fired');
+          refreshPublicState();
+        }
+      }, 5000); // Increased from 2000ms to 5000ms
+
+      // Set up 10-second interval for continuous updates (increased from 5s)
       const intervalTimer = setInterval(() => {
-        console.log('[LunarswapContext] Refreshing public state (5s interval)...');
-        refreshPublicState();
-      }, 5000);
-      
+        if (!isRefreshPaused && !isRefreshing) {
+          console.log(
+            '[LunarswapContext] Refreshing public state (10s interval)...',
+          );
+          refreshPublicState();
+        }
+      }, 10000); // Increased from 5000ms to 10000ms
+
       return () => {
+        console.log('[LunarswapContext] Cleaning up refresh timers');
         clearTimeout(initialTimer);
         clearInterval(intervalTimer);
       };
     }
-    
+
     // Only clear public state, keep pairs data for better UX
     setPublicState(null);
-  }, [status, lunarswap, refreshPublicState]);
+  }, [status, lunarswap, refreshPublicState, isRefreshPaused, isRefreshing]);
+
+  // Pause/resume refresh functions
+  const pauseRefresh = useCallback(() => {
+    console.log('[LunarswapContext] Pausing refresh...');
+    setIsRefreshPaused(true);
+  }, []);
+
+  const resumeRefresh = useCallback(() => {
+    console.log('[LunarswapContext] Resuming refresh...');
+    setIsRefreshPaused(false);
+  }, []);
 
   const contextValue: LunarswapContextType = {
     lunarswap,
@@ -249,6 +313,8 @@ export const LunarswapProvider = ({ children }: LunarswapProviderProps) => {
     publicState,
     allPairs,
     refreshPublicState,
+    pauseRefresh,
+    resumeRefresh,
   };
 
   return (

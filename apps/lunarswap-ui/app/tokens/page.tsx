@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Header } from '@/components/header';
 import { StarsBackground } from '@/components/stars-background';
 import { MoonDustBackground } from '@/components/moon-dust-background';
-import { Identicon } from '@/components/identicon';
+import { TokenIcon } from '@/components/token-icon';
 import {
   Card,
   CardContent,
@@ -15,17 +15,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, Grid3X3, List, Clock } from 'lucide-react';
 import { popularTokens } from '@/lib/token-config';
+import type { Token } from '@/lib/token-config';
 import { useViewPreference } from '@/hooks/use-view-preference';
 import { useWallet } from '@/hooks/use-wallet';
 import { useLunarswapContext } from '@/lib/lunarswap-context';
 import { Buffer } from 'buffer';
-
-interface Token {
-  symbol: string;
-  name: string;
-  address: string;
-  type: string;
-}
 
 export const metadata = {
   title: 'Explore & Manage Midnight Tokens',
@@ -94,7 +88,7 @@ function TokensContent() {
 
     console.log(
       'Available tokens after filtering:',
-      available.map((t) => t.symbol),
+      available.map((t) => ({ symbol: t.symbol, shielded: t.shielded })),
     );
 
     // Only set available tokens if we have a successful connection and pools
@@ -112,15 +106,17 @@ function TokensContent() {
     }
   }, [isConnected, status, allPairs]);
 
-  const tokens: Token[] = isConnected && status === 'connected' ? availableTokens : [];
-  
+  const tokens: Token[] =
+    isConnected && status === 'connected' ? availableTokens : [];
+
   // Debug logging
   console.log('Tokens page state:', {
     isConnected,
     status,
     availableTokensLength: availableTokens.length,
     tokensLength: tokens.length,
-    allPairsLength: allPairs.length
+    allPairsLength: allPairs.length,
+    availableTokens: availableTokens.map(t => ({ symbol: t.symbol, shielded: t.shielded })),
   });
 
   const filteredTokens = tokens.filter(
@@ -154,10 +150,17 @@ function TokensContent() {
           <CardHeader className="pb-4">
             <div className="flex items-center space-x-3">
               <div className="relative h-12 w-12 rounded-full overflow-hidden">
-                <Identicon address={token.address} size={48} />
+                <TokenIcon symbol={token.symbol} size={48} />
               </div>
               <div>
-                <CardTitle className="text-lg">{token.symbol}</CardTitle>
+                <div className="flex items-center gap-2 mb-1">
+                  <CardTitle className="text-lg">{token.symbol}</CardTitle>
+                  {token.shielded && (
+                    <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 border-purple-200 dark:border-purple-700">
+                      Shielded
+                    </Badge>
+                  )}
+                </div>
                 <CardDescription>{token.name}</CardDescription>
               </div>
             </div>
@@ -179,7 +182,7 @@ function TokensContent() {
                   onClick={() =>
                     copyToClipboard(token.address, `${token.symbol}-address`)
                   }
-                  title="Click to copy address"
+                  title="Click to copy contract address"
                 >
                   {formatAddress(token.address)}
                 </button>
@@ -246,10 +249,17 @@ function TokensContent() {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <div className="relative h-12 w-12 rounded-full overflow-hidden">
-                  <Identicon address={token.address} size={48} />
+                  <TokenIcon symbol={token.symbol} size={48} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold">{token.symbol}</h3>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-lg font-semibold">{token.symbol}</h3>
+                    {token.shielded && (
+                      <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 border-purple-200 dark:border-purple-700">
+                        Shielded
+                      </Badge>
+                    )}
+                  </div>
                   <p className="text-sm text-muted-foreground">{token.name}</p>
                 </div>
               </div>
@@ -281,9 +291,9 @@ function TokensContent() {
                         `${token.symbol}-address-list`,
                       )
                     }
-                    title="Click to copy address"
+                    title="Click to copy contract address"
                   >
-                    {token.address}
+                    {formatAddress(token.address)}
                   </button>
                   {copiedField === `${token.symbol}-address-list` && (
                     <div className="absolute inset-0 bg-green-500/20 backdrop-blur-sm rounded border flex items-center justify-center">
@@ -311,9 +321,9 @@ function TokensContent() {
                     onClick={() =>
                       copyToClipboard(token.type, `${token.symbol}-type-list`)
                     }
-                    title="Click to copy type"
+                    title="Click to copy token type"
                   >
-                    {token.type}
+                    {formatAddress(token.type)}
                   </button>
                   {copiedField === `${token.symbol}-type-list` && (
                     <div className="absolute inset-0 bg-green-500/20 backdrop-blur-sm rounded border flex items-center justify-center">
@@ -447,10 +457,14 @@ function TokensContent() {
                   development and testing purposes. They have no real value and
                   are used to demonstrate Lunarswap functionality.
                 </p>
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-3 gap-4 text-sm">
                   <div>
                     <span className="font-medium">Total Tokens:</span>
                     <span className="ml-2">{tokens.length}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium">Shielded:</span>
+                    <span className="ml-2">{tokens.filter(t => t.shielded).length}</span>
                   </div>
                   <div>
                     <span className="font-medium">Network:</span>

@@ -38,7 +38,12 @@ import {
   getZswapNetworkId,
 } from '@midnight-ntwrk/midnight-js-network-id';
 import { encodeCoinInfo } from '@midnight-ntwrk/compact-runtime';
-import { createCoinInfo, encodeCoinPublicKey, encodeQualifiedCoinInfo } from '@midnight-ntwrk/ledger';
+import {
+  createCoinInfo,
+  encodeCoinPublicKey,
+  encodeQualifiedCoinInfo,
+  type TokenType,
+} from '@midnight-ntwrk/ledger';
 import {
   ShieldedAddress,
   MidnightBech32m,
@@ -258,7 +263,6 @@ export class LunarswapIntegration {
 
     return pairs;
   }
-  
 
   /**
    * Check if a pair exists for given tokens
@@ -301,8 +305,8 @@ export class LunarswapIntegration {
    * Get pair reserves for given tokens
    */
   async getPairReserves(
-    tokenA: string,
-    tokenB: string,
+    tokenA: TokenType,
+    tokenB: TokenType,
   ): Promise<[bigint, bigint] | null> {
     if (!this.isReady) {
       console.warn('Contract not ready for getPairReserves operation');
@@ -322,10 +326,7 @@ export class LunarswapIntegration {
       const tokenBInfo = LunarswapIntegration.toCoinInfo(tokenB, BigInt(0));
 
       // Use the Lunarswap API method
-      const pairId = this.lunarswapSimulator.getPairId(
-        tokenAInfo,
-        tokenBInfo,
-      );
+      const pairId = this.lunarswapSimulator.getPairId(tokenAInfo, tokenBInfo);
       const reserveAId = this.lunarswapSimulator.getReserveId(
         pairId,
         tokenAInfo.color,
@@ -421,8 +422,8 @@ export class LunarswapIntegration {
    * Add liquidity to a pool
    */
   async addLiquidity(
-    tokenA: string,
-    tokenB: string,
+    tokenA: TokenType,
+    tokenB: TokenType,
     amountA: bigint,
     amountB: bigint,
     minAmountA: bigint,
@@ -475,9 +476,9 @@ export class LunarswapIntegration {
    * Remove liquidity from a pool
    */
   async removeLiquidity(
-    token0Type: string,
-    token1Type: string,
-    liquidityType: string,
+    token0Type: TokenType,
+    token1Type: TokenType,
+    liquidityType: TokenType,
     liquidityAmount: string,
     minAmountA: bigint,
     minAmountB: bigint,
@@ -511,6 +512,30 @@ export class LunarswapIntegration {
       minAmountB,
       recipientAddress,
     );
+  }
+
+  /**
+   * Get LP token total supply for a pair
+   */
+  async getLpTokenTotalSupply(
+    token0Type: TokenType,
+    token1Type: TokenType,
+  ): Promise<{ value: bigint }> {
+    await this.ensureContractJoined();
+
+    if (!this.lunarswap) {
+      throw new Error('Contract not initialized');
+    }
+
+    const token0Info = LunarswapIntegration.toCoinInfo(token0Type, BigInt(0));
+    const token1Info = LunarswapIntegration.toCoinInfo(token1Type, BigInt(0));
+
+    // Use the Lunarswap API method
+    const result = await this.lunarswap.getLpTokenTotalSupply(
+      token0Info,
+      token1Info,
+    );
+    return result;
   }
 
   /**
@@ -564,7 +589,7 @@ export class LunarswapIntegration {
   /**
    * Create CoinInfo from token symbol/address and amount
    */
-  static toCoinInfo(type: string, value: bigint): CoinInfo {
+  static toCoinInfo(type: TokenType, value: bigint): CoinInfo {
     return encodeCoinInfo(createCoinInfo(type, value));
   }
 
@@ -598,8 +623,8 @@ export class LunarswapIntegration {
    * Calculate pool address for token pair using the actual getPairId circuit
    */
   private async calculatePoolAddress(
-    tokenA: string,
-    tokenB: string,
+    tokenA: TokenType,
+    tokenB: TokenType,
   ): Promise<string> {
     if (!this.lunarswap) {
       throw new Error('Contract not initialized');
@@ -617,10 +642,7 @@ export class LunarswapIntegration {
 
       return `0x${Buffer.from(pairIdentity).toString('hex')}`;
     } catch (error) {
-      console.error(
-        'Failed to calculate pool address using getPairId:',
-        error,
-      );
+      console.error('Failed to calculate pool address using getPairId:', error);
       throw error;
     }
   }

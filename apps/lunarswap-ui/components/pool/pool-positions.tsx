@@ -55,8 +55,8 @@ export function PoolPositions() {
               No Active Positions
             </h3>
             <p className="text-gray-500 dark:text-gray-400 mb-4 max-w-md mx-auto">
-              You don't have any active liquidity positions yet. Create your first position 
-              to start earning trading fees.
+              You don't have any active liquidity positions yet. Create your
+              first position to start earning trading fees.
             </p>
             {isConnected && (
               <Link to="/pool/new">
@@ -66,7 +66,7 @@ export function PoolPositions() {
                 </Button>
               </Link>
             )}
-            
+
             {/* Privacy Information */}
             <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg max-w-md mx-auto">
               <div className="flex items-start space-x-2">
@@ -74,8 +74,9 @@ export function PoolPositions() {
                 <div className="text-sm text-blue-800 dark:text-blue-200">
                   <p className="font-medium mb-1">Privacy Note</p>
                   <p>
-                    Your positions are managed privately. The system cannot see your actual balances 
-                    but will generate proofs assuming sufficient funds for operations.
+                    Your positions are managed privately. The system cannot see
+                    your actual balances but will generate proofs assuming
+                    sufficient funds for operations.
                   </p>
                 </div>
               </div>

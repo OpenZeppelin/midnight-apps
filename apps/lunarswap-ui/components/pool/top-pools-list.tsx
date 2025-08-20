@@ -113,9 +113,13 @@ export function TopPoolsList() {
       ) : (
         <div className="space-y-3">
           {allPairs.slice(0, 5).map((pool, index) => {
-            const token0Symbol = getTokenSymbolByColor(Buffer.from(pool.pair.token0Type).toString('hex'));
-            const token1Symbol = getTokenSymbolByColor(Buffer.from(pool.pair.token1Type).toString('hex'));
-            
+            const token0Symbol = getTokenSymbolByColor(
+              Buffer.from(pool.pair.token0Type).toString('hex'),
+            );
+            const token1Symbol = getTokenSymbolByColor(
+              Buffer.from(pool.pair.token1Type).toString('hex'),
+            );
+
             return (
               <Card
                 key={pool.pairId}

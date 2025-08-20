@@ -6,9 +6,11 @@ import { formatAddress } from '@/utils/wallet-utils';
 import { ChevronsRight, LogOut, Settings, ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
+import { Button } from './ui/button';
 import { Identicon } from './identicon';
 import { NetworkSelector } from './network-selector';
 import { GlobalPreferences } from './global-preferences';
+import { AccountDetailsModal } from './account-details-modal';
 import type { DAppConnectorWalletState } from '@midnight-ntwrk/dapp-connector-api';
 
 type AccountPanelPage = 'main' | 'settings';
@@ -29,6 +31,7 @@ export function AccountPanel({
 
   const [currentPage, setCurrentPage] = useState<AccountPanelPage>('main');
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [showAccountDetails, setShowAccountDetails] = useState(false);
 
   useEffect(() => {
     if (isVisible) {
@@ -113,12 +116,28 @@ export function AccountPanel({
           </span>
         </div>
 
+        {/* View Details Button */}
+        {walletState && (
+          <div className="mt-4 w-full">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowAccountDetails(true)}
+              className="w-full"
+            >
+              View Account Details
+            </Button>
+          </div>
+        )}
+
         {/* Account Details */}
         {walletState && (
           <div className="mt-6 w-full space-y-4">
             {/* Address */}
             <div className="space-y-2">
-              <div className="text-xs text-muted-foreground text-center">Address</div>
+              <div className="text-xs text-muted-foreground text-center">
+                Address
+              </div>
               <button
                 type="button"
                 onClick={() => copyToClipboard(walletState.address, 'Address')}
@@ -150,10 +169,14 @@ export function AccountPanel({
 
             {/* Coin Public Key */}
             <div className="space-y-2">
-              <div className="text-xs text-muted-foreground text-center">Coin Public Key</div>
+              <div className="text-xs text-muted-foreground text-center">
+                Coin Public Key
+              </div>
               <button
                 type="button"
-                onClick={() => copyToClipboard(walletState.coinPublicKey, 'Coin Public Key')}
+                onClick={() =>
+                  copyToClipboard(walletState.coinPublicKey, 'Coin Public Key')
+                }
                 className={`w-full p-2 rounded-md transition-all duration-200 text-center group relative overflow-hidden ${
                   copiedField === 'Coin Public Key'
                     ? 'bg-green-50 dark:bg-green-950/20'
@@ -182,10 +205,17 @@ export function AccountPanel({
 
             {/* Encryption Public Key */}
             <div className="space-y-2">
-              <div className="text-xs text-muted-foreground text-center">Encryption Public Key</div>
+              <div className="text-xs text-muted-foreground text-center">
+                Encryption Public Key
+              </div>
               <button
                 type="button"
-                onClick={() => copyToClipboard(walletState.encryptionPublicKey, 'Encryption Public Key')}
+                onClick={() =>
+                  copyToClipboard(
+                    walletState.encryptionPublicKey,
+                    'Encryption Public Key',
+                  )
+                }
                 className={`w-full p-2 rounded-md transition-all duration-200 text-center group relative overflow-hidden ${
                   copiedField === 'Encryption Public Key'
                     ? 'bg-green-50 dark:bg-green-950/20'
@@ -219,6 +249,16 @@ export function AccountPanel({
           </div>
         )}
       </div>
+
+      {/* Account Details Modal */}
+      {walletState && (
+        <AccountDetailsModal
+          isOpen={showAccountDetails}
+          onClose={() => setShowAccountDetails(false)}
+          walletState={walletState}
+          walletAPI={walletAPI}
+        />
+      )}
     </>
   );
 
@@ -265,8 +305,6 @@ export function AccountPanel({
       >
         {currentPage === 'main' ? renderMainPage() : renderSettingsPage()}
       </div>
-
-
     </>
   );
 }

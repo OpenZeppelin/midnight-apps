@@ -46,9 +46,7 @@ import type {
   ProofProvider,
 } from '@midnight-ntwrk/midnight-js-types';
 import { PrivateDataProviderWrapper } from '@/providers/private';
-import {
-  connectToWallet,
-} from '@/utils/wallet-utils';
+import { connectToWallet } from '@/utils/wallet-utils';
 import { ZkConfigProviderWrapper } from '@/providers/zk-config';
 import { PublicDataProviderWrapper } from '@/providers/public';
 import { noopProofClient } from '@/providers/proof';
@@ -73,6 +71,9 @@ export interface MidnightWalletState {
   shake: () => void;
   callback: (action: ProviderCallbackAction) => void;
   disconnect: () => void;
+  reconnect: () => void;
+  connect: (manual: boolean) => Promise<void>;
+  walletError?: MidnightWalletErrorType;
 }
 
 export interface WalletAPI {
@@ -161,6 +162,9 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
     undefined,
   );
   const [walletAPI, setWalletAPI] = useState<WalletAPI | undefined>(undefined);
+  const [reconnectAttempts, setReconnectAttempts] = useState(0);
+  const [lastReconnectTime, setLastReconnectTime] = useState(0);
+  const [isReconnecting, setIsReconnecting] = useState(false);
 
   // Disconnect function to reset wallet state
   const disconnect = useCallback(() => {
@@ -170,7 +174,94 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
     setWalletError(undefined);
     setOpenWallet(false);
     setProofServerIsOnline(false);
+    setReconnectAttempts(0);
+    setIsReconnecting(false);
   }, []);
+
+  // Enhanced connect function with better error handling
+  const connect = useCallback(async (manual: boolean): Promise<void> => {
+    setIsConnecting(true);
+    setWalletError(undefined);
+    
+    let walletResult:
+      | { wallet: DAppConnectorWalletAPI; uris: ServiceUriConfig }
+      | undefined;
+    
+    try {
+      walletResult = await connectToWallet(logger);
+    } catch (e) {
+      const walletError = getErrorType(e as Error);
+      setWalletError(walletError);
+      setIsConnecting(false);
+      return;
+    }
+    
+    if (!walletResult) {
+      setIsConnecting(false);
+      if (manual) setOpenWallet(true);
+      return;
+    }
+    
+    await checkProofServerStatus(walletResult.uris.proverServerUri);
+    
+    try {
+      const reqState = await walletResult.wallet.state();
+      setAddress(reqState.address);
+      setWalletAPI({
+        address: reqState.address,
+        wallet: walletResult.wallet,
+        coinPublicKey: reqState.coinPublicKey,
+        encryptionPublicKey: reqState.encryptionPublicKey,
+        uris: walletResult.uris,
+      });
+      // Reset reconnect attempts on successful connection
+      setReconnectAttempts(0);
+    } catch (e) {
+      setWalletError(MidnightWalletErrorType.TIMEOUT_API_RESPONSE);
+    }
+    
+    setIsConnecting(false);
+  }, [logger]);
+
+  // Reconnection function with exponential backoff
+  const attemptReconnect = useCallback(async () => {
+    if (isReconnecting || reconnectAttempts >= 5) {
+      return;
+    }
+
+    const now = Date.now();
+    const timeSinceLastAttempt = now - lastReconnectTime;
+    const backoffDelay = Math.min(1000 * (2 ** reconnectAttempts), 30000); // Max 30 seconds
+
+    if (timeSinceLastAttempt < backoffDelay) {
+      return;
+    }
+
+    setIsReconnecting(true);
+    setLastReconnectTime(now);
+    setReconnectAttempts(prev => prev + 1);
+
+    try {
+      await connect(false);
+      // If successful, reset reconnect attempts
+      setReconnectAttempts(0);
+      setWalletError(undefined);
+    } catch (error) {
+      console.warn(`Reconnection attempt ${reconnectAttempts + 1} failed:`, error);
+      if (reconnectAttempts >= 4) {
+        setWalletError(MidnightWalletErrorType.TIMEOUT_API_RESPONSE);
+      }
+    } finally {
+      setIsReconnecting(false);
+    }
+  }, [isReconnecting, reconnectAttempts, lastReconnectTime, connect]);
+
+  // Manual reconnect function for user-initiated reconnection
+  const manualReconnect = useCallback(async () => {
+    setWalletError(undefined);
+    setReconnectAttempts(0);
+    await connect(true);
+  }, [connect]);
 
   const privateStateProvider: PrivateStateProvider<
     typeof LunarswapPrivateStateId,
@@ -324,6 +415,7 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
     };
   }, [walletAPI]);
 
+  // Add manual reconnect to wallet state
   const [walletState, setWalletState] = useState<MidnightWalletState>({
     isConnected: false,
     isConnecting: false,
@@ -347,6 +439,9 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
     },
     callback: providerCallback,
     disconnect,
+    reconnect: manualReconnect,
+    connect,
+    walletError,
   });
 
   async function checkProofServerStatus(
@@ -362,40 +457,6 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
     } catch (error) {
       setProofServerIsOnline(false);
     }
-  }
-
-  async function connect(manual: boolean): Promise<void> {
-    setIsConnecting(true);
-    let walletResult:
-      | { wallet: DAppConnectorWalletAPI; uris: ServiceUriConfig }
-      | undefined;
-    try {
-      walletResult = await connectToWallet(logger);
-    } catch (e) {
-      const walletError = getErrorType(e as Error);
-      setWalletError(walletError);
-      setIsConnecting(false);
-    }
-    if (!walletResult) {
-      setIsConnecting(false);
-      if (manual) setOpenWallet(true);
-      return;
-    }
-    await checkProofServerStatus(walletResult.uris.proverServerUri);
-    try {
-      const reqState = await walletResult.wallet.state();
-      setAddress(reqState.address);
-      setWalletAPI({
-        address: reqState.address,
-        wallet: walletResult.wallet,
-        coinPublicKey: reqState.coinPublicKey,
-        encryptionPublicKey: reqState.encryptionPublicKey,
-        uris: walletResult.uris,
-      });
-    } catch (e) {
-      setWalletError(MidnightWalletErrorType.TIMEOUT_API_RESPONSE);
-    }
-    setIsConnecting(false);
   }
 
   useEffect(() => {
@@ -458,7 +519,42 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
     ) {
       void connect(false); // auto connect
     }
-  }, [walletState.isConnected, isConnecting]);
+  }, [walletState.isConnected, isConnecting, isWalletAvailable, connect]);
+
+  // Auto-reconnection for stale connections
+  useEffect(() => {
+    if (walletError === MidnightWalletErrorType.TIMEOUT_API_RESPONSE || 
+        walletError === MidnightWalletErrorType.TIMEOUT_FINDING_API) {
+      // Schedule automatic reconnection for timeout errors
+      const timeoutId = setTimeout(() => {
+        if (!isConnecting && !isReconnecting) {
+          void attemptReconnect();
+        }
+      }, 3000);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [walletError, isConnecting, isReconnecting, attemptReconnect]);
+
+  // Periodic connection health check
+  useEffect(() => {
+    if (!walletState.isConnected || !walletAPI) {
+      return;
+    }
+
+    const healthCheckInterval = setInterval(async () => {
+      try {
+        // Test if wallet is still responsive
+        await walletAPI.wallet.state();
+      } catch (error) {
+        console.warn('Wallet connection health check failed:', error);
+        // If wallet is not responsive, trigger reconnection
+        setWalletError(MidnightWalletErrorType.TIMEOUT_API_RESPONSE);
+      }
+    }, 30000); // Check every 30 seconds
+
+    return () => clearInterval(healthCheckInterval);
+  }, [walletState.isConnected, walletAPI]);
 
   // Expose wallet state for debugging
   useEffect(() => {

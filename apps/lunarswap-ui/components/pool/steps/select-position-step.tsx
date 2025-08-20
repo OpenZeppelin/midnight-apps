@@ -28,21 +28,26 @@ interface SelectPositionStepProps {
   initialData: PositionData | null;
 }
 
-export function SelectPositionStep({ onSubmit, initialData }: SelectPositionStepProps) {
+export function SelectPositionStep({
+  onSubmit,
+  initialData,
+}: SelectPositionStepProps) {
   const { allPairs } = useLunarswapContext();
   const { isConnected } = useWallet();
-  const [selectedPosition, setSelectedPosition] = useState<PositionData | null>(initialData);
+  const [selectedPosition, setSelectedPosition] = useState<PositionData | null>(
+    initialData,
+  );
   const [searchQuery, setSearchQuery] = useState('');
 
   // Convert allPairs to position data format
   const availablePositions = allPairs.map((pool) => {
     const token0Symbol = getTokenSymbolByColor(
-      Buffer.from(pool.pair.token0Type).toString('hex')
+      Buffer.from(pool.pair.token0Type).toString('hex'),
     );
     const token1Symbol = getTokenSymbolByColor(
-      Buffer.from(pool.pair.token1Type).toString('hex')
+      Buffer.from(pool.pair.token1Type).toString('hex'),
     );
-    
+
     return {
       pairId: pool.pairId,
       token0Symbol,
@@ -56,10 +61,11 @@ export function SelectPositionStep({ onSubmit, initialData }: SelectPositionStep
   });
 
   // Filter positions based on search query
-  const filteredPositions = availablePositions.filter((position) =>
-    position.token0Symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    position.token1Symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    position.pairId.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredPositions = availablePositions.filter(
+    (position) =>
+      position.token0Symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      position.token1Symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      position.pairId.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const handleContinue = () => {
@@ -77,11 +83,22 @@ export function SelectPositionStep({ onSubmit, initialData }: SelectPositionStep
             Choose the liquidity position you want to remove liquidity from
           </p>
         </div>
-        
+
         <div className="text-center py-8">
           <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            <svg
+              className="h-8 w-8 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+              />
             </svg>
           </div>
           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
@@ -91,7 +108,8 @@ export function SelectPositionStep({ onSubmit, initialData }: SelectPositionStep
             Connect wallet first to fetch liquidity positions.
           </p>
           <p className="text-sm text-gray-400 dark:text-gray-500">
-            You need to connect your wallet to view and manage your liquidity positions.
+            You need to connect your wallet to view and manage your liquidity
+            positions.
           </p>
         </div>
       </div>
@@ -107,18 +125,30 @@ export function SelectPositionStep({ onSubmit, initialData }: SelectPositionStep
             Choose the liquidity position you want to remove liquidity from
           </p>
         </div>
-        
+
         <div className="text-center py-8">
           <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            <svg
+              className="h-8 w-8 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+              />
             </svg>
           </div>
           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
             No Pools Available
           </h3>
           <p className="text-gray-500 dark:text-gray-400 mb-4">
-            There are currently no liquidity pools available to remove liquidity from.
+            There are currently no liquidity pools available to remove liquidity
+            from.
           </p>
           <p className="text-sm text-gray-400 dark:text-gray-500">
             You can create new positions by adding liquidity to existing pools.
@@ -157,52 +187,50 @@ export function SelectPositionStep({ onSubmit, initialData }: SelectPositionStep
           </div>
         ) : (
           filteredPositions.map((position) => (
-          <Card
-            key={position.pairId}
-            className={`cursor-pointer transition-all ${
-              selectedPosition?.pairId === position.pairId
-                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-            }`}
-            onClick={() => setSelectedPosition(position)}
-          >
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <SplitTokenIcon
-                    tokenASymbol={position.token0Symbol}
-                    tokenBSymbol={position.token1Symbol}
-                    size={32}
-                  />
-                  <div>
-                    <div className="font-medium">
-                      {position.token0Symbol}/{position.token1Symbol}
-                    </div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                      Pair ID: {position.pairId.slice(0, 8)}...{position.pairId.slice(-8)}
+            <Card
+              key={position.pairId}
+              className={`cursor-pointer transition-all ${
+                selectedPosition?.pairId === position.pairId
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                  : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+              }`}
+              onClick={() => setSelectedPosition(position)}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <SplitTokenIcon
+                      tokenASymbol={position.token0Symbol}
+                      tokenBSymbol={position.token1Symbol}
+                      size={32}
+                    />
+                    <div>
+                      <div className="font-medium">
+                        {position.token0Symbol}/{position.token1Symbol}
+                      </div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        Pair ID: {position.pairId.slice(0, 8)}...
+                        {position.pairId.slice(-8)}
+                      </div>
                     </div>
                   </div>
+                  <div className="flex items-center space-x-2">
+                    <Badge variant="secondary" className="text-xs">
+                      {position.fee}%
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {position.version}
+                    </Badge>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Badge variant="secondary" className="text-xs">
-                    {position.fee}%
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    {position.version}
-                  </Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))
+              </CardContent>
+            </Card>
+          ))
         )}
       </div>
 
       <div className="flex justify-end space-x-3">
-        <Button
-          variant="outline"
-          onClick={() => setSelectedPosition(null)}
-        >
+        <Button variant="outline" onClick={() => setSelectedPosition(null)}>
           Clear Selection
         </Button>
         <Button
@@ -215,4 +243,4 @@ export function SelectPositionStep({ onSubmit, initialData }: SelectPositionStep
       </div>
     </div>
   );
-} 
+}

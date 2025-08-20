@@ -10,8 +10,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { ChevronDown, Search } from 'lucide-react';
 import { useState } from 'react';
-import { Identicon } from '@/components/identicon';
-import { popularTokens, getAvailableTokensForSelection } from '@/lib/token-config';
+import { TokenIcon } from '@/components/token-icon';
+import {
+  popularTokens,
+  getAvailableTokensForSelection,
+} from '@/lib/token-config';
 import { useLunarswapContext } from '@/lib/lunarswap-context';
 
 interface TokenSelectorProps {
@@ -32,11 +35,14 @@ export function TokenSelector({
   const { allPairs, status } = useLunarswapContext();
 
   // Get available tokens from pools, fallback to all popular tokens if empty
-  let availableTokens = allPairs.length > 0 ? getAvailableTokensForSelection(allPairs) : popularTokens;
+  let availableTokens =
+    allPairs.length > 0
+      ? getAvailableTokensForSelection(allPairs)
+      : popularTokens;
   if (!availableTokens || availableTokens.length === 0) {
     availableTokens = popularTokens;
   }
-  
+
   const filteredTokens = availableTokens.filter(
     (token) =>
       token.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -66,7 +72,7 @@ export function TokenSelector({
           <div className="flex items-center">
             {showTokenIcon && (
               <div className="relative h-6 w-6 mr-2">
-                <Identicon address={selectedToken.address} size={24} />
+                <TokenIcon symbol={selectedToken.symbol} size={24} />
               </div>
             )}
             <span>{selectedToken.symbol}</span>
@@ -108,7 +114,7 @@ export function TokenSelector({
                 onClick={() => handleSelectToken(token)}
               >
                 <div className="relative h-8 w-8 rounded-full overflow-hidden">
-                  <Identicon address={token.address} size={32} />
+                  <TokenIcon symbol={token.symbol} size={32} />
                 </div>
                 <div className="flex flex-col items-start">
                   <span className="font-medium">{token.symbol}</span>

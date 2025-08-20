@@ -8,7 +8,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Search, Droplets, Plus } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { Identicon } from '@/components/identicon';
+import { TokenIcon } from '@/components/token-icon';
 import { useLunarswapContext } from '@/lib/lunarswap-context';
 import { useWallet } from '@/hooks/use-wallet';
 import { Button } from '@/components/ui/button';
@@ -51,7 +51,9 @@ export function TokenSelectModal({
   useEffect(() => {
     // If custom tokens are provided, skip the default logic
     if (customTokens && customTokens.length > 0) {
-      console.log('TokenSelectModal - Using custom tokens, skipping default logic');
+      console.log(
+        'TokenSelectModal - Using custom tokens, skipping default logic',
+      );
       return;
     }
 
@@ -88,8 +90,11 @@ export function TokenSelectModal({
     }
 
     console.log('TokenSelectModal - Pool token types:', Array.from(tokenSet));
-    console.log('TokenSelectModal - Popular token types:', popularTokens.map(t => t.type.replace(/^0x/i, '').toLowerCase()));
-    
+    console.log(
+      'TokenSelectModal - Popular token types:',
+      popularTokens.map((t) => t.type.replace(/^0x/i, '').toLowerCase()),
+    );
+
     // Log detailed pool information
     console.log('TokenSelectModal - Detailed pool info:');
     allPairs.forEach((pair, index) => {
@@ -102,28 +107,34 @@ export function TokenSelectModal({
     const available = popularTokens.filter((token) => {
       const tokenType = token.type.replace(/^0x/i, '').toLowerCase();
       const tokenTypeWithoutPrefix = tokenType.replace(/^0200/, '');
-      
+
       // Try exact match first
       let hasMatch = tokenSet.has(tokenType);
-      
+
       // If no exact match, try without the 0200 prefix
       if (!hasMatch) {
         hasMatch = tokenSet.has(tokenTypeWithoutPrefix);
       }
-      
+
       // If still no match, try adding 0200 prefix to pool tokens
       if (!hasMatch) {
-        hasMatch = Array.from(tokenSet).some(poolType => 
-          poolType === tokenTypeWithoutPrefix || 
-          `0200${poolType}` === tokenType
+        hasMatch = Array.from(tokenSet).some(
+          (poolType) =>
+            poolType === tokenTypeWithoutPrefix ||
+            `0200${poolType}` === tokenType,
         );
       }
-      
-      console.log(`TokenSelectModal - Token ${token.symbol}: ${tokenType} has match: ${hasMatch}`);
+
+      console.log(
+        `TokenSelectModal - Token ${token.symbol}: ${tokenType} has match: ${hasMatch}`,
+      );
       return hasMatch;
     });
 
-    console.log('TokenSelectModal - Available tokens:', available.map(t => t.symbol));
+    console.log(
+      'TokenSelectModal - Available tokens:',
+      available.map((t) => t.symbol),
+    );
     setAvailableTokens(available);
   }, [show, allPairs, customTokens]);
 
@@ -133,12 +144,19 @@ export function TokenSelectModal({
     isLoading,
     allPairsLength: allPairs.length,
     customTokensLength: customTokens?.length || 0,
-    availableTokensLength: availableTokens.length
+    availableTokensLength: availableTokens.length,
   });
-  console.log('TokenSelectModal - customTokens:', customTokens?.map(t => t.symbol));
-  console.log('TokenSelectModal - availableTokens:', availableTokens.map(t => t.symbol));
-  const tokensToUse = customTokens && customTokens.length > 0 ? customTokens : availableTokens;
-  
+  console.log(
+    'TokenSelectModal - customTokens:',
+    customTokens?.map((t) => t.symbol),
+  );
+  console.log(
+    'TokenSelectModal - availableTokens:',
+    availableTokens.map((t) => t.symbol),
+  );
+  const tokensToUse =
+    customTokens && customTokens.length > 0 ? customTokens : availableTokens;
+
   const filteredTokens = tokensToUse.filter(
     (token) =>
       token.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -178,7 +196,10 @@ export function TokenSelectModal({
           />
         </div>
         <div className="space-y-1 max-h-[300px] overflow-y-auto pr-1">
-          {externalIsLoading || isLoading || allPairs.length === 0 || (customTokens && customTokens.length === 0) ? (
+          {externalIsLoading ||
+          isLoading ||
+          allPairs.length === 0 ||
+          (customTokens && customTokens.length === 0) ? (
             <div className="text-center py-6 text-gray-500 dark:text-gray-400">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-2" />
               Loading available tokens...
@@ -212,7 +233,7 @@ export function TokenSelectModal({
                 onClick={() => onSelect(token)}
               >
                 <div className="relative h-8 w-8 rounded-full overflow-hidden">
-                  <Identicon address={token.address} size={32} />
+                  <TokenIcon symbol={token.symbol} size={32} />
                 </div>
                 <div className="flex flex-col items-start">
                   <span className="font-medium">{token.symbol}</span>

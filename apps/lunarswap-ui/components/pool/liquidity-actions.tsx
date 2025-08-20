@@ -11,7 +11,10 @@ interface LiquidityActionsProps {
   onRemoveLiquidity?: () => void;
 }
 
-export function LiquidityActions({ onAddLiquidity, onRemoveLiquidity }: LiquidityActionsProps) {
+export function LiquidityActions({
+  onAddLiquidity,
+  onRemoveLiquidity,
+}: LiquidityActionsProps) {
   const navigate = useNavigate();
   const { isConnected } = useWallet();
 
@@ -79,10 +82,10 @@ export function LiquidityActions({ onAddLiquidity, onRemoveLiquidity }: Liquidit
               </div>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-              Add tokens to existing pools or create new positions. The system will generate 
-              zero-knowledge proofs assuming sufficient balance.
+              Add tokens to existing pools or create new positions. The system
+              will generate zero-knowledge proofs assuming sufficient balance.
             </p>
-            <Button 
+            <Button
               onClick={handleAddLiquidity}
               className="w-full bg-green-600 hover:bg-green-700 text-white gap-2"
             >
@@ -105,10 +108,10 @@ export function LiquidityActions({ onAddLiquidity, onRemoveLiquidity }: Liquidit
               </div>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-              Remove liquidity from your positions and collect accumulated fees. 
+              Remove liquidity from your positions and collect accumulated fees.
               Your privacy is maintained throughout the process.
             </p>
-            <Button 
+            <Button
               onClick={handleRemoveLiquidity}
               variant="outline"
               className="w-full border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 gap-2"
@@ -128,8 +131,9 @@ export function LiquidityActions({ onAddLiquidity, onRemoveLiquidity }: Liquidit
                 Privacy-First Operations
               </p>
               <p className="text-gray-600 dark:text-gray-400">
-                All liquidity operations use zero-knowledge proofs. The system cannot see your actual balances 
-                but assumes sufficient funds for proof generation. This maintains your privacy while enabling 
+                All liquidity operations use zero-knowledge proofs. The system
+                cannot see your actual balances but assumes sufficient funds for
+                proof generation. This maintains your privacy while enabling
                 seamless DeFi operations.
               </p>
             </div>
@@ -138,4 +142,4 @@ export function LiquidityActions({ onAddLiquidity, onRemoveLiquidity }: Liquidit
       </CardContent>
     </Card>
   );
-} 
+}

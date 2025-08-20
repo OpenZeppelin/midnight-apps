@@ -1,5 +1,5 @@
 import React from 'react';
-import { Identicon } from '@/components/identicon';
+import { TokenIcon } from '@/components/token-icon';
 import { getTokenDetails } from '../../lib/token-utils';
 
 interface SplitTokenIconProps {
@@ -30,7 +30,7 @@ export function SplitTokenIcon({
             className="relative"
             style={{ width: size, height: size, marginLeft: 0 }}
           >
-            <Identicon address={tokenADetails.address} size={size} />
+            <TokenIcon symbol={tokenADetails.symbol} size={size} />
           </div>
         ) : (
           <div className="w-full h-full bg-gray-500 flex items-center justify-center">
@@ -48,7 +48,7 @@ export function SplitTokenIcon({
             className="relative"
             style={{ width: size, height: size, marginLeft: `-${size / 2}px` }}
           >
-            <Identicon address={tokenBDetails.address} size={size} />
+            <TokenIcon symbol={tokenBDetails.symbol} size={size} />
           </div>
         ) : (
           <div className="w-full h-full bg-gray-500 flex items-center justify-center">
