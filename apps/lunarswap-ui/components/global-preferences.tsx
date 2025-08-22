@@ -23,8 +23,6 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
-  LayoutGrid,
-  List,
   Globe,
   DollarSign,
 } from 'lucide-react';
@@ -48,9 +46,6 @@ function PreferencesContent() {
   const runtimeConfig = useRuntimeConfiguration();
   const { statusInfo, isLoading, refreshContract } = useLunarswapContext();
   const [animationsEnabled, setAnimationsEnabledState] = useState(true);
-  const [viewPreference, setViewPreferenceState] = useState<
-    'horizontal' | 'vertical'
-  >('horizontal');
   const [showContractDetails, setShowContractDetails] = useState(false);
 
   // Use the contract integration context instead of local state
@@ -72,18 +67,6 @@ function PreferencesContent() {
     }
   }, []);
 
-  // Load view preference setting from localStorage
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem('lunarswap-view-preference');
-      if (stored === 'horizontal' || stored === 'vertical') {
-        setViewPreferenceState(stored);
-      }
-    } catch (error) {
-      console.warn('Failed to load view preference settings:', error);
-    }
-  }, []);
-
   // Save animation setting to localStorage
   const toggleAnimations = (enabled: boolean) => {
     setAnimationsEnabledState(enabled);
@@ -98,20 +81,6 @@ function PreferencesContent() {
       );
     } catch (error) {
       console.warn('Failed to save animation settings:', error);
-    }
-  };
-
-  // Save view preference setting to localStorage
-  const setViewPreference = (preference: 'horizontal' | 'vertical') => {
-    setViewPreferenceState(preference);
-    try {
-      localStorage.setItem('lunarswap-view-preference', preference);
-      // Trigger a custom event to notify components about view preference change
-      window.dispatchEvent(
-        new CustomEvent('view-preference-changed', { detail: { preference } }),
-      );
-    } catch (error) {
-      console.warn('Failed to save view preference settings:', error);
     }
   };
 
@@ -298,44 +267,6 @@ function PreferencesContent() {
               }`}
             />
           </button>
-        </div>
-
-        {/* View Preference Selection */}
-        <div className="flex items-center justify-between p-2 rounded-lg">
-          <div className="flex flex-col">
-            <span className="text-sm font-medium">Layout</span>
-            <span className="text-xs text-muted-foreground">
-              Choose layout orientation
-            </span>
-          </div>
-          <div className="grid grid-cols-2 gap-2 rounded-lg bg-muted p-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setViewPreference('horizontal')}
-              className={cn(
-                'flex items-center justify-center text-muted-foreground',
-                viewPreference === 'horizontal' &&
-                  'bg-background text-foreground',
-              )}
-              aria-label="Set horizontal layout"
-            >
-              <LayoutGrid className="h-5 w-5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setViewPreference('vertical')}
-              className={cn(
-                'flex items-center justify-center text-muted-foreground',
-                viewPreference === 'vertical' &&
-                  'bg-background text-foreground',
-              )}
-              aria-label="Set vertical layout"
-            >
-              <List className="h-5 w-5" />
-            </Button>
-          </div>
         </div>
 
         {/* Language Selection */}

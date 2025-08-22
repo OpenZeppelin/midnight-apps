@@ -22,6 +22,8 @@ interface LunarswapContextType {
   status: ContractStatus;
   statusInfo: ContractStatusInfo;
   isLoading: boolean;
+  isLoadingPublicState: boolean; // Add new loading state for public state
+  hasLoadedDataOnce: boolean; // Track if we've ever loaded data
   error: string | null;
   refreshContract: () => Promise<void>;
   publicState: Ledger | null;
@@ -69,6 +71,7 @@ export const LunarswapProvider = ({ children }: LunarswapProviderProps) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const [isRefreshPaused, setIsRefreshPaused] = useState(false);
+  const [hasLoadedDataOnce, setHasLoadedDataOnce] = useState(false); // Track if we've ever loaded data successfully
 
   // Initialize or update contract integration
   const initializeLunarswap = useCallback(async () => {
@@ -194,6 +197,7 @@ export const LunarswapProvider = ({ children }: LunarswapProviderProps) => {
         setAllPairs(pairs);
         const lpSupply = state.lpTotalSupply;
         setLpTotalSupply(lpSupply);
+        setHasLoadedDataOnce(true); // Mark that we've successfully loaded data
         console.log('[LunarswapContext] Fetched pairs:', pairs.length);
       } else {
         setAllPairs([]);
@@ -266,7 +270,7 @@ export const LunarswapProvider = ({ children }: LunarswapProviderProps) => {
           console.log('[LunarswapContext] Initial refresh timer fired');
           refreshPublicState();
         }
-      }, 5000); // Increased from 2000ms to 5000ms
+      }, 8000); // Increased from 5000ms to 8000ms for more reliable initial loading
 
       // Set up 10-second interval for continuous updates (increased from 5s)
       const intervalTimer = setInterval(() => {
@@ -305,6 +309,8 @@ export const LunarswapProvider = ({ children }: LunarswapProviderProps) => {
     status,
     statusInfo,
     isLoading,
+    isLoadingPublicState: isRefreshing && !hasLoadedDataOnce, // Only show loading if we haven't loaded data before
+    hasLoadedDataOnce,
     error,
     refreshContract,
     publicState,

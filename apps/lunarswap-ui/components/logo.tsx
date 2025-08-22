@@ -34,12 +34,6 @@ export function Logo({ size = 36, className = '' }) {
 
   const links = [
     {
-      label: 'Documentation (coming soon)',
-      href: undefined,
-      icon: <BookOpen className="h-4 w-4 opacity-50" />,
-      disabled: true,
-    },
-    {
       label: 'GitHub',
       href: 'https://github.com/OpenZeppelin/midnight-dapps',
       icon: <Github className="h-4 w-4" />,

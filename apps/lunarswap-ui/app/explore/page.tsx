@@ -19,6 +19,9 @@ import {
   ArrowRight,
   Plus,
   Minus,
+  Copy,
+  Check,
+  X,
 } from 'lucide-react';
 import {
   popularTokens,
@@ -27,15 +30,29 @@ import {
 import { getTokenSymbolByColor } from '@/lib/token-utils';
 import { SplitTokenIcon } from '@/components/pool/split-token-icon';
 import { Input } from '@/components/ui/input';
-import { Copy, Search, Grid3X3, List } from 'lucide-react';
+import { Copy as CopyIcon, Search, Grid3X3, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TokenIcon } from '@/components/token-icon';
 import { useViewPreference } from '@/hooks/use-view-preference';
 import { useWallet } from '@/hooks/use-wallet';
 import { useLunarswapContext } from '@/lib/lunarswap-context';
 import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 type ExploreOption = 'tokens' | 'pools' | 'transactions';
+
+interface Token {
+  symbol: string;
+  name: string;
+  type: string;
+  address: string;
+  shielded: boolean;
+}
 
 export const metadata = {
   title: 'Discover the Midnight Ecosystem',
@@ -50,7 +67,7 @@ export default function ExplorePage() {
 
   const viewPreference = useViewPreference();
   const { isConnected } = useWallet();
-  const { status, isLoading, allPairs } = useLunarswapContext();
+  const { status, isLoading, isLoadingPublicState, hasLoadedDataOnce, allPairs } = useLunarswapContext();
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedOption, setSelectedOption] = useState<ExploreOption>('tokens');
@@ -67,6 +84,11 @@ export default function ExplorePage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>(
     viewPreference === 'horizontal' ? 'grid' : 'list',
   );
+  
+  // Token dialog state
+  const [selectedToken, setSelectedToken] = useState<Token | null>(null);
+  const [isTokenDialogOpen, setIsTokenDialogOpen] = useState(false);
+  const [copiedDialogField, setCopiedDialogField] = useState<string | null>(null);
   // Update view mode when view preference changes
   useEffect(() => {
     setViewMode(viewPreference === 'horizontal' ? 'grid' : 'list');
@@ -116,6 +138,21 @@ export default function ExplorePage() {
     }
   };
 
+  const copyDialogToClipboard = async (text: string, field: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedDialogField(field);
+      setTimeout(() => setCopiedDialogField(null), 2000);
+    } catch (error) {
+      console.error('Failed to copy:', error);
+    }
+  };
+
+  const handleTokenClick = (token: Token) => {
+    setSelectedToken(token);
+    setIsTokenDialogOpen(true);
+  };
+
   const handleAddLiquidity = () => {
     navigate('/pool');
   };
@@ -150,12 +187,7 @@ export default function ExplorePage() {
                       <td className="py-3 px-4">
                         <button
                           type="button"
-                          onClick={() =>
-                            copyToClipboard(
-                              token.symbol,
-                              `token-${token.symbol}`,
-                            )
-                          }
+                          onClick={() => handleTokenClick(token)}
                           className="flex items-center space-x-2 w-full text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors rounded p-1 -m-1 cursor-pointer"
                         >
                           <TokenIcon symbol={token.symbol} size={24} />
@@ -165,9 +197,7 @@ export default function ExplorePage() {
                       <td className="py-3 px-4">
                         <button
                           type="button"
-                          onClick={() =>
-                            copyToClipboard(token.name, `name-${token.symbol}`)
-                          }
+                          onClick={() => handleTokenClick(token)}
                           className="w-full text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors rounded p-1 -m-1 cursor-pointer text-gray-600 dark:text-gray-400 text-sm"
                         >
                           {token.name}
@@ -176,27 +206,19 @@ export default function ExplorePage() {
                       <td className="py-3 px-4">
                         <button
                           type="button"
-                          onClick={() =>
-                            copyToClipboard(token.type, `type-${token.symbol}`)
-                          }
+                          onClick={() => handleTokenClick(token)}
                           className="w-full text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors rounded p-1 -m-1 cursor-pointer font-mono text-xs text-gray-500 dark:text-gray-400"
                         >
-                          {token.type}
+                          {token.type.slice(0, 8)}...{token.type.slice(-8)}
                         </button>
                       </td>
                       <td className="py-3 px-4">
                         <button
                           type="button"
-                          onClick={() =>
-                            copyToClipboard(
-                              token.address,
-                              `address-${token.symbol}`,
-                            )
-                          }
+                          onClick={() => handleTokenClick(token)}
                           className="w-full text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors rounded p-1 -m-1 cursor-pointer font-mono text-xs text-gray-500 dark:text-gray-400"
                         >
-                          {token.address.slice(0, 8)}...
-                          {token.address.slice(-8)}
+                          {token.address.slice(0, 8)}...{token.address.slice(-8)}
                         </button>
                       </td>
                     </tr>
@@ -211,6 +233,25 @@ export default function ExplorePage() {
   };
 
   const renderPoolsContent = () => {
+    // Show loading while initial public state is being fetched (but not on subsequent refreshes)
+    if (isLoadingPublicState && !hasLoadedDataOnce) {
+      return (
+        <div className="mt-8">
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-gray-200/50 dark:border-blue-900/30">
+            <CardContent className="p-8 text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                Loading Pools...
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400">
+                Fetching latest pool data and statistics.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
     // Filter pools based on search query
     const filteredPools = allPairs
       ? Array.from(
@@ -499,6 +540,119 @@ export default function ExplorePage() {
           {selectedOption === 'transactions' && renderTransactionsContent()}
         </div>
       </main>
+
+      {/* Token Info Dialog */}
+      <Dialog open={isTokenDialogOpen} onOpenChange={setIsTokenDialogOpen}>
+        <DialogContent className="sm:max-w-md bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-gray-200/50 dark:border-blue-900/30">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-lg font-semibold">Token Information</DialogTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsTokenDialogOpen(false)}
+                className="h-8 w-8 p-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </DialogHeader>
+          
+          {selectedToken && (
+            <div className="space-y-4">
+              {/* Token Header */}
+              <div className="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <TokenIcon symbol={selectedToken.symbol} size={48} />
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                    {selectedToken.symbol}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    {selectedToken.name}
+                  </p>
+                </div>
+              </div>
+
+              {/* Token Details */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Token Type</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+                      {selectedToken.type.slice(0, 12)}...{selectedToken.type.slice(-12)}
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyDialogToClipboard(selectedToken.type, 'type')}
+                    className="h-8 w-8 p-0"
+                  >
+                    {copiedDialogField === 'type' ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Contract Address</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+                      {selectedToken.address.slice(0, 12)}...{selectedToken.address.slice(-12)}
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyDialogToClipboard(selectedToken.address, 'address')}
+                    className="h-8 w-8 p-0"
+                  >
+                    {copiedDialogField === 'address' ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Token Type</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {selectedToken.shielded ? 'Shielded' : 'Public'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex space-x-2 pt-2">
+                <Button
+                  onClick={() => {
+                    setIsTokenDialogOpen(false);
+                    navigate('/trade');
+                  }}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Trade {selectedToken.symbol}
+                </Button>
+                <Button
+                  onClick={() => {
+                    setIsTokenDialogOpen(false);
+                    navigate('/pool');
+                  }}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Add Liquidity
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

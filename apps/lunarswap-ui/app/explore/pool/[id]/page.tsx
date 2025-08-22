@@ -18,13 +18,14 @@ import { ExternalLink, Droplets, Clock, Repeat } from 'lucide-react';
 import { useLunarswapContext } from '@/lib/lunarswap-context';
 import { getTokenSymbolByColor, getTokenNameByColor } from '@/lib/token-utils';
 import { Identicon } from '@/components/identicon';
+import { TokenIcon } from '@/components/token-icon';
 import { SplitTokenIcon } from '@/components/pool/split-token-icon';
 import { LiquidityChart } from '@/components/pool/liquidity-chart';
 
 export default function PoolDetailPage() {
   const params = useParams();
   const navigate = useNavigate();
-  const { isLoading, allPairs, lunarswap } = useLunarswapContext();
+  const { isLoading, allPairs, lunarswap, publicState } = useLunarswapContext();
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [reserves, setReserves] = useState<[bigint, bigint] | null>(null);
 
@@ -106,11 +107,11 @@ export default function PoolDetailPage() {
 
       const reserves = await lunarswap.getPairReserves(token0Type, token1Type);
       if (reserves) {
-        setReserves(reserves);
+        setReserves(reserves); // Update state with fetched reserves
       }
     } catch (error) {
       console.error('Failed to fetch reserves:', error);
-      setReserves(null);
+      setReserves(null); // Clear reserves on error
     }
   }, [allPairs, lunarswap, poolId]);
 
@@ -273,7 +274,7 @@ export default function PoolDetailPage() {
               <LiquidityChart
                 token0Symbol={getToken0Symbol()}
                 token1Symbol={getToken1Symbol()}
-                reserves={reserves}
+                reserves={reserves} // Use reserves state
                 className="mb-6"
               />
 
@@ -408,7 +409,7 @@ export default function PoolDetailPage() {
                         </div>
                         <div className="flex justify-between items-center mt-1">
                           <div className="flex items-center gap-2">
-                            <Identicon address={getToken0Color()} size={12} />
+                            <TokenIcon symbol={getToken0Symbol()} size={12} />
                             <span className="text-xs text-muted-foreground">
                               {getToken0Symbol()} ({(() => {
                                 if (!reserves) return '0.0';
@@ -438,7 +439,7 @@ export default function PoolDetailPage() {
                                   : '50.0';
                               })()}% {getToken1Symbol()}
                             </span>
-                            <Identicon address={getToken1Color()} size={12} />
+                            <TokenIcon symbol={getToken1Symbol()} size={12} />
                           </div>
                         </div>
                       </div>
@@ -447,24 +448,20 @@ export default function PoolDetailPage() {
                       <div className="space-y-2">
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-2">
-                            <Identicon address={getToken0Color()} size={12} />
+                            <TokenIcon symbol={getToken0Symbol()} size={12} />
                             <span className="text-sm">{getToken0Symbol()}</span>
                           </div>
                           <span className="text-sm font-medium">
-                            {reserves
-                              ? formatReserve(reserves[0])
-                              : 'Loading...'}
+                            {reserves ? formatReserve(reserves[0]) : 'Loading...'}
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-2">
-                            <Identicon address={getToken1Color()} size={12} />
+                            <TokenIcon symbol={getToken1Symbol()} size={12} />
                             <span className="text-sm">{getToken1Symbol()}</span>
                           </div>
                           <span className="text-sm font-medium">
-                            {reserves
-                              ? formatReserve(reserves[1])
-                              : 'Loading...'}
+                            {reserves ? formatReserve(reserves[1]) : 'Loading...'}
                           </span>
                         </div>
                       </div>

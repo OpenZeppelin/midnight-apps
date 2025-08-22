@@ -13,7 +13,7 @@ import { getTokenSymbolByColor } from '@/lib/token-utils';
 export function TopPoolsList() {
   const navigate = useNavigate();
   const { isConnected } = useWallet();
-  const { status, isLoading, allPairs } = useLunarswapContext();
+  const { status, isLoading, isLoadingPublicState, hasLoadedDataOnce, allPairs } = useLunarswapContext();
 
   const handleExploreMorePools = () => {
     navigate('/explore', { state: { selectedOption: 'pools' } });
@@ -48,8 +48,8 @@ export function TopPoolsList() {
     );
   }
 
-  // Show loading while contract is connecting
-  if (isLoading) {
+  // Show loading while contract is connecting or initial public state is being fetched
+  if (isLoading || (isLoadingPublicState && !hasLoadedDataOnce)) {
     return (
       <div>
         <h3 className="text-xl font-bold mb-4">Top pools by TVL</h3>
@@ -60,7 +60,10 @@ export function TopPoolsList() {
               <div className="text-left">
                 <h4 className="text-lg font-semibold mb-1">Loading Pools...</h4>
                 <p className="text-sm text-muted-foreground">
-                  Connecting to Lunarswap contract and fetching pool data.
+                  {isLoading 
+                    ? 'Connecting to Lunarswap contract and fetching pool data.'
+                    : 'Fetching latest pool data and statistics.'
+                  }
                 </p>
               </div>
             </div>
