@@ -1,7 +1,6 @@
 'use client';
 
 import { TradeTabs } from '@/components/trade-tabs';
-import { BrowserCompatibility } from '@/components/browser-compatibility';
 import { Header } from '@/components/header';
 import { MoonDustBackground } from '@/components/moon-dust-background';
 import { useEffect, useState } from 'react';
@@ -38,7 +37,6 @@ export default function TradePage() {
 			<MoonDustBackground />
 			<Header />
 			<div className="container mx-auto px-3 py-16">
-				<BrowserCompatibility />
 				<div className="mt-4">
 					<TradeTabs initialTokens={initialTokens} />
 				</div>
