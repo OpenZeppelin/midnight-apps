@@ -1,9 +1,9 @@
 pragma language_version >= 0.15.0;
 
 import CompactStandardLibrary;
-import "../../interfaces/IUint64";
+import "../interfaces/IUint64";
 
-import "../../Uint64" prefix Uint64_;
+import "../Uint64" prefix Uint64_;
 
 export circuit add(a: Uint<64>, b: Uint<64>): Uint<128> {
     return Uint64_add(a, b);

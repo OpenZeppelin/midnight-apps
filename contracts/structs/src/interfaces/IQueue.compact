@@ -1,0 +1,30 @@
+pragma language_version >= 0.14.0;
+
+/**
+ * @module IQueue
+ * @description Interface for a queue implementation in Compact.
+ * 
+ * This interface defines the contract that any queue implementation
+ * must follow, providing a standard API for queue operations.
+ *
+ * @template T - The type of elements stored in the queue.
+ */
+module IQueue<T> {
+    import CompactStandardLibrary;
+
+    /** @type {Map<Uint<64>, T>} The queue's storage, mapping 
+     * positions to elements. 
+     */
+    export ledger state: Map<Uint<64>, T>;
+
+    /** @type {Counter} The position of the front element 
+     * (head). 
+     */
+    export ledger head: Counter;
+
+    /** @type {Counter} The position where the next element 
+     * will be added (tail). 
+     */
+    export ledger tail: Counter;
+}
+ 

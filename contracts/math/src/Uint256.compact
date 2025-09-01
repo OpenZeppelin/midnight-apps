@@ -57,6 +57,32 @@ module Uint256 {
     import Uint128 prefix Uint128_;
 
     /**
+     * @description Computes division of two U256 values locally (off-chain).
+     *
+     * @param a The number to divide.
+     * @param b The number to divide by.
+     * @returns DivResultU256 The quotient and remainder of the division as U256 structs.
+     */
+    export witness wit_divU256Locally(a: U256, b: U256): DivResultU256;
+
+    /**
+     * @description Computes the square root of a U256 value locally (off-chain).
+     *
+     * @param radicand The number to compute the square root of.
+     * @returns Uint<128> The square root of radicand.
+     */
+    export witness wit_sqrtU256Locally(radicand: U256): Uint<128>;
+
+    /**
+     * @description Computes division of two Uint<254> values locally (off-chain).
+     *
+     * @param a The Uint<254> value to divide.
+     * @param b The Uint<254> value to divide by.
+     * @returns DivResultU256 The quotient and remainder of the division as U256 structs.
+     */
+    export witness wit_divUint254Locally(a: Uint<254>, b: Uint<254>): DivResultU256;
+
+    /**
      * @title MODULUS circuit
      * @description A pure circuit that returns the modulus value for U256 high part (2^128).
      *
@@ -135,7 +161,7 @@ module Uint256 {
      * @returns {Uint<254>} The 254-bit representation of the U256 value.
      */
     export circuit fromU256(a: U256): Uint<254> {
-        assert (!isExceedingFieldSize(a)) "MathU256: fromU256() - value exceeds 254 bits";
+        assert (!isExceedingFieldSize(a), "MathU256: fromU256() - value exceeds 254 bits");
 
         // Compute highShifted = valueU256.high * 2^128 as a U256 struct
         const highShiftedU256 = U256 { low: U128 { low: 0, high: 0 }, high: a.high }; // Equivalent to value.high * 2^128
@@ -173,7 +199,7 @@ module Uint256 {
      */
     export circuit toU256(a: Uint<254>): U256 {
         // split into high and low 128-bit parts
-        const { quotient, remainder } = divUint254Locally(a, MODULUS());
+        const { quotient, remainder } = wit_divUint254Locally(a, MODULUS());
 
         // extract the U128 limbs
         const lowU128  = remainder.low;
@@ -197,7 +223,7 @@ module Uint256 {
         const reconstructed = add(highU256, lowU256);
 
         // verify we recovered the original `a` exactly
-        assert(eq(reconstructed, result)) "MathU256: conversion invalid";
+        assert(eq(reconstructed, result), "MathU256: conversion invalid");
 
         return result;
     }
@@ -368,7 +394,7 @@ module Uint256 {
      * @returns {U256} The sum of a and b.
      */
     export circuit add(a: U256, b: U256): U256 {
-        assert (!(eq(a, MAX_U256()) && !isZero(b))) "MathU256: addition overflow";
+        assert (!(eq(a, MAX_U256()) && !isZero(b)), "MathU256: addition overflow");
 
         // Special case: a = 0, return b
         if (isZero(a)) {
@@ -381,7 +407,7 @@ module Uint256 {
             const carry = lowSum.high.low; // 0 or 1
             const bHighCarrySum = Uint128_addU128(b.high, Uint128_toU128(carry));
             const highSum = Uint128_addU128(a.high, bHighCarrySum.low);
-            assert (Uint128_isZeroU128(highSum.high)) "MathU256: addition overflow";
+            assert (Uint128_isZeroU128(highSum.high), "MathU256: addition overflow");
             return U256 {
                 low: lowSum.low,
                 high: highSum.low
@@ -438,7 +464,7 @@ module Uint256 {
             return ZERO_U256();
         } else {
             // Check for underflow: a must be >= b
-            assert (gt(a, b) || eq(a, b)) "MathU256: subtraction underflow";
+            assert (gt(a, b) || eq(a, b), "MathU256: subtraction underflow");
             
             // Handle low part subtraction with borrow
             const borrow = Uint128_lteU128(a.low, b.low) ? 1 : 0;
@@ -509,7 +535,7 @@ module Uint256 {
      * @returns {U256} The product of a and b.
      */
     export circuit mul(a: U256, b: U256): U256 {
-        assert (!(eq(a, MAX_U256()) && Uint128_gtU128(b.low, U128 { low: 1, high: 0 }))) "MathU256: multiplication overflow";
+        assert (!(eq(a, MAX_U256()) && Uint128_gtU128(b.low, U128 { low: 1, high: 0 })), "MathU256: multiplication overflow");
 
         if (isZero(a) || isZero(b)) {
             // Special case: a = 0 or b = 0, return 0
@@ -536,7 +562,7 @@ module Uint256 {
             const hhShifted = add(high, crossCarry); // Align hh and add carry
 
             // Check that upper 256 bits from partial products are zero
-            assert (isZero(hhShifted)) "MathU256: multiplication overflow";
+            assert (isZero(hhShifted), "MathU256: multiplication overflow");
 
             return lowAndCross;
         }
@@ -587,7 +613,7 @@ module Uint256 {
      * @returns {DivResultU256} The quotient and remainder of the division as U256 structs.
      */
     circuit _div(a: U256, b: U256): DivResultU256 {
-        assert (!isZero(b)) "MathU256: division by zero";
+        assert (!isZero(b), "MathU256: division by zero");
         
         if (isZero(a)) {
             // Dividend is zero: quotient = 0, remainder = 0
@@ -614,18 +640,18 @@ module Uint256 {
                 remainder: a
             };
         } else {
-            const result = divU256Locally(a, b);
+            const result = wit_divU256Locally(a, b);
 
             // Verify remainder < b
             const remainderU256 = result.remainder;
-            assert (lte(remainderU256, b)) "MathU256: remainder error";
+            assert (lte(remainderU256, b), "MathU256: remainder error");
 
             // Verify: quotient * b + remainder == a
             const quotientU256 = result.quotient;
             const product = mul(quotientU256, b);
             const sum = add(product, remainderU256);
 
-            assert (eq(sum, a)) "MathU256: division invalid";
+            assert (eq(sum, a), "MathU256: division invalid");
 
             return result;
         } 
@@ -746,13 +772,13 @@ module Uint256 {
         } else if (eq(radicand, MAX_U256())) {
             return MAX_UINT128();
         } else {
-            const root = sqrtU256Locally(radicand);
+            const root = wit_sqrtU256Locally(radicand);
             const rootSquareU256 = Uint128_mul(root, root);
-            assert (!gt(rootSquareU256, radicand)) "MathU256: sqrt overestimate";
+            assert (!gt(rootSquareU256, radicand), "MathU256: sqrt overestimate");
 
             const next = Uint128_add(root, 1);
             const nextSquareU256 = mul(next, next);
-            assert (gt(nextSquareU256, radicand)) "MathU256: sqrt underestimate";
+            assert (gt(nextSquareU256, radicand), "MathU256: sqrt underestimate");
 
             return root;
         }
@@ -995,7 +1021,7 @@ module Uint256 {
      * @returns {Boolean} True if value is a multiple of b, false otherwise.
      */
     export circuit isMultiple(value: U256, b: U256): Boolean {
-        assert (!isZero(b)) "MathU256: division by zero";
+        assert (!isZero(b), "MathU256: division by zero");
         const result = _div(value, b);
         return eq(result.remainder, ZERO_U256());
     }

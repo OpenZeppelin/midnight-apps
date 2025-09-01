@@ -9,12 +9,14 @@ pragma language_version >= 0.14.0;
 
 import AccessControl prefix AccessControl_;
 
+import "./interfaces/IAccessControl";
+
 /**
  * @description Exports public ledger state and types from AccessControl for contract and TypeScript integration.
  */
 export { 
-    AccessControl_Role,       // Enum defining user roles (Admin, Lp, Trader, None)
-    AccessControl_roleCommits, // Merkle tree storing role commitments
-    AccessControl_isInitialized, // Boolean indicating contract initialization
-    AccessControl_index       // Counter for the next Merkle tree index
+    Role,       // Enum defining user roles (Admin, Lp, Trader, None)
+    roleCommits, // Merkle tree storing role commitments
+    isInitialized, // Boolean indicating contract initialization
+    index       // Counter for the next Merkle tree index
 };

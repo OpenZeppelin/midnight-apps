@@ -76,7 +76,7 @@ module Field254 {
      */
     export circuit fromField(a: Field): U256 {
         // divide into 128-bit halves
-        const result = divUint254Locally(a as Uint<254>, Uint256_MODULUS());
+        const result = Uint256_wit_divUint254Locally(a as Uint<254>, Uint256_MODULUS());
         const low = result.remainder;
         const high = result.quotient;
 
@@ -104,7 +104,7 @@ module Field254 {
         const reconstructed = Uint256_add(highU256, lowU256);
 
         // verify lossless conversion
-        assert (Uint256_eq(reconstructed, origU256)) "MathU256: reconstruction mismatch";
+        assert (Uint256_eq(reconstructed, origU256), "Field254: reconstruction mismatch");
 
         return origU256;
     }
@@ -117,7 +117,7 @@ module Field254 {
      *
      * @param {U256} a - The U256 struct to convert.
      *
-     * @throws {Error} "MathU256: reconstruction mismatch" if the conversion is not lossless.
+     * @throws {Error} "Field254: reconstruction mismatch" if the conversion is not lossless.
      *
      * @returns {Field} The Field representation of the U256 value.
      */
@@ -130,7 +130,7 @@ module Field254 {
      * @description Compares two Field values for equality using U256 conversion.
      *
      * This circuit compares two field elements by converting them to U256 structs
-     * and then using the MathU256 equality comparison. The comparison is performed
+     * and then using the Field254 equality comparison. The comparison is performed
      * by first converting both field values to U256 format, then comparing them
      * using the existing Uint256_eq function.
      * 
@@ -157,7 +157,7 @@ module Field254 {
      * @description Compares two Field values to check if a < b using U256 conversion.
      *
      * This circuit compares two field elements by converting them to U256 structs
-     * and then using the MathU256 less than comparison. The comparison is performed
+     * and then using the Field254 less than comparison. The comparison is performed
      * by first converting both field values to U256 format, then comparing them
      * using the existing Uint256_lt function.
      * 
@@ -184,7 +184,7 @@ module Field254 {
      * @description Compares two Field values to check if a <= b using U256 conversion.
      *
      * This circuit compares two field elements by converting them to U256 structs
-     * and then using the MathU256 less than or equal comparison. The comparison is performed
+     * and then using the Field254 less than or equal comparison. The comparison is performed
      * by first converting both field values to U256 format, then comparing them
      * using the existing Uint256_lte function.
      * 
@@ -211,7 +211,7 @@ module Field254 {
      * @description Compares two Field values to check if a > b using U256 conversion.
      *
      * This circuit compares two field elements by converting them to U256 structs
-     * and then using the MathU256 greater than comparison. The comparison is performed
+     * and then using the Field254 greater than comparison. The comparison is performed
      * by first converting both field values to U256 format, then comparing them
      * using the existing Uint256_gt function.
      * 
@@ -238,7 +238,7 @@ module Field254 {
      * @description Compares two Field values to check if a >= b using U256 conversion.
      *
      * This circuit compares two field elements by converting them to U256 structs
-     * and then using the MathU256 greater than or equal comparison. The comparison is performed
+     * and then using the Field254 greater than or equal comparison. The comparison is performed
      * by first converting both field values to U256 format, then comparing them
      * using the existing Uint256_gte function.
      * 
@@ -305,7 +305,7 @@ module Field254 {
      * @param {Field} a - The field value to subtract from (minuend).
      * @param {Field} b - The field value to subtract (subtrahend).
      *
-     * @throws {Error} "MathU256: subtraction underflow" if a < b.
+     * @throws {Error} "Field254: subtraction underflow" if a < b.
      *
      * @returns {Field} The difference of a and b modulo the field size.
      */
@@ -334,7 +334,7 @@ module Field254 {
      * @param {Field} a - The first field value to multiply.
      * @param {Field} b - The second field value to multiply.
      *
-     * @throws {Error} "MathU256: multiplication overflow" if the product exceeds 2^256 - 1.
+     * @throws {Error} "Field254: multiplication overflow" if the product exceeds 2^256 - 1.
      *
      * @returns {Field} The product of a and b modulo the field size.
      */
@@ -351,7 +351,7 @@ module Field254 {
      * 
      * @remarks
      * Requirements:
-     * - `b` must not be zero, otherwise the circuit aborts with "MathU256: division by zero".
+     * - `b` must not be zero, otherwise the circuit aborts with "Field254: division by zero".
      * - Both `a` and `b` must be valid Field values.
      *
      * @circuitInfo k=14, rows=12623
@@ -359,7 +359,7 @@ module Field254 {
      * @param {Field} a - The field value to divide (dividend).
      * @param {Field} b - The field value to divide by (divisor).
      *
-     * @throws {Error} "MathU256: division by zero" if `b` is zero.
+     * @throws {Error} "Field254: division by zero" if `b` is zero.
      *
      * @returns {DivResultU256} The quotient and remainder of the division as U256 structs.
      */
@@ -386,7 +386,7 @@ module Field254 {
      * @param {Field} a - The field value to divide (dividend).
      * @param {Field} b - The field value to divide by (divisor).
      *
-     * @throws {Error} "MathU256: division by zero" if b = 0.
+     * @throws {Error} "Field254: division by zero" if b = 0.
      *
      * @returns {Field} The quotient of the division.
      */

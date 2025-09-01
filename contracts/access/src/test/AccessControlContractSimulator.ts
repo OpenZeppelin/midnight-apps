@@ -9,12 +9,12 @@ import {
   encodeCoinPublicKey,
 } from '@midnight-ntwrk/compact-runtime';
 import { sampleContractAddress } from '@midnight-ntwrk/zswap';
-import type { AccessControl_Role } from '../artifacts/Index/contract/index.cjs';
+import type { Role } from '../artifacts/Index/contract/index.cjs';
 import {
   type Ledger,
   Contract as MockAccessControl,
   ledger,
-} from '../artifacts/MockAccessControl/contract/index.cjs';
+} from '../artifacts/AccessControl.mock/contract/index.cjs';
 import type { IContractSimulator } from '../types/test';
 import {
   AccessContractPrivateState,
@@ -105,7 +105,7 @@ export class AccessControlContractSimulator
    */
   public grantRole(
     user: ZswapCoinPublicKey,
-    role: AccessControl_Role,
+    role: Role,
     sender?: CoinPublicKey,
   ): CircuitContext<AccessContractPrivateState> {
     this.circuitContext = this.contract.impureCircuits.testGrantRole(
@@ -123,7 +123,7 @@ export class AccessControlContractSimulator
 
   public revokeRole(
     user: ZswapCoinPublicKey,
-    role: AccessControl_Role,
+    role: Role,
     index: bigint,
     sender?: CoinPublicKey,
   ): CircuitContext<AccessContractPrivateState> {

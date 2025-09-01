@@ -6,7 +6,7 @@ import type {
 } from '@midnight-dapps/compact-std';
 import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
 import {
-  AccessControl_Role,
+  Role,
   type Ledger,
 } from '../artifacts/Index/contract/index.cjs';
 import type { RoleValue } from '../types/role';
@@ -45,14 +45,14 @@ export const AccessContractPrivateState = {
    * @param index - The index of the commitment in the Merkle tree.
    * @returns The updated private state with the new role entry.
    */
-  updateRole: (
+  wit_updateRole: (
     state: AccessContractPrivateState,
     userRoleCommit: Uint8Array,
-    role: AccessControl_Role,
+    role: Role,
     index: bigint,
   ): AccessContractPrivateState => {
     const userRoleCommitString = userRoleCommit.toString();
-    if (role === AccessControl_Role.None) {
+    if (role === Role.None) {
       // Remove the role entry if role is None
       const { [userRoleCommitString]: _, ...remainingRoles } = state.roles;
 
@@ -82,12 +82,12 @@ export const AccessContractPrivateState = {
    * @param user - The public key of the user to query.
    * @returns The user’s role, defaulting to None if not found.
    */
-  getRole: (
+  wit_getRole: (
     state: AccessContractPrivateState,
     user: ZswapCoinPublicKey,
-  ): AccessControl_Role => {
+  ): Role => {
     const userKey = Buffer.from(user.bytes).toString('hex');
-    return state.roles[userKey]?.role ?? AccessControl_Role.None;
+    return state.roles[userKey]?.role ?? Role.None;
   },
 
   /**
@@ -97,7 +97,7 @@ export const AccessContractPrivateState = {
    * @param path - The Merkle tree path to store.
    * @returns The updated private state, or unchanged if the role doesn’t exist.
    */
-  updatePath: (
+  wit_updatePath: (
     state: AccessContractPrivateState,
     userRoleCommit: Uint8Array,
     path: MerkleTreePath<Uint8Array>,
@@ -129,14 +129,14 @@ export const AccessControlWitnesses =
      * @param index - The Merkle tree index for the commitment.
      * @returns A tuple of the updated private state and an empty array as the witness result.
      */
-    updateRole(
+    wit_updateRole(
       context: WitnessContext<Ledger, AccessContractPrivateState>,
       userRoleCommit: Uint8Array,
-      role: AccessControl_Role,
+      role: Role,
       index: bigint,
     ): [AccessContractPrivateState, []] {
       return [
-        AccessContractPrivateState.updateRole(
+        AccessContractPrivateState.wit_updateRole(
           context.privateState,
           userRoleCommit,
           role,
@@ -152,7 +152,7 @@ export const AccessControlWitnesses =
      * @param userRoleCommit - The commitment hash to look up.
      * @returns A tuple of the unchanged private state and a Maybe containing the Merkle path or an empty path.
      */
-    getRolePath(
+    wit_getRolePath(
       context: WitnessContext<Ledger, AccessContractPrivateState>,
       userRoleCommit: Uint8Array,
     ): [AccessContractPrivateState, Maybe<MerkleTreePath<Uint8Array>>] {
@@ -169,7 +169,7 @@ export const AccessControlWitnesses =
       return [
         context.privateState,
         maybeFromNullable(
-          context.ledger.accessControlRoleCommits.pathForLeaf(
+          context.ledger.roleCommits.pathForLeaf(
             context.privateState.roles[userRoleCommitString].index,
             userRoleCommit,
           ),
@@ -183,7 +183,7 @@ export const AccessControlWitnesses =
      * @param context - The witness context containing the private state.
      * @returns A tuple of the unchanged private state and the secret key as a Uint8Array.
      */
-    getSecretKey(
+    wit_getSecretKey(
       context: WitnessContext<Ledger, AccessContractPrivateState>,
     ): [AccessContractPrivateState, Uint8Array] {
       return [context.privateState, context.privateState.secretKey];

@@ -4,9 +4,9 @@ pragma language_version >= 0.15.0;
 /**
  * @description A mock module for testing Max functionality.
  */
-import "../../interfaces/IUint128";
-import "../../interfaces/IUint256";
-import "../../Max" prefix Max_;
+import "../interfaces/IUint128";
+import "../interfaces/IUint256";
+import "../Max" prefix Max_;
 
 export pure circuit MAX_UINT8(): Uint<8> {
     return Max_MAX_UINT8();

@@ -3,10 +3,10 @@ pragma language_version >= 0.15.0;
 
 import CompactStandardLibrary;
 
-import "../../interfaces/IUint128";
-import "../../interfaces/IUint256";
+import "../interfaces/IUint128";
+import "../interfaces/IUint256";
 
-import "../../Uint256" prefix Uint256_;
+import "../Uint256" prefix Uint256_;
 
 export { U256, DivResultU256 };
 

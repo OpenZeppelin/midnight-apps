@@ -2,14 +2,15 @@ pragma language_version >= 0.14.0;
 
 import CompactStandardLibrary;
 
-import "../../AccessControl" prefix AccessControl_;
+import "../interfaces/IAccessControl";
+import "../AccessControl" prefix AccessControl_;
 
 // Export circuits for testing purposes
 export { 
     AccessControl_hashUserRole,
-    AccessControl_roleCommits,
-    AccessControl_isInitialized,
-    AccessControl_index
+    roleCommits,
+    isInitialized,
+    index
 };
 
 /**
@@ -29,10 +30,10 @@ constructor(initialAdmin: ZswapCoinPublicKey) {
  * @returns {[]} - An empty array indicating success.
  * @throws {RoleError} - If the contract is not initialized, caller is not Admin, or the role tree is full.
  */
-export circuit testGrantRole(user: ZswapCoinPublicKey, role: AccessControl_Role): [] {
+export circuit testGrantRole(user: ZswapCoinPublicKey, role: Role): [] {
     return AccessControl_grantRole(user, role);
 }
 
-export circuit revokeRole(user: ZswapCoinPublicKey, role: AccessControl_Role, index: Uint<64>): [] {
+export circuit revokeRole(user: ZswapCoinPublicKey, role: Role, index: Uint<64>): [] {
     return AccessControl_revokeRole(user, role, index);
 }

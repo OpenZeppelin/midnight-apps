@@ -4,7 +4,7 @@ import {
 } from '@midnight-ntwrk/compact-runtime';
 import { sampleCoinPublicKey } from '@midnight-ntwrk/zswap';
 import { beforeEach, describe, expect, test } from 'vitest';
-import { pureCircuits } from '../artifacts/MockAccessControl/contract/index.cjs';
+import { pureCircuits } from '../artifacts/AccessControl.mock/contract/index.cjs';
 import { AccessControlRole } from '../types/ledger';
 import type { RoleValue } from '../types/role';
 import { AccessControlContractSimulator } from './AccessControlContractSimulator';
@@ -39,10 +39,10 @@ describe('AccessControl', () => {
       expect(privateState.roles[adminRoleCommit.toString()]).toEqual(
         expectedAdminRole,
       );
-      expect(publicState.accessControlIsInitialized).toBe(true);
+      expect(publicState.isInitialized).toBe(true);
       expect(
-        publicState.accessControlRoleCommits.checkRoot(
-          publicState.accessControlRoleCommits.root(),
+        publicState.roleCommits.checkRoot(
+          publicState.roleCommits.root(),
         ),
       ).toBe(true);
     });
@@ -50,15 +50,15 @@ describe('AccessControl', () => {
     test('should have valid root after initialization', () => {
       const publicState = mockAccessControlContract.getCurrentPublicState();
       expect(
-        publicState.accessControlRoleCommits.checkRoot(
-          publicState.accessControlRoleCommits.root(),
+        publicState.roleCommits.checkRoot(
+          publicState.roleCommits.root(),
         ),
       ).toBe(true);
     });
 
     test('should not have full tree after initialization', () => {
       const publicState = mockAccessControlContract.getCurrentPublicState();
-      expect(publicState.accessControlRoleCommits.isFull()).toBe(false);
+      expect(publicState.roleCommits.isFull()).toBe(false);
     });
   });
 
@@ -84,7 +84,7 @@ describe('AccessControl', () => {
         expectedLpRole,
       );
       expect(
-        mockAccessControlContract.getCurrentPublicState().accessControlIndex,
+        mockAccessControlContract.getCurrentPublicState().index,
       ).toBe(2n);
     });
 
@@ -391,14 +391,14 @@ describe('AccessControl', () => {
         admin,
       ); // Queue: [1]
       const initialIndex =
-        mockAccessControlContract.getCurrentPublicState().accessControlIndex;
+        mockAccessControlContract.getCurrentPublicState().index;
       mockAccessControlContract.grantRole(
         { bytes: encodeCoinPublicKey(user2) },
         AccessControlRole.Trader,
         admin,
       ); // Reuses 1
       expect(
-        mockAccessControlContract.getCurrentPublicState().accessControlIndex,
+        mockAccessControlContract.getCurrentPublicState().index,
       ).toBe(initialIndex); // No increment
     });
   });

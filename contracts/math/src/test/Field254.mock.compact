@@ -1,9 +1,9 @@
 pragma language_version >= 0.15.0;
 
 import CompactStandardLibrary;
-import "../../interfaces/IUint256";
+import "../interfaces/IUint256";
 
-import "../../Field254" prefix Field254_;
+import "../Field254" prefix Field254_;
 
 export { U256, DivResultU256 };
 

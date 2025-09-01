@@ -10,7 +10,7 @@ import {
   type Ledger,
   Contract as MockQueue,
   ledger,
-} from '../artifacts/MockQueue/contract/index.cjs';
+} from '../artifacts/Queue.mock/contract/index.cjs';
 import type { IContractSimulator } from '../types/test';
 import {
   QueueContractPrivateState,
@@ -61,19 +61,22 @@ export class QueueContractSimulator
   }
 
   public enqueue(item: bigint): Ledger {
-    this.circuitContext = this.contract.impureCircuits.enqueue(
+    const result = this.contract.impureCircuits.enqueue(
       this.circuitContext,
       item,
-    ).context;
+    );
+    this.circuitContext = result.context;
     return ledger(this.circuitContext.transactionContext.state);
   }
 
   public dequeue(): [Ledger, bigint] {
-    const { context, result } = this.contract.impureCircuits.dequeue(
+    const result = this.contract.impureCircuits.dequeue(
       this.circuitContext,
     );
-    this.circuitContext = context;
-    return [ledger(this.circuitContext.transactionContext.state), result.value];
+    this.circuitContext = result.context;
+    // Handle the Maybe<T> return type - if it's none, return 0, otherwise return the value
+    const value = result.result.is_some ? result.result.value : 0n;
+    return [ledger(this.circuitContext.transactionContext.state), value];
   }
 
   public isEmpty(): boolean {

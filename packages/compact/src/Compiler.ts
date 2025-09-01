@@ -152,7 +152,10 @@ export class CompactCompiler {
             spinner.succeed(chalk.green(`[COMPILE] ${step} ✓ ${file}`));
             resolve();
           } else {
+            // Only show error with full file path when compilation fails
             spinner.fail(chalk.red(`[COMPILE] ${step} ✗ ${file}`));
+            // biome-ignore lint/suspicious/noConsoleLog: needed for error reporting
+            console.log(chalk.red(`[COMPILE] Error in file: ${inputPath}`));
             reject(new Error(`Process exited with code ${code}`));
           }
         });
@@ -164,30 +167,9 @@ export class CompactCompiler {
       });
     } catch (error: unknown) {
       spinner.fail(chalk.red(`[COMPILE] ${step} ✗ ${file}`));
-      if (error instanceof Error) {
-        this.printOutput(error.message, chalk.red);
-      }
       throw error;
     }
   }
 
-  /**
-   * Prints compiler output with indentation and specified color.
-   *
-   * @param output - The compiler output string to print (stdout or stderr)
-   * @param colorFn - Chalk color function to style the output (e.g., `chalk.cyan` for success, `chalk.red` for errors)
-   */
-  private printOutput(
-    output: string | undefined,
-    colorFn: (text: string) => string,
-  ): void {
-    if (output) {
-      const lines: string[] = output
-        .split('\n')
-        .filter((line: string): boolean => line.trim() !== '')
-        .map((line: string): string => `    ${line}`);
-      // biome-ignore lint/suspicious/noConsoleLog: needed for debugging
-      console.log(colorFn(lines.join('\n')));
-    }
-  }
+
 }

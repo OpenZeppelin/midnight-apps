@@ -31,6 +31,24 @@ module Uint64 {
     import Max prefix Max_;
 
     /**
+     * @description Computes division of two Uint<64> values locally (off-chain).
+     *
+     * @param a The number to divide.
+     * @param b The number to divide by.
+     * @returns DivResultU64 The quotient and remainder of the division.
+     */
+    export witness wit_divU64Locally(a: Uint<64>, b: Uint<64>): DivResultU64;
+
+    /**
+     * @description Computes the square root of a Uint<64> value locally (off-chain).
+     *
+     * @param radicand The number to compute the square root of.
+     * @returns Uint<32> The square root of radicand.
+     */
+    export witness wit_sqrtU64Locally(radicand: Uint<64>): Uint<32>;
+
+
+    /**
      * @title Add circuit
      * @description Adds two `Uint<64>` numbers, returning a `Uint<128>` result to accommodate potential overflow.
      * 
@@ -68,7 +86,7 @@ module Uint64 {
      * @returns {Uint<64>} The difference `a - b` as a `Uint<64>` value.
      */
     export circuit sub(a: Uint<64>, b: Uint<64>): Uint<64> {
-        assert (a >= b) "Math: subtraction underflow";
+        assert (a >= b, "Math: subtraction underflow");
         return a - b;
     }
 
@@ -135,7 +153,7 @@ module Uint64 {
      * @returns {DivResultU64} A struct containing the quotient and remainder as Uint<64> values.
      */
     circuit _div(a: Uint<64>, b: Uint<64>): DivResultU64 {
-        assert (b != 0) "Math: division by zero";
+        assert (b != 0, "Math: division by zero");
         
         if (a == 0) {
             return DivResultU64 { quotient: 0 as Uint<64>, remainder: 0 as Uint<64> };
@@ -146,9 +164,9 @@ module Uint64 {
         } else if (a < b) {
             return DivResultU64 { quotient: 0 as Uint<64>, remainder: a };
         } else {
-            const result = divU64Locally(a, b);
-            assert (result.remainder < b) "Math: remainder error";
-            assert ((result.quotient * b + result.remainder) as Uint<64> == a) "Math: division invalid";
+            const result = wit_divU64Locally(a, b);
+            assert (result.remainder < b, "Math: remainder error");
+            assert ((result.quotient * b + result.remainder) as Uint<64> == a, "Math: division invalid");
             return result;
         }
     }
@@ -265,13 +283,13 @@ module Uint64 {
      * @returns {Uint<32>} The floor of the square root of radicand.
      */
     export circuit sqrt(radicand: Uint<64>): Uint<32> {
-        const root = sqrtU64Locally(radicand);
+        const root = wit_sqrtU64Locally(radicand);
         const rootSquare = mul(root, root);
-        assert (rootSquare <= radicand) "Math: sqrt overestimate";
+        assert (rootSquare <= radicand, "Math: sqrt overestimate");
         
         const next = root + 1;
         const nextSquare = mul(next, next);
-        assert (nextSquare > radicand) "Math: sqrt underestimate";
+        assert (nextSquare > radicand, "Math: sqrt underestimate");
         
         return root;
     }

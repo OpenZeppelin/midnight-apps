@@ -1,0 +1,60 @@
+pragma language_version >= 0.14.0;
+
+/**
+ * @module IAccessControl
+ * @description Interface for an access control implementation in Compact.
+ * 
+ * This interface defines the contract that any access control implementation
+ * must follow, providing a standard API for role-based access control operations.
+ */
+module IAccessControl {
+    import CompactStandardLibrary;
+
+    /**
+     * @description Defines the possible roles a user can have in the system.
+     * @enum {number}
+     */
+    export enum Role {
+        Admin,
+        Lp,
+        Trader,
+        None
+    };
+
+    /**
+     * @description Indicates whether the contract has been initialized.
+     * @type {Boolean}
+     */
+    export ledger isInitialized: Boolean;
+
+    /**
+     * @description Merkle tree storing commitments of user-role pairs, with a fixed depth of 10.
+     * @type {MerkleTree<10, Bytes<32>>}
+     */
+    export ledger roleCommits: MerkleTree<10, Bytes<32>>;
+
+    /**
+     * @description A set of nullifiers tracking granted user-role pairs to prevent duplicate role assignments.
+     * @type {Set<Bytes<32>>}
+     * @remarks - Uses a hash of user, role, and secret key (without index) to uniquely identify role assignments.
+     *          Inserted during grantRole and removed during revokeRole.
+     *          - Used within grantRole for preventing double assignment. Note the difference with 
+     *          `userRoleIndexNullifier` which can't be used inside grantRole to check the same issue, because
+     *          when granting new role for a user there won't be an index existing yet. 
+     */
+    export ledger userRoleNullifier: Set<Bytes<32>>;
+
+    /**
+     * @description A set of nullifiers tracking user-role-index triplets to ensure accurate role revocation.
+     * @type {Set<Bytes<32>>}
+     * @remarks Uses a hash of user, role, index, and secret key to bind a role to its specific Merkle tree index.
+     *          Inserted during grantRole and removed during revokeRole to validate index-specific revocation.
+     */
+    export ledger userRoleIndexNullifier: Set<Bytes<32>>;
+
+    /**
+     * @description Counter tracking the next available index for inserting into the role tree.
+     * @type {Counter}
+     */
+    export ledger index: Counter;
+}

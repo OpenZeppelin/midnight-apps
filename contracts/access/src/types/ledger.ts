@@ -9,14 +9,6 @@
  * @description Ledger interface containing the public state of the AccessControl contract.
  * @typedef {Object} AccessControlLedger
  */
-<<<<<<< Updated upstream
 export {
-  AccessControl_Role as AccessControlRole,
-  Ledger as AccessControlLedger,
+  Role as AccessControlRole,
 } from '../artifacts/Index/contract/index.cjs';
-=======
-export type { Ledger as AccessControlLedger } from '../artifacts/Index/contract/index.cjs';
-
-// biome-ignore lint/performance/noBarrelFile: entrypoint module
-export { AccessControl_Role as AccessControlRole } from '../artifacts/Index/contract/index.cjs';
->>>>>>> Stashed changes

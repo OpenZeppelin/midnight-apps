@@ -14,7 +14,6 @@ export type { IAccessControlWitnesses } from './witnesses/interface';
 
 export type {
   AccessControlRole,
-  AccessControlLedger,
 } from './types/ledger';
 
 export type { RoleValue } from './types/role';

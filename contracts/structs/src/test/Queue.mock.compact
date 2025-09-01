@@ -2,13 +2,15 @@ pragma language_version >= 0.14.0;
 
 import CompactStandardLibrary;
 
-import "../../Queue"<Uint<16>> prefix Queue_;
+import "../interfaces/IQueue"<Uint<16>>;
+
+import "../Queue"<Uint<16>> prefix Queue_;
 
 // Export Public state
-export { Queue_state, Queue_tail, Queue_head }
+export { state, tail, head }
 
 export circuit enqueue(item: Uint<16>): [] {
-    return Queue_enqueue(item);
+    return Queue_enqueue(disclose(item));
 }
 
 export circuit dequeue(): Maybe<Uint<16>> {

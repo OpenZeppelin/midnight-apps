@@ -1,7 +1,7 @@
 pragma language_version >= 0.15.0;
 
 import CompactStandardLibrary;
-import "../../Bytes32" prefix Bytes32_;
+import "../Bytes32" prefix Bytes32_;
 
 export circuit fromBytes(bytes: Bytes<32>): Field {
     return Bytes32_fromBytes(bytes);

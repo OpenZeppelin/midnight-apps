@@ -16,13 +16,16 @@
     "./zkir/*": "./dist/artifacts/zkir/*"
   },
   "scripts": {
-    "compact": "pnpm exec compact-compiler",
-    "build": "pnpm exec compact-builder && tsc",
+    "compact": "pnpm run clean:artifacts && pnpm exec compact-compiler",
+    "build": "pnpm run clean && pnpm exec compact-builder && tsc",
     "test": "vitest run --printConsoleTrace",
     "types": "tsc -p tsconfig.json --noEmit",
     "fmt": "biome format --write",
     "lint": "biome lint",
     "lint:fix": "biome check --write",
+    "clean": "pnpm run clean:dist && pnpm run clean:artifacts",
+    "clean:dist": "rm -rf dist",
+    "clean:artifacts": "rm -rf src/artifacts",
     "precommit": "lint-staged --no-stash && pnpm run types"
   },
   "keywords": [],
