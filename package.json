@@ -10,7 +10,7 @@
     "compact:fast": "turbo run compact -- --skip-zk",
     "compact:version": "turbo run compact -- --version",
     "compact:language-version": "turbo run compact -- --language-version",
-    "build": "pnpm run build:contracts && pnpm run build:packages && pnpm run build:apps",
+    "build": "pnpm -r --workspace-concurrency=1 run build",
     "build:contracts": "pnpm -r --filter './contracts/*' --workspace-concurrency=1 run build",
     "build:apps": "pnpm -r --filter './apps/*' --workspace-concurrency=1 run build",
     "build:packages": "pnpm -r --filter './packages/*' --workspace-concurrency=1 run build",
