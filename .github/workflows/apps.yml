@@ -46,6 +46,9 @@ jobs:
         run: pnpm test:apps
         timeout-minutes: 10
 
+      - name: Check types for apps and packages
+        run: pnpm types:apps && pnpm types:packages
+
       - name: Upload build artifacts
         if: steps.build.outcome == 'success'
         uses: actions/upload-artifact@v4

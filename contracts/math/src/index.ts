@@ -1,5 +1,5 @@
 /**
- * @module @midnight-dapps/math-contract
+ * @module @openzeppelin-midnight-apps/math-contract
  * @description Main entry point for the Math contract package, exporting private state utilities, witness implementations, and type definitions.
  */
 

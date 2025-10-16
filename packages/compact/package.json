@@ -1,5 +1,5 @@
 {
-  "name": "@midnight-dapps/compact",
+  "name": "@openzeppelin-midnight-apps/compact",
   "version": "1.2.0",
   "private": true,
   "keywords": ["compact", "compiler"],
@@ -24,7 +24,7 @@
   },
   "packageManager": "pnpm@10.4.1",
   "devDependencies": {
-    "@midnight-dapps/biome-config": "workspace:^",
+    "@openzeppelin-midnight-apps/biome-config": "workspace:^",
     "@types/node": "^22.15.29",
     "typescript": "^5.8.3",
     "vitest": "^3.1.4"

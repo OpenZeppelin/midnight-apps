@@ -1,10 +1,10 @@
 import { getRandomValues } from 'node:crypto';
+import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
 import type {
   Maybe,
   MerkleTreePath,
   ZswapCoinPublicKey,
-} from '@midnight-dapps/compact-std';
-import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
+} from '@openzeppelin-midnight-apps/compact-std';
 import {
   AccessControl_Role,
   type Ledger,

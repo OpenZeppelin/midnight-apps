@@ -1,5 +1,5 @@
 {
-  "name": "@midnight-dapps/lunarswap-ui",
+  "name": "@openzeppelin-midnight-apps/lunarswap-ui",
   "version": "1.0.0-alpha.1",
   "private": true,
   "scripts": {
@@ -69,7 +69,7 @@
     "zod": "^3.25.67"
   },
   "devDependencies": {
-    "@midnight-dapps/biome-config": "workspace:^",
+    "@openzeppelin-midnight-apps/biome-config": "workspace:^",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",

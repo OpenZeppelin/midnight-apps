@@ -1,5 +1,5 @@
 /**
- * @module @midnight-dapps/compact-stdlib
+ * @module @openzeppelin-midnight-apps/compact-stdlib
  * @description Re-exports custom structs from CompactStandardLibrary for use in TypeScript code.
  * Excludes standard runtime types from @midnight-ntwrk/compact-runtime.
  */

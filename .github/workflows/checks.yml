@@ -18,22 +18,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Setup Environment
         uses: ./.github/actions/setup
 
-      - name: Lint
-        run: pnpm lint
+      - name: Lint and Format
+        run: pnpm lint && pnpm fmt
         timeout-minutes: 10
 
-      - name: Format
-        run: pnpm fmt
-        timeout-minutes: 10
+      - name: Commitlint
+        run: pnpm commitlint --from=${{ github.event.pull_request.base.sha }} --to=${{ github.event.pull_request.head.sha }}
 
-      - name: Type check
-        run: pnpm types
-        timeout-minutes: 10
+      - name: Spell Check with Typos
+        uses: crate-ci/typos@v1.36.2
+        with:
+          config: .github/workflows/config/typos.toml
 
       - name: Cleanup on failure
         if: failure()

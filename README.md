@@ -28,12 +28,12 @@ nvm use 22.14.0
    ```bash
    pnpm install
    ```
-   - This installs all workspace dependencies and runs the `prepare` script, which sets up Husky and builds `@midnight-dapps/compact`.
+   - This installs all workspace dependencies and runs the `prepare` script, which sets up Husky and builds `@openzeppelin-midnight-apps/compact`.
 
 3. **Workspace Structure**:
-   - `contracts/*`: Compact Smart contract projects (e.g., `@midnight-dapps/access-contract`).
-   - `packages/*`: Utility packages (e.g., `@midnight-dapps/compact`).
-   - `apps/*`: Frontend applications (e.g., `@midnight-dapps/lunarswap-ui`).
+   - `contracts/*`: Compact Smart contract projects (e.g., `@openzeppelin-midnight-apps/access-contract`).
+   - `packages/*`: Utility packages (e.g., `@openzeppelin-midnight-apps/compact`).
+   - `apps/*`: Frontend applications (e.g., `@openzeppelin-midnight-apps/lunarswap-ui`).
 
    See `pnpm-workspace.yaml` for the full list.
 
@@ -86,7 +86,7 @@ Commits are linted with `commitlint` and staged files are processed with `lint-s
 
 2. **Pre-Commit Hook**:
    - Runs `turbo run precommit` via `.husky/pre-commit`.
-   - For `@midnight-dapps/access-contract`:
+   - For `@openzeppelin-midnight-apps/access-contract`:
      - `lint-staged`: Formats and lints staged files (see `.lintstagedrc.json`).
      - `pnpm run types`: Checks TypeScript types.
 
@@ -104,7 +104,7 @@ Output:
 husky - pre-commit hook
 > turbo run precommit
 • Running precommit in X packages
-• @midnight-dapps/access-contract:precommit
+• @openzeppelin-midnight-apps/access-contract:precommit
 Tasks:    1 successful, 1 total
 Time:    500ms
 

@@ -15,8 +15,24 @@ runs:
       with:
         fetch-depth: 1
 
+    - name: Set Compact environment variables
+      shell: bash
+      run: |
+        COMPACT_HOME="$HOME/compactc"
+        echo "COMPACT_HOME=$COMPACT_HOME" >> "$GITHUB_ENV"
+        echo "$COMPACT_HOME" >> "$GITHUB_PATH"
+
+    - name: Cache Compact compiler
+      id: cache-compact
+      uses: actions/cache@v4
+      with:
+        path: ${{ env.COMPACT_HOME }}
+        key: compact-compiler-0.23.0
+        restore-keys: |
+          compact-compiler-
+
     - name: Install Compact compiler
-      id: setup
+      if: steps.cache-compact.outputs.cache-hit != 'true'
       shell: bash
       env:
         COMPILER_VERSION: "0.23.0"
@@ -24,7 +40,6 @@ runs:
       run: |
         set -euo pipefail
         # Create directory for compiler
-        COMPACT_HOME="$HOME/compactc"
         mkdir -p "$COMPACT_HOME"
 
         # Create URL
@@ -38,10 +53,9 @@ runs:
         unzip -qo "$COMPACT_HOME/compactc.zip" -d "$COMPACT_HOME"
         chmod +x "$COMPACT_HOME"/{compactc,compactc.bin,zkir}
 
-        echo "📁 Setting environment variables..."
-        echo "COMPACT_HOME=$COMPACT_HOME" >> "$GITHUB_ENV"
-        echo "$COMPACT_HOME" >> "$GITHUB_PATH"
-
+    - name: Verify Compact compiler installation
+      shell: bash
+      run: |
         echo "✅ Verifying installation..."
         if [ ! -f "$COMPACT_HOME/compactc" ]; then
           echo "::error::❌ compactc not found in $COMPACT_HOME"
@@ -50,14 +64,6 @@ runs:
 
         echo "🤖 Testing installation..."
         "$COMPACT_HOME/compactc" --version
-
-    - name: Cache Compact compiler
-      uses: actions/cache@v4
-      with:
-        path: ${{ env.COMPACT_HOME }}
-        key: compact-compiler-0.23.0
-        restore-keys: |
-          compact-compiler-
 
     - name: Install pnpm
       uses: pnpm/action-setup@v2
@@ -95,3 +101,27 @@ runs:
     - name: Install dependencies
       shell: bash
       run: pnpm install --frozen-lockfile --prefer-offline
+
+    - name: Build contract packages (with retry on hash mismatch)
+      if: inputs.skip-compile != 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        build_contracts() {
+          echo "⚙️ Building contract packages..."
+          if ! pnpm build:contracts; then
+            echo "❌ Build failed."
+            if [ -d "$HOME/.cache/midnight/zk-params" ]; then
+              echo "⚠️ zk-params exists. Removing cache and retrying..."
+              rm -rf "$HOME/.cache/midnight/zk-params"
+              echo "::notice::♻️ Retrying build after clearing zk-params..."
+              pnpm build:contracts || { echo "::error::❌ Retry also failed."; exit 1; }
+            else
+              echo "🚫 Build failed and zk-params missing. No retry."
+              exit 1
+            fi
+          fi
+        }
+
+        build_contracts

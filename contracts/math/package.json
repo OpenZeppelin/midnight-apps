@@ -1,5 +1,5 @@
 {
-  "name": "@midnight-dapps/math-contracts",
+  "name": "@openzeppelin-midnight-apps/math",
   "version": "1.0.0-alpha.1",
   "private": true,
   "description": "Compacts contracts math operations.",
@@ -29,8 +29,8 @@
     "vitest": "^3.1.4"
   },
   "dependencies": {
-    "@midnight-dapps/biome-config": "workspace:^",
-    "@midnight-dapps/compact": "workspace:^",
+    "@openzeppelin-midnight-apps/biome-config": "workspace:^",
+    "@openzeppelin-midnight-apps/compact": "workspace:^",
     "@midnight-ntwrk/compact-runtime": "^0.8.1",
     "@midnight-ntwrk/midnight-js-network-id": "^2.0.1",
     "@midnight-ntwrk/zswap": "^4.0.0"

@@ -1,4 +1,3 @@
-import type { ZswapCoinPublicKey } from '@midnight-dapps/compact-std';
 import {
   type CircuitContext,
   type CoinPublicKey,
@@ -9,6 +8,7 @@ import {
   encodeCoinPublicKey,
 } from '@midnight-ntwrk/compact-runtime';
 import { sampleContractAddress } from '@midnight-ntwrk/zswap';
+import type { ZswapCoinPublicKey } from '@openzeppelin-midnight-apps/compact-std';
 import type { AccessControl_Role } from '../artifacts/Index/contract/index.cjs';
 import {
   type Ledger,

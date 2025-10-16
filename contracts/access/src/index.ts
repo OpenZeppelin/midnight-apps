@@ -1,5 +1,5 @@
 /**
- * @module @midnight-dapps/access-contract
+ * @module @openzeppelin-midnight-apps/access-contract
  * @description Main entry point for the AccessControl contract package, exporting private state utilities, witness implementations, and type definitions.
  * @remarks This module serves as the primary export point for TypeScript consumers of the AccessControl contract.
  */

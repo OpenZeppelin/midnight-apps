@@ -1,5 +1,5 @@
 /**
- * @module @midnight-dapps/structs-contract
+ * @module @openzeppelin-midnight-apps/structs-contract
  * @description Main entry point for the AccessControl contract package, exporting private state utilities, witness implementations, and type definitions.
  */
 
