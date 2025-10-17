@@ -6,7 +6,7 @@ pragma language_version >= 0.15.0;
  * @description Re-exports ledger-related types and state from Math.compact for use in contracts and TypeScript.
  * 
  * This module serves as a centralized export point for all mathematical types, constants, and result structures
- * used throughout the midnight-dapps math contracts. It provides a clean interface for importing the necessary
+ * used throughout the midnight-apps math contracts. It provides a clean interface for importing the necessary
  * components without having to import from multiple individual files.
  * 
  * The module re-exports:

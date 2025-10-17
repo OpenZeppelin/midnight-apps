@@ -21,7 +21,7 @@ nvm use 22.14.0
 1. **Clone the Repository**:
    ```bash
    git clone <repository-url>
-   cd midnight-dapps
+   cd midnight-apps
    ```
 
 2. **Install Dependencies**:

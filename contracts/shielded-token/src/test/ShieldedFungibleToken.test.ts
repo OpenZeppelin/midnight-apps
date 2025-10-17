@@ -1,3 +1,4 @@
+import { encodeTokenType, tokenType } from '@midnight-ntwrk/compact-runtime';
 import {
   NetworkId,
   getZswapNetworkId,
@@ -91,19 +92,26 @@ describe('ShieldedFungibleToken', () => {
       // Perform first mint
       const coin = token.mint(recipient, amount);
 
-      // Minted coin color should match the token type
-      expect(coin.color).not.toEqual(initialType);
+      // Calculate the expected token type from domain and contract address
+      const publicState = token.getCurrentPublicState();
+      const expectedType = encodeTokenType(
+        tokenType(
+          publicState.shieldedFungibleToken_Domain,
+          token.contractAddress,
+        ),
+      );
+      expect(expectedType).not.toEqual(initialType);
 
-      // Verify the type persists after mints
-      const typeAfterFirstMint = token.type();
-      expect(typeAfterFirstMint).not.toEqual(initialType); // Should remain unchanged
+      // Verify minted coin color matches the calculated token type
+      expect(coin.color).toEqual(expectedType);
+      expect(token.type()).toEqual(expectedType);
 
-      // Second mint should also have the same color
+      // Second mint should have the same color as the expected type
       const coin2 = token.mint(recipient, 500n);
-      expect(coin2.color).not.toEqual(initialType);
+      expect(coin2.color).toEqual(expectedType);
 
-      const typeAfterSecondMint = token.type();
-      expect(typeAfterSecondMint).not.toEqual(initialType); // Should remain unchanged
+      // Type should remain unchanged after subsequent mints
+      expect(token.type()).toEqual(expectedType);
     });
 
     it('should mint tokens to a recipient', () => {
@@ -113,12 +121,18 @@ describe('ShieldedFungibleToken', () => {
       const coin = token.mint(recipient, amount);
 
       // Verify the minted coin
-      expect(coin).toBeDefined();
-      expect(coin.color).toBeDefined();
-      expect(coin.value).toBe(amount);
+      const publicState = token.getCurrentPublicState();
+      const expectedType = encodeTokenType(
+        tokenType(
+          publicState.shieldedFungibleToken_Domain,
+          token.contractAddress,
+        ),
+      );
+      expect(coin.color).toEqual(expectedType);
+      expect(coin.value).toEqual(amount);
 
       // Verify total supply increased
-      expect(token.totalSupply()).toBe(amount);
+      expect(token.totalSupply()).toEqual(amount);
     });
 
     it('should mint tokens to multiple recipients', () => {
@@ -244,7 +258,7 @@ describe('ShieldedFungibleToken', () => {
 
       expect(() => {
         token.burn(mintedCoin, burnAmount);
-      }).toThrow();
+      }).toThrow('ShieldedToken: insufficient token amount to burn');
     });
 
     it('should fail when burning a coin with incorrect token type', () => {
@@ -257,7 +271,7 @@ describe('ShieldedFungibleToken', () => {
 
       expect(() => {
         token.burn(incorrectCoin, 50n);
-      }).toThrow();
+      }).toThrow('ShieldedToken: token not created from this contract');
     });
   });
 
@@ -273,14 +287,14 @@ describe('ShieldedFungibleToken', () => {
       const burnResult = token.burn(coin1, 300n);
       expect(token.totalSupply()).toBe(700n);
 
+      // Verify burn result
+      expect(burnResult.sent.value).toEqual(300n);
+      expect(burnResult.change.is_some).toEqual(true);
+      expect(burnResult.change.value.value).toEqual(700n);
+
       // Second mint
       token.mint(recipient, 500n);
-      expect(token.totalSupply()).toBe(1200n);
-
-      // Verify burn result
-      expect(burnResult.sent.value).toBe(300n);
-      expect(burnResult.change.is_some).toBe(true);
-      expect(burnResult.change.value.value).toBe(700n);
+      expect(token.totalSupply()).toEqual(1200n);
     });
 
     it('should handle multiple burns from same coin', () => {
