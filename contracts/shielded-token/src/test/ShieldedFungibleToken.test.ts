@@ -84,7 +84,7 @@ describe('ShieldedFungibleToken', () => {
       const recipient = createEitherFromHex(USER);
       const amount = 1000n;
 
-      // Check token type is initialized in constructor (derived from domain and contract address)
+      // Check token type is not set before lazy mint
       const initialType = token.type();
       expect(initialType).toEqual(new Uint8Array(32)); // Should be all zeros
 
