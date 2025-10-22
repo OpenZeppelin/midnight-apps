@@ -8,7 +8,7 @@ import type {
   U256,
 } from '../artifacts/Index/contract/index.cjs';
 
-export interface IMathU64Witnesses<P> {
+export interface IUint64Witnesses<P> {
   sqrtU64Locally(
     context: WitnessContext<Ledger, P>,
     radicand: bigint,
@@ -21,7 +21,7 @@ export interface IMathU64Witnesses<P> {
   ): [P, DivResultU64];
 }
 
-export interface IMathU128Witnesses<L, P> {
+export interface IUint128Witnesses<L, P> {
   sqrtU128Locally(context: WitnessContext<L, P>, radicand: U128): [P, bigint];
 
   divU128Locally(
@@ -37,7 +37,7 @@ export interface IMathU128Witnesses<L, P> {
   ): [P, DivResultU128];
 }
 
-export interface IMathU256Witnesses<L, P> {
+export interface IUint256Witnesses<L, P> {
   sqrtU256Locally(context: WitnessContext<L, P>, radicand: U256): [P, bigint];
 
   divU256Locally(

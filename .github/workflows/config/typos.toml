@@ -21,7 +21,7 @@ Merkle = "Merkle"
 
 [default.extend-identifiers]
 # Add custom identifiers that should be considered correct
-Lunarswap = "Lunarswap"
+LunarSwap = "LunarSwap"
 Zswap     = "Zswap"
 vitest    = "vitest"
 UTXO      = "UTXO"

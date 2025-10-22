@@ -13,33 +13,25 @@ import {
   Contract,
   type Ledger,
   ledger,
-} from '../artifacts/MockBytes32/contract/index.cjs';
+} from '../artifacts/Bytes32.mock/contract/index.cjs';
 import type { IContractSimulator } from '../types/test';
-import {
-  Bytes32ContractPrivateState,
-  Bytes32Witnesses,
-} from '../witnesses/Bytes32';
+import { Bytes32PrivateState, Bytes32Witnesses } from '../witnesses/Bytes32';
 
-export class Bytes32ContractSimulator
-  implements IContractSimulator<Bytes32ContractPrivateState, Ledger>
+export class Bytes32Simulator
+  implements IContractSimulator<Bytes32PrivateState, Ledger>
 {
-  readonly contract: Contract<Bytes32ContractPrivateState>;
+  readonly contract: Contract<Bytes32PrivateState>;
   readonly contractAddress: string;
-  circuitContext: CircuitContext<Bytes32ContractPrivateState>;
+  circuitContext: CircuitContext<Bytes32PrivateState>;
 
   constructor() {
-    this.contract = new Contract<Bytes32ContractPrivateState>(
-      Bytes32Witnesses(),
-    );
+    this.contract = new Contract<Bytes32PrivateState>(Bytes32Witnesses());
     const {
       currentPrivateState,
       currentContractState,
       currentZswapLocalState,
     } = this.contract.initialState(
-      constructorContext(
-        Bytes32ContractPrivateState.generate(),
-        sampleCoinPublicKey(),
-      ),
+      constructorContext(Bytes32PrivateState.generate(), sampleCoinPublicKey()),
     );
     this.circuitContext = {
       currentPrivateState,
@@ -58,7 +50,7 @@ export class Bytes32ContractSimulator
     return ledger(this.circuitContext.transactionContext.state);
   }
 
-  public getCurrentPrivateState(): Bytes32ContractPrivateState {
+  public getCurrentPrivateState(): Bytes32PrivateState {
     return this.circuitContext.currentPrivateState;
   }
 
@@ -127,69 +119,66 @@ export function createMaliciousSimulator({
   mockLte?: (a: Uint8Array, b: Uint8Array) => boolean;
   mockGt?: (a: Uint8Array, b: Uint8Array) => boolean;
   mockGte?: (a: Uint8Array, b: Uint8Array) => boolean;
-}): Bytes32ContractSimulator {
+}): Bytes32Simulator {
   const baseWitnesses = Bytes32Witnesses();
 
   const witnesses = (): ReturnType<typeof Bytes32Witnesses> => ({
     ...baseWitnesses,
     ...(mockEq && {
       eqLocally(
-        context: WitnessContext<Ledger, Bytes32ContractPrivateState>,
+        context: WitnessContext<Ledger, Bytes32PrivateState>,
         a: Uint8Array,
         b: Uint8Array,
-      ): [Bytes32ContractPrivateState, boolean] {
+      ): [Bytes32PrivateState, boolean] {
         return [context.privateState, mockEq(a, b)];
       },
     }),
     ...(mockLt && {
       ltLocally(
-        context: WitnessContext<Ledger, Bytes32ContractPrivateState>,
+        context: WitnessContext<Ledger, Bytes32PrivateState>,
         a: Uint8Array,
         b: Uint8Array,
-      ): [Bytes32ContractPrivateState, boolean] {
+      ): [Bytes32PrivateState, boolean] {
         return [context.privateState, mockLt(a, b)];
       },
     }),
     ...(mockLte && {
       lteLocally(
-        context: WitnessContext<Ledger, Bytes32ContractPrivateState>,
+        context: WitnessContext<Ledger, Bytes32PrivateState>,
         a: Uint8Array,
         b: Uint8Array,
-      ): [Bytes32ContractPrivateState, boolean] {
+      ): [Bytes32PrivateState, boolean] {
         return [context.privateState, mockLte(a, b)];
       },
     }),
     ...(mockGt && {
       gtLocally(
-        context: WitnessContext<Ledger, Bytes32ContractPrivateState>,
+        context: WitnessContext<Ledger, Bytes32PrivateState>,
         a: Uint8Array,
         b: Uint8Array,
-      ): [Bytes32ContractPrivateState, boolean] {
+      ): [Bytes32PrivateState, boolean] {
         return [context.privateState, mockGt(a, b)];
       },
     }),
     ...(mockGte && {
       gteLocally(
-        context: WitnessContext<Ledger, Bytes32ContractPrivateState>,
+        context: WitnessContext<Ledger, Bytes32PrivateState>,
         a: Uint8Array,
         b: Uint8Array,
-      ): [Bytes32ContractPrivateState, boolean] {
+      ): [Bytes32PrivateState, boolean] {
         return [context.privateState, mockGte(a, b)];
       },
     }),
   });
 
-  const contract = new Contract<Bytes32ContractPrivateState>(witnesses());
+  const contract = new Contract<Bytes32PrivateState>(witnesses());
 
   const { currentPrivateState, currentContractState, currentZswapLocalState } =
     contract.initialState(
-      constructorContext(
-        Bytes32ContractPrivateState.generate(),
-        sampleCoinPublicKey(),
-      ),
+      constructorContext(Bytes32PrivateState.generate(), sampleCoinPublicKey()),
     );
 
-  const badSimulator = new Bytes32ContractSimulator();
+  const badSimulator = new Bytes32Simulator();
   Object.defineProperty(badSimulator, 'contract', {
     value: contract,
     writable: false,

@@ -8,13 +8,13 @@ import {
   encodeCoinPublicKey,
 } from '@midnight-ntwrk/compact-runtime';
 import { sampleContractAddress } from '@midnight-ntwrk/zswap';
-import type { ZswapCoinPublicKey } from '@openzeppelin-midnight-apps/compact-std';
-import type { AccessControl_Role } from '../artifacts/Index/contract/index.cjs';
+import type { ZswapCoinPublicKey } from '@openzeppelin/midnight-apps-compact-std';
 import {
   type Ledger,
   Contract as MockAccessControl,
   ledger,
-} from '../artifacts/MockAccessControl/contract/index.cjs';
+} from '../artifacts/AccessControl.mock/contract/index.cjs';
+import type { AccessControl_Role } from '../artifacts/Index/contract/index.cjs';
 import type { IContractSimulator } from '../types/test';
 import {
   AccessContractPrivateState,
@@ -26,7 +26,7 @@ import {
  * @template P - The private state type, fixed to AccessContractPrivateState.
  * @template L - The ledger type, fixed to Contract.Ledger.
  */
-export class AccessControlContractSimulator
+export class AccessControlSimulator
   implements IContractSimulator<AccessContractPrivateState, Ledger>
 {
   /** @description The underlying contract instance managing access control logic. */

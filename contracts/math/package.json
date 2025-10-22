@@ -1,11 +1,12 @@
 {
-  "name": "@openzeppelin-midnight-apps/math",
+  "name": "@openzeppelin/midnight-apps-math",
   "version": "1.0.0-alpha.1",
   "private": true,
   "description": "Compacts contracts math operations.",
   "type": "module",
   "scripts": {
     "compact": "pnpm exec compact-compiler",
+    "compact:show": "pnpm exec compact-compiler --show-circuits",
     "compact:fast": "pnpm exec compact-compiler --skip-zk",
     "build": "pnpm exec compact-builder && tsc",
     "test": "vitest run --printConsoleTrace",
@@ -29,9 +30,9 @@
     "vitest": "^3.1.4"
   },
   "dependencies": {
-    "@openzeppelin-midnight-apps/biome-config": "workspace:^",
-    "@openzeppelin-midnight-apps/compact": "workspace:^",
-    "@midnight-ntwrk/compact-runtime": "^0.8.1",
+    "@openzeppelin/midnight-apps-biome-config": "workspace:^",
+    "@openzeppelin/midnight-apps-compact": "workspace:^",
+    "@midnight-ntwrk/compact-runtime": "^0.9.0",
     "@midnight-ntwrk/midnight-js-network-id": "^2.0.1",
     "@midnight-ntwrk/zswap": "^4.0.0"
   }

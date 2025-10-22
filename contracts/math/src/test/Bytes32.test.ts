@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, test } from 'vitest';
-import { Bytes32ContractSimulator } from './Bytes32Simulator';
+import { Bytes32Simulator } from './Bytes32Simulator';
 
-let bytes32Simulator: Bytes32ContractSimulator;
+let bytes32Simulator: Bytes32Simulator;
 
 const setup = () => {
-  bytes32Simulator = new Bytes32ContractSimulator();
+  bytes32Simulator = new Bytes32Simulator();
 };
 
 // Helper function to create test bytes from decimal bigint
@@ -91,21 +91,21 @@ describe('Bytes32', () => {
       test('should handle bytes just above field size', () => {
         const bytes = createOverflowBytes();
         expect(() => bytes32Simulator.fromBytes(bytes)).toThrow(
-          'failed assert: Bytes32: toField() - inputs exceed the field size',
+          'Bytes32: toField() - inputs exceed the field size',
         );
       });
 
       test('should handle bytes with only last byte set to 0xF', () => {
         const bytes = createPatternBytes(0xf, 31);
         expect(() => bytes32Simulator.fromBytes(bytes)).toThrow(
-          'failed assert: Bytes32: toField() - inputs exceed the field size',
+          'Bytes32: toField() - inputs exceed the field size',
         );
       });
 
       test('should handle bytes with only last byte set to 0x01', () => {
         const bytes = createPatternBytes(0x01, 31);
         expect(() => bytes32Simulator.fromBytes(bytes)).toThrow(
-          'failed assert: Bytes32: toField() - inputs exceed the field size',
+          'Bytes32: toField() - inputs exceed the field size',
         );
       });
 
@@ -412,7 +412,7 @@ describe('Bytes32', () => {
           expected: null,
           shouldThrow: true,
           errorMessage:
-            'failed assert: Bytes32: lt() - comparison invalid; one or both of the inputs exceed the field size',
+            'Bytes32: lt() - comparison invalid; one or both of the inputs exceed the field size',
         },
         {
           name: 'max256Bit vs maxFieldBytes',
@@ -421,7 +421,7 @@ describe('Bytes32', () => {
           expected: null,
           shouldThrow: true,
           errorMessage:
-            'failed assert: Bytes32: lt() - comparison invalid; one or both of the inputs exceed the field size',
+            'Bytes32: lt() - comparison invalid; one or both of the inputs exceed the field size',
         },
         {
           name: 'overflowBytes vs max256Bit',
@@ -429,8 +429,7 @@ describe('Bytes32', () => {
           b: createBytes(2n ** 256n - 1n),
           expected: null,
           shouldThrow: true,
-          errorMessage:
-            'failed assert: Bytes32: toField() - inputs exceed the field size',
+          errorMessage: 'Bytes32: toField() - inputs exceed the field size',
         },
         {
           name: 'max256Bit vs overflowBytes',
@@ -438,8 +437,7 @@ describe('Bytes32', () => {
           b: createOverflowBytes(),
           expected: null,
           shouldThrow: true,
-          errorMessage:
-            'failed assert: Bytes32: toField() - inputs exceed the field size',
+          errorMessage: 'Bytes32: toField() - inputs exceed the field size',
         },
         {
           name: 'max256Bit vs itself',

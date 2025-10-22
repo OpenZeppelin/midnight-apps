@@ -1,4 +1,4 @@
-import type { MerkleTreePath } from '@openzeppelin-midnight-apps/compact-std';
+import type { MerkleTreePath } from '@openzeppelin/midnight-apps-compact-std';
 import type { AccessControlRole } from './ledger';
 
 /**

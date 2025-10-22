@@ -6,34 +6,34 @@ import type {
 import type { Ledger } from '../artifacts/Uint128/contract/index.cjs';
 import type { EmptyState } from '../types/state';
 import { sqrtBigint } from '../utils/sqrtBigint';
-import type { IMathU128Witnesses } from './interfaces';
+import type { IUint128Witnesses } from './interfaces';
 
 /**
- * @description Represents the private state of the MathU128 module.
+ * @description Represents the private state of the Uint128 module.
  * @remarks No persistent state is needed beyond what's computed on-demand, so this is minimal.
  */
-export type MathU128ContractPrivateState = EmptyState;
+export type Uint128PrivateState = EmptyState;
 
 /**
- * @description Utility object for managing the private state of the MathU128 module.
+ * @description Utility object for managing the private state of the Uint128 module.
  */
-export const MathU128ContractPrivateState = {
+export const Uint128PrivateState = {
   /**
    * @description Generates a new private state.
-   * @returns A fresh MathU128ContractPrivateState instance (empty for now).
+   * @returns A fresh Uint128PrivateState instance (empty for now).
    */
-  generate: (): MathU128ContractPrivateState => {
+  generate: (): Uint128PrivateState => {
     return {};
   },
 };
 
 /**
- * @description Factory function creating witness implementations for MathU128 module operations.
- * @returns An object implementing the IMathU128Witnesses interface for MathU128ContractPrivateState.
+ * @description Factory function creating witness implementations for Uint128 module operations.
+ * @returns An object implementing the IUint128Witnesses interface for Uint128PrivateState.
  */
-export const MathU128Witnesses = (): IMathU128Witnesses<
+export const Uint128Witnesses = (): IUint128Witnesses<
   Ledger,
-  MathU128ContractPrivateState
+  Uint128PrivateState
 > => ({
   /**
    * @description Computes the square root of a U128 value off-chain.
@@ -42,9 +42,9 @@ export const MathU128Witnesses = (): IMathU128Witnesses<
    * @returns A tuple of the unchanged private state and the square root as a bigint.
    */
   sqrtU128Locally(
-    context: WitnessContext<Ledger, MathU128ContractPrivateState>,
+    context: WitnessContext<Ledger, Uint128PrivateState>,
     radicand: U128,
-  ): [MathU128ContractPrivateState, bigint] {
+  ): [Uint128PrivateState, bigint] {
     // Convert U128 to bigint
     const radicandBigInt =
       (BigInt(radicand.high) << 64n) + BigInt(radicand.low);
@@ -62,10 +62,10 @@ export const MathU128Witnesses = (): IMathU128Witnesses<
    * @returns A tuple of the unchanged private state and a DivResultU64 with quotient and remainder.
    */
   divU128Locally(
-    context: WitnessContext<Ledger, MathU128ContractPrivateState>,
+    context: WitnessContext<Ledger, Uint128PrivateState>,
     a: U128,
     b: U128,
-  ): [MathU128ContractPrivateState, DivResultU128] {
+  ): [Uint128PrivateState, DivResultU128] {
     const aValue = (BigInt(a.high) << 64n) + BigInt(a.low);
     const bValue = (BigInt(b.high) << 64n) + BigInt(b.low);
     const quotient = aValue / bValue;
@@ -93,10 +93,10 @@ export const MathU128Witnesses = (): IMathU128Witnesses<
    * @returns A tuple of the unchanged private state and a DivResultU64 with quotient and remainder.
    */
   divUint128Locally(
-    context: WitnessContext<Ledger, MathU128ContractPrivateState>,
+    context: WitnessContext<Ledger, Uint128PrivateState>,
     a: bigint,
     b: bigint,
-  ): [MathU128ContractPrivateState, DivResultU128] {
+  ): [Uint128PrivateState, DivResultU128] {
     return this.divU128Locally(
       context,
       { low: a, high: 0n },

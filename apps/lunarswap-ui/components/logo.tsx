@@ -13,7 +13,7 @@ export function Logo({ size = 36, className = '' }: LogoProps) {
     >
       <Image
         src="/logo.svg"
-        alt="Lunarswap Logo"
+        alt="LunarSwap Logo"
         width={size}
         height={size}
         className="rounded-full object-contain"

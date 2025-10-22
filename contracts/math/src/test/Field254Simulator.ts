@@ -9,39 +9,34 @@ import {
   sampleCoinPublicKey,
   sampleContractAddress,
 } from '@midnight-ntwrk/zswap';
-import type {
-  DivResultU256,
-  U256,
-} from '../artifacts/Index/contract/index.d.cts';
 import {
   Contract,
   type Ledger,
   ledger,
-} from '../artifacts/MockField254/contract/index.cjs';
+} from '../artifacts/Field254.mock/contract/index.cjs';
+import type {
+  DivResultU256,
+  U256,
+} from '../artifacts/Index/contract/index.d.cts';
 import type { IContractSimulator } from '../types/test';
-import {
-  Field254ContractPrivateState,
-  Field254Witnesses,
-} from '../witnesses/Field254';
+import { Field254PrivateState, Field254Witnesses } from '../witnesses/Field254';
 
 export class Field254Simulator
-  implements IContractSimulator<Field254ContractPrivateState, Ledger>
+  implements IContractSimulator<Field254PrivateState, Ledger>
 {
-  readonly contract: Contract<Field254ContractPrivateState>;
+  readonly contract: Contract<Field254PrivateState>;
   readonly contractAddress: string;
-  circuitContext: CircuitContext<Field254ContractPrivateState>;
+  circuitContext: CircuitContext<Field254PrivateState>;
 
   constructor() {
-    this.contract = new Contract<Field254ContractPrivateState>(
-      Field254Witnesses(),
-    );
+    this.contract = new Contract<Field254PrivateState>(Field254Witnesses());
     const {
       currentPrivateState,
       currentContractState,
       currentZswapLocalState,
     } = this.contract.initialState(
       constructorContext(
-        Field254ContractPrivateState.generate(),
+        Field254PrivateState.generate(),
         sampleCoinPublicKey(),
       ),
     );
@@ -61,7 +56,7 @@ export class Field254Simulator
     return ledger(this.circuitContext.transactionContext.state);
   }
 
-  public getCurrentPrivateState(): Field254ContractPrivateState {
+  public getCurrentPrivateState(): Field254PrivateState {
     return this.circuitContext.currentPrivateState;
   }
 
@@ -187,18 +182,18 @@ export function createMaliciousField254Simulator({
     ...baseWitnesses,
     ...(mockSqrtU256 && {
       sqrtU256Locally(
-        context: WitnessContext<Ledger, Field254ContractPrivateState>,
+        context: WitnessContext<Ledger, Field254PrivateState>,
         radicand: U256,
-      ): [Field254ContractPrivateState, bigint] {
+      ): [Field254PrivateState, bigint] {
         return [context.privateState, mockSqrtU256(radicand)];
       },
     }),
     ...(mockDivU256 && {
       divU256Locally(
-        context: WitnessContext<Ledger, Field254ContractPrivateState>,
+        context: WitnessContext<Ledger, Field254PrivateState>,
         a: U256,
         b: U256,
-      ): [Field254ContractPrivateState, DivResultU256] {
+      ): [Field254PrivateState, DivResultU256] {
         const { quotient, remainder } = mockDivU256(a, b);
 
         const qLow = quotient & ((1n << 128n) - 1n);
@@ -235,12 +230,12 @@ export function createMaliciousField254Simulator({
     }),
   };
 
-  const contract = new Contract<Field254ContractPrivateState>(witnesses);
+  const contract = new Contract<Field254PrivateState>(witnesses);
 
   const { currentPrivateState, currentContractState, currentZswapLocalState } =
     contract.initialState(
       constructorContext(
-        Field254ContractPrivateState.generate(),
+        Field254PrivateState.generate(),
         sampleCoinPublicKey(),
       ),
     );

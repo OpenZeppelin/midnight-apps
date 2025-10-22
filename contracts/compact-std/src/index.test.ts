@@ -13,7 +13,7 @@ import type {
   ZswapCoinPublicKey,
 } from './index';
 
-describe('@openzeppelin-midnight-apps/compact-std', () => {
+describe('@openzeppelin/midnight-apps-compact-std', () => {
   it('should export Maybe type correctly', () => {
     const maybeNumber: Maybe<number> = { is_some: true, value: 42 };
     expectTypeOf(maybeNumber).toEqualTypeOf<{

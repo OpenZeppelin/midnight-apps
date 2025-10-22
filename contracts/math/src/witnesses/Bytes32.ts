@@ -1,26 +1,26 @@
 import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
+import type { Ledger } from '../artifacts/Bytes32/contract/index.d.cts';
 import type {
   DivResultU128,
   U256,
 } from '../artifacts/Index/contract/index.d.cts';
-import type { Ledger } from '../artifacts/MockBytes32/contract/index.d.cts';
 import type { EmptyState } from '../types/state';
 
 /**
  * @description Represents the private state of the Bytes32 module.
  * @remarks No persistent state is needed beyond what's computed on-demand, so this is minimal.
  */
-export type Bytes32ContractPrivateState = EmptyState;
+export type Bytes32PrivateState = EmptyState;
 
 /**
  * @description Utility object for managing the private state of the Bytes32 module.
  */
-export const Bytes32ContractPrivateState = {
+export const Bytes32PrivateState = {
   /**
    * @description Generates a new private state.
    * @returns A fresh Bytes32ContractPrivateState instance (empty for now).
    */
-  generate: (): Bytes32ContractPrivateState => {
+  generate: (): Bytes32PrivateState => {
     return {};
   },
 };
@@ -32,10 +32,10 @@ export const Bytes32ContractPrivateState = {
 export const Bytes32Witnesses = () => ({
   // Witness functions required by MathU256_fromField
   divUint254Locally(
-    context: WitnessContext<Ledger, Bytes32ContractPrivateState>,
+    context: WitnessContext<Ledger, Bytes32PrivateState>,
     a: bigint,
     b: bigint,
-  ): [Bytes32ContractPrivateState, { quotient: U256; remainder: U256 }] {
+  ): [Bytes32PrivateState, { quotient: U256; remainder: U256 }] {
     const quotient = a / b;
     const remainder = a % b;
 
@@ -73,10 +73,10 @@ export const Bytes32Witnesses = () => ({
   },
 
   divUint128Locally(
-    context: WitnessContext<Ledger, Bytes32ContractPrivateState>,
+    context: WitnessContext<Ledger, Bytes32PrivateState>,
     a: bigint,
     b: bigint,
-  ): [Bytes32ContractPrivateState, DivResultU128] {
+  ): [Bytes32PrivateState, DivResultU128] {
     const quotient = a / b;
     const remainder = a % b;
 

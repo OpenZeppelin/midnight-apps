@@ -1,16 +1,17 @@
-pragma language_version >= 0.14.0;
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (access/test/AccessControl.mock.compact)
+
+pragma language_version >= 0.18.0;
 
 import CompactStandardLibrary;
 
-import "../../AccessControl" prefix AccessControl_;
+import "../AccessControl" prefix AccessControl_;
 
 // Export circuits for testing purposes
-export { 
-    AccessControl_hashUserRole,
-    AccessControl_roleCommits,
-    AccessControl_isInitialized,
-    AccessControl_index
-};
+export { AccessControl_hashUserRole,
+         AccessControl_roleCommits,
+         AccessControl_isInitialized,
+         AccessControl_index };
 
 /**
  * @description Constructs the contract by initializing the AccessControl module with an initial admin.
@@ -19,7 +20,7 @@ export {
  * @throws {RoleError} - If the contract is already initialized (inherited from AccessControl).
  */
 constructor(initialAdmin: ZswapCoinPublicKey) {
-    return AccessControl_initialize(initialAdmin);
+  return AccessControl_initialize(initialAdmin);
 }
 
 /**
@@ -30,5 +31,5 @@ constructor(initialAdmin: ZswapCoinPublicKey) {
  * @throws {RoleError} - If the contract is not initialized, caller is not Admin, or the role tree is full.
  */
 export circuit testGrantRole(user: ZswapCoinPublicKey, role: AccessControl_Role): [] {
-    return AccessControl_grantRole(user, role);
+  return AccessControl_grantRole(user, role);
 }

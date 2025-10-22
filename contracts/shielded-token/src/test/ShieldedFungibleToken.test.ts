@@ -13,7 +13,7 @@ import type {
   ContractAddress,
   Either,
   ZswapCoinPublicKey,
-} from '@openzeppelin-midnight-apps/compact-std';
+} from '@openzeppelin/midnight-apps-compact-std';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ShieldedFungibleTokenSimulator } from './ShieldedFungibleTokenSimulator';
 
@@ -96,7 +96,7 @@ describe('ShieldedFungibleToken', () => {
       const publicState = token.getCurrentPublicState();
       const expectedType = encodeTokenType(
         tokenType(
-          publicState.shieldedFungibleToken_Domain,
+          publicState.ShieldedFungibleToken__domain,
           token.contractAddress,
         ),
       );
@@ -124,7 +124,7 @@ describe('ShieldedFungibleToken', () => {
       const publicState = token.getCurrentPublicState();
       const expectedType = encodeTokenType(
         tokenType(
-          publicState.shieldedFungibleToken_Domain,
+          publicState.ShieldedFungibleToken__domain,
           token.contractAddress,
         ),
       );

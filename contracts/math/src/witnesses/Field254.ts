@@ -12,24 +12,24 @@ import { sqrtBigint } from '../utils/sqrtBigint';
  * @description Represents the private state of the Field254 module.
  * @remarks No persistent state is needed beyond what's computed on-demand, so this is minimal.
  */
-export type Field254ContractPrivateState = EmptyState;
+export type Field254PrivateState = EmptyState;
 
 /**
  * @description Utility object for managing the private state of the Field254 module.
  */
-export const Field254ContractPrivateState = {
+export const Field254PrivateState = {
   /**
    * @description Generates a new private state.
    * @returns A fresh Field254ContractPrivateState instance (empty for now).
    */
-  generate: (): Field254ContractPrivateState => {
+  generate: (): Field254PrivateState => {
     return {};
   },
 };
 
 /**
  * @description Factory function creating witness implementations for Field254 module operations.
- * @returns An object implementing the witness functions for Field254ContractPrivateState.
+ * @returns An object implementing the witness functions for Field254PrivateState.
  */
 export const Field254Witnesses = () => ({
   /**
@@ -40,10 +40,10 @@ export const Field254Witnesses = () => ({
    * @returns A tuple of the unchanged private state and a DivResultU256 with quotient and remainder.
    */
   divUint254Locally(
-    context: WitnessContext<Ledger, Field254ContractPrivateState>,
+    context: WitnessContext<Ledger, Field254PrivateState>,
     a: bigint,
     b: bigint,
-  ): [Field254ContractPrivateState, DivResultU256] {
+  ): [Field254PrivateState, DivResultU256] {
     // Compute quotient and remainder
     const quotient = a / b;
     const remainder = a - quotient * b;
@@ -92,9 +92,9 @@ export const Field254Witnesses = () => ({
    * @returns A tuple of the unchanged private state and the square root as a bigint (Uint<128>).
    */
   sqrtU256Locally(
-    context: WitnessContext<Ledger, Field254ContractPrivateState>,
+    context: WitnessContext<Ledger, Field254PrivateState>,
     radicand: U256,
-  ): [Field254ContractPrivateState, bigint] {
+  ): [Field254PrivateState, bigint] {
     // Convert U256 to bigint
     const radicandBigInt =
       (BigInt(radicand.high.high) << 192n) +
@@ -116,10 +116,10 @@ export const Field254Witnesses = () => ({
    * @returns A tuple of the unchanged private state and a DivResultU256 with quotient and remainder.
    */
   divU256Locally(
-    context: WitnessContext<Ledger, Field254ContractPrivateState>,
+    context: WitnessContext<Ledger, Field254PrivateState>,
     a: U256,
     b: U256,
-  ): [Field254ContractPrivateState, DivResultU256] {
+  ): [Field254PrivateState, DivResultU256] {
     // Convert U256 to bigint
     const aBigInt =
       (BigInt(a.high.high) << 192n) +
@@ -181,10 +181,10 @@ export const Field254Witnesses = () => ({
    * @returns A tuple of the unchanged private state and a DivResultU64 with quotient and remainder.
    */
   divUint128Locally(
-    context: WitnessContext<Ledger, Field254ContractPrivateState>,
+    context: WitnessContext<Ledger, Field254PrivateState>,
     a: bigint,
     b: bigint,
-  ): [Field254ContractPrivateState, DivResultU128] {
+  ): [Field254PrivateState, DivResultU128] {
     const quotient = a / b;
     const remainder = a - quotient * b;
     return [

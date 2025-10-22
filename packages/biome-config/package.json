@@ -1,5 +1,5 @@
 {
-  "name": "@openzeppelin-midnight-apps/biome-config",
+  "name": "@openzeppelin/midnight-apps-biome-config",
   "version": "1.0.0",
   "type": "module",
   "private": true,

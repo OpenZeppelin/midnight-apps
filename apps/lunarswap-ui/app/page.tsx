@@ -4,7 +4,7 @@ import { SwapCard } from '@/components/swap-card';
 import { TokenStats } from '@/components/token-stats';
 
 export const metadata = {
-  title: 'Lunarswap | Swap',
+  title: 'LunarSwap | Swap',
   description:
     'Swap tokens on the lunar surface with the most celestial DEX in the galaxy',
 };

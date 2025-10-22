@@ -17,53 +17,52 @@ runs:
 
     - name: Set Compact environment variables
       shell: bash
+      env:
+        COMPILER_VERSION: "0.26.0"
       run: |
-        COMPACT_HOME="$HOME/compactc"
-        echo "COMPACT_HOME=$COMPACT_HOME" >> "$GITHUB_ENV"
-        echo "$COMPACT_HOME" >> "$GITHUB_PATH"
+        echo "COMPILER_VERSION=$COMPILER_VERSION" >> "$GITHUB_ENV"
 
-    - name: Cache Compact compiler
+    - name: Cache Compact developer tools
       id: cache-compact
       uses: actions/cache@v4
       with:
-        path: ${{ env.COMPACT_HOME }}
-        key: compact-compiler-0.23.0
+        path: ~/.compact
+        key: compact-tools-${{ env.COMPILER_VERSION }}
         restore-keys: |
-          compact-compiler-
+          compact-tools-
 
-    - name: Install Compact compiler
+    - name: Install Compact developer tools
       if: steps.cache-compact.outputs.cache-hit != 'true'
       shell: bash
-      env:
-        COMPILER_VERSION: "0.23.0"
-        LANGUAGE_VERSION: "0.15.0"
       run: |
-        set -euo pipefail
-        # Create directory for compiler
-        mkdir -p "$COMPACT_HOME"
+        curl --proto '=https' --tlsv1.2 -LsSf https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh | sh
 
-        # Create URL
-        ZIP_FILE="compactc_v${COMPILER_VERSION}_x86_64-unknown-linux-musl.zip"
-        DOWNLOAD_URL="https://d3fazakqrumx6p.cloudfront.net/artifacts/compiler/compactc_${COMPILER_VERSION}/${ZIP_FILE}"
-
-        echo "⬇️ Downloading Compact compiler..."
-        curl -Ls "$DOWNLOAD_URL" -o "$COMPACT_HOME/compactc.zip"
-
-        echo "📦 Extracting..."
-        unzip -qo "$COMPACT_HOME/compactc.zip" -d "$COMPACT_HOME"
-        chmod +x "$COMPACT_HOME"/{compactc,compactc.bin,zkir}
-
-    - name: Verify Compact compiler installation
+    - name: Add Compact to PATH
       shell: bash
       run: |
-        echo "✅ Verifying installation..."
-        if [ ! -f "$COMPACT_HOME/compactc" ]; then
-          echo "::error::❌ compactc not found in $COMPACT_HOME"
-          exit 1
+        echo "$HOME/.compact/bin" >> "$GITHUB_PATH"
+
+    - name: Verify Compact installation
+      shell: bash
+      run: |
+        echo "🔍 Checking Compact installation..."
+        echo "HOME: $HOME"
+        ls -la "$HOME/.compact/bin/" || echo "⚠️  .compact/bin directory not found"
+        if [ -f "$HOME/.compact/bin/compact" ]; then
+          echo "✅ Compact binary found at $HOME/.compact/bin/compact"
+        else
+          echo "❌ Compact binary not found, installing..."
+          curl --proto '=https' --tlsv1.2 -LsSf https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh | sh
         fi
 
+    - name: Install and verify toolchain
+      shell: bash
+      run: |
+        export PATH="$HOME/.compact/bin:$PATH"
+        compact update ${{ env.COMPILER_VERSION }}
         echo "🤖 Testing installation..."
-        "$COMPACT_HOME/compactc" --version
+        compact compile --version
+        compact compile --language-version
 
     - name: Install pnpm
       uses: pnpm/action-setup@v2
@@ -107,6 +106,7 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
+        export PATH="$HOME/.compact/bin:$PATH"
 
         build_contracts() {
           echo "⚙️ Building contract packages..."

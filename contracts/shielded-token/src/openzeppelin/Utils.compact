@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (shielded-token/openzeppelin/Utils.compact)
 
-pragma language_version >= 0.15.0;
+pragma language_version >= 0.18.0;
 
 module Utils {
   import CompactStandardLibrary;
@@ -43,7 +44,7 @@ module Utils {
    * @return {ZswapCoinPublicKey} - The public key of the caller.
    */
   export circuit callerZPK(): ZswapCoinPublicKey {
-    return own_public_key();
+    return ownPublicKey();
   }
 
   /**

@@ -29,7 +29,7 @@ export function Header() {
             >
               <Logo size={36} />
               <span className="bg-gradient-to-r from-gray-800 to-blue-600 dark:from-gray-300 dark:to-blue-400 bg-clip-text text-transparent font-bold tracking-tight">
-                Lunarswap
+                LunarSwap
               </span>
             </Link>
             <nav className="hidden md:flex items-center gap-6">

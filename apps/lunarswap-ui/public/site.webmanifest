@@ -1,6 +1,6 @@
 {
-  "name": "Lunarswap",
-  "short_name": "Lunarswap",
+  "name": "LunarSwap",
+  "short_name": "LunarSwap",
   "description": "Swap tokens on the lunar surface with the most celestial DEX in the galaxy",
   "start_url": "/",
   "display": "standalone",

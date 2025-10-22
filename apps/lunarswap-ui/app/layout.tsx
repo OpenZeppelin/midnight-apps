@@ -13,7 +13,7 @@ import { ThemeProvider } from 'next-themes';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Lunarswap | Decentralized Exchange',
+  title: 'LunarSwap | Decentralized Exchange',
   description:
     'Swap tokens on the lunar surface with the most celestial DEX in the galaxy',
   icons: {

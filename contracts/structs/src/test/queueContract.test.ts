@@ -16,24 +16,24 @@ describe('Queue', () => {
   describe('Enqueue', () => {
     test('should enqueue single item', () => {
       const nextLedgerState = mockQueueContract.enqueue(0n);
-      expect(nextLedgerState.queueState.member(0n)).toBeTruthy();
-      expect(nextLedgerState.queueState.lookup(0n)).toBe(0n);
-      expect(nextLedgerState.queueHead).toBe(0n);
-      expect(nextLedgerState.queueTail).toBe(1n);
+      expect(nextLedgerState.Queue_state.member(0n)).toBeTruthy();
+      expect(nextLedgerState.Queue_state.lookup(0n)).toBe(0n);
+      expect(nextLedgerState.Queue_head).toBe(0n);
+      expect(nextLedgerState.Queue_tail).toBe(1n);
     });
 
     test('should enqueue multiple items sequentially', () => {
       let result = mockQueueContract.enqueue(0n);
       result = mockQueueContract.enqueue(100n);
       result = mockQueueContract.enqueue(200n);
-      expect(result.queueState.member(0n)).toBeTruthy();
-      expect(result.queueState.lookup(0n)).toBe(0n);
-      expect(result.queueState.member(1n)).toBeTruthy();
-      expect(result.queueState.lookup(1n)).toBe(100n);
-      expect(result.queueState.member(2n)).toBeTruthy();
-      expect(result.queueState.lookup(2n)).toBe(200n);
-      expect(result.queueHead).toBe(0n);
-      expect(result.queueTail).toBe(3n);
+      expect(result.Queue_state.member(0n)).toBeTruthy();
+      expect(result.Queue_state.lookup(0n)).toBe(0n);
+      expect(result.Queue_state.member(1n)).toBeTruthy();
+      expect(result.Queue_state.lookup(1n)).toBe(100n);
+      expect(result.Queue_state.member(2n)).toBeTruthy();
+      expect(result.Queue_state.lookup(2n)).toBe(200n);
+      expect(result.Queue_head).toBe(0n);
+      expect(result.Queue_tail).toBe(3n);
     });
 
     test('should not mark queue as empty after enqueue', () => {
@@ -46,10 +46,10 @@ describe('Queue', () => {
         mockQueueContract.enqueue(i);
       }
       const state = mockQueueContract.getCurrentPublicState();
-      expect(state.queueState.member(99n)).toBeTruthy();
-      expect(state.queueState.lookup(99n)).toBe(99n);
-      expect(state.queueTail).toBe(100n);
-      expect(state.queueHead).toBe(0n);
+      expect(state.Queue_state.member(99n)).toBeTruthy();
+      expect(state.Queue_state.lookup(99n)).toBe(99n);
+      expect(state.Queue_tail).toBe(100n);
+      expect(state.Queue_head).toBe(0n);
     });
   });
 
@@ -58,9 +58,9 @@ describe('Queue', () => {
       mockQueueContract.enqueue(0n);
       const [nextLedgerState, value] = mockQueueContract.dequeue();
       expect(value).toBe(0n);
-      expect(nextLedgerState.queueState.member(0n)).toBeFalsy();
-      expect(nextLedgerState.queueHead).toBe(1n);
-      expect(nextLedgerState.queueTail).toBe(1n);
+      expect(nextLedgerState.Queue_state.member(0n)).toBeFalsy();
+      expect(nextLedgerState.Queue_head).toBe(1n);
+      expect(nextLedgerState.Queue_tail).toBe(1n);
     });
 
     test('should dequeue multiple items in FIFO order', () => {
@@ -70,24 +70,24 @@ describe('Queue', () => {
 
       let [result, value] = mockQueueContract.dequeue();
       expect(value).toBe(0n);
-      expect(result.queueState.member(0n)).toBeFalsy();
+      expect(result.Queue_state.member(0n)).toBeFalsy();
 
       [result, value] = mockQueueContract.dequeue();
       expect(value).toBe(100n);
-      expect(result.queueState.member(1n)).toBeFalsy();
+      expect(result.Queue_state.member(1n)).toBeFalsy();
 
       [result, value] = mockQueueContract.dequeue();
       expect(value).toBe(200n);
-      expect(result.queueState.member(2n)).toBeFalsy();
-      expect(result.queueHead).toBe(3n);
-      expect(result.queueTail).toBe(3n);
+      expect(result.Queue_state.member(2n)).toBeFalsy();
+      expect(result.Queue_head).toBe(3n);
+      expect(result.Queue_tail).toBe(3n);
     });
 
     test('should return none when dequeuing empty queue', () => {
       const [_, value] = mockQueueContract.dequeue();
       expect(value).toBe(0n);
-      expect(mockQueueContract.getCurrentPublicState().queueHead).toBe(0n);
-      expect(mockQueueContract.getCurrentPublicState().queueTail).toBe(0n);
+      expect(mockQueueContract.getCurrentPublicState().Queue_head).toBe(0n);
+      expect(mockQueueContract.getCurrentPublicState().Queue_tail).toBe(0n);
     });
 
     test('should mark queue as empty after dequeuing all items', () => {
@@ -114,10 +114,10 @@ describe('Queue', () => {
       mockQueueContract.enqueue(100n);
       mockQueueContract.dequeue(); // Removes 0n at head=0
       const state = mockQueueContract.getCurrentPublicState();
-      expect(state.queueState.member(0n)).toBeFalsy();
-      expect(state.queueState.member(1n)).toBeTruthy();
-      expect(state.queueHead).toBe(1n);
-      expect(state.queueTail).toBe(2n);
+      expect(state.Queue_state.member(0n)).toBeFalsy();
+      expect(state.Queue_state.member(1n)).toBeTruthy();
+      expect(state.Queue_head).toBe(1n);
+      expect(state.Queue_tail).toBe(2n);
     });
   });
 });
