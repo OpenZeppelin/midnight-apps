@@ -1,0 +1,10 @@
+[build]
+  base = "apps/lunarswap-ui"
+  command = "npm run build"
+  publish = "apps/lunarswap-ui/.next"
+
+[[redirects]]
+  from = "/lunarswap/*"
+  to = "https://lunarswap.netlify.app/:splat"
+  status = 200
+  force = true
