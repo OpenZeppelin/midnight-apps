@@ -70,6 +70,7 @@
   },
   "devDependencies": {
     "@openzeppelin-midnight-apps/biome-config": "workspace:^",
+    "@tailwindcss/postcss": "^4.1.16",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",

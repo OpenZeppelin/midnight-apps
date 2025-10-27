@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@reference;
 
 :root {
   --background: 0 0% 100%;
@@ -66,7 +65,9 @@
 
 @layer base {
   body {
-    @apply bg-background text-foreground min-h-screen;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    min-height: 100vh;
   }
 
   .dark body {

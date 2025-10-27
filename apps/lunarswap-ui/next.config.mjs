@@ -18,11 +18,21 @@ const nextConfig = {
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
-    asyncWebAssembly: true,
   },
   devIndicators: {
-    buildActivity: false,
-    buildActivityPosition: 'bottom-left',
+    position: 'bottom-left',
+  },
+  webpack: (config, options) => {
+    config.experiments = {
+      ...config.experiments,
+      asyncWebAssembly: true,
+      layers: true,
+    };
+    // keep user's webpack if provided
+    if (typeof userConfig?.default?.webpack === 'function') {
+      return userConfig.default.webpack(config, options);
+    }
+    return config;
   },
 };
 
