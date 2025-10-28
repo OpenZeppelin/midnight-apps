@@ -5,8 +5,38 @@
   set -euo pipefail
   corepack enable
   corepack prepare pnpm@10.4.1 --activate
-  chmod +x scripts/build.sh
-  ./scripts/build.sh
+
+  cd ..  # repo root
+
+  # 1) compactc where code expects it
+  COMPACT_HOME="$PWD/packages/compact/compactc"
+  mkdir -p "$COMPACT_HOME"
+  V=0.23.0
+  ZIP="compactc_v${V}_x86_64-unknown-linux-musl.zip"
+  URL="https://d3fazakqrumx6p.cloudfront.net/artifacts/compiler/compactc_${V}/${ZIP}"
+  curl -Ls "$URL" -o "$COMPACT_HOME/compactc.zip"
+  unzip -qo "$COMPACT_HOME/compactc.zip" -d "$COMPACT_HOME"
+  chmod +x "$COMPACT_HOME"/{compactc,compactc.bin,zkir}
+  export COMPACT_HOME PATH="$COMPACT_HOME:$PATH"
+  "$COMPACT_HOME/compactc" --version
+
+  # 2) Build compact package FIRST (matching GitHub Actions workflow)
+  cd packages/compact
+  pnpm install
+  pnpm run build
+  cd ../../
+
+  # 3) Validate build artifacts
+  test -f packages/compact/dist/runCompiler.js || { echo "runCompiler.js not found!"; exit 1; }
+  test -f packages/compact/dist/runBuilder.js || { echo "runBuilder.js not found!"; exit 1; }
+
+  # 4) Install all workspace dependencies (bins will link properly now)
+  pnpm install --frozen-lockfile --prefer-offline
+
+  # 5) Build everything else + Next app
+  pnpm -w -r --workspace-concurrency=1 run build
+  cd apps/lunarswap-ui
+  pnpm run build
   """
   ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF"
 
