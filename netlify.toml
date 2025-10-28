@@ -20,21 +20,20 @@
   export COMPACT_HOME PATH="$COMPACT_HOME:$PATH"
   "$COMPACT_HOME/compactc" --version
 
-  # 2) build local compact FIRST
+  # 2) Install all workspace deps WITH --ignore-scripts to prevent premature linking
+  pnpm -w install --frozen-lockfile --prefer-offline --ignore-scripts
+
+  # 3) Build compact package (now all deps are available)
   cd packages/compact
-  pnpm install --prefer-offline --ignore-scripts
   pnpm run build
   test -f dist/runCompiler.js || { echo "runCompiler.js not found!"; exit 1; }
   test -f dist/runBuilder.js || { echo "runBuilder.js not found!"; exit 1; }
   cd ../../
 
-  # 3) workspace install WITHOUT frozen lockfile first, then relink bins
-  pnpm -w install --prefer-offline --no-frozen-lockfile
-  
-  # 4) Now rebuild to ensure all bins are properly linked
+  # 4) Rebuild to link all bins now that compact files exist
   pnpm -w rebuild -r
 
-  # 5) build everything + Next app
+  # 5) Build everything else + Next app
   pnpm -w -r --workspace-concurrency=1 run build
   cd apps/lunarswap-ui
   pnpm run build
