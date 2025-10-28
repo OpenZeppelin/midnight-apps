@@ -1,14 +1,14 @@
 [build]
-  base = "apps/lunarswap-ui"
-  publish = ".next"
+  base = "netlify_base"                # <- stops Netlify's auto install
+  publish = "apps/lunarswap-ui/.next"
   command = """
   set -euo pipefail
   corepack enable
   corepack prepare pnpm@10.4.1 --activate
 
-  cd ..   # repo root
+  cd ..  # repo root
 
-  # 1) Install compactc where your packages expect it
+  # 1) compactc where code expects it
   COMPACT_HOME="$PWD/packages/compact/compactc"
   mkdir -p "$COMPACT_HOME"
   V=0.23.0
@@ -20,7 +20,7 @@
   export COMPACT_HOME PATH="$COMPACT_HOME:$PATH"
   "$COMPACT_HOME/compactc" --version
 
-  # 2) EXACTLY what you suggested: prebuild local compact first
+  # 2) build local compact FIRST (your step)
   cd packages/compact
   pnpm install --prefer-offline --ignore-scripts
   pnpm run build
@@ -28,13 +28,12 @@
   test -f dist/runBuilder.js
   cd ../../
 
-  # 3) Nuke existing node_modules to force pnpm to relink .bin properly
-  find . -name node_modules -type d -prune -exec rm -rf {} +
-  rm -rf pnpm-lock.yaml .pnpm-debug.log || true
-  pnpm install
+  # 3) workspace install (now bins can be linked), then rebuild scripts
+  pnpm -w install --frozen-lockfile --prefer-offline
+  pnpm -w rebuild -r
 
-  # 4) Build workspaces, then the Next app
-  pnpm -r --workspace-concurrency=1 run build
+  # 4) build everything + Next app
+  pnpm -w -r --workspace-concurrency=1 run build
   cd apps/lunarswap-ui
   pnpm run build
   """
@@ -42,6 +41,3 @@
 [build.environment]
   NODE_VERSION = "22"
   PNPM_VERSION = "10.4.1"
-  PNPM_FLAGS = "--ignore-scripts"            # keep Netlify auto-install from running scripts early
-  PNPM_ALLOW_SCRIPT = "1"
-  PNPM_ENABLE_PREPOST_SCRIPTS = "true"
