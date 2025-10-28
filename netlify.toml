@@ -6,10 +6,9 @@
   corepack enable
   corepack prepare pnpm@10.4.1 --activate
 
-  # go to repo root
-  cd ..
+  cd ..   # repo root
 
-  # --- install compactc where your code expects it ---
+  # 1) Install compactc where your packages expect it
   COMPACT_HOME="$PWD/packages/compact/compactc"
   mkdir -p "$COMPACT_HOME"
   V=0.23.0
@@ -21,17 +20,21 @@
   export COMPACT_HOME PATH="$COMPACT_HOME:$PATH"
   "$COMPACT_HOME/compactc" --version
 
-  # prebuild local compact so dist/run*.js exist
-  pushd packages/compact >/dev/null
-  pnpm install --frozen-lockfile --prefer-offline --ignore-scripts
+  # 2) EXACTLY what you suggested: prebuild local compact first
+  cd packages/compact
+  pnpm install --prefer-offline --ignore-scripts
   pnpm run build
-  popd >/dev/null
+  test -f dist/runCompiler.js
+  test -f dist/runBuilder.js
+  cd ../../
 
-  # now install workspace & link bins
-  pnpm install --frozen-lockfile --prefer-offline
+  # 3) Nuke existing node_modules to force pnpm to relink .bin properly
+  find . -name node_modules -type d -prune -exec rm -rf {} +
+  rm -rf pnpm-lock.yaml .pnpm-debug.log || true
+  pnpm install
+
+  # 4) Build workspaces, then the Next app
   pnpm -r --workspace-concurrency=1 run build
-
-  # build Next app
   cd apps/lunarswap-ui
   pnpm run build
   """
