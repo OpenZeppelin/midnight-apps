@@ -9,7 +9,7 @@
   # go to repo root
   cd ..
 
-  # 1) Install compactc where packages expect it
+  # --- install compactc where your code expects it ---
   COMPACT_HOME="$PWD/packages/compact/compactc"
   mkdir -p "$COMPACT_HOME"
   V=0.23.0
@@ -21,20 +21,17 @@
   export COMPACT_HOME PATH="$COMPACT_HOME:$PATH"
   "$COMPACT_HOME/compactc" --version
 
-  # 2) Prebuild packages/compact to create dist/run*.js
+  # prebuild local compact so dist/run*.js exist
   pushd packages/compact >/dev/null
   pnpm install --frozen-lockfile --prefer-offline --ignore-scripts
   pnpm run build
   popd >/dev/null
 
-  # 3) Force reinstall to RELINK bins now that dist/* exists
-  pnpm install --force --frozen-lockfile --prefer-offline
-  pnpm rebuild -r
-
-  # 4) Build workspaces (serial)
+  # now install workspace & link bins
+  pnpm install --frozen-lockfile --prefer-offline
   pnpm -r --workspace-concurrency=1 run build
 
-  # 5) Build Next app
+  # build Next app
   cd apps/lunarswap-ui
   pnpm run build
   """
