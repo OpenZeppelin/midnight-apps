@@ -20,23 +20,20 @@
   export COMPACT_HOME PATH="$COMPACT_HOME:$PATH"
   "$COMPACT_HOME/compactc" --version
 
-  # 2) Install workspace deps at root level WITH --ignore-scripts
-  pnpm -w install --frozen-lockfile --prefer-offline --ignore-scripts
-
-  # 3) Install compact package dependencies specifically (without workspace bin linking)
+  # 2) Build compact package FIRST (matching GitHub Actions workflow)
   cd packages/compact
-  pnpm install --prefer-offline --ignore-scripts
-  
-  # 4) Build compact package (now its deps are available)
+  pnpm install
   pnpm run build
-  test -f dist/runCompiler.js || { echo "runCompiler.js not found!"; exit 1; }
-  test -f dist/runBuilder.js || { echo "runBuilder.js not found!"; exit 1; }
   cd ../../
 
-  # 5) Rebuild to link all bins now that compact files exist
-  pnpm -w rebuild -r
+  # 3) Validate build artifacts
+  test -f packages/compact/dist/runCompiler.js || { echo "runCompiler.js not found!"; exit 1; }
+  test -f packages/compact/dist/runBuilder.js || { echo "runBuilder.js not found!"; exit 1; }
 
-  # 6) Build everything else + Next app
+  # 4) Install all workspace dependencies (bins will link properly now)
+  pnpm install --frozen-lockfile --prefer-offline
+
+  # 5) Build everything else + Next app
   pnpm -w -r --workspace-concurrency=1 run build
   cd apps/lunarswap-ui
   pnpm run build
