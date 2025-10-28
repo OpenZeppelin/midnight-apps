@@ -6,8 +6,11 @@
   corepack enable
   corepack prepare pnpm@10.4.1 --activate
 
-  REPO_ROOT="$(git rev-parse --show-toplevel || echo $PWD/../..)"
-  COMPACT_HOME="$REPO_ROOT/packages/compact/compactc"
+  # Move from base to repo root
+  cd ..
+
+  # 1) Install compactc where your builder expects it
+  COMPACT_HOME="$PWD/packages/compact/compactc"
   mkdir -p "$COMPACT_HOME"
   COMPILER_VERSION=0.23.0
   ZIP="compactc_v${COMPILER_VERSION}_x86_64-unknown-linux-musl.zip"
@@ -16,15 +19,18 @@
   unzip -qo "$COMPACT_HOME/compactc.zip" -d "$COMPACT_HOME"
   chmod +x "$COMPACT_HOME"/{compactc,compactc.bin,zkir}
   export COMPACT_HOME PATH="$COMPACT_HOME:$PATH"
+  "$COMPACT_HOME/compactc" --version
 
-  # prebuild to create dist/runCompiler.js & dist/runBuilder.js
-  cd "$REPO_ROOT/packages/compact"
-  pnpm install
+  # 2) Prebuild packages/compact so dist/run*.js exist
+  pushd packages/compact >/dev/null
+  pnpm install --frozen-lockfile --prefer-offline --ignore-scripts
   pnpm run build
+  popd >/dev/null
 
-  # workspace install & app build
-  cd "$REPO_ROOT"
-  pnpm install --frozen-lockfile --prefer-offline
+  # 3) Now run skipped lifecycle scripts across the workspace
+  pnpm rebuild -r
+
+  # 4) Build the app
   cd apps/lunarswap-ui
   pnpm run build
   """
@@ -32,13 +38,15 @@
 [build.environment]
   NODE_VERSION = "22"
   PNPM_VERSION = "10.4.1"
+  # Make Netlify's auto "pnpm install" skip scripts so it doesn't fail early
+  PNPM_FLAGS = "--ignore-scripts"
+  # Allow lifecycle scripts when we run them ourselves later
   PNPM_ALLOW_SCRIPT = "1"
   PNPM_ENABLE_PREPOST_SCRIPTS = "true"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# (optional) keep your redirects
 [[redirects]]
   from = "/lunarswap/*"
   to = "https://lunarswap.netlify.app/:splat"
