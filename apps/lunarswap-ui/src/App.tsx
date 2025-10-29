@@ -48,7 +48,7 @@ const App = () => {
           <AppWithLogger>
             <LunarswapProvider>
               <NetworkProvider>
-                <BrowserRouter>
+                <BrowserRouter basename="/lunarswap">
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/trade" element={<TradePage />} />
