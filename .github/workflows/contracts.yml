@@ -8,8 +8,7 @@ on:
 
 env:
   TURBO_TELEMETRY_DISABLED: 1
-  COMPILER_VERSION: "0.23.0"
-  LANGUAGE_VERSION: "0.15.0"
+  COMPILER_VERSION: "0.26.0"
 
 jobs:
   pipeline:
@@ -25,9 +24,10 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/setup
 
-      - name: Check compiler and language version
+      - name: Check compiler version
         run: |
-            COMPILER_OUTPUT=$(compactc --version)
+            export PATH="$HOME/.compact/bin:$PATH"
+            COMPILER_OUTPUT=$(compact compile --version)
             COMPUTED_COMPILER_VERSION=$(echo "$COMPILER_OUTPUT" | grep -oP '\b0\.[0-9]+\.[0-9]+\b' | head -n 1)
             if [ "$COMPUTED_COMPILER_VERSION" != "$COMPILER_VERSION" ]; then
               errMsg="❌ Compiler version mismatch!%0AExpected: $COMPILER_VERSION%0AGot: $COMPUTED_COMPILER_VERSION"
@@ -36,18 +36,11 @@ jobs:
             fi
             echo "✅ Compiler version matches: $COMPUTED_COMPILER_VERSION"
 
-            LANGUAGE_OUTPUT=$(compactc --language-version)
-            COMPUTED_LANGUAGE_VERSION=$(echo "$LANGUAGE_OUTPUT" | grep -oP '\b0\.[0-9]+\.[0-9]+\b' | tail -n 1)
-            if [ "$COMPUTED_LANGUAGE_VERSION" != "$LANGUAGE_VERSION" ]; then
-                errMsg="❌ Language version mismatch!%0AExpected: $LANGUAGE_VERSION%0AGot: $COMPUTED_LANGUAGE_VERSION"
-                echo "::error::$errMsg"
-                exit 1
-            fi
-
-            echo "✅ Language version matches: $COMPUTED_LANGUAGE_VERSION"
+            echo "📋 Language version:"
+            compact compile --language-version
 
       - name: Run tests
         run: pnpm test:contracts
 
       - name: Check types
-        run: pnpm types:contracts
+        run: pnpm exec turbo run types --filter './contracts/*'

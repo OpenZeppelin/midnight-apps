@@ -8,34 +8,34 @@ import type {
 import type { Ledger } from '../artifacts/Uint256/contract/index.cjs';
 import type { EmptyState } from '../types/state';
 import { sqrtBigint } from '../utils/sqrtBigint';
-import type { IMathU256Witnesses } from './interfaces';
+import type { IUint256Witnesses } from './interfaces';
 
 /**
  * @description Represents the private state of the MathU256 module.
  * @remarks No persistent state is needed beyond what's computed on-demand, so this is minimal.
  */
-export type MathU256ContractPrivateState = EmptyState;
+export type Uint256PrivateState = EmptyState;
 
 /**
  * @description Utility object for managing the private state of the MathU256 module.
  */
-export const MathU256ContractPrivateState = {
+export const Uint256PrivateState = {
   /**
    * @description Generates a new private state.
-   * @returns A fresh MathU256ContractPrivateState instance (empty for now).
+   * @returns A fresh Uint256PrivateState instance (empty for now).
    */
-  generate: (): MathU256ContractPrivateState => {
+  generate: (): Uint256PrivateState => {
     return {};
   },
 };
 
 /**
  * @description Factory function creating witness implementations for MathU256 module operations.
- * @returns An object implementing the IMathU256Witnesses interface for MathU256ContractPrivateState.
+ * @returns An object implementing the IUint256Witnesses interface for Uint256PrivateState.
  */
-export const MathU256Witnesses = (): IMathU256Witnesses<
+export const Uint256Witnesses = (): IUint256Witnesses<
   Ledger,
-  MathU256ContractPrivateState
+  Uint256PrivateState
 > => ({
   /**
    * @description Computes the square root of a U256 value off-chain.
@@ -44,9 +44,9 @@ export const MathU256Witnesses = (): IMathU256Witnesses<
    * @returns A tuple of the unchanged private state and the square root as a bigint (Uint<128>).
    */
   sqrtU256Locally(
-    context: WitnessContext<Ledger, MathU256ContractPrivateState>,
+    context: WitnessContext<Ledger, Uint256PrivateState>,
     radicand: U256,
-  ): [MathU256ContractPrivateState, bigint] {
+  ): [Uint256PrivateState, bigint] {
     // Convert U256 to bigint
     const radicandBigInt =
       (BigInt(radicand.high.high) << 192n) +
@@ -68,10 +68,10 @@ export const MathU256Witnesses = (): IMathU256Witnesses<
    * @returns A tuple of the unchanged private state and a DivResultU256 with quotient and remainder.
    */
   divU256Locally(
-    context: WitnessContext<Ledger, MathU256ContractPrivateState>,
+    context: WitnessContext<Ledger, Uint256PrivateState>,
     a: U256,
     b: U256,
-  ): [MathU256ContractPrivateState, DivResultU256] {
+  ): [Uint256PrivateState, DivResultU256] {
     // Convert U256 to bigint
     const aBigInt =
       (BigInt(a.high.high) << 192n) +
@@ -133,10 +133,10 @@ export const MathU256Witnesses = (): IMathU256Witnesses<
    * @returns A tuple of the unchanged private state and a DivResultU64 with quotient and remainder.
    */
   divU128Locally(
-    context: WitnessContext<Ledger, MathU256ContractPrivateState>,
+    context: WitnessContext<Ledger, Uint256PrivateState>,
     a: U128,
     b: U128,
-  ): [MathU256ContractPrivateState, DivResultU128] {
+  ): [Uint256PrivateState, DivResultU128] {
     const aBigInt = (BigInt(a.high) << 64n) + BigInt(a.low);
     const bBigInt = (BigInt(b.high) << 64n) + BigInt(b.low);
     const quotient = aBigInt / bBigInt;
@@ -157,10 +157,10 @@ export const MathU256Witnesses = (): IMathU256Witnesses<
   },
 
   divUint128Locally(
-    context: WitnessContext<Ledger, MathU256ContractPrivateState>,
+    context: WitnessContext<Ledger, Uint256PrivateState>,
     a: bigint,
     b: bigint,
-  ): [MathU256ContractPrivateState, DivResultU128] {
+  ): [Uint256PrivateState, DivResultU128] {
     const quotient = a / b;
     const remainder = a - quotient * b;
     return [
@@ -186,10 +186,10 @@ export const MathU256Witnesses = (): IMathU256Witnesses<
    * @returns A tuple of the unchanged private state and a DivResultU256 with quotient and remainder.
    */
   divUint254Locally(
-    context: WitnessContext<Ledger, MathU256ContractPrivateState>,
+    context: WitnessContext<Ledger, Uint256PrivateState>,
     a: bigint,
     b: bigint,
-  ): [MathU256ContractPrivateState, DivResultU256] {
+  ): [Uint256PrivateState, DivResultU256] {
     // Compute quotient and remainder
     const quotient = a / b;
     const remainder = a - quotient * b;

@@ -13,7 +13,7 @@ import type {
   ContractAddress,
   Either,
   ZswapCoinPublicKey,
-} from '@openzeppelin-midnight-apps/compact-std';
+} from '@openzeppelin/midnight-apps-compact-std';
 import {
   Contract,
   type Ledger,

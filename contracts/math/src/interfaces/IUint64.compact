@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma language_version >= 0.15.0;
+pragma language_version >= 0.18.0;
 
 /**
  * @title IUint64
@@ -8,34 +8,34 @@ pragma language_version >= 0.15.0;
  * The module works with Uint<64> values which represent 64-bit unsigned integers.
  */
 module IUint64 {
+  /**
+   * @dev Struct containing the quotient and remainder from a division operation
+   */
+  export struct DivResultU64 {
     /**
-     * @dev Struct containing the quotient and remainder from a division operation
+     * @dev The quotient result from the division operation
      */
-    export struct DivResultU64 {
-        /**
-         * @dev The quotient result from the division operation
-         */
-        quotient: Uint<64>,
-        /**
-         * @dev The remainder result from the division operation
-         */
-        remainder: Uint<64>
-    }
+    quotient: Uint<64>,
+    /**
+     * @dev The remainder result from the division operation
+     */
+    remainder: Uint<64>
+  }
 
-    /**
-     * @description Computes division of two Uint<64> values locally (off-chain).
-     *
-     * @param a The number to divide.
-     * @param b The number to divide by.
-     * @returns DivResultU64 The quotient and remainder of the division.
-     */
-    export witness divU64Locally(a: Uint<64>, b: Uint<64>): DivResultU64;
+  /**
+   * @description Computes division of two Uint<64> values locally (off-chain).
+   *
+   * @param a The number to divide.
+   * @param b The number to divide by.
+   * @returns DivResultU64 The quotient and remainder of the division.
+   */
+  export witness divU64Locally(a: Uint<64>, b: Uint<64>): DivResultU64;
 
-    /**
-     * @description Computes the square root of a Uint<64> value locally (off-chain).
-     *
-     * @param radicand The number to compute the square root of.
-     * @returns Uint<32> The square root of radicand.
-     */
-    export witness sqrtU64Locally(radicand: Uint<64>): Uint<32>;
+  /**
+   * @description Computes the square root of a Uint<64> value locally (off-chain).
+   *
+   * @param radicand The number to compute the square root of.
+   * @returns Uint<32> The square root of radicand.
+   */
+  export witness sqrtU64Locally(radicand: Uint<64>): Uint<32>;
 }

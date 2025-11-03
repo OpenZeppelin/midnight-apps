@@ -2,7 +2,7 @@ import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
 import type {
   Maybe,
   MerkleTreePath,
-} from '@openzeppelin-midnight-apps/compact-std';
+} from '@openzeppelin/midnight-apps-compact-std';
 import type {
   AccessControl_Role,
   Ledger,

@@ -4,19 +4,19 @@ import {
 } from '@midnight-ntwrk/compact-runtime';
 import { sampleCoinPublicKey } from '@midnight-ntwrk/zswap';
 import { beforeEach, describe, expect, test } from 'vitest';
-import { pureCircuits } from '../artifacts/MockAccessControl/contract/index.cjs';
+import { pureCircuits } from '../artifacts/AccessControl.mock/contract/index.cjs';
 import { AccessControlRole } from '../types/ledger';
 import type { RoleValue } from '../types/role';
-import { AccessControlContractSimulator } from './AccessControlContractSimulator';
+import { AccessControlSimulator } from './AccessControlSimulator';
 
-let mockAccessControlContract: AccessControlContractSimulator;
+let mockAccessControlContract: AccessControlSimulator;
 let admin: CoinPublicKey;
 let adminPkBytes: Uint8Array;
 
 const setup = () => {
   admin = '9905a18ce5bd2d7945818b18be9b0afe387efe29c8ffa81d90607a651fb83a2b';
   adminPkBytes = encodeCoinPublicKey(admin);
-  mockAccessControlContract = new AccessControlContractSimulator(admin);
+  mockAccessControlContract = new AccessControlSimulator(admin);
 };
 
 describe('AccessControl', () => {
@@ -39,23 +39,23 @@ describe('AccessControl', () => {
       expect(privateState.roles[adminRoleCommit.toString()]).toEqual(
         expectedAdminRole,
       );
-      expect(publicState.accessControlIsInitialized).toBe(true);
+      expect(publicState.AccessControl_isInitialized).toBe(true);
       expect(
-        publicState.accessControlRoleCommits.checkRoot(
-          publicState.accessControlRoleCommits.root(),
+        publicState.AccessControl_roleCommits.checkRoot(
+          publicState.AccessControl_roleCommits.root(),
         ),
       ).toBe(true);
     });
 
     test('should have valid root after initialization', () => {
       const publicState = mockAccessControlContract.getCurrentPublicState();
-      const root = publicState.accessControlRoleCommits.root();
-      expect(publicState.accessControlRoleCommits.checkRoot(root)).toBe(true);
+      const root = publicState.AccessControl_roleCommits.root();
+      expect(publicState.AccessControl_roleCommits.checkRoot(root)).toBe(true);
     });
 
     test('should not have full tree after initialization', () => {
       const publicState = mockAccessControlContract.getCurrentPublicState();
-      expect(publicState.accessControlRoleCommits.isFull()).toBe(false);
+      expect(publicState.AccessControl_roleCommits.isFull()).toBe(false);
     });
   });
 
@@ -118,7 +118,7 @@ describe('AccessControl', () => {
         admin,
       );
       const publicState = mockAccessControlContract.getCurrentPublicState();
-      expect(publicState.accessControlIndex).toBe(2n); // 0 from init, 1 from grant
+      expect(publicState.AccessControl_index).toBe(2n); // 0 from init, 1 from grant
     });
 
     test('should fail when role tree is full', () => {

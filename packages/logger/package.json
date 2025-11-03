@@ -1,0 +1,37 @@
+{
+  "name": "@openzeppelin/midnight-apps-logger",
+  "private": true,
+  "version": "0.0.1",
+  "keywords": ["logger", "pino"],
+  "author": "",
+  "license": "MIT",
+  "description": "Singleton logger for Midnight apps",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "types": "tsc -p tsconfig.json --noEmit",
+    "clean": "git clean -fXd"
+  },
+  "devDependencies": {
+    "@openzeppelin/midnight-apps-biome-config": "workspace:^",
+    "@tsconfig/node22": "^22.0.2",
+    "@types/node": "22.18.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "pino": "^9.6.0",
+    "pino-pretty": "^13.0.0"
+  }
+}
+

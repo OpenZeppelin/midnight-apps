@@ -2,6 +2,9 @@
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
     "compact": {
+      "dependsOn": [
+        "^build"
+      ],
       "env": [
         "COMPACT_HOME"
       ],

@@ -4,7 +4,7 @@ import type {
   Maybe,
   MerkleTreePath,
   ZswapCoinPublicKey,
-} from '@openzeppelin-midnight-apps/compact-std';
+} from '@openzeppelin/midnight-apps-compact-std';
 import {
   AccessControl_Role,
   type Ledger,
@@ -159,7 +159,7 @@ export const AccessControlWitnesses =
       return [
         context.privateState,
         maybeFromNullable(
-          context.ledger.accessControlRoleCommits.pathForLeaf(
+          context.ledger.AccessControl_roleCommits.pathForLeaf(
             context.privateState.roles[userRoleCommitString].index,
             userRoleCommit,
           ),

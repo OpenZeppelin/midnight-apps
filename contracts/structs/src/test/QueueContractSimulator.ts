@@ -10,7 +10,7 @@ import {
   type Ledger,
   Contract as MockQueue,
   ledger,
-} from '../artifacts/MockQueue/contract/index.cjs';
+} from '../artifacts/Queue.mock/contract/index.cjs';
 import type { IContractSimulator } from '../types/test';
 import {
   QueueContractPrivateState,

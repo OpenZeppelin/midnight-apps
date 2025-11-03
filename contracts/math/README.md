@@ -1,4 +1,4 @@
-# `@openzeppelin-midnight-apps/math-contracts`
+# `@openzeppelin/midnight-apps-math-contracts`
 
 A comprehensive mathematical operations library for Midnight Network smart contracts, providing efficient and secure arithmetic operations for various integer types.
 
@@ -125,7 +125,7 @@ The following table shows the constraint counts and circuit sizes for each mathe
 ## Installation
 
 ```bash
-pnpm add @openzeppelin-midnight-apps/math-contracts
+pnpm add @openzeppelin/midnight-apps-math-contracts
 ```
 
 ## Usage
@@ -137,13 +137,13 @@ import {
   MathU64Witnesses, 
   sqrtBigint,
   type MathU64ContractPrivateState 
-} from '@openzeppelin-midnight-apps/math-contracts';
+} from '@openzeppelin/midnight-apps-math-contracts';
 ```
 
 ### Square Root Calculation
 
 ```typescript
-import { sqrtBigint } from '@openzeppelin-midnight-apps/math-contracts';
+import { sqrtBigint } from '@openzeppelin/midnight-apps-math-contracts';
 
 // Calculate square root of a bigint
 const result = sqrtBigint(16n); // Returns 4n
@@ -153,7 +153,7 @@ const largeNumber = sqrtBigint(1000000000000n); // Efficient for large numbers
 ### Witness Operations
 
 ```typescript
-import { MathU64Witnesses } from '@openzeppelin-midnight-apps/math-contracts';
+import { MathU64Witnesses } from '@openzeppelin/midnight-apps-math-contracts';
 
 // Create witness implementations
 const witnesses = MathU64Witnesses();
@@ -314,6 +314,6 @@ ISC License - see package.json for details.
 
 ## Related Packages
 
-- `@openzeppelin-midnight-apps/compact` - Core Compact framework
+- `@openzeppelin/midnight-apps-compact` - Core Compact framework
 - `@midnight-ntwrk/compact-runtime` - Runtime utilities
 - `@midnight-ntwrk/zswap` - ZK-SNARK operations

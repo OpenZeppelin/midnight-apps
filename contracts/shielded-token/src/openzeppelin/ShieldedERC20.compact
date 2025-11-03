@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (shielded-token/openzeppelin/ShieldedERC20.compact)
 
-pragma language_version >= 0.15.0;
+pragma language_version >= 0.18.0;
 
 /**
  * @module ShieldedToken (archived until further notice, DO NOT USE IN PRODUCTION)
@@ -33,7 +34,7 @@ pragma language_version >= 0.15.0;
 module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
   import CompactStandardLibrary;
   import Utils prefix Utils_;
-  import "../../node_modules/@openzeppelin-midnight-apps/math/dist/Bytes32" prefix Bytes32_;
+  import "../../node_modules/@openzeppelin/midnight-apps-math/dist/Bytes32" prefix Bytes32_;
 
   // Public state
   export ledger _counter: Counter;
@@ -58,11 +59,11 @@ module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
     decimals_ :Uint<8>,
     domain_: Bytes<32>
   ): [] {
-    _nonce = initNonce;
-    _domain = domain_;
-    _name = name_;
-    _symbol = symbol_;
-    _decimals = decimals_;
+    _nonce = disclose(initNonce);
+    _domain = disclose(domain_);
+    _name = disclose(name_);
+    _symbol = disclose(symbol_);
+    _decimals = disclose(decimals_);
   }
 
   /**
@@ -122,19 +123,31 @@ module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
    * @param {amount} - The value of tokens minted.
    * @return {CoinInfo} - The description of the newly created coin.
    */
-  export circuit mint(recipient: Either<ZswapCoinPublicKey, ContractAddress>, amount: Uint<128>): CoinInfo {
-    assert !Utils_isKeyOrAddressZero(recipient) "ShieldedToken: invalid recipient";
+   // TODO: if we use Uint<128> we get this compilation error: 
+   // no compatible function named mintToken is in scope at this call
+   //   one function is incompatible with the supplied argument types
+   //     supplied argument types:
+   //       (Bytes<32>, Uint<128>, Bytes<32>, struct Either<is_left: Boolean, left: struct
+   //       ZswapCoinPublicKey<bytes: Bytes<32>>, right: struct ContractAddress<bytes:
+   //       Bytes<32>>>)
+   //     declared argument types for function at <standard library>:
+   //       (Bytes<32>, Uint<64>, Bytes<32>, struct Either<is_left: Boolean, left: struct
+   //       ZswapCoinPublicKey<bytes: Bytes<32>>, right: struct ContractAddress<bytes:
+   //       Bytes<32>>>)
+  export circuit mint(recipient: Either<ZswapCoinPublicKey, ContractAddress>, amount: Uint<64>): CoinInfo {
+    assert (!Utils_isKeyOrAddressZero(recipient), "ShieldedToken: invalid recipient");
 
     // TODO: Is that correct here? Do we need to increment after minting? not before?
     _counter.increment(1);
-    const newNonce = evolve_nonce(_counter, _nonce);
+    const newNonce = evolveNonce(_counter, _nonce);
     _nonce = newNonce;
-    const ret = mint_token(_domain, amount, _nonce, recipient);
+    // TODO: had to add disclose here, what does that mean?
+    const ret = mintToken(_domain, disclose(amount), _nonce, disclose(recipient));
     // TODO: find a better solution for detecting the type
     if (Bytes32_isZero(_type)) {
       _type = ret.color;
     }
-    _totalSupply = _totalSupply + amount as Uint<128>;
+    _totalSupply = _totalSupply + disclose(amount) as Uint<128>;
     return ret;
   }
 
@@ -150,18 +163,18 @@ module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
    * spending the output if available.
    */
   export circuit burn(coin: CoinInfo, amount: Uint<128>): SendResult {
-    assert coin.color == _type "ShieldedToken: token not created from this contract";
-    assert coin.value >= amount "ShieldedToken: insufficient token amount to burn";
+    assert (coin.color == _type, "ShieldedToken: token not created from this contract");
+    assert (coin.value >= amount, "ShieldedToken: insufficient token amount to burn");
 
-    receive(coin);
-    _totalSupply = _totalSupply - amount;
+    receive(disclose(coin));
+    _totalSupply = _totalSupply - disclose(amount);
 
-    const sendRes = send_immediate(coin, burn_address(), amount);
+    const sendRes = sendImmediate(disclose(coin), burnAddress(), disclose(amount));
     if (sendRes.change.is_some) {
       // tmp for only zswap because we should be able to handle contracts burning tokens
       // and returning change.
-      const caller = left<ZswapCoinPublicKey, ContractAddress>(own_public_key());
-      send_immediate(sendRes.change.value, caller, sendRes.change.value.value);
+      const caller = left<ZswapCoinPublicKey, ContractAddress>(ownPublicKey());
+      sendImmediate(sendRes.change.value, caller, sendRes.change.value.value);
     }
 
     return sendRes;

@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma language_version >= 0.15.0;
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/Max.compact)
+
+pragma language_version >= 0.18.0;
 
 /**
  * @description A module providing maximum values for various unsigned integer types.
@@ -21,129 +23,121 @@ pragma language_version >= 0.15.0;
  * supported unsigned integer size (8-bit through 256-bit).
  */
 module Max {
-    import "./interfaces/IUint128";
-    import "./interfaces/IUint256";
-    
-    /**
-     * @title MAX_UINT8 circuit
-     * @description Returns the maximum value for an 8-bit unsigned integer (2^8 - 1).
-     * 
-     * @circuitInfo k=10, rows=128
-     *
-     * @returns {Uint<8>} The value 255 (0xFF).
-     */
-    export pure circuit MAX_UINT8(): Uint<8> {
-        return 255;
-    }
+  import "./interfaces/IUint128";
+  import "./interfaces/IUint256";
 
-    /**
-     * @title MAX_UINT16 circuit
-     * @description Returns the maximum value for a 16-bit unsigned integer (2^16 - 1).
-     * 
-     * @circuitInfo k=10, rows=128
-     *
-     * @returns {Uint<16>} The value 65,535 (0xFFFF).
-     */
-    export pure circuit MAX_UINT16(): Uint<16> {
-        return 65535;
-    }
+  /**
+   * @title MAX_UINT8 circuit
+   * @description Returns the maximum value for an 8-bit unsigned integer (2^8 - 1).
+   * 
+   * @circuitInfo k=10, rows=128
+   *
+   * @returns {Uint<8>} The value 255 (0xFF).
+   */
+  export pure circuit MAX_UINT8(): Uint<8> {
+    return 255;
+  }
 
-    /**
-     * @title MAX_UINT32 circuit
-     * @description Returns the maximum value for a 32-bit unsigned integer (2^32 - 1).
-     * 
-     * @circuitInfo k=10, rows=128
-     *
-     * @returns {Uint<32>} The value 4,294,967,295 (0xFFFFFFFF).
-     */
-    export pure circuit MAX_UINT32(): Uint<32> {
-        return 4294967295;
-    }
+  /**
+   * @title MAX_UINT16 circuit
+   * @description Returns the maximum value for a 16-bit unsigned integer (2^16 - 1).
+   * 
+   * @circuitInfo k=10, rows=128
+   *
+   * @returns {Uint<16>} The value 65,535 (0xFFFF).
+   */
+  export pure circuit MAX_UINT16(): Uint<16> {
+    return 65535;
+  }
 
-    /**
-     * @title MAX_UINT64 circuit
-     * @description Returns the maximum value for a 64-bit unsigned integer (2^64 - 1).
-     * 
-     * @circuitInfo k=10, rows=128
-     *
-     * @returns {Uint<64>} The value 18,446,744,073,709,551,615 (0xFFFFFFFFFFFFFFFF).
-     */
-    export pure circuit MAX_UINT64(): Uint<64> {
-        return 18446744073709551615;
-    }
+  /**
+   * @title MAX_UINT32 circuit
+   * @description Returns the maximum value for a 32-bit unsigned integer (2^32 - 1).
+   * 
+   * @circuitInfo k=10, rows=128
+   *
+   * @returns {Uint<32>} The value 4,294,967,295 (0xFFFFFFFF).
+   */
+  export pure circuit MAX_UINT32(): Uint<32> {
+    return 4294967295;
+  }
 
-    /**
-     * @title MAX_UINT128 circuit
-     * @description Returns the maximum value for a 128-bit unsigned integer (2^128 - 1).
-     * 
-     * @circuitInfo k=10, rows=128
-     *
-     * @returns {Uint<128>} The value 340,282,366,920,938,463,463,374,607,431,768,211,455 
-     * (0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF).
-     */
-    export pure circuit MAX_UINT128(): Uint<128> {
-        return 340282366920938463463374607431768211455;
-    }
+  /**
+   * @title MAX_UINT64 circuit
+   * @description Returns the maximum value for a 64-bit unsigned integer (2^64 - 1).
+   * 
+   * @circuitInfo k=10, rows=128
+   *
+   * @returns {Uint<64>} The value 18,446,744,073,709,551,615 (0xFFFFFFFFFFFFFFFF).
+   */
+  export pure circuit MAX_UINT64(): Uint<64> {
+    return 18446744073709551615;
+  }
 
-    /**
-     * @title MAX_UINT254 circuit
-     * @description A pure circuit that returns the maximum Uint<254> value as a U256 struct.
-     *
-     * MAX_Uint254 = 2^254 - 1 = 28948022309329048855892746252171976963317496166410141009864396001978282409983
-     * 
-     * @circuitInfo k=10, rows=128
-     *
-     * @returns {U256} The maximum Uint<254> value (2^254 - 1) as a U256 struct.
-     */
-    export pure circuit MAX_UINT254(): U256 {
-        return U256 {
-            low: U128 { low: 18446744073709551615, high: 18446744073709551615 },
-            high: U128 { low: 18446744073709551615, high: 4611686018427387903 }
-        }; // 2^254 - 1
-    }
+  /**
+   * @title MAX_UINT128 circuit
+   * @description Returns the maximum value for a 128-bit unsigned integer (2^128 - 1).
+   * 
+   * @circuitInfo k=10, rows=128
+   *
+   * @returns {Uint<128>} The value 340,282,366,920,938,463,463,374,607,431,768,211,455 
+   * (0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF).
+   */
+  export pure circuit MAX_UINT128(): Uint<128> {
+    return 340282366920938463463374607431768211455;
+  }
 
-    /**
-     * @title MAX_FIELD circuit
-     * @description Returns the maximum value for a field element (2^254 - 1).
-     * 
-     * @circuitInfo k=10, rows=128
-     *
-     * @returns {Uint<254>} The value 28948022309329048855892746252171976963317496166410141009864396001978282409983
-     * (0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF).
-     */
-    export pure circuit MAX_FIELD(): Uint<254> {
-        return 28948022309329048855892746252171976963317496166410141009864396001978282409983;
-    } 
+  /**
+   * @title MAX_UINT254 circuit
+   * @description A pure circuit that returns the maximum Uint<254> value as a U256 struct.
+   *
+   * MAX_Uint254 = 2^254 - 1 = 28948022309329048855892746252171976963317496166410141009864396001978282409983
+   * 
+   * @circuitInfo k=10, rows=128
+   *
+   * @returns {U256} The maximum Uint<254> value (2^254 - 1) as a U256 struct.
+   */
+  export pure circuit MAX_UINT254(): U256 {
+    return U256 { low: U128 { low: 18446744073709551615, high: 18446744073709551615 },
+                  high: U128 { low: 18446744073709551615, high: 4611686018427387903 } }; // 2^254 - 1
+  }
 
-    /**
-     * @title MAX_U128 circuit
-     * @description Returns the maximum value for a U128 struct, where both low and high
-     * fields are set to the maximum 64-bit value (2^64 - 1).
-     * 
-     * @circuitInfo k=10, rows=128
-     *
-     * @returns {U128} A U128 struct representing 2^128 - 1.
-     */
-    export pure circuit MAX_U128(): U128 {
-        return U128 {
-            low: MAX_UINT64(),  
-            high: MAX_UINT64()
-        };
-    }
+  /**
+   * @title MAX_FIELD circuit
+   * @description Returns the maximum value for a field element (2^254 - 1).
+   * 
+   * @circuitInfo k=10, rows=128
+   *
+   * @returns {Uint<254>} The value 28948022309329048855892746252171976963317496166410141009864396001978282409983
+   * (0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF).
+   */
+  export pure circuit MAX_FIELD(): Uint<254> {
+    return 28948022309329048855892746252171976963317496166410141009864396001978282409983;
+  }
 
-    /**
-     * @title MAX_U256 circuit
-     * @description Returns the maximum value for a U256 struct, where both low and high
-     * fields are set to the maximum 128-bit value (2^128 - 1).
-     * 
-     * @circuitInfo k=10, rows=128
-     *
-     * @returns {U256} A U256 struct representing 2^256 - 1.
-     */
-    export pure circuit MAX_U256(): U256 {
-        return U256 {
-            low: MAX_U128(),
-            high: MAX_U128()
-        };
-    }
+  /**
+   * @title MAX_U128 circuit
+   * @description Returns the maximum value for a U128 struct, where both low and high
+   * fields are set to the maximum 64-bit value (2^64 - 1).
+   * 
+   * @circuitInfo k=10, rows=128
+   *
+   * @returns {U128} A U128 struct representing 2^128 - 1.
+   */
+  export pure circuit MAX_U128(): U128 {
+    return U128 { low: MAX_UINT64(), high: MAX_UINT64() };
+  }
+
+  /**
+   * @title MAX_U256 circuit
+   * @description Returns the maximum value for a U256 struct, where both low and high
+   * fields are set to the maximum 128-bit value (2^128 - 1).
+   * 
+   * @circuitInfo k=10, rows=128
+   *
+   * @returns {U256} A U256 struct representing 2^256 - 1.
+   */
+  export pure circuit MAX_U256(): U256 {
+    return U256 { low: MAX_U128(), high: MAX_U128() };
+  }
 }

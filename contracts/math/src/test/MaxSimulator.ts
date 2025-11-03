@@ -10,19 +10,19 @@ import {
   Contract,
   type Ledger,
   ledger,
-} from '../artifacts/MockMax/contract/index.cjs';
+} from '../artifacts/Max.mock/contract/index.cjs';
 import type { IContractSimulator } from '../types/test';
-import { type MaxContractPrivateState, MaxWitnesses } from '../witnesses/Max';
+import { type MaxPrivateState, MaxWitnesses } from '../witnesses/Max';
 
 export class MaxSimulator
-  implements IContractSimulator<MaxContractPrivateState, Ledger>
+  implements IContractSimulator<MaxPrivateState, Ledger>
 {
-  readonly contract: Contract<MaxContractPrivateState>;
+  readonly contract: Contract<MaxPrivateState>;
   readonly contractAddress: string;
-  circuitContext: CircuitContext<MaxContractPrivateState>;
+  circuitContext: CircuitContext<MaxPrivateState>;
 
   constructor() {
-    this.contract = new Contract<MaxContractPrivateState>(MaxWitnesses);
+    this.contract = new Contract<MaxPrivateState>(MaxWitnesses);
     const {
       currentPrivateState,
       currentContractState,
@@ -44,7 +44,7 @@ export class MaxSimulator
     return ledger(this.circuitContext.transactionContext.state);
   }
 
-  public getCurrentPrivateState(): MaxContractPrivateState {
+  public getCurrentPrivateState(): MaxPrivateState {
     return this.circuitContext.currentPrivateState;
   }
 
