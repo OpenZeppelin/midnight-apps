@@ -31,7 +31,7 @@ jobs:
         run: pnpm commitlint --from=${{ github.event.pull_request.base.sha }} --to=${{ github.event.pull_request.head.sha }}
 
       - name: Spell Check with Typos
-        uses: crate-ci/typos@v1.38.1
+        uses: crate-ci/typos@v1.39.0
         with:
           config: .github/workflows/config/typos.toml
 
