@@ -33,7 +33,7 @@ export function VersionSwitcher() {
         >
           <Check
             className={cn(
-              'mr-2 h-4 w-4 flex-shrink-0 mt-1',
+              'mr-2 h-4 w-4 shrink-0 mt-1',
               version === 'V1' ? 'opacity-100' : 'opacity-0',
             )}
           />
@@ -50,7 +50,7 @@ export function VersionSwitcher() {
         >
           <Check
             className={cn(
-              'mr-2 h-4 w-4 flex-shrink-0 mt-1',
+              'mr-2 h-4 w-4 shrink-0 mt-1',
               version === 'V2' ? 'opacity-100' : 'opacity-0',
             )}
           />
@@ -67,7 +67,7 @@ export function VersionSwitcher() {
         >
           <Check
             className={cn(
-              'mr-2 h-4 w-4 flex-shrink-0 mt-1',
+              'mr-2 h-4 w-4 shrink-0 mt-1',
               version === 'V3' ? 'opacity-100' : 'opacity-0',
             )}
           />

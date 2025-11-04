@@ -93,7 +93,7 @@ export function WalletConnect() {
       return (
         <Button
           disabled
-          className="rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 text-sm font-medium text-white opacity-70"
+          className="rounded-full bg-linear-to-r from-blue-500 to-indigo-500 text-sm font-medium text-white opacity-70"
         >
           Loading...
         </Button>
@@ -106,7 +106,7 @@ export function WalletConnect() {
           <Button
             onClick={connectWallet}
             disabled={isConnecting}
-            className="rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 dark:from-blue-600 dark:to-indigo-600 dark:hover:from-blue-700 dark:hover:to-indigo-700 text-sm font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-full bg-linear-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 dark:from-blue-600 dark:to-indigo-600 dark:hover:from-blue-700 dark:hover:to-indigo-700 text-sm font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isConnecting ? 'Connecting...' : 'Connect'}
           </Button>
@@ -116,7 +116,7 @@ export function WalletConnect() {
         return (
           <Button
             disabled
-            className="rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 text-sm font-medium text-white opacity-70"
+            className="rounded-full bg-linear-to-r from-blue-500 to-indigo-500 text-sm font-medium text-white opacity-70"
           >
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -151,7 +151,7 @@ export function WalletConnect() {
         return (
           <Button
             onClick={connectWallet}
-            className="rounded-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-sm font-medium text-white"
+            className="rounded-full bg-linear-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-sm font-medium text-white"
           >
             Retry
           </Button>

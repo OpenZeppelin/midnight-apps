@@ -171,7 +171,7 @@ export function AccountDetailsModal({
 
   const modalContent = (
     <dialog
-      className="fixed inset-0 bg-black/80 backdrop-blur-lg z-[99999] flex items-center justify-center p-4 border-0 pointer-events-auto animate-in fade-in duration-200"
+      className="fixed inset-0 bg-black/80 backdrop-blur-lg z-99999 flex items-center justify-center p-4 border-0 pointer-events-auto animate-in fade-in duration-200"
       style={{
         position: 'fixed',
         top: '0px',

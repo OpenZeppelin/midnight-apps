@@ -12,7 +12,7 @@ export const metadata = {
 
 export default function PoolPage() {
   return (
-    <div className="min-h-screen bg-white dark:bg-gradient-to-b dark:from-[#0f172a] dark:via-[#1e293b] dark:to-[#0f172a] text-foreground">
+    <div className="min-h-screen bg-white dark:bg-linear-to-b dark:from-[#0f172a] dark:via-[#1e293b] dark:to-[#0f172a] text-foreground">
       <StarsBackground />
       <Header />
       <main className="container mx-auto px-4 py-8 relative z-0 pt-24">
