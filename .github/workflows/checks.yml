@@ -15,8 +15,13 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        with:
+          egress-policy: audit
+
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 0
 
@@ -31,7 +36,7 @@ jobs:
         run: pnpm commitlint --from=${{ github.event.pull_request.base.sha }} --to=${{ github.event.pull_request.head.sha }}
 
       - name: Spell Check with Typos
-        uses: crate-ci/typos@v1.39.0
+        uses: crate-ci/typos@07d900b8fa1097806b8adb6391b0d3e0ac2fdea7 # v1.39.0
         with:
           config: .github/workflows/config/typos.toml
 
