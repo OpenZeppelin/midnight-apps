@@ -1,4 +1,8 @@
 # Midnight DApps
+
+[![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://opensource.org/licenses/MIT)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/midnight-apps/badge)](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/midnight-apps)
+
 A collection of starter-dapps on the Midnight Network
 
 ## Overview

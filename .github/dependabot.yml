@@ -1,14 +1,23 @@
+---
 version: 2
+# opt in to updates for ecosystems that are not yet GA.
+enable-beta-ecosystems: true
 updates:
-  - package-ecosystem: "npm"
-    directory: "/"
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: github-actions
+    directory: /
     schedule:
-      interval: "daily"
-    open-pull-requests-limit: 5
-    rebase-strategy: "auto"
+      interval: monthly
+    groups:
+      actions-deps:
+        patterns:
+          - '*'
+    commit-message:
+      prefix: 'chore(deps): '
 
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: npm
+    directory: /
     schedule:
-      interval: "weekly"
-      
+      interval: weekly
+    open-pull-requests-limit: 5
+    rebase-strategy: auto
