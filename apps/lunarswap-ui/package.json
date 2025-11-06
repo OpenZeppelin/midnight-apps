@@ -71,7 +71,7 @@
   },
   "devDependencies": {
     "@openzeppelin/midnight-apps-biome-config": "workspace:^",
-    "@types/node": "^22",
+    "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "postcss": "^8",
