@@ -1,11 +1,18 @@
 {
   "name": "@openzeppelin/midnight-apps-logger",
-  "private": true,
-  "version": "0.0.1",
-  "keywords": ["logger", "pino"],
-  "author": "",
+  "version": "0.1.0",
+  "keywords": ["logger", "pino", "midnight", "starter"],
+  "author": "OpenZeppelin",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenZeppelin/midnight-apps.git"
+  },
+  "bugs": {
+    "url": "https://github.com/OpenZeppelin/midnight-apps/issues"
+  },
+  "homepage": "https://github.com/OpenZeppelin/midnight-apps#readme",
   "license": "MIT",
-  "description": "Singleton logger for Midnight apps",
+  "description": "Singleton logger for Midnight starter apps",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -34,4 +41,3 @@
     "pino-pretty": "^13.0.0"
   }
 }
-

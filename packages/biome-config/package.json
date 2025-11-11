@@ -1,8 +1,19 @@
 {
   "name": "@openzeppelin/midnight-apps-biome-config",
-  "version": "1.0.0",
+  "version": "0.1.0",
+  "description": "Biome configuration for Midnight Apps",
+  "keywords": ["biome", "config", "midnight", "apps"],
+  "author": "OpenZeppelin",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenZeppelin/midnight-apps.git"
+  },
+  "bugs": {
+    "url": "https://github.com/OpenZeppelin/midnight-apps/issues"
+  },
+  "homepage": "https://github.com/OpenZeppelin/midnight-apps#readme",
   "type": "module",
-  "private": true,
   "exports": {
     ".": "./biome.json"
   }
