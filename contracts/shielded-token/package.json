@@ -1,8 +1,18 @@
 {
   "name": "@openzeppelin/midnight-apps-shielded-token",
-  "version": "1.0.0-alpha.1",
-  "private": true,
-  "description": "Shielded Fungible Token contract for Midnight DApps",
+  "version": "0.1.0",
+  "description": "Shielded Fungible Token contract for Midnight starter apps",
+  "keywords": ["shielded", "token", "fungible", "midnight", "starter", "contracts", "zk"],
+  "author": "OpenZeppelin",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenZeppelin/midnight-apps.git"
+  },
+  "bugs": {
+    "url": "https://github.com/OpenZeppelin/midnight-apps/issues"
+  },
+  "homepage": "https://github.com/OpenZeppelin/midnight-apps#readme",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,9 +37,6 @@
     "lint:fix": "biome check --write",
     "precommit": "lint-staged --no-stash && pnpm run types"
   },
-  "keywords": ["midnight", "shielded", "token", "fungible"],
-  "author": "",
-  "license": "ISC",
   "packageManager": "pnpm@10.4.1",
   "devDependencies": {
     "@types/node": "^24.10.0",
