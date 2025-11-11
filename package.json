@@ -25,7 +25,10 @@
     "types:apps": "pnpm compact:fast && turbo run types --filter './apps/*'",
     "types:contracts": "pnpm compact:fast && turbo run types --filter './contracts/*'",
     "types:packages": "pnpm compact:fast && turbo run types --filter './packages/*'",
-    "precommit": "turbo run precommit"
+    "precommit": "turbo run precommit",
+    "changeset": "changeset",
+    "changeset:version": "changeset version",
+    "changeset:publish": "changeset publish"
   },
   "keywords": [],
   "author": "",
@@ -33,6 +36,8 @@
   "packageManager": "pnpm@10.4.1",
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "@changesets/changelog-github": "^0.5.1",
+    "@changesets/cli": "^2.29.7",
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "@commitlint/types": "^19.8.1",
