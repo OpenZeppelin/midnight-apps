@@ -1,0 +1,42 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (crypto/test/SchnorrBLS12381.mock.compact)
+
+pragma language_version >= 0.18.0;
+
+import CompactStandardLibrary;
+
+import "../interfaces/ISchnorrBLS12318";
+import "../SchnorrBLS12381" prefix Schnorr_;
+
+export { SchnorrSignature, SchnorrKeyPair };
+
+export ledger steps: Counter;
+
+export circuit derivePublicKey(secretKeyBytes: Bytes<32>): CurvePoint {
+  steps.increment(1);
+  return Schnorr_derivePublicKey(secretKeyBytes);
+}
+
+export circuit generateKeyPair(secretKeyBytes: Bytes<32>): SchnorrKeyPair {
+  steps.increment(1);
+  return Schnorr_generateKeyPair(secretKeyBytes);
+}
+
+export circuit sign(secretKeyBytes: Bytes<32>, message: Bytes<32>, nonceBytes: Bytes<32>): SchnorrSignature {
+  steps.increment(1);
+  return Schnorr_sign(secretKeyBytes, message, nonceBytes);
+}
+
+export circuit verifySignature(
+  publicKey: CurvePoint,
+  message: Bytes<32>,
+  signature: SchnorrSignature
+): Boolean {
+  steps.increment(1);
+  return disclose(Schnorr_verifySignature(publicKey, message, signature));
+}
+
+export circuit isValidPublicKey(publicKey: CurvePoint): Boolean {
+  steps.increment(1);
+  return disclose(Schnorr_isValidPublicKey(publicKey));
+}

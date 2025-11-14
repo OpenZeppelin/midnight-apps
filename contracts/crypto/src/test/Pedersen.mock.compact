@@ -1,0 +1,70 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/test/Pedersen.mock.compact)
+
+pragma language_version >= 0.18.0;
+
+import CompactStandardLibrary;
+
+import "../interfaces/IPedersen";
+import "../Pedersen" prefix Pedersen_;
+
+export { Commitment, Opening };
+
+export ledger steps: Counter;
+
+export circuit VALUE_GENERATOR(): CurvePoint {
+  steps.increment(1);
+  return Pedersen_VALUE_GENERATOR();
+}
+
+export circuit commit(value: Field, randomness: Field): Commitment {
+  steps.increment(1);
+  return Pedersen_commit(value, randomness);
+}
+
+export circuit open(
+  commitment: Commitment,
+  value: Field,
+  randomness: Field
+): Boolean {
+  steps.increment(1);
+  return disclose(Pedersen_open(commitment, value, randomness));
+}
+
+export circuit verifyOpening(
+  commitment: Commitment,
+  opening: Opening
+): Boolean {
+  steps.increment(1);
+  return disclose(Pedersen_verifyOpening(commitment, opening));
+}
+
+export circuit add(c1: Commitment, c2: Commitment): Commitment {
+  steps.increment(1);
+  return Pedersen_add(c1, c2);
+}
+
+export circuit mockRandom(seed: Field): Field {
+  steps.increment(1);
+  return Pedersen_mockRandom(seed);
+}
+
+export circuit mockRandomFromData(
+  data1: Field,
+  data2: Field,
+  nonce: Field
+): Field {
+  steps.increment(1);
+  return Pedersen_mockRandomFromData(data1, data2, nonce);
+}
+
+export circuit zero(): Commitment {
+  steps.increment(1);
+  return Pedersen_zero();
+}
+
+export circuit isZero(c: Commitment): Boolean {
+  steps.increment(1);
+  return disclose(Pedersen_isZero(c));
+}
+

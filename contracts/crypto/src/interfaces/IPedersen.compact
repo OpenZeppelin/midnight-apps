@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (crypto/interfaces/IPedersen.compact)
+
+pragma language_version >= 0.18.0;
+
+module IPedersen {
+  import CompactStandardLibrary;
+
+  /**
+   * @title Commitment struct
+   * @description Represents a Pedersen commitment as a curve point
+   */
+  export struct Commitment {
+    point: CurvePoint
+  }
+
+  /**
+   * @title Opening struct
+   * @description Contains the value and randomness needed to open a commitment
+   */
+  export struct Opening {
+    value: Field,
+    randomness: Field
+  }
+}

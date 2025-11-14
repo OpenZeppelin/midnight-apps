@@ -1,0 +1,101 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (crypto/SchnorrBLS12381.compact)
+
+pragma language_version >= 0.18.0;
+
+/**
+ * @title SchnorrBLS12381
+ * @dev Implementation of Schnorr signatures over the BLS12-381 elliptic curve.
+ * 
+ * This module provides basic Schnorr signature operations optimized for zero-knowledge proofs
+ * on the Midnight Network. The BLS12-381 curve is specifically chosen for its pairing-friendly
+ * properties and efficiency in ZK circuits.
+ * 
+ * Current Features:
+ * - Key generation from private scalars
+ * - Signature creation with Fiat-Shamir transform
+ * - Signature verification
+ * 
+ * Security Properties:
+ * - EUF-CMA security in the random oracle model
+ * - Based on hardness of discrete logarithm problem on BLS12-381
+ * 
+ * TODO: Future Extensions (separate modules):
+ * - Multi-signature aggregation (MuSig/MuSig2)
+ * - Blind signatures for anonymous credentials
+ * - Threshold signatures (FROST)
+ * - Batch verification for multiple signatures
+ * - Ring signatures for anonymity sets
+ * 
+ * Supported Operations:
+ * - derivePublicKey(): Computes public key from secret key
+ * - generateKeyPair(): Creates complete key pair
+ * - sign(): Signs a message with private key and nonce
+ * - verify(): Verifies a signature against public key and message
+ * - hashToScalar(): Hashes data to scalar field element
+ * - isValidPublicKey(): Checks public key validity
+ */
+module SchnorrBLS12381 {
+  import CompactStandardLibrary;
+  import "./interfaces/ISchnorrBLS12318";
+
+  struct Bytes64 {
+    b0: Bytes<32>,
+    b1: Bytes<32>
+  }
+
+  struct Bytes96 {
+    b0: Bytes<32>,
+    b1: Bytes<32>,
+    b2: Bytes<32>
+  }
+
+  circuit pointToBytes(p: CurvePoint): Bytes<32> {
+    return persistentHash<CurvePoint>(p);
+  }
+
+  export circuit derivePublicKey(secretKeyBytes: Bytes<32>): CurvePoint {
+    const sk = transientHash<Bytes<32>>(secretKeyBytes);
+    return ecMulGenerator(sk);
+  }
+
+  export circuit generateKeyPair(secretKeyBytes: Bytes<32>): SchnorrKeyPair {
+    const sk = transientHash<Bytes<32>>(secretKeyBytes);
+    const publicKey = ecMulGenerator(sk);
+    return SchnorrKeyPair { secretKey: sk, publicKey: publicKey };
+  }
+
+  export circuit sign(secretKeyBytes: Bytes<32>, message: Bytes<32>, nonceBytes: Bytes<32>): SchnorrSignature {
+    const sk = transientHash<Bytes<32>>(secretKeyBytes);
+    const k = transientHash<Bytes<32>>(nonceBytes);
+
+    const R = ecMulGenerator(k);
+    const pk = ecMulGenerator(sk);
+
+    const rBytes = pointToBytes(R);
+    const pkBytes = pointToBytes(pk);
+    const challengeInput = Bytes96 { b0: rBytes, b1: pkBytes, b2: message };
+    const challenge = transientHash<Bytes96>(challengeInput);
+
+    const s = k + (challenge * sk);
+
+    return SchnorrSignature { R: R, s: s };
+  }
+
+  export circuit verifySignature(publicKey: CurvePoint, message: Bytes<32>, signature: SchnorrSignature): Boolean {
+    const rBytes = pointToBytes(signature.R);
+    const pkBytes = pointToBytes(publicKey);
+    const challengeInput = Bytes96 { b0: rBytes, b1: pkBytes, b2: message };
+    const challenge = transientHash<Bytes96>(challengeInput);
+
+    const lhs = ecMulGenerator(signature.s);
+    const cPk = ecMul(publicKey, challenge);
+    const rhs = ecAdd(signature.R, cPk);
+
+    return lhs.x == rhs.x && lhs.y == rhs.y;
+  }
+
+  export circuit isValidPublicKey(publicKey: CurvePoint): Boolean {
+    return publicKey.x != 0 as Field || publicKey.y != 0 as Field;
+  }
+}

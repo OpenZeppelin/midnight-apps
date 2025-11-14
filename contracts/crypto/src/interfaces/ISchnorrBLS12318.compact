@@ -1,0 +1,18 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (crypto/interfaces/ISchnorrBLS12318.compact)
+
+pragma language_version >= 0.18.0;
+
+module ISchnorrBLS12318 {
+  import CompactStandardLibrary;
+  
+  export struct SchnorrSignature {
+    R: CurvePoint,
+    s: Field
+  }
+
+  export struct SchnorrKeyPair {
+    secretKey: Field,
+    publicKey: CurvePoint
+  }
+}
