@@ -82,8 +82,7 @@ describe('Pedersen', () => {
       expect(c1.point).toEqual(c2.point);
     });
 
-    test.skip('should handle field modulus boundary values', () => {
-      // Skipped: values at field modulus cause decoding errors
+    test('should handle field modulus boundary values', () => {
       const commitment = pedersenSimulator.commit(FIELD_MODULUS, FIELD_MODULUS);
       expect(commitment).toBeDefined();
       expect(commitment.point).toBeDefined();
@@ -269,6 +268,114 @@ describe('Pedersen', () => {
       // Verify homomorphic property
       const expected = pedersenSimulator.commit(v1 + v2, r1 + r2);
       expect(sum.point).toEqual(expected.point);
+    });
+  });
+
+  describe('sub', () => {
+    test('should subtract two commitments homomorphically', () => {
+      const v1 = 20n;
+      const r1 = 15n;
+      const v2 = 10n;
+      const r2 = 5n;
+
+      const c1 = pedersenSimulator.commit(v1, r1);
+      const c2 = pedersenSimulator.commit(v2, r2);
+      const diff = pedersenSimulator.sub(c1, c2);
+
+      // Verify homomorphic property: sub(c1, c2) = commit(v1-v2, r1-r2)
+      const expected = pedersenSimulator.commit(v1 - v2, r1 - r2);
+      expect(diff.point).toEqual(expected.point);
+    });
+
+    test('should subtract zero commitment from non-zero commitment', () => {
+      const value = 100n;
+      const randomness = 10n;
+      const c1 = pedersenSimulator.commit(value, randomness);
+      const c2 = pedersenSimulator.zero();
+
+      const diff = pedersenSimulator.sub(c1, c2);
+      // Subtracting zero should not change the commitment
+      expect(diff.point).toEqual(c1.point);
+    });
+
+    test('should subtract non-zero commitment from zero commitment', () => {
+      const value = 100n;
+      const randomness = 10n;
+      const c1 = pedersenSimulator.zero();
+      const c2 = pedersenSimulator.commit(value, randomness);
+
+      const diff = pedersenSimulator.sub(c1, c2);
+      // Subtracting from zero should give negative commitment
+      const expected = pedersenSimulator.commit(-value, -randomness);
+      expect(diff.point).toEqual(expected.point);
+    });
+
+    test('should subtract two zero commitments', () => {
+      const c1 = pedersenSimulator.zero();
+      const c2 = pedersenSimulator.zero();
+
+      const diff = pedersenSimulator.sub(c1, c2);
+      expect(pedersenSimulator.isZero(diff)).toBe(true);
+    });
+
+    test('should handle subtraction of same commitment', () => {
+      const value = 100n;
+      const randomness = 10n;
+      const c1 = pedersenSimulator.commit(value, randomness);
+      const c2 = pedersenSimulator.commit(value, randomness);
+
+      const diff = pedersenSimulator.sub(c1, c2);
+      expect(pedersenSimulator.isZero(diff)).toBe(true);
+    });
+
+    test('should handle large values in subtraction', () => {
+      // Use values that are large but not at field modulus boundary
+      const v1 = FIELD_MODULUS - 10000n;
+      const r1 = FIELD_MODULUS - 20000n;
+      const v2 = 500n;
+      const r2 = 300n;
+
+      const c1 = pedersenSimulator.commit(v1, r1);
+      const c2 = pedersenSimulator.commit(v2, r2);
+      const diff = pedersenSimulator.sub(c1, c2);
+
+      // Verify homomorphic property
+      const expected = pedersenSimulator.commit(v1 - v2, r1 - r2);
+      expect(diff.point).toEqual(expected.point);
+    });
+
+    test('should verify sub(c1, c2) + c2 = c1', () => {
+      const v1 = 100n;
+      const r1 = 50n;
+      const v2 = 30n;
+      const r2 = 20n;
+
+      const c1 = pedersenSimulator.commit(v1, r1);
+      const c2 = pedersenSimulator.commit(v2, r2);
+      const diff = pedersenSimulator.sub(c1, c2);
+      const sum = pedersenSimulator.add(diff, c2);
+
+      // Adding back should recover original
+      expect(sum.point).toEqual(c1.point);
+    });
+
+    test('should verify c1 - c2 = -(c2 - c1)', () => {
+      const v1 = 100n;
+      const r1 = 50n;
+      const v2 = 30n;
+      const r2 = 20n;
+
+      const c1 = pedersenSimulator.commit(v1, r1);
+      const c2 = pedersenSimulator.commit(v2, r2);
+      const diff1 = pedersenSimulator.sub(c1, c2);
+      const diff2 = pedersenSimulator.sub(c2, c1);
+      const negDiff2 = pedersenSimulator.sub(
+        pedersenSimulator.zero(),
+        diff2,
+      );
+
+      // c1 - c2 should equal -(c2 - c1)
+      expect(diff1.point).toEqual(negDiff2.point);
     });
   });
   

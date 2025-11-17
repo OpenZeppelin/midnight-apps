@@ -44,6 +44,11 @@ export circuit add(c1: Commitment, c2: Commitment): Commitment {
   return Pedersen_add(c1, c2);
 }
 
+export circuit sub(c1: Commitment, c2: Commitment): Commitment {
+  steps.increment(1);
+  return Pedersen_sub(c1, c2);
+}
+
 export circuit mockRandom(seed: Field): Field {
   steps.increment(1);
   return Pedersen_mockRandom(seed);

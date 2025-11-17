@@ -12,19 +12,19 @@ export { SchnorrSignature, SchnorrKeyPair };
 
 export ledger steps: Counter;
 
-export circuit derivePublicKey(secretKeyBytes: Bytes<32>): CurvePoint {
+export circuit derivePublicKey(sk: Bytes<32>): CurvePoint {
   steps.increment(1);
-  return Schnorr_derivePublicKey(secretKeyBytes);
+  return Schnorr_derivePublicKey(sk);
 }
 
-export circuit generateKeyPair(secretKeyBytes: Bytes<32>): SchnorrKeyPair {
+export circuit generateKeyPair(sk: Bytes<32>): SchnorrKeyPair {
   steps.increment(1);
-  return Schnorr_generateKeyPair(secretKeyBytes);
+  return Schnorr_generateKeyPair(sk);
 }
 
-export circuit sign(secretKeyBytes: Bytes<32>, message: Bytes<32>, nonceBytes: Bytes<32>): SchnorrSignature {
+export circuit sign(sk: Bytes<32>, message: Bytes<32>, nonce: Bytes<32>): SchnorrSignature {
   steps.increment(1);
-  return Schnorr_sign(secretKeyBytes, message, nonceBytes);
+  return Schnorr_sign(sk, message, nonce);
 }
 
 export circuit verifySignature(

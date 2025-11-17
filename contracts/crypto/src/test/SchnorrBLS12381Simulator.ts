@@ -23,20 +23,6 @@ import {
   SchnorrBLS12381Witnesses,
 } from '../witnesses/SchnorrBLS12381';
 
-// Helper function to convert bigint to Bytes<32> (Uint8Array)
-const bigintToBytes32 = (value: bigint): Uint8Array => {
-  const bytes = new Uint8Array(32);
-  let remaining = value;
-
-  // Convert bigint to bytes (little-endian)
-  for (let i = 0; i < 32 && remaining > 0n; i++) {
-    bytes[i] = Number(remaining & 0xffn);
-    remaining = remaining >> 8n;
-  }
-
-  return bytes;
-};
-
 export class SchnorrBLS12381Simulator
   implements IContractSimulator<SchnorrBLS12381PrivateState, Ledger>
 {
@@ -82,45 +68,41 @@ export class SchnorrBLS12381Simulator
     return this.circuitContext.originalState;
   }
 
-  public derivePublicKey(secretKey: bigint): unknown {
-    const secretKeyBytes = bigintToBytes32(secretKey);
+  public derivePublicKey(secretKey: Uint8Array): { x: bigint; y: bigint } {
     const result = this.contract.circuits.derivePublicKey(
       this.circuitContext,
-      secretKeyBytes,
+      secretKey,
     );
     this.circuitContext = result.context;
     return result.result;
   }
 
-  public generateKeyPair(secretKey: bigint): SchnorrKeyPair {
-    const secretKeyBytes = bigintToBytes32(secretKey);
+  public generateKeyPair(secretKey: Uint8Array): SchnorrKeyPair {
     const result = this.contract.circuits.generateKeyPair(
       this.circuitContext,
-      secretKeyBytes,
+      secretKey,
     );
     this.circuitContext = result.context;
     return result.result;
   }
 
   public sign(
-    secretKey: bigint,
+    secretKey: Uint8Array,
     message: Uint8Array,
-    nonce: bigint,
+    nonce: Uint8Array,
   ): SchnorrSignature {
-    const secretKeyBytes = bigintToBytes32(secretKey);
-    const nonceBytes = bigintToBytes32(nonce);
     const result = this.contract.circuits.sign(
       this.circuitContext,
-      secretKeyBytes,
+      secretKey,
       message,
-      nonceBytes,
+      nonce,
     );
     this.circuitContext = result.context;
     return result.result;
   }
 
   public verifySignature(
-    publicKey: unknown,
+    publicKey: { x: bigint; y: bigint },
     message: Uint8Array,
     signature: SchnorrSignature,
   ): boolean {
@@ -134,16 +116,7 @@ export class SchnorrBLS12381Simulator
     return result.result;
   }
 
-  public hashToScalar(data: Uint8Array): bigint {
-    const result = this.contract.circuits.hashToScalar(
-      this.circuitContext,
-      data,
-    );
-    this.circuitContext = result.context;
-    return result.result;
-  }
-
-  public isValidPublicKey(publicKey: unknown): boolean {
+  public isValidPublicKey(publicKey: { x: bigint; y: bigint }): boolean {
     const result = this.contract.circuits.isValidPublicKey(
       this.circuitContext,
       publicKey,

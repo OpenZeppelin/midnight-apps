@@ -177,21 +177,23 @@ module Pedersen {
    *
    * @returns {Commitment} The difference commitment C1 - C2
    */
-  // export circuit sub(c1: Commitment, c2: Commitment): Commitment {
-  //   // Special case: if c2 is zero, return c1 (subtracting zero doesn't change the commitment)
-  //   if (isZero(c2)) {
-  //     return c1;
-  //   }
+  export circuit sub(c1: Commitment, c2: Commitment): Commitment {
+    // Special case: if c2 is zero, return c1 (subtracting zero doesn't change the commitment)
+    if (isZero(c2)) {
+      return c1;
+    }
     
-  //   // Compute -C2 by negating the point using scalar multiplication with -1
-  //   // In field arithmetic, -1 = r - 1 where r is the scalar field modulus
-  //   // For BLS12-381 scalar field: r = 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001
-  //   // So -1 = r - 1 = 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000000
-  //   // We inline the hex value directly to avoid function call overhead
-  //   const negC2Point = ecMul(c2.point, 52435875175126190479447740508185965837690552500527637822603658699938581184512 as Field);
-  //   const diffPoint = ecAdd(c1.point, negC2Point);
-  //   return Commitment { point: diffPoint };
-  // }
+    // Compute -C2 by negating the point using scalar multiplication with -1
+    // In field arithmetic, -1 = r - 1 where r is the scalar field modulus
+    // For BLS12-381 scalar field: r = 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001
+    // So -1 = r - 1 = 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000000 HEX
+    // So -1 = 52435875175126190479447740508185965837690552500527637822603658699938581184512 as Field DECIMAL
+    // We inline the hex value directly to avoid function call overhead
+    const r_minus_one = 52435875175126190479447740508185965837690552500527637822603658699938581184511 as Field;
+    const negC2Point = ecMul(c2.point, r_minus_one); // EmbeddedFr Error here
+    const diffPoint = ecAdd(c1.point, negC2Point);
+    return Commitment { point: diffPoint };
+  }
 
   /**
    * @title Mock Random circuit
