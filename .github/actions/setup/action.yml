@@ -35,7 +35,7 @@ runs:
       if: steps.cache-compact.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        curl --proto '=https' --tlsv1.2 -LsSf https://github.com/midnightntwrk/compact/releases/download/compact-v0.2.0/compact-installer.sh | sh
+        curl --proto '=https' --tlsv1.2 -LsSf "$COMPACT_INSTALLER_URL" | sh
 
     - name: Add Compact to PATH
       shell: bash
@@ -52,7 +52,7 @@ runs:
           echo "✅ Compact binary found at $HOME/.compact/bin/compact"
         else
           echo "❌ Compact binary not found, installing..."
-          curl --proto '=https' --tlsv1.2 -LsSf https://github.com/midnightntwrk/compact/releases/download/compact-v0.2.0/compact-installer.sh | sh
+          curl --proto '=https' --tlsv1.2 -LsSf "$COMPACT_INSTALLER_URL" | sh
         fi
 
     - name: Install and verify toolchain

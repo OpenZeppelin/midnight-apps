@@ -1,8 +1,18 @@
 {
   "name": "@openzeppelin/midnight-apps-compact-std",
-  "version": "1.0.0-alpha.1",
-  "private": true,
-  "description": "",
+  "version": "0.1.0",
+  "description": "A helper Compact package for the STD library types",
+  "keywords": ["compact", "std", "midnight", "starter", "contracts", "zk"],
+  "author": "OpenZeppelin",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenZeppelin/midnight-apps.git"
+  },
+  "bugs": {
+    "url": "https://github.com/OpenZeppelin/midnight-apps/issues"
+  },
+  "homepage": "https://github.com/OpenZeppelin/midnight-apps#readme",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -23,9 +33,6 @@
     "lint:fix": "biome check --write",
     "precommit": "lint-staged && pnpm run types"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "packageManager": "pnpm@10.4.1",
   "devDependencies": {
     "@types/node": "^24.10.0",
