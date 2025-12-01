@@ -1,11 +1,18 @@
 {
   "name": "@openzeppelin/midnight-apps-compact",
-  "private": true,
-  "version": "0.0.1",
-  "keywords": ["compact", "compiler"],
-  "author": "",
-  "license": "MIT",
+  "version": "0.1.0",
   "description": "Compact fetcher",
+  "keywords": ["compact", "compiler", "midnight", "starter"],
+  "author": "OpenZeppelin",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenZeppelin/midnight-apps.git"
+  },
+  "bugs": {
+    "url": "https://github.com/OpenZeppelin/midnight-apps/issues"
+  },
+  "homepage": "https://github.com/OpenZeppelin/midnight-apps#readme",
   "type": "module",
   "exports": "./index.js",
   "engines": {
