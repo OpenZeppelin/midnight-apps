@@ -1,0 +1,59 @@
+{
+  "name": "@openzeppelin/midnight-apps-contracts",
+  "version": "0.0.1-alpha.1",
+  "description": "OpenZeppelin Midnight Apps contracts",
+  "keywords": [
+    "openzeppelin",
+    "midnight-apps",
+    "midnight",
+    "contracts",
+    "security"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenZeppelin/midnight-apps.git"
+  },
+  "license": "MIT",
+  "author": "OpenZeppelin Community <maintainers@openzeppelin.org>",
+  "bugs": {
+    "url": "https://github.com/OpenZeppelin/midnight-apps/issues"
+  },
+  "homepage": "https://docs.openzeppelin.com/midnight-apps/",
+  "type": "module",
+  "scripts": {
+    "compact": "compact-compiler",
+    "compact:fast": "compact-compiler --skip-zk",
+    "compact:access": "compact-compiler --dir access",
+    "compact:archive": "compact-compiler --dir archive",
+    "compact:compact-types": "compact-compiler --dir compact-types",
+    "compact:shielded-token": "compact-compiler --dir shielded-token",
+    "compact:structs": "compact-compiler --dir structs",
+    "compact:math": "compact-compiler --dir math",
+    "build": "compact-builder",
+    "test": "compact-compiler --skip-zk && vitest run",
+    "types": "tsc -p tsconfig.json --noEmit",
+    "fmt": "biome format --write",
+    "fmt:check": "biome format --check",
+    "lint": "biome lint",
+    "lint:fix": "biome check --write",
+    "clean": "git clean -fXd"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@openzeppelin/compact-tools-cli": "file:../compact-tools/packages/cli",
+    "@openzeppelin/compact-tools-simulator": "file:../compact-tools/packages/simulator",
+    "@openzeppelin/midnight-apps-biome-config": "workspace:^",
+    "@tsconfig/node24": "^24.0.3",
+    "@types/node": "24.10.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.14"
+  },
+  "dependencies": {
+    "@midnight-ntwrk/midnight-js-network-id": "^2.1.0",
+    "@midnight-ntwrk/wallet-sdk-address-format": "^2.0.0",
+    "@midnight-ntwrk/zswap": "^4.0.0"
+  }
+}

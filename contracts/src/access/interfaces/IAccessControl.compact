@@ -1,0 +1,43 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (access/interfaces/IAccessControl.compact)
+
+pragma language_version >= 0.18.0;
+
+module IAccessControl {
+  import CompactStandardLibrary;
+
+  /**
+     * @description Defines the possible roles a user can have in the system.
+     * @enum {number}
+     */
+  export enum Role {
+    Admin,
+    Lp,
+    Trader,
+    None
+  };
+
+  /**
+   * @description Indicates whether the contract has been initialized.
+   * @type {Boolean}
+   */
+  export ledger isInitialized: Boolean;
+
+  /**
+   * @description Merkle tree storing commitments of user-role pairs, with a fixed depth of 10.
+   * @type {MerkleTree<10, Bytes<32>>}
+   */
+  export ledger roleCommits: MerkleTree<10, Bytes<32>>;
+
+  /**
+   * @description A set of nullifiers tracking used user-role pairs to prevent duplicate role assignments.
+   * @type {Set<Bytes<32>>}
+   */
+  export ledger roleNullifiers: Set<Bytes<32>>;
+
+  /**
+   * @description Counter tracking the next available index for inserting into the role tree.
+   * @type {Counter}
+   */
+  export ledger index: Counter;
+}

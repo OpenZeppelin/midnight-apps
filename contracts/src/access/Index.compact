@@ -1,0 +1,23 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (access/Index.compact)
+
+pragma language_version >= 0.18.0;
+
+/**
+ * @module Index
+ * @description Re-exports ledger-related types and state from IAccessControl.compact for use in contracts and TypeScript.
+ * @remarks This file provides a centralized export of IAccessControl's public ledger state, 
+ * making it accessible for TypeScript type generation via compactc. So no need to export them in a Mock*.compact.
+ */
+
+import "./interfaces/IAccessControl";
+
+/**
+ * @description Exports public ledger state and types from IAccessControl for contract and TypeScript integration.
+ */
+export { Role, // Enum defining user roles (Admin, Lp, Trader, None)
+         isInitialized, // Boolean indicating contract initialization
+         roleCommits, // Merkle tree storing role commitments
+         roleNullifiers, // Set of nullifiers tracking used user-role pairs
+         index // Counter for the next Merkle tree index
+         };
