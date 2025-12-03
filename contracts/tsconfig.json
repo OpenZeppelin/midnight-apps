@@ -1,0 +1,26 @@
+{
+    "extends": "@tsconfig/node24/tsconfig.json",
+    "include": [
+      "src/**/witnesses/**/*.ts"
+    ],
+    "exclude": ["src/archive/"],
+    "compilerOptions": {
+      "rootDir": "src",
+      "outDir": "dist",
+      // ES2020 target required to support BigInt literals (e.g., 1n, 64n)
+      "target": "ES2020",
+      // Include ES2020 type definitions for BigInt support
+      "lib": ["ES2020"],
+      // ESNext module format required when using bundler moduleResolution
+      "module": "ESNext",
+      // Bundler resolution allows imports without explicit file extensions
+      // (e.g., '../types/state' instead of '../types/state.js')
+      "moduleResolution": "bundler",
+      "declaration": true,
+      "allowJs": true,
+      "forceConsistentCasingInFileNames": true,
+      "noImplicitAny": true,
+      "isolatedModules": true,
+      "resolveJsonModule": true,
+    }
+  }
