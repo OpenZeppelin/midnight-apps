@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from 'vitest';
-import { MaxSimulator } from './MaxSimulator';
+import { MaxSimulator } from './MaxSimulator.js';
 
 let maxSimulator: MaxSimulator;
 

@@ -14,8 +14,8 @@ import {
   type Ledger,
   ledger,
 } from '../../../artifacts/math/test/Bytes32.mock/contract/index.cjs';
-import type { IContractSimulator } from '../types/test';
-import { Bytes32PrivateState, Bytes32Witnesses } from '../witnesses/Bytes32';
+import type { IContractSimulator } from '../types/test.js';
+import { Bytes32PrivateState, Bytes32Witnesses } from '../witnesses/Bytes32.js';
 
 export class Bytes32Simulator
   implements IContractSimulator<Bytes32PrivateState, Ledger>

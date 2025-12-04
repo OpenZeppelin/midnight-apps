@@ -11,7 +11,7 @@ import type {
   QualifiedCoinInfo,
   SendResult,
   ZswapCoinPublicKey,
-} from './StandardLibrary';
+} from './StandardLibrary.js';
 
 describe('@openzeppelin/midnight-apps-compact-std', () => {
   it('should export Maybe type correctly', () => {

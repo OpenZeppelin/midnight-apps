@@ -5,8 +5,8 @@ import type {
   U256,
 } from '../../../artifacts/math/Index/contract/index.d.cts';
 import type { Ledger } from '../../../artifacts/math/test/Field254.mock/contract/index.cjs';
-import type { EmptyState } from '../types/state';
-import { sqrtBigint } from '../utils/sqrtBigint';
+import type { EmptyState } from '../types/state.js';
+import { sqrtBigint } from '../utils/sqrtBigint.js';
 
 /**
  * @description Represents the private state of the Field254 module.

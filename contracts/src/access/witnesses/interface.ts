@@ -2,7 +2,7 @@ import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
 import type { Role } from '../../../artifacts/access/Index/contract/index.cjs';
 // TODO: (team): I noticed that we are using the mock contract's ledger type here, but I am not sure if this is correct way.
 import type { Ledger } from '../../../artifacts/access/test/AccessControl.mock/contract/index.cjs';
-import type { Maybe, MerkleTreePath } from '../../types/StandardLibrary';
+import type { Maybe, MerkleTreePath } from '../../types/StandardLibrary.js';
 /**
  * @description Interface defining the witness methods for access control operations.
  * Matches the structure expected by Index and MockAccessControl artifacts.

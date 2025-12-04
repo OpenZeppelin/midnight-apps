@@ -18,8 +18,11 @@ import {
   type Ledger,
   ledger,
 } from '../../../artifacts/math/test/Field254.mock/contract/index.cjs';
-import type { IContractSimulator } from '../types/test';
-import { Field254PrivateState, Field254Witnesses } from '../witnesses/Field254';
+import type { IContractSimulator } from '../types/test.js';
+import {
+  Field254PrivateState,
+  Field254Witnesses,
+} from '../witnesses/Field254.js';
 
 export class Field254Simulator
   implements IContractSimulator<Field254PrivateState, Ledger>

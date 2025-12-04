@@ -1,5 +1,5 @@
 import type { U256 } from '../../../artifacts/math/Index/contract/index.d.cts';
-import { MAX_UINT64 } from './consts';
+import { MAX_UINT64 } from './consts.js';
 
 /**
  * Converts a bigint value to a U256 struct representation.

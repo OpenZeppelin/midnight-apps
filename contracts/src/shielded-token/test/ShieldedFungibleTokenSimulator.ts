@@ -18,12 +18,12 @@ import type {
   ContractAddress,
   Either,
   ZswapCoinPublicKey,
-} from '../../types/StandardLibrary';
-import type { IContractSimulator } from '../types/test';
+} from '../../types/StandardLibrary.js';
+import type { IContractSimulator } from '../types/test.js';
 import {
   ShieldedFungibleTokenPrivateState,
   ShieldedFungibleTokenWitnesses,
-} from '../witnesses';
+} from '../witnesses.js';
 
 export class ShieldedFungibleTokenSimulator
   implements IContractSimulator<ShieldedFungibleTokenPrivateState, Ledger>

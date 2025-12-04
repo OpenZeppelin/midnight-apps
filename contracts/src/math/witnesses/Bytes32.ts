@@ -4,7 +4,7 @@ import type {
   U256,
 } from '../../../artifacts/math/Index/contract/index.d.cts';
 import type { Ledger } from '../../../artifacts/math/test/Bytes32.mock/contract/index.cjs';
-import type { EmptyState } from '../types/state';
+import type { EmptyState } from '../types/state.js';
 
 /**
  * @description Represents the private state of the Bytes32 module.

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from 'vitest';
-import { Bytes32Simulator } from './Bytes32Simulator';
+import { Bytes32Simulator } from './Bytes32Simulator.js';
 
 let bytes32Simulator: Bytes32Simulator;
 

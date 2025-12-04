@@ -1,2 +1,2 @@
-export type { IContractSimulator } from './test';
-export type { EmptyState } from './state';
+export type { IContractSimulator } from './test.js';
+export type { EmptyState } from './state.js';

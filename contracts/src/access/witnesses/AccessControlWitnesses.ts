@@ -6,11 +6,11 @@ import type {
   Maybe,
   MerkleTreePath,
   ZswapCoinPublicKey,
-} from '../../types/StandardLibrary';
-import type { RoleValue } from '../types/role';
-import { maybeFromNullable } from '../utils/compactHelper';
-import { emptyMerkleTreePath } from '../utils/test';
-import type { IAccessControlWitnesses } from './interface';
+} from '../../types/StandardLibrary.js';
+import type { RoleValue } from '../types/role.js';
+import { maybeFromNullable } from '../utils/compactHelper.js';
+import { emptyMerkleTreePath } from '../utils/test.js';
+import type { IAccessControlWitnesses } from './interface.js';
 
 /**
  * @description Represents the private state of an access control contract, storing a secret key and role assignments.

@@ -19,8 +19,8 @@ import {
   type Ledger,
   ledger,
 } from '../../../artifacts/math/test/Uint256.mock/contract/index.cjs';
-import type { IContractSimulator } from '../types/test';
-import { Uint256PrivateState, Uint256Witnesses } from '../witnesses/Uint256';
+import type { IContractSimulator } from '../types/test.js';
+import { Uint256PrivateState, Uint256Witnesses } from '../witnesses/Uint256.js';
 
 export class Uint256Simulator
   implements IContractSimulator<Uint256PrivateState, Ledger>

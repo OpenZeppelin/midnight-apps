@@ -14,8 +14,8 @@ import type {
   ContractAddress,
   Either,
   ZswapCoinPublicKey,
-} from '../../types/StandardLibrary';
-import { ShieldedFungibleTokenSimulator } from './ShieldedFungibleTokenSimulator';
+} from '../../types/StandardLibrary.js';
+import { ShieldedFungibleTokenSimulator } from './ShieldedFungibleTokenSimulator.js';
 
 const NONCE = new Uint8Array(32).fill(0x01);
 const DOMAIN = new Uint8Array(32).fill(0x42);

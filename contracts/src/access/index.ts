@@ -8,15 +8,15 @@
 export {
   AccessContractPrivateState,
   AccessControlWitnesses,
-} from './witnesses/AccessControlWitnesses';
+} from './witnesses/AccessControlWitnesses.js';
 
-export type { IAccessControlWitnesses } from './witnesses/interface';
+export type { IAccessControlWitnesses } from './witnesses/interface.js';
 
 export type {
   Role,
   Ledger,
-} from './types/ledger';
+} from './types/ledger.js';
 
-export type { RoleValue } from './types/role';
+export type { RoleValue } from './types/role.js';
 
-export type { IContractSimulator } from './types/test';
+export type { IContractSimulator } from './types/test.js';

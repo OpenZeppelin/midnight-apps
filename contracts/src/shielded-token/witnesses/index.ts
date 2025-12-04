@@ -1,5 +1,5 @@
 import type { Ledger } from '../../../artifacts/shielded-token/ShieldedFungibleToken/contract/index.cjs';
-import type { EmptyState } from '../types/state';
+import type { EmptyState } from '../types/state.js';
 
 export type IShieldedFungibleTokenWitnesses<_L, _P> = Record<string, never>;
 

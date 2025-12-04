@@ -19,8 +19,8 @@ import {
   type Ledger,
   ledger,
 } from '../../../artifacts/math/test/Uint128.mock/contract/index.cjs';
-import type { IContractSimulator } from '../types/test';
-import { Uint128PrivateState, Uint128Witnesses } from '../witnesses/Uint128';
+import type { IContractSimulator } from '../types/test.js';
+import { Uint128PrivateState, Uint128Witnesses } from '../witnesses/Uint128.js';
 
 export class Uint128Simulator
   implements IContractSimulator<Uint128PrivateState, Ledger>

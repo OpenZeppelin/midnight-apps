@@ -14,12 +14,12 @@ import {
   Contract as MockAccessControl,
   ledger,
 } from '../../../artifacts/access/test/AccessControl.mock/contract/index.cjs';
-import type { ZswapCoinPublicKey } from '../../types/StandardLibrary';
-import type { IContractSimulator } from '../types/test';
+import type { ZswapCoinPublicKey } from '../../types/StandardLibrary.js';
+import type { IContractSimulator } from '../types/test.js';
 import {
   AccessContractPrivateState,
   AccessControlWitnesses,
-} from '../witnesses/AccessControlWitnesses';
+} from '../witnesses/AccessControlWitnesses.js';
 
 /**
  * @description A simulator implementation of an access control contract for testing purposes.

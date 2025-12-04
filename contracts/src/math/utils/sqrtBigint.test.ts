@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { sqrtBigint } from './sqrtBigint';
+import { sqrtBigint } from './sqrtBigint.js';
 
 describe('sqrtBigint() function', () => {
   test('should handle zero', () => {

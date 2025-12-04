@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import { MAX_UINT64 } from './consts';
-import { FIELD_MODULUS, fromU256, toU256 } from './u256';
+import { MAX_UINT64 } from './consts.js';
+import { FIELD_MODULUS, fromU256, toU256 } from './u256.js';
 
 describe('U256 Utils', () => {
   describe('toU256', () => {

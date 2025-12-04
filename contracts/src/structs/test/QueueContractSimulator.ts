@@ -11,11 +11,11 @@ import {
   Contract as MockQueue,
   ledger,
 } from '../../../artifacts/structs/test/Queue.mock/contract/index.cjs';
-import type { IContractSimulator } from '../types/test';
+import type { IContractSimulator } from '../types/test.js';
 import {
   QueueContractPrivateState,
   QueueWitnesses,
-} from '../witnesses/QueueWitnesses';
+} from '../witnesses/QueueWitnesses.js';
 
 export class QueueContractSimulator
   implements IContractSimulator<QueueContractPrivateState, Ledger>

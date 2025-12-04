@@ -6,7 +6,7 @@ import {
   MAX_UINT64,
   MAX_UINT128,
   MAX_UINT256,
-} from './consts';
+} from './consts.js';
 
 describe('Constants', () => {
   test('MAX_U8 should be 2^8 - 1', () => {

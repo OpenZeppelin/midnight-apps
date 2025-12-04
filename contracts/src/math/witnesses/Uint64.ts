@@ -1,9 +1,9 @@
 import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
 import type { DivResultU64 } from '../../../artifacts/math/Index/contract/index.d.cts';
 import type { Ledger } from '../../../artifacts/math/test/Uint64.mock/contract/index.cjs';
-import type { EmptyState } from '../types/state';
-import { sqrtBigint } from '../utils/sqrtBigint';
-import type { IUint64Witnesses } from './interfaces';
+import type { EmptyState } from '../types/state.js';
+import { sqrtBigint } from '../utils/sqrtBigint.js';
+import type { IUint64Witnesses } from './interfaces.js';
 
 /**
  * @description Represents the private state of the Uint64 module.

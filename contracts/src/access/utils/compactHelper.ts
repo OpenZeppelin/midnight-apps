@@ -1,4 +1,4 @@
-import type { Maybe } from '../../types/StandardLibrary';
+import type { Maybe } from '../../types/StandardLibrary.js';
 
 /**
  * @description Converts a nullable value into a Maybe type, providing a default empty value if null or undefined.

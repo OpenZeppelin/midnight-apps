@@ -7,4 +7,4 @@
 export {
   type QueueContractPrivateState,
   QueueWitnesses,
-} from './witnesses/QueueWitnesses';
+} from './witnesses/QueueWitnesses.js';

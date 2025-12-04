@@ -14,8 +14,8 @@ import {
   type Ledger,
   ledger,
 } from '../../../artifacts/math/test/Max.mock/contract/index.cjs';
-import type { IContractSimulator } from '../types/test';
-import { type MaxPrivateState, MaxWitnesses } from '../witnesses/Max';
+import type { IContractSimulator } from '../types/test.js';
+import { type MaxPrivateState, MaxWitnesses } from '../witnesses/Max.js';
 
 export class MaxSimulator
   implements IContractSimulator<MaxPrivateState, Ledger>

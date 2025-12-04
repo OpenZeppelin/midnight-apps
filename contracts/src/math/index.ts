@@ -7,27 +7,27 @@
 export {
   type Uint64PrivateState,
   Uint64Witnesses,
-} from './witnesses/Uint64';
+} from './witnesses/Uint64.js';
 export {
   type Uint128PrivateState,
   Uint128Witnesses,
-} from './witnesses/Uint128';
+} from './witnesses/Uint128.js';
 export {
   type Uint256PrivateState,
   Uint256Witnesses,
-} from './witnesses/Uint256';
+} from './witnesses/Uint256.js';
 export {
   type Field254PrivateState,
   Field254Witnesses,
-} from './witnesses/Field254';
+} from './witnesses/Field254.js';
 export {
   type Bytes32PrivateState,
   Bytes32Witnesses,
-} from './witnesses/Bytes32';
+} from './witnesses/Bytes32.js';
 export {
   type MaxPrivateState,
   MaxWitnesses,
-} from './witnesses/Max';
-export { sqrtBigint } from './utils/sqrtBigint';
-export type { IContractSimulator } from './types/test';
-export type { EmptyState } from './types/state';
+} from './witnesses/Max.js';
+export { sqrtBigint } from './utils/sqrtBigint.js';
+export type { IContractSimulator } from './types/test.js';
+export type { EmptyState } from './types/state.js';

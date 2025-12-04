@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test } from 'vitest';
-import { FIELD_MODULUS, fromU256, toU256 } from '../utils/u256';
-import { Field254Simulator } from './Field254Simulator';
+import { FIELD_MODULUS, fromU256, toU256 } from '../utils/u256.js';
+import { Field254Simulator } from './Field254Simulator.js';
 
 let field254Simulator: Field254Simulator;
 

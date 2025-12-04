@@ -1,5 +1,5 @@
-import type { MerkleTreePath } from '../../types/StandardLibrary';
-import type { Role } from './ledger';
+import type { MerkleTreePath } from '../../types/StandardLibrary.js';
+import type { Role } from './ledger.js';
 
 /**
  * @description Represents a role assignment with its cryptographic commitment and Merkle tree metadata.

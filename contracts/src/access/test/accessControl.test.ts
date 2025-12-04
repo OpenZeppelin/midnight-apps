@@ -6,8 +6,8 @@ import { sampleCoinPublicKey } from '@midnight-ntwrk/zswap';
 import { beforeEach, describe, expect, test } from 'vitest';
 import { Role } from '../../../artifacts/access/Index/contract/index.cjs';
 import { pureCircuits } from '../../../artifacts/access/test/AccessControl.mock/contract/index.cjs';
-import type { RoleValue } from '../types/role';
-import { AccessControlSimulator } from './AccessControlSimulator';
+import type { RoleValue } from '../types/role.js';
+import { AccessControlSimulator } from './AccessControlSimulator.js';
 
 let mockAccessControlContract: AccessControlSimulator;
 let admin: CoinPublicKey;
