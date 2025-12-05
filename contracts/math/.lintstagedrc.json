@@ -1,4 +1,0 @@
-{
-  "*.{ts,md}": ["biome format --write", "biome check --write"],
-  "*.compact": ["compact format"]
-}
