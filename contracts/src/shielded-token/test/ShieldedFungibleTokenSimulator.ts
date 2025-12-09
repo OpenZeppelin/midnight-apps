@@ -23,7 +23,7 @@ import type { IContractSimulator } from '../types/test.js';
 import {
   ShieldedFungibleTokenPrivateState,
   ShieldedFungibleTokenWitnesses,
-} from '../witnesses.js';
+} from '../witnesses/index.js';
 
 export class ShieldedFungibleTokenSimulator
   implements IContractSimulator<ShieldedFungibleTokenPrivateState, Ledger>
