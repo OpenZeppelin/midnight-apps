@@ -292,37 +292,6 @@ importers:
 
   packages/biome-config: {}
 
-  packages/compact:
-    dependencies:
-      '@openzeppelin/midnight-apps-logger':
-        specifier: workspace:^
-        version: link:../logger
-      chalk:
-        specifier: ^5.6.2
-        version: 5.6.2
-      log-symbols:
-        specifier: ^7.0.0
-        version: 7.0.1
-      ora:
-        specifier: ^9.0.0
-        version: 9.0.0
-    devDependencies:
-      '@openzeppelin/midnight-apps-biome-config':
-        specifier: workspace:^
-        version: link:../biome-config
-      '@tsconfig/node22':
-        specifier: ^22.0.2
-        version: 22.0.2
-      '@types/node':
-        specifier: 24.10.0
-        version: 24.10.0
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
-      vitest:
-        specifier: ^3.1.3
-        version: 3.1.4(@types/node@24.10.0)(jiti@2.4.2)(lightningcss@1.30.1)(yaml@2.8.0)
-
   packages/logger:
     dependencies:
       pino:

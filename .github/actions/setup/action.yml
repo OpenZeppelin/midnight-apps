@@ -76,19 +76,25 @@ runs:
         node-version: '22.x'
         cache: 'pnpm'
     
-    - name: Build compact package
+    - name: Enable Corepack for Yarn
+      shell: bash
+      run: corepack enable
+
+    - name: Build compact-tools submodule
       shell: bash
       run: |
-        cd packages/compact
-        pnpm install
-        pnpm run build
+        echo "📦 Building compact-tools submodule..."
+        cd compact-tools
+        yarn install --immutable
+        yarn build
+        echo "✅ compact-tools built successfully"
 
-    - name: Validate build artifacts
+    - name: Validate compact-tools artifacts
       shell: bash
       run: |
         REQUIRED_FILES=(
-          "packages/compact/dist/runCompiler.js"
-          "packages/compact/dist/runBuilder.js"
+          "compact-tools/packages/cli/dist/runCompiler.js"
+          "compact-tools/packages/cli/dist/runBuilder.js"
         )
         for file in "${REQUIRED_FILES[@]}"; do
           if [ ! -f "$file" ]; then
@@ -96,6 +102,16 @@ runs:
             exit 1
           fi
         done
+        echo "✅ compact-tools artifacts validated"
+
+    - name: Build compact-contracts submodule
+      shell: bash
+      run: |
+        echo "📦 Building compact-contracts submodule..."
+        cd compact-contracts
+        yarn install --immutable
+        SKIP_ZK=true yarn compact
+        echo "✅ compact-contracts built successfully"
 
     - name: Install dependencies
       shell: bash
