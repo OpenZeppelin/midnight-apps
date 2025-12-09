@@ -26,7 +26,7 @@ module LunarswapPair {
   import "../math/Uint128" prefix Uint128_;
   import "../math/Max" prefix Max_;
 
-  import "./types/Pair";
+  import "./types/TPair";
 
   import LunarswapLibrary prefix LunarswapLibrary_;
   import LunarswapLiquidity prefix LunarswapLiquidity_;

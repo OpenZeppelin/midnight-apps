@@ -3,7 +3,7 @@
 
 pragma language_version >= 0.18.0;
 
-module Pair {
+module TPair {
   import CompactStandardLibrary;
 
   /**
