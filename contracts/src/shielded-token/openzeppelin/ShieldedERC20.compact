@@ -33,7 +33,7 @@ pragma language_version >= 0.18.0;
  */
 module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
   import CompactStandardLibrary;
-  import Utils prefix Utils_;
+  import "../../../../compact-contracts/contracts/src/utils/Utils" prefix Utils_;
   import "../../math/Bytes32" prefix Bytes32_;
 
   // Public state
