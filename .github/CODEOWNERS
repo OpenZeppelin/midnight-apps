@@ -13,5 +13,4 @@
 
 # Global:
 
-* @OpenZeppelin/contracts-midnight-maintainers
-SECURITY.md @OpenZeppelin/product-security @OpenZeppelin/contracts-midnight-maintainers
+* @OpenZeppelin/contracts-midnight-maintainers @OpenZeppelin/product-security @OpenZeppelin/devops
