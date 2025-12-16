@@ -5,16 +5,18 @@ pragma language_version >= 0.18.0;
 
 import CompactStandardLibrary;
 
-import "../AccessControl" prefix AccessControl_;
-
-import "../interfaces/IAccessControl";
+import "../../AccessControl" prefix AccessControl_;
 
 // Export circuits for testing purposes
-export { AccessControl_hashUserRole, roleCommits, isInitialized, index, Role };
+export { AccessControl_hashUserRole,
+         AccessControl_roleCommits,
+         AccessControl_isInitialized,
+         AccessControl_index,
+         AccessControl_Role };
 
 /**
  * @description Constructs the contract by initializing the AccessControl module with an initial admin.
- * @param {ZswapCoinPublicKey} initialAdmin - The public key of the initial admin.
+ * @param {AccessControl_ZswapCoinPublicKey} initialAdmin - The public key of the initial admin.
  * @returns {[]} - An empty array indicating successful initialization.
  * @throws {RoleError} - If the contract is already initialized (inherited from AccessControl).
  */
@@ -24,11 +26,11 @@ constructor(initialAdmin: ZswapCoinPublicKey) {
 
 /**
  * @description Test circuit to grant a role to a user, wrapping AccessControl's grantRole.
- * @param {ZswapCoinPublicKey} user - The public key of the user to grant the role to.
- * @param {Role} role - The role to grant (Admin, Lp, Trader, or None).
+ * @param {AccessControl_ZswapCoinPublicKey} user - The public key of the user to grant the role to.
+ * @param {AccessControl_Role} role - The role to grant (Admin, Lp, Trader, or None).
  * @returns {[]} - An empty array indicating success.
  * @throws {RoleError} - If the contract is not initialized, caller is not Admin, or the role tree is full.
  */
-export circuit testGrantRole(user: ZswapCoinPublicKey, role: Role): [] {
+export circuit testGrantRole(user: ZswapCoinPublicKey, role: AccessControl_Role): [] {
   return AccessControl_grantRole(user, role);
 }

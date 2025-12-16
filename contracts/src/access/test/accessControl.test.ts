@@ -1,200 +1,191 @@
-import {
-  type CoinPublicKey,
-  encodeCoinPublicKey,
-} from '@midnight-ntwrk/compact-runtime';
+import { encodeCoinPublicKey } from '@midnight-ntwrk/compact-runtime';
 import { sampleCoinPublicKey } from '@midnight-ntwrk/zswap';
-import { beforeEach, describe, expect, test } from 'vitest';
-import { Role } from '../../../artifacts/access/Index/contract/index.cjs';
-import { pureCircuits } from '../../../artifacts/access/test/AccessControl.mock/contract/index.cjs';
-import type { RoleValue } from '../types/role.js';
-import { AccessControlSimulator } from './AccessControlSimulator.js';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { AccessControl_Role } from '../../../artifacts/access/test/mocks/AccessControl.mock/contract/index.cjs';
+import { AccessControlSimulator } from './mocks/AccessControlSimulator.js';
+import type { RoleValue } from './mocks/AccessControlWitnesses.js';
 
-let mockAccessControlContract: AccessControlSimulator;
-let admin: CoinPublicKey;
+let simulator: AccessControlSimulator;
+let admin: string;
 let adminPkBytes: Uint8Array;
 
 const setup = () => {
   admin = '9905a18ce5bd2d7945818b18be9b0afe387efe29c8ffa81d90607a651fb83a2b';
   adminPkBytes = encodeCoinPublicKey(admin);
-  mockAccessControlContract = new AccessControlSimulator(admin);
+  simulator = new AccessControlSimulator(admin);
 };
 
-// TODO: skipping this test because of known issue: pathForLeaf is not working as expected: Error: invalid index into sparse merkle tree: 0
-describe.skip('AccessControl', () => {
+describe('AccessControl', () => {
   beforeEach(setup);
 
   describe('Initialize', () => {
-    test('should initialize with admin role', () => {
-      const publicState = mockAccessControlContract.getCurrentPublicState();
-      const privateState = mockAccessControlContract.getCurrentPrivateState();
-      const adminRoleCommit = pureCircuits.AccessControl_hashUserRole(
+    it('should initialize with admin role', () => {
+      const publicState = simulator.getPublicState();
+      const privateState = simulator.getPrivateState();
+      const adminRoleCommit = simulator.hashUserRole(
         { bytes: adminPkBytes },
-        Role.Admin,
+        AccessControl_Role.Admin,
       );
       const expectedAdminRole: RoleValue = {
         commitment: adminRoleCommit,
         index: 0n,
-        role: Role.Admin,
+        role: AccessControl_Role.Admin,
       };
 
-      expect(privateState.roles[adminRoleCommit.toString()]).toEqual(
-        expectedAdminRole,
-      );
-      expect(publicState.isInitialized).toBe(true);
       expect(
-        publicState.roleCommits.checkRoot(publicState.roleCommits.root()),
+        privateState.roles[Buffer.from(adminRoleCommit).toString('hex')],
+      ).toEqual(expectedAdminRole);
+      expect(publicState.AccessControl_isInitialized).toBe(true);
+      expect(
+        publicState.AccessControl_roleCommits.checkRoot(
+          publicState.AccessControl_roleCommits.root(),
+        ),
       ).toBe(true);
     });
 
-    test('should have valid root after initialization', () => {
-      const publicState = mockAccessControlContract.getCurrentPublicState();
-      const root = publicState.roleCommits.root();
-      expect(publicState.roleCommits.checkRoot(root)).toBe(true);
+    it('should have valid root after initialization', () => {
+      const publicState = simulator.getPublicState();
+      const root = publicState.AccessControl_roleCommits.root();
+      expect(publicState.AccessControl_roleCommits.checkRoot(root)).toBe(true);
     });
 
-    test('should not have full tree after initialization', () => {
-      const publicState = mockAccessControlContract.getCurrentPublicState();
-      expect(publicState.roleCommits.isFull()).toBe(false);
+    it('should not have full tree after initialization', () => {
+      const publicState = simulator.getPublicState();
+      expect(publicState.AccessControl_roleCommits.isFull()).toBe(false);
     });
   });
 
   describe('Grant Role', () => {
-    test('should grant role to user by admin', () => {
+    it('should grant role to user by admin', () => {
       const lpUser = sampleCoinPublicKey();
-      const circuitResult = mockAccessControlContract.grantRole(
+      simulator.grantRole(
         { bytes: encodeCoinPublicKey(lpUser) },
-        Role.Lp,
-        admin,
+        AccessControl_Role.Lp,
       );
-      const lpRoleCommit = pureCircuits.AccessControl_hashUserRole(
+
+      const lpRoleCommit = simulator.hashUserRole(
         { bytes: encodeCoinPublicKey(lpUser) },
-        Role.Lp,
+        AccessControl_Role.Lp,
       );
+      const privateState = simulator.getPrivateState();
       const expectedLpRole: RoleValue = {
-        role: Role.Lp,
+        role: AccessControl_Role.Lp,
         commitment: lpRoleCommit,
         index: 1n,
       };
 
       expect(
-        circuitResult.currentPrivateState.roles[lpRoleCommit.toString()],
+        privateState.roles[Buffer.from(lpRoleCommit).toString('hex')],
       ).toEqual(expectedLpRole);
     });
 
-    test('should fail when non-admin calls grantRole', () => {
+    it('should fail when non-admin calls grantRole', () => {
       const lpUser = sampleCoinPublicKey();
       const notAuthorizedUser = sampleCoinPublicKey();
+
+      // Use as() to simulate a non-admin caller
       expect(() =>
-        mockAccessControlContract.grantRole(
-          { bytes: encodeCoinPublicKey(lpUser) },
-          Role.Lp,
-          notAuthorizedUser,
-        ),
+        simulator
+          .as(notAuthorizedUser)
+          .grantRole(
+            { bytes: encodeCoinPublicKey(lpUser) },
+            AccessControl_Role.Lp,
+          ),
       ).toThrowError('AccessControl: Unauthorized user!');
     });
 
-    test('should fail when granting duplicate role', () => {
+    it('should fail when granting duplicate role', () => {
       const lpUser = sampleCoinPublicKey();
-      mockAccessControlContract.grantRole(
+      simulator.grantRole(
         { bytes: encodeCoinPublicKey(lpUser) },
-        Role.Lp,
-        admin,
+        AccessControl_Role.Lp,
       );
       expect(() =>
-        mockAccessControlContract.grantRole(
+        simulator.grantRole(
           { bytes: encodeCoinPublicKey(lpUser) },
-          Role.Lp,
-          admin,
+          AccessControl_Role.Lp,
         ),
       ).toThrowError('AccessControl: Role already granted!');
     });
 
-    test('should increment index after granting role', () => {
+    it('should increment index after granting role', () => {
       const lpUser = sampleCoinPublicKey();
-      mockAccessControlContract.grantRole(
+      simulator.grantRole(
         { bytes: encodeCoinPublicKey(lpUser) },
-        Role.Lp,
-        admin,
+        AccessControl_Role.Lp,
       );
-      const publicState = mockAccessControlContract.getCurrentPublicState();
-      expect(publicState.index).toBe(2n); // 0 from init, 1 from grant
+      const publicState = simulator.getPublicState();
+      expect(publicState.AccessControl_index).toBe(2n); // 0 from init, 1 from grant
     });
 
-    test('should fail when role tree is full', () => {
+    it('should fail when role tree is full', () => {
       for (let i = 0; i < 1023; i++) {
         const user = sampleCoinPublicKey();
-        mockAccessControlContract.grantRole(
+        simulator.grantRole(
           { bytes: encodeCoinPublicKey(user) },
-          Role.Lp,
-          admin,
+          AccessControl_Role.Lp,
         );
       }
       const lastUser = sampleCoinPublicKey();
       expect(() =>
-        mockAccessControlContract.grantRole(
+        simulator.grantRole(
           { bytes: encodeCoinPublicKey(lastUser) },
-          Role.Lp,
-          admin,
+          AccessControl_Role.Lp,
         ),
       ).toThrowError('AccessControl: Role commitments tree is full!');
     }, 60000); // 60s timeout
 
-    test.concurrent(
-      'should handle concurrent grants to unique users',
-      async () => {
-        const user1 = sampleCoinPublicKey();
-        const user2 = sampleCoinPublicKey();
-        await Promise.all([
-          mockAccessControlContract.grantRole(
-            { bytes: encodeCoinPublicKey(user1) },
-            Role.Lp,
-            admin,
-          ),
-          mockAccessControlContract.grantRole(
-            { bytes: encodeCoinPublicKey(user2) },
-            Role.Trader,
-            admin,
-          ),
-        ]);
-        const privateState = mockAccessControlContract.getCurrentPrivateState();
-        expect(Object.keys(privateState.roles).length).toBe(3); // Admin + 2 new roles
-      },
-    );
+    it('should handle concurrent grants to unique users', async () => {
+      const user1 = sampleCoinPublicKey();
+      const user2 = sampleCoinPublicKey();
 
-    test('should grant None role', () => {
+      simulator.grantRole(
+        { bytes: encodeCoinPublicKey(user1) },
+        AccessControl_Role.Lp,
+      );
+      simulator.grantRole(
+        { bytes: encodeCoinPublicKey(user2) },
+        AccessControl_Role.Trader,
+      );
+
+      const privateState = simulator.getPrivateState();
+      expect(Object.keys(privateState.roles).length).toBe(3); // Admin + 2 new roles
+    });
+
+    it('should grant None role', () => {
       const user = sampleCoinPublicKey();
-      const circuitResult = mockAccessControlContract.grantRole(
+      simulator.grantRole(
         { bytes: encodeCoinPublicKey(user) },
-        Role.None,
-        admin,
+        AccessControl_Role.None,
       );
-      const noneRoleCommit = pureCircuits.AccessControl_hashUserRole(
+
+      const noneRoleCommit = simulator.hashUserRole(
         { bytes: encodeCoinPublicKey(user) },
-        Role.None,
+        AccessControl_Role.None,
       );
+      const privateState = simulator.getPrivateState();
       const expectedNoneRole: RoleValue = {
-        role: Role.None,
+        role: AccessControl_Role.None,
         commitment: noneRoleCommit,
         index: 1n,
       };
+
       expect(
-        circuitResult.currentPrivateState.roles[noneRoleCommit.toString()],
+        privateState.roles[Buffer.from(noneRoleCommit).toString('hex')],
       ).toEqual(expectedNoneRole);
     });
 
-    test('should grant multiple roles to same user', () => {
+    it('should grant multiple roles to same user', () => {
       const user = sampleCoinPublicKey();
-      mockAccessControlContract.grantRole(
+      simulator.grantRole(
         { bytes: encodeCoinPublicKey(user) },
-        Role.Lp,
-        admin,
+        AccessControl_Role.Lp,
       );
-      mockAccessControlContract.grantRole(
+      simulator.grantRole(
         { bytes: encodeCoinPublicKey(user) },
-        Role.Trader,
-        admin,
+        AccessControl_Role.Trader,
       );
-      const privateState = mockAccessControlContract.getCurrentPrivateState();
+      const privateState = simulator.getPrivateState();
       expect(Object.keys(privateState.roles).length).toBe(3); // Admin + Lp + Trader
     });
   });
