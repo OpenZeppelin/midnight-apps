@@ -29,7 +29,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Lint and Format
-        run: pnpm lint && pnpm fmt
+        run: pnpm lint:ci
         timeout-minutes: 10
 
       - name: Commitlint

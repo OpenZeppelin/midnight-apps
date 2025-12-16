@@ -13,9 +13,9 @@
     "build": "pnpm exec compact-builder && tsc",
     "test": "vitest run --printConsoleTrace",
     "types": "tsc -p tsconfig.json --noEmit",
-    "fmt": "biome format --write",
-    "lint": "biome lint",
-    "lint:fix": "biome check --write",
+    "lint": "biome check .",
+    "lint:fix": "biome check . --write",
+    "lint:ci": "biome ci . --no-errors-on-unmatched",
     "precommit": "lint-staged --no-stash && pnpm run types"
   },
   "keywords": [],
