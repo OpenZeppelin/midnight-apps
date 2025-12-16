@@ -7,14 +7,14 @@ import {
 import {
   type AccessControl_Role,
   Contract as MockAccessControl,
+  type ZswapCoinPublicKey,
   ledger,
   pureCircuits,
-} from '../../../../artifacts/access/test/mocks/AccessControl.mock/contract/index.cjs';
-import type { ZswapCoinPublicKey } from '../../../types/StandardLibrary.js';
+} from '../../../../artifacts/access/test/mocks/contracts/AccessControl.mock/contract/index.js';
 import {
   AccessContractPrivateState,
   AccessControlWitnesses,
-} from './AccessControlWitnesses.js';
+} from './witnesses/AccessControl.js';
 
 type AccessControlArgs = readonly [{ bytes: Uint8Array }];
 
