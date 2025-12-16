@@ -357,19 +357,24 @@ describe('Bytes32', () => {
         },
       ];
 
-      test.each(createOverflowTestCases())(
-        'should return $expected when comparing $name',
-        ({ a, b, expected }) => {
-          expect(bytes32Simulator.eq(a, b)).toBe(expected);
-        },
-      );
+      test.each(
+        createOverflowTestCases(),
+      )('should return $expected when comparing $name', ({
+        a,
+        b,
+        expected,
+      }) => {
+        expect(bytes32Simulator.eq(a, b)).toBe(expected);
+      });
 
-      test.each(createSelfComparisonTestCases())(
-        'should return $expected when comparing $name',
-        ({ value, expected }) => {
-          expect(bytes32Simulator.eq(value, value)).toBe(expected);
-        },
-      );
+      test.each(
+        createSelfComparisonTestCases(),
+      )('should return $expected when comparing $name', ({
+        value,
+        expected,
+      }) => {
+        expect(bytes32Simulator.eq(value, value)).toBe(expected);
+      });
     });
   });
 
@@ -448,18 +453,21 @@ describe('Bytes32', () => {
         },
       ];
 
-      test.each(createLtTestCases())(
-        'should handle $name',
-        ({ a, b, expected, shouldThrow, errorMessage }) => {
-          if (shouldThrow) {
-            expect(() => bytes32Simulator.lt(a, b)).toThrow(errorMessage);
-          } else {
-            expect(() => bytes32Simulator.lt(a, b)).not.toThrow();
-            expect(bytes32Simulator.lt(a, b)).toBe(expected);
-            expect(typeof bytes32Simulator.lt(a, b)).toBe('boolean');
-          }
-        },
-      );
+      test.each(createLtTestCases())('should handle $name', ({
+        a,
+        b,
+        expected,
+        shouldThrow,
+        errorMessage,
+      }) => {
+        if (shouldThrow) {
+          expect(() => bytes32Simulator.lt(a, b)).toThrow(errorMessage);
+        } else {
+          expect(() => bytes32Simulator.lt(a, b)).not.toThrow();
+          expect(bytes32Simulator.lt(a, b)).toBe(expected);
+          expect(typeof bytes32Simulator.lt(a, b)).toBe('boolean');
+        }
+      });
     });
   });
 

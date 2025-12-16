@@ -5,8 +5,8 @@ import type {
   DAppConnectorWalletState,
 } from '@midnight-ntwrk/dapp-connector-api';
 import {
-  type PropsWithChildren,
   createContext,
+  type PropsWithChildren,
   useCallback,
   useEffect,
   useMemo,
@@ -120,12 +120,7 @@ export const WalletProvider: React.FC<Readonly<WalletProviderProps>> = ({
           WALLET_STORAGE_KEYS.CONNECTION_STATUS,
           walletConnectionStatus,
         );
-      } catch (error) {
-        console.warn(
-          'Failed to save wallet connection status to localStorage:',
-          error,
-        );
-      }
+      } catch (_error) {}
     }
   }, [walletConnectionStatus]);
 
@@ -141,9 +136,7 @@ export const WalletProvider: React.FC<Readonly<WalletProviderProps>> = ({
         } else {
           localStorage.removeItem(WALLET_STORAGE_KEYS.WALLET_STATE);
         }
-      } catch (error) {
-        console.warn('Failed to save wallet state to localStorage:', error);
-      }
+      } catch (_error) {}
     }
   }, [walletState]);
 
@@ -159,9 +152,7 @@ export const WalletProvider: React.FC<Readonly<WalletProviderProps>> = ({
         } else {
           localStorage.removeItem(WALLET_STORAGE_KEYS.WALLET_ADDRESS);
         }
-      } catch (error) {
-        console.warn('Failed to save wallet address to localStorage:', error);
-      }
+      } catch (_error) {}
     }
   }, [walletAddress]);
 
@@ -193,12 +184,12 @@ export const WalletProvider: React.FC<Readonly<WalletProviderProps>> = ({
             setWalletAddress(currentState.address || null);
             setWalletConnectionStatus('connected');
           } else {
-            console.warn('Wallet address mismatch during reconnection');
             setWalletConnectionStatus('disconnected');
             setWalletState(null);
             setWalletAddress(null);
           }
         } catch (error) {
+          // biome-ignore lint/suspicious/noConsole: report to user
           console.error('Failed to reconnect wallet:', error);
           setWalletConnectionStatus('disconnected');
           setWalletState(null);

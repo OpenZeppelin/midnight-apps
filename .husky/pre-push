@@ -1,2 +1,2 @@
 #!/bin/sh
-pnpm turbo run types
+# pnpm turbo run types

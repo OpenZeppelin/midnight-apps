@@ -27,6 +27,7 @@ export function BalanceDisplay({
         toast.success('Wallet state updated');
       } catch (error) {
         toast.error('Failed to update wallet state');
+        // biome-ignore lint/suspicious/noConsole: report to user
         console.error('Wallet refresh error:', error);
       } finally {
         setIsRefreshing(false);

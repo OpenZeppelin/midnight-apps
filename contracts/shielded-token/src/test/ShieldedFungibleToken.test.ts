@@ -1,7 +1,7 @@
 import { encodeTokenType, tokenType } from '@midnight-ntwrk/compact-runtime';
 import {
-  NetworkId,
   getZswapNetworkId,
+  NetworkId,
   setNetworkId,
 } from '@midnight-ntwrk/midnight-js-network-id';
 import {

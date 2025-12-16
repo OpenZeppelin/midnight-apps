@@ -1,10 +1,10 @@
 'use client';
 
+import { ChevronLeft, ChevronsRight, LogOut, Settings } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useWallet } from '@/hooks/use-wallet';
 import { useWalletRx } from '@/hooks/use-wallet-rx';
 import { formatAddress } from '@/lib/wallet-utils';
-import { ChevronLeft, ChevronsRight, LogOut, Settings } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { AccountDetailsModal } from './account-details-modal';
 import { BalanceDisplay } from './balance-display';
 import { Identicon } from './identicon';
@@ -41,6 +41,7 @@ export function AccountPanel({
       // Clear the copied state after 2 seconds
       setTimeout(() => setCopiedField(null), 2000);
     } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: report to user
       console.error('Failed to copy:', error);
     }
   };

@@ -2,17 +2,17 @@ import {
   type CircuitContext,
   type CoinPublicKey,
   type ContractState,
-  QueryContext,
   constructorContext,
   emptyZswapLocalState,
   encodeCoinPublicKey,
+  QueryContext,
 } from '@midnight-ntwrk/compact-runtime';
 import { sampleContractAddress } from '@midnight-ntwrk/zswap';
 import type { ZswapCoinPublicKey } from '@openzeppelin/midnight-apps-compact-std';
 import {
   type Ledger,
-  Contract as MockAccessControl,
   ledger,
+  Contract as MockAccessControl,
 } from '../artifacts/AccessControl.mock/contract/index.cjs';
 import type { AccessControl_Role } from '../artifacts/Index/contract/index.cjs';
 import type { IContractSimulator } from '../types/test';

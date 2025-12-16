@@ -1,11 +1,11 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/hooks/use-wallet';
 import { cn } from '@/lib/utils';
 import { connectToWallet, disconnectWallet } from '@/lib/wallet-utils';
-import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
 import { AccountPanel } from './account-panel';
 import { Identicon } from './identicon';
 
@@ -69,6 +69,7 @@ export function WalletConnect() {
       // Simple error handling - show the error as it is
       const errorMsg = error instanceof Error ? error.message : String(error);
 
+      // biome-ignore lint/suspicious/noConsole: report to user
       console.error('Wallet connection failed:', errorMsg);
       toast.error(errorMsg, { duration: 5000 });
 

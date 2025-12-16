@@ -1,9 +1,9 @@
 import {
   type CircuitContext,
   type ContractState,
+  constructorContext,
   QueryContext,
   type WitnessContext,
-  constructorContext,
 } from '@midnight-ntwrk/compact-runtime';
 import {
   sampleCoinPublicKey,

@@ -157,7 +157,7 @@ function handleError(error: unknown, spinner: Ora): void {
         const shorten = (p: string) =>
           homeDir && p.startsWith(homeDir) ? p.replace(homeDir, '~') : p;
         const updatedStderr = execError.stderr.replace(
-          /([A-Za-z0-9_.\-\/]+\.compact)\b/g,
+          /([A-Za-z0-9_.\-/]+\.compact)\b/g,
           (match) => {
             if (match.startsWith('/') || match.startsWith('~'))
               return shorten(match);

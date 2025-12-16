@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test } from 'vitest';
 import { MAX_UINT32, MAX_UINT64 } from '../utils/consts';
-import { Uint64Simulator, createMaliciousSimulator } from './Uint64Simulator';
+import { createMaliciousSimulator, Uint64Simulator } from './Uint64Simulator';
 
 let uint64Simulator: Uint64Simulator;
 
