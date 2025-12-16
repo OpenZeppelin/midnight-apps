@@ -1,9 +1,6 @@
 import { beforeEach, describe, expect, test } from 'vitest';
 import { MAX_UINT32, MAX_UINT64 } from '../utils/consts.js';
-import {
-  Uint64Simulator,
-  createMaliciousSimulator,
-} from './Uint64Simulator.js';
+import { Uint64Simulator } from './mocks/Uint64Simulator.js';
 
 let uint64Simulator: Uint64Simulator;
 
@@ -111,19 +108,21 @@ describe('Uint64', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      const badSimulator = createMaliciousSimulator({
-        mockDiv: () => ({ quotient: 1n, remainder: 10n }), // 10n >= 5n
-      });
-      expect(() => badSimulator.div(10n, 5n)).toThrow(
+      uint64Simulator.overrideWitness('divU64Locally', (context) => [
+        context.privateState,
+        { quotient: 1n, remainder: 10n },
+      ]);
+      expect(() => uint64Simulator.div(10n, 5n)).toThrow(
         'failed assert: Math: remainder error',
       );
     });
 
     test('should fail when quotient * b + remainder != a', () => {
-      const badSimulator = createMaliciousSimulator({
-        mockDiv: () => ({ quotient: 1n, remainder: 1n }), // 1*5 + 1 = 6 ≠ 10
-      });
-      expect(() => badSimulator.div(10n, 5n)).toThrow(
+      uint64Simulator.overrideWitness('divU64Locally', (context) => [
+        context.privateState,
+        { quotient: 1n, remainder: 1n },
+      ]);
+      expect(() => uint64Simulator.div(10n, 5n)).toThrow(
         'failed assert: Math: division invalid',
       );
     });
@@ -165,19 +164,21 @@ describe('Uint64', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      const badSimulator = createMaliciousSimulator({
-        mockDiv: () => ({ quotient: 1n, remainder: 5n }), // 5n >= 5n
-      });
-      expect(() => badSimulator.rem(10n, 5n)).toThrow(
+      uint64Simulator.overrideWitness('divU64Locally', (context) => [
+        context.privateState,
+        { quotient: 1n, remainder: 5n },
+      ]);
+      expect(() => uint64Simulator.rem(10n, 5n)).toThrow(
         'failed assert: Math: remainder error',
       );
     });
 
     test('should fail when quotient * b + remainder != a', () => {
-      const badSimulator = createMaliciousSimulator({
-        mockDiv: () => ({ quotient: 0n, remainder: 2n }), // 0*5 + 2 = 2 ≠ 10
-      });
-      expect(() => badSimulator.rem(10n, 5n)).toThrow(
+      uint64Simulator.overrideWitness('divU64Locally', (context) => [
+        context.privateState,
+        { quotient: 0n, remainder: 2n },
+      ]);
+      expect(() => uint64Simulator.rem(10n, 5n)).toThrow(
         'failed assert: Math: division invalid',
       );
     });
@@ -233,29 +234,31 @@ describe('Uint64', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      const badSimulator = createMaliciousSimulator({
-        mockDiv: () => ({ quotient: 1n, remainder: 5n }), // 5n >= 5n
-      });
-      expect(() => badSimulator.divRem(10n, 5n)).toThrow(
+      uint64Simulator.overrideWitness('divU64Locally', (context) => [
+        context.privateState,
+        { quotient: 1n, remainder: 5n },
+      ]);
+      expect(() => uint64Simulator.divRem(10n, 5n)).toThrow(
         'failed assert: Math: remainder error',
       );
     });
 
     test('should fail when quotient * b + remainder != a', () => {
-      const badSimulator = createMaliciousSimulator({
-        mockDiv: () => ({ quotient: 2n, remainder: 0n }), // 2*5 = 10 OK, change to fail
-      });
-      expect(() => badSimulator.divRem(11n, 5n)).toThrow(
+      uint64Simulator.overrideWitness('divU64Locally', (context) => [
+        context.privateState,
+        { quotient: 2n, remainder: 0n },
+      ]);
+      expect(() => uint64Simulator.divRem(11n, 5n)).toThrow(
         'failed assert: Math: division invalid',
       ); // 2*5 + 0 = 10 ≠ 11
     });
 
-    test('should fail when remainder >= divisor', () => {
-      const badSimulator = createMaliciousSimulator({
-        mockDiv: () => ({ quotient: 1n, remainder: 10n }), // 10n not < 5n
-      });
-
-      expect(() => badSimulator.divRem(10n, 5n)).toThrow(
+    test('should fail when remainder >= divisor (duplicate)', () => {
+      uint64Simulator.overrideWitness('divU64Locally', (context) => [
+        context.privateState,
+        { quotient: 1n, remainder: 10n },
+      ]);
+      expect(() => uint64Simulator.divRem(10n, 5n)).toThrow(
         'failed assert: Math: remainder error',
       );
     });
@@ -314,21 +317,21 @@ describe('Uint64', () => {
     });
 
     test('should fail with overestimated root', () => {
-      const badSimulator = createMaliciousSimulator({
-        mockSqrt: () => 5n, // 5^2 = 25 > 10
-      });
-
-      expect(() => badSimulator.sqrt(10n)).toThrow(
+      uint64Simulator.overrideWitness('sqrtU64Locally', (context) => [
+        context.privateState,
+        5n,
+      ]);
+      expect(() => uint64Simulator.sqrt(10n)).toThrow(
         'failed assert: Math: sqrt overestimate',
       );
     });
 
     test('should fail with underestimated root', () => {
-      const badSimulator = createMaliciousSimulator({
-        mockSqrt: () => 3n, // 3^2 = 9 < 16
-      });
-
-      expect(() => badSimulator.sqrt(16n)).toThrow(
+      uint64Simulator.overrideWitness('sqrtU64Locally', (context) => [
+        context.privateState,
+        3n,
+      ]);
+      expect(() => uint64Simulator.sqrt(16n)).toThrow(
         'failed assert: Math: sqrt underestimate',
       );
     });
@@ -379,6 +382,30 @@ describe('Uint64', () => {
 
     test('should handle max Uint<64> and smaller value', () => {
       expect(uint64Simulator.max(MAX_UINT64, 1n)).toBe(MAX_UINT64);
+    });
+  });
+
+  describe('MAX_UINT8', () => {
+    test('should return 255', () => {
+      expect(uint64Simulator.MAX_UINT8()).toBe(255n);
+    });
+  });
+
+  describe('MAX_UINT16', () => {
+    test('should return 65535', () => {
+      expect(uint64Simulator.MAX_UINT16()).toBe(65535n);
+    });
+  });
+
+  describe('MAX_UINT32', () => {
+    test('should return 4294967295', () => {
+      expect(uint64Simulator.MAX_UINT32()).toBe(4294967295n);
+    });
+  });
+
+  describe('MAX_UINT64', () => {
+    test('should return 18446744073709551615', () => {
+      expect(uint64Simulator.MAX_UINT64()).toBe(18446744073709551615n);
     });
   });
 });

@@ -6,18 +6,20 @@ A comprehensive mathematical operations library for Midnight Network smart contr
 
 This package provides mathematical contract operations for the Midnight Network, including:
 
-- **Uint64, Uint128, and Uint256 arithmetic operations** with overflow protection
+- **Uint64 and Uint128 arithmetic operations** with overflow protection
 - **Square root calculations** using efficient algorithms
 - **Division operations** with quotient and remainder results
 - **Witness-based computations** for off-chain calculations
 - **Type-safe interfaces** for all mathematical operations
+
+> **Note:** Uint256 operations are currently archived due to breaking changes in Compact compiler v0.27.0 which reduced maximum Uint width from 254 to 248 bits. The Uint256 contract uses `Uint<254>` internally and will be updated in a future release.
 
 ## Features
 
 ### Supported Integer Types
 - `Uint<64>` - 64-bit unsigned integers
 - `Uint<128>` - 128-bit unsigned integers  
-- `Uint<256>` - 256-bit unsigned integers
+- `Uint<256>` - 256-bit unsigned integers (archived - see note above)
 
 ### Mathematical Operations
 - **Basic Arithmetic**: Addition, subtraction, multiplication, division
@@ -28,9 +30,11 @@ This package provides mathematical contract operations for the Midnight Network,
 ### Key Components
 
 #### Core Contracts
-- `MathU64.compact` - 64-bit mathematical operations
-- `MathU128.compact` - 128-bit mathematical operations
-- `MathU256.compact` - 256-bit mathematical operations
+- `Uint64.compact` - 64-bit mathematical operations
+- `Uint128.compact` - 128-bit mathematical operations
+- `Uint256.compact` - 256-bit mathematical operations (archived)
+
+#### Archived Contracts
 - `Field254.compact` - Field arithmetic operations
 - `Bytes32.compact` - Byte array operations
 
@@ -47,7 +51,7 @@ This package provides mathematical contract operations for the Midnight Network,
 
 The following table shows the constraint counts and circuit sizes for each mathematical operation:
 
-### MathU64 Operations
+### Uint64 Operations
 | Operation | Circuit Name | K (Constraint Degree) | Rows |
 |-----------|--------------|----------------------|------|
 | Division | `div` | 10 | 240 |
@@ -56,7 +60,7 @@ The following table shows the constraint counts and circuit sizes for each mathe
 | Square Root | `sqrt` | 10 | 122 |
 | Is Multiple | `isMultiple` | 10 | 243 |
 
-### MathU128 Operations
+### Uint128 Operations
 | Operation | Circuit Name | K (Constraint Degree) | Rows |
 |-----------|--------------|----------------------|------|
 | Addition | `add` | 10 | 575 |
@@ -73,7 +77,10 @@ The following table shows the constraint counts and circuit sizes for each mathe
 | Is Multiple | `isMultiple` | 12 | 2,759 |
 | Is Multiple (U128) | `isMultipleU128` | 12 | 2,635 |
 
-### MathU256 Operations
+### Uint256 Operations (Archived)
+
+> These operations are currently archived due to Compact compiler breaking changes. See note above.
+
 | Operation | Circuit Name | K (Constraint Degree) | Rows |
 |-----------|--------------|----------------------|------|
 | Addition | `add` | 11 | 1,305 |
@@ -87,7 +94,7 @@ The following table shows the constraint counts and circuit sizes for each mathe
 | From U256 | `fromU256` | 10 | 816 |
 | To U256 | `toU256` | 10 | 739 |
 
-### Field254 Operations
+### Field254 Operations (Archived)
 | Operation | Circuit Name | K (Constraint Degree) | Rows |
 |-----------|--------------|----------------------|------|
 | Addition | `add` | 12 | 3,008 |
@@ -104,7 +111,7 @@ The following table shows the constraint counts and circuit sizes for each mathe
 | Maximum | `max` | 12 | 2,208 |
 | Minimum | `min` | 12 | 2,208 |
 
-### Bytes32 Operations
+### Bytes32 Operations (Archived)
 | Operation | Circuit Name | K (Constraint Degree) | Rows |
 |-----------|--------------|----------------------|------|
 | Greater Than | `gt` | 12 | 2,639 |
@@ -134,9 +141,9 @@ pnpm add @openzeppelin/midnight-apps-math-contracts
 
 ```typescript
 import { 
-  MathU64Witnesses, 
+  Uint64Witnesses, 
   sqrtBigint,
-  type MathU64ContractPrivateState 
+  type Uint64PrivateState 
 } from '@openzeppelin/midnight-apps-math-contracts';
 ```
 
@@ -153,10 +160,10 @@ const largeNumber = sqrtBigint(1000000000000n); // Efficient for large numbers
 ### Witness Operations
 
 ```typescript
-import { MathU64Witnesses } from '@openzeppelin/midnight-apps-math-contracts';
+import { Uint64Witnesses } from '@openzeppelin/midnight-apps-math-contracts';
 
 // Create witness implementations
-const witnesses = MathU64Witnesses();
+const witnesses = Uint64Witnesses();
 
 // Use in contract context
 const [newState, sqrtResult] = witnesses.sqrtU64Locally(context, 64n);
@@ -169,8 +176,8 @@ const [newState2, divResult] = witnesses.divU64Locally(context, 10n, 3n);
 The package provides Compact interfaces for mathematical operations:
 
 ```compact
-// Example: IMathU64 interface
-module IMathU64 {
+// Example: Uint64 interface
+module Uint64 {
     export struct DivResultU64 {
         quotient: Uint<64>,
         remainder: Uint<64>
@@ -205,11 +212,11 @@ sqrtBigint(15n) // Returns 3n (floor of sqrt)
 
 ### Witness Functions
 
-#### `MathU64Witnesses()`
-Factory function that creates witness implementations for MathU64 operations.
+#### `Uint64Witnesses()`
+Factory function that creates witness implementations for Uint64 operations.
 
 **Returns:**
-- Object implementing `IMathU64Witnesses` interface
+- Object implementing `Uint64Witnesses` interface
 
 **Available Methods:**
 - `sqrtU64Locally(context, radicand)` - Computes square root off-chain
@@ -217,8 +224,8 @@ Factory function that creates witness implementations for MathU64 operations.
 
 ### Types
 
-#### `MathU64ContractPrivateState`
-Type representing the private state of the MathU64 module.
+#### `Uint64PrivateState`
+Type representing the private state of the Uint64 module.
 
 #### `DivResultU64`
 Structure containing division results:

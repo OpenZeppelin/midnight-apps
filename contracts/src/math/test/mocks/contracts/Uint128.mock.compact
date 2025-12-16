@@ -1,17 +1,16 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/test/Uint128.mock.compact)
 
-pragma language_version >= 0.18.0;
+pragma language_version >= 0.19.0;
 
 import CompactStandardLibrary;
 
-import "../interfaces/IUint128";
+import { DivResultU128 } from "../../../Uint128";
+import { U128 } from "../../../types/TU128";
+import { U256 } from "../../../types/TU256";
+import "../../../Uint128" prefix Uint128_;
 
-import "../interfaces/IUint256";
-
-import "../Uint128" prefix Uint128_;
-
-export { U128, U256, DivResultU128 };
+export { DivResultU128, U128, U256 };
 
 /**
  * @description A mock contract for testing the MathU128 module's circuits.
@@ -175,4 +174,12 @@ export circuit isMultiple(value: Uint<128>, b: Uint<128>): Boolean {
 
 export circuit isMultipleU128(value: U128, b: U128): Boolean {
   return disclose(Uint128_isMultipleU128(value, b));
+}
+
+export pure circuit MAX_UINT128(): Uint<128> {
+  return Uint128_MAX_UINT128();
+}
+
+export pure circuit MAX_U128(): U128 {
+  return Uint128_MAX_U128();
 }

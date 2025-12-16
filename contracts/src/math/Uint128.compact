@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/Uint128.compact)
 
-pragma language_version >= 0.18.0;
+pragma language_version >= 0.19.0;
 
 /**
  * @title Uint128
@@ -39,12 +39,52 @@ pragma language_version >= 0.18.0;
  *   - isMultiple(), isMultipleU128(): Checks if one 128-bit number is a multiple of another.
  */
 module Uint128 {
-  import CompactStandardLibrary;
+  import { MAX_UINT8, MAX_UINT16, MAX_UINT32, MAX_UINT64 } from Uint64;
 
-  import "./interfaces/IUint128";
-  import "./interfaces/IUint256";
+  // U128 and U256 types are imported from dedicated type modules to avoid
+  // cyclic dependencies between Uint128 and Uint256. See TU128/TU256 documentation.
+  import "./types/TU128";
+  import "./types/TU256";
 
-  import Max;
+  /**
+   * @description A struct representing the result of a division operation on U128 values.
+   */
+  export struct DivResultU128 {
+    /**
+     * @description The quotient result of the division operation
+     */
+    quotient: U128,
+    /**
+     * @description The remainder result of the division operation
+     */
+    remainder: U128
+  }
+
+  /**
+   * @description Computes division of two U128 values locally (off-chain).
+   *
+   * @param a The number to divide.
+   * @param b The number to divide by.
+   * @returns DivResultU128 The quotient and remainder of the division as U128 values.
+   */
+  export witness divU128Locally(a: U128, b: U128): DivResultU128;
+
+  /**
+   * @description Computes division of two Uint<128> values locally (off-chain).
+   *
+   * @param a The number to divide.
+   * @param b The number to divide by.
+   * @returns DivResultU128 The quotient and remainder of the division as U128 values.
+   */
+  export witness divUint128Locally(a: Uint<128>, b: Uint<128>): DivResultU128;
+
+  /**
+   * @description Computes the square root of a U128 value locally (off-chain).
+   *
+   * @param radicand The U128 value to compute the square root of.
+   * @returns Uint<64> The square root of radicand.
+   */
+  export witness sqrtU128Locally(radicand: U128): Uint<64>;
 
   /**
    * @title Modulus U128 circuit
@@ -69,6 +109,32 @@ module Uint128 {
    */
   export pure circuit ZERO_U128(): U128 {
     return U128 { low: 0, high: 0 };
+  }
+
+  /**
+   * @title MAX_U128 circuit
+   * @description Returns the maximum value for a U128 struct, where both low and high
+   * fields are set to the maximum 64-bit value (2^64 - 1).
+   *
+   * @circuitInfo k=10, rows=128
+   *
+   * @returns {U128} A U128 struct representing 2^128 - 1.
+   */
+  export pure circuit MAX_U128(): U128 {
+    return U128 { low: MAX_UINT64(), high: MAX_UINT64() };
+  }
+
+  /**
+   * @title MAX_UINT128 circuit
+   * @description Returns the maximum value for a 128-bit unsigned integer (2^128 - 1).
+   *
+   * @circuitInfo k=10, rows=128
+   *
+   * @returns {Uint<128>} The value 340,282,366,920,938,463,463,374,607,431,768,211,455
+   * (0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF).
+   */
+  export pure circuit MAX_UINT128(): Uint<128> {
+    return 340282366920938463463374607431768211455;
   }
 
   /**
@@ -858,7 +924,7 @@ module Uint128 {
   /**
    * @title Division circuit
    * @description Divides a Uint<128> a by a Uint<128> b, returning the quotient.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `b` must not be zero.
@@ -884,7 +950,7 @@ module Uint128 {
   /**
    * @title Division U128 circuit
    * @description Divides a U128 a by a U128 b, returning the quotient.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `b` must not be zero.
@@ -908,7 +974,7 @@ module Uint128 {
   /**
    * @title Remainder circuit
    * @description Computes the remainder of dividing a Uint<128> a by a Uint<128> b.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `b` must not be zero.
@@ -934,7 +1000,7 @@ module Uint128 {
   /**
    * @title Remainder U128 circuit
    * @description Computes the remainder of dividing a U128 a by a U128 b.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `b` must not be zero.
@@ -958,7 +1024,7 @@ module Uint128 {
   /**
    * @title Division with Remainder circuit
    * @description Divides a Uint<128> a by a Uint<128> b, returning quotient and remainder.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `b` must not be zero.
@@ -984,7 +1050,7 @@ module Uint128 {
   /**
    * @title Division with Remainder U128 circuit
    * @description Divides a U128 a by a U128 b, returning quotient and remainder.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `b` must not be zero.
@@ -1286,7 +1352,7 @@ module Uint128 {
   /**
    * @title Is Multiple circuit
    * @description Checks if a Uint<128> value is a multiple of another.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `b` must not be zero.

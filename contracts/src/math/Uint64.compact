@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/Uint64.compact)
 
-pragma language_version >= 0.18.0;
+pragma language_version >= 0.19.0;
 
 /**
  * @title Uint64
@@ -26,16 +26,89 @@ pragma language_version >= 0.18.0;
  *   - max(): Returns the larger of two `Uint<64>` numbers.
  */
 module Uint64 {
-  import CompactStandardLibrary;
+  /**
+   * @dev Struct containing the quotient and remainder from a division operation
+   */
+  export struct DivResultU64 {
+    /**
+     * @dev The quotient result from the division operation
+     */
+    quotient: Uint<64>,
+    /**
+     * @dev The remainder result from the division operation
+     */
+    remainder: Uint<64>
+  }
 
-  import "./interfaces/IUint64";
+  /**
+   * @description Computes division of two Uint<64> values locally (off-chain).
+   *
+   * @param a The number to divide.
+   * @param b The number to divide by.
+   * @returns DivResultU64 The quotient and remainder of the division.
+   */
+  export witness divU64Locally(a: Uint<64>, b: Uint<64>): DivResultU64;
 
-  import Max prefix Max_;
+  /**
+   * @description Computes the square root of a Uint<64> value locally (off-chain).
+   *
+   * @param radicand The number to compute the square root of.
+   * @returns Uint<32> The square root of radicand.
+   */
+  export witness sqrtU64Locally(radicand: Uint<64>): Uint<32>;
+
+    /**
+   * @title MAX_UINT8 circuit
+   * @description Returns the maximum value for an 8-bit unsigned integer (2^8 - 1).
+   *
+   * @circuitInfo k=10, rows=128
+   *
+   * @returns {Uint<8>} The value 255 (0xFF).
+   */
+  export pure circuit MAX_UINT8(): Uint<8> {
+    return 255;
+  }
+
+  /**
+   * @title MAX_UINT16 circuit
+   * @description Returns the maximum value for a 16-bit unsigned integer (2^16 - 1).
+   *
+   * @circuitInfo k=10, rows=128
+   *
+   * @returns {Uint<16>} The value 65,535 (0xFFFF).
+   */
+  export pure circuit MAX_UINT16(): Uint<16> {
+    return 65535;
+  }
+
+  /**
+   * @title MAX_UINT32 circuit
+   * @description Returns the maximum value for a 32-bit unsigned integer (2^32 - 1).
+   *
+   * @circuitInfo k=10, rows=128
+   *
+   * @returns {Uint<32>} The value 4,294,967,295 (0xFFFFFFFF).
+   */
+  export pure circuit MAX_UINT32(): Uint<32> {
+    return 4294967295;
+  }
+
+  /**
+   * @title MAX_UINT64 circuit
+   * @description Returns the maximum value for a 64-bit unsigned integer (2^64 - 1).
+   *
+   * @circuitInfo k=10, rows=128
+   *
+   * @returns {Uint<64>} The value 18,446,744,073,709,551,615 (0xFFFFFFFFFFFFFFFF).
+   */
+  export pure circuit MAX_UINT64(): Uint<64> {
+    return 18446744073709551615;
+  }
 
   /**
    * @title Add circuit
    * @description Adds two `Uint<64>` numbers, returning a `Uint<128>` result to accommodate potential overflow.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `a` and `b` must be valid `Uint<64>` values in range [0, 2^64 - 1].
@@ -54,7 +127,7 @@ module Uint64 {
   /**
    * @title Subtract circuit
    * @description Subtracts `b` from `a`, checking for underflow to ensure the result is non-negative.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `a` must be greater than or equal to `b` to prevent underflow.
@@ -77,7 +150,7 @@ module Uint64 {
   /**
    * @title Multiply circuit
    * @description Multiplies two `Uint<64>` values, returning a `Uint<128>` result to handle large products.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `a` and `b` must be valid `Uint<64>` values.
@@ -164,7 +237,7 @@ module Uint64 {
   /**
    * @title Division circuit
    * @description Divides a `Uint<64>` number `a` by `b`, returning the quotient.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `b` must not be zero.
@@ -188,7 +261,7 @@ module Uint64 {
   /**
    * @title Remainder circuit
    * @description Computes the remainder of dividing a `Uint<64>` number `a` by `b`.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `b` must not be zero.
@@ -212,7 +285,7 @@ module Uint64 {
   /**
    * @title Division with Remainder circuit
    * @description Divides a Uint<64> number by another, returning both quotient and remainder.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `b` must not be zero.
@@ -287,7 +360,7 @@ module Uint64 {
   /**
    * @title Is Multiple circuit
    * @description Checks if a `Uint<64>` number is a multiple of another.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `b` must not be zero.
@@ -309,7 +382,7 @@ module Uint64 {
   /**
    * @title Min circuit
    * @description Returns the minimum of two Uint<64> values.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `a` and `b` must be valid `Uint<64>` values.
@@ -328,7 +401,7 @@ module Uint64 {
   /**
    * @title Max circuit
    * @description Returns the maximum of two Uint<64> values.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `a` and `b` must be valid `Uint<64>` values.

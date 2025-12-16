@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test } from 'vitest';
 import type {
   U128,
   U256,
-} from '../../../artifacts/math/Index/contract/index.d.cts';
+} from '../../../artifacts/math/test/mocks/contracts/Uint128.mock/contract/index.d.ts';
 import {
   MAX_UINT8,
   MAX_UINT16,
@@ -10,10 +10,7 @@ import {
   MAX_UINT64,
   MAX_UINT128,
 } from '../utils/consts.js';
-import {
-  Uint128Simulator,
-  createMaliciousSimulator,
-} from './Uint128Simulator.js';
+import { Uint128Simulator } from './mocks/Uint128Simulator.js';
 
 let uint128Simulator: Uint128Simulator;
 
@@ -55,10 +52,11 @@ describe('Uint128', () => {
     });
 
     test('should fail when reconstruction is invalid', () => {
-      const badSimulator = createMaliciousSimulator({
-        mockDiv: () => ({ quotient: 1n, remainder: 1n }),
-      });
-      expect(() => badSimulator.toU128(123n)).toThrow(
+      uint128Simulator.overrideWitness('divUint128Locally', (context) => [
+        context.privateState,
+        { quotient: { low: 1n, high: 0n }, remainder: { low: 1n, high: 0n } },
+      ]);
+      expect(() => uint128Simulator.toU128(123n)).toThrow(
         'failed assert: MathU128: conversion invalid',
       );
     });
@@ -655,14 +653,11 @@ describe('Uint128', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      const sim = createMaliciousSimulator({
-        mockDiv: () => ({
-          quotient: 1n,
-          remainder: 5n, // invalid: remainder == divisor
-        }),
-      });
-
-      expect(() => sim.div(10n, 5n)).toThrow(
+      uint128Simulator.overrideWitness('divUint128Locally', (context) => [
+        context.privateState,
+        { quotient: { low: 1n, high: 0n }, remainder: { low: 5n, high: 0n } },
+      ]);
+      expect(() => uint128Simulator.div(10n, 5n)).toThrow(
         'failed assert: MathU128: conversion invalid',
       );
     });
@@ -726,16 +721,13 @@ describe('Uint128', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      const sim = createMaliciousSimulator({
-        mockDiv: () => ({
-          quotient: 1n,
-          remainder: 5n, // divisor = 5n, remainder == 5n → invalid
-        }),
-      });
-
+      uint128Simulator.overrideWitness('divU128Locally', (context) => [
+        context.privateState,
+        { quotient: { low: 1n, high: 0n }, remainder: { low: 5n, high: 0n } },
+      ]);
       const a: U128 = { low: 10n, high: 0n };
       const b: U128 = { low: 5n, high: 0n };
-      expect(() => sim.divU128(a, b)).toThrow(
+      expect(() => uint128Simulator.divU128(a, b)).toThrow(
         'failed assert: MathU128: conversion invalid',
       );
     });
@@ -784,14 +776,11 @@ describe('Uint128', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      const sim = createMaliciousSimulator({
-        mockDiv: () => ({
-          quotient: 1n,
-          remainder: 10n, // too big
-        }),
-      });
-
-      expect(() => sim.rem(20n, 10n)).toThrow(
+      uint128Simulator.overrideWitness('divUint128Locally', (context) => [
+        context.privateState,
+        { quotient: { low: 1n, high: 0n }, remainder: { low: 10n, high: 0n } },
+      ]);
+      expect(() => uint128Simulator.rem(20n, 10n)).toThrow(
         'failed assert: MathU128: conversion invalid',
       );
     });
@@ -855,16 +844,13 @@ describe('Uint128', () => {
     });
 
     test('remU128 should fail when remainder >= divisor', () => {
-      const sim = createMaliciousSimulator({
-        mockDiv: () => ({
-          quotient: 1n,
-          remainder: 10n, // too big
-        }),
-      });
-
+      uint128Simulator.overrideWitness('divU128Locally', (context) => [
+        context.privateState,
+        { quotient: { low: 1n, high: 0n }, remainder: { low: 10n, high: 0n } },
+      ]);
       const a: U128 = { low: 20n, high: 0n };
       const b: U128 = { low: 10n, high: 0n };
-      expect(() => sim.remU128(a, b)).toThrow(
+      expect(() => uint128Simulator.remU128(a, b)).toThrow(
         'failed assert: MathU128: conversion invalid',
       );
     });
@@ -1015,19 +1001,21 @@ describe('Uint128', () => {
     });
 
     test('should fail if sqrt witness overestimates (root^2 > radicand)', () => {
-      const sim = createMaliciousSimulator({
-        mockSqrt: () => 11n, // 11^2 = 121 > 100
-      });
-      expect(() => sim.sqrt(100n)).toThrow(
+      uint128Simulator.overrideWitness('sqrtU128Locally', (context) => [
+        context.privateState,
+        11n,
+      ]);
+      expect(() => uint128Simulator.sqrt(100n)).toThrow(
         'failed assert: MathU128: sqrt overestimate',
       );
     });
 
     test('should fail if sqrt witness underestimates (next^2 <= radicand)', () => {
-      const sim = createMaliciousSimulator({
-        mockSqrt: () => 9n, // (9+1)^2 = 100 <= 100
-      });
-      expect(() => sim.sqrt(100n)).toThrow(
+      uint128Simulator.overrideWitness('sqrtU128Locally', (context) => [
+        context.privateState,
+        9n,
+      ]);
+      expect(() => uint128Simulator.sqrt(100n)).toThrow(
         'failed assert: MathU128: sqrt underestimate',
       );
     });
@@ -1271,6 +1259,22 @@ describe('Checked Operations', () => {
       expect(() => uint128Simulator.mulCheckedU128(a, b)).toThrow(
         'failed assert: MathU128: multiplication overflow',
       );
+    });
+  });
+
+  describe('MAX_UINT128', () => {
+    test('should return 340282366920938463463374607431768211455', () => {
+      expect(uint128Simulator.MAX_UINT128()).toBe(
+        340282366920938463463374607431768211455n,
+      );
+    });
+  });
+
+  describe('MAX_U128', () => {
+    test('should return U128 with max values', () => {
+      const result = uint128Simulator.MAX_U128();
+      expect(result.low).toBe(18446744073709551615n);
+      expect(result.high).toBe(18446744073709551615n);
     });
   });
 });
