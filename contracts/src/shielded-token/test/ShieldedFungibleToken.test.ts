@@ -14,8 +14,8 @@ import type {
   ContractAddress,
   Either,
   ZswapCoinPublicKey,
-} from '../../types/StandardLibrary.js';
-import { ShieldedFungibleTokenSimulator } from './ShieldedFungibleTokenSimulator.js';
+} from '../../types/tests/StandardLibrary.js';
+import { ShieldedFungibleTokenSimulator } from './mocks/ShieldedFungibleTokenSimulator.js';
 
 const NONCE = new Uint8Array(32).fill(0x01);
 const DOMAIN = new Uint8Array(32).fill(0x42);
@@ -72,12 +72,6 @@ describe('ShieldedFungibleToken', () => {
       expect(typeof token.contractAddress).toBe('string');
       expect(token.contractAddress.length).toBeGreaterThan(0);
     });
-
-    it('should have a valid sender', () => {
-      expect(token.sender).toBeDefined();
-      expect(typeof token.sender).toBe('string');
-      expect(token.sender.length).toBeGreaterThan(0);
-    });
   });
 
   describe('mint functionality', () => {
@@ -93,7 +87,7 @@ describe('ShieldedFungibleToken', () => {
       const coin = token.mint(recipient, amount);
 
       // Calculate the expected token type from domain and contract address
-      const publicState = token.getCurrentPublicState();
+      const publicState = token.getPublicState();
       const expectedType = encodeTokenType(
         tokenType(
           publicState.ShieldedFungibleToken__domain,
@@ -121,7 +115,7 @@ describe('ShieldedFungibleToken', () => {
       const coin = token.mint(recipient, amount);
 
       // Verify the minted coin
-      const publicState = token.getCurrentPublicState();
+      const publicState = token.getPublicState();
       const expectedType = encodeTokenType(
         tokenType(
           publicState.ShieldedFungibleToken__domain,
