@@ -1,6 +1,6 @@
 import type { CoinPublicKey } from '@midnight-ntwrk/compact-runtime';
 import { beforeEach, describe, expect, test } from 'vitest';
-import { QueueContractSimulator } from './QueueContractSimulator.js';
+import { QueueContractSimulator } from './mocks/QueueContractSimulator.js';
 
 let mockQueueContract: QueueContractSimulator;
 let sender: CoinPublicKey;

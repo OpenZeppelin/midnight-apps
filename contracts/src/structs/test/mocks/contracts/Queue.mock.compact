@@ -3,9 +3,8 @@
 
 pragma language_version >= 0.18.0;
 
-import CompactStandardLibrary;
-
-import "../Queue"<Uint<16>> prefix Queue_;
+import { Map, Counter, Either, Maybe, some, none } from CompactStandardLibrary;
+import "../../../Queue"<Uint<16>> prefix Queue_;
 
 // Export Public state
 export { Queue_state, Queue_tail, Queue_head }
