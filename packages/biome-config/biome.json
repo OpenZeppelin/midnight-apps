@@ -8,7 +8,8 @@
       "!**/tsconfig.base.json",
       "!**/tsconfig*.json",
       "!**/*.compact",
-      "!**/artifacts/**"
+      "!**/artifacts/**",
+      "!**/*.css"
     ]
   },
   "formatter": {
