@@ -8,7 +8,6 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "compact": "pnpm exec compact-compiler",
-    "compact:show": "pnpm exec compact-compiler --show-circuits",
     "compact:fast": "pnpm exec compact-compiler --skip-zk",
     "build": "pnpm exec compact-builder && tsc",
     "test": "vitest run --printConsoleTrace",

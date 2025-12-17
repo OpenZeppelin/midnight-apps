@@ -21,8 +21,7 @@
     },
     "build": {
       "dependsOn": [
-        "^build",
-        "compact"
+        "^build"
       ],
       "env": [
         "COMPACT_HOME"
