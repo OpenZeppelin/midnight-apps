@@ -1,5 +1,5 @@
-import { WalletContext, type WalletContextType } from '@/lib/wallet-context';
 import { useContext } from 'react';
+import { WalletContext, type WalletContextType } from '@/lib/wallet-context';
 
 /**
  * Retrieves the currently in-scope wallet provider.

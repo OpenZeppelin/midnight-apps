@@ -27,7 +27,12 @@
     "lint:ci": "biome ci . --changed --since=main --no-errors-on-unmatched",
     "precommit": "lint-staged --no-stash && pnpm run types"
   },
-  "keywords": ["midnight", "shielded", "token", "fungible"],
+  "keywords": [
+    "midnight",
+    "shielded",
+    "token",
+    "fungible"
+  ],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.4.1",

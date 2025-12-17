@@ -7,7 +7,8 @@
       "!**/pnpm-lock.yaml",
       "!**/tsconfig.base.json",
       "!**/tsconfig*.json",
-      "!**/*.compact"
+      "!**/*.compact",
+      "!**/artifacts/**"
     ]
   },
   "formatter": {
@@ -51,7 +52,9 @@
           "level": "error",
           "options": {
             "allow": [
-              "log"
+              "log",
+              "warn",
+              "error"
             ]
           }
         }

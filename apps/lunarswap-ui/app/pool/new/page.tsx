@@ -1,8 +1,8 @@
+import { ChevronRight } from 'lucide-react';
+import Link from 'next/link';
 import { Header } from '@/components/header';
 import { NewPositionWizard } from '@/components/pool/new-position-wizard';
 import { StarsBackground } from '@/components/stars-background';
-import { ChevronRight } from 'lucide-react';
-import Link from 'next/link';
 
 export const metadata = {
   title: 'LunarSwap | New Position',

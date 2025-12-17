@@ -4,19 +4,15 @@
  * @remarks This module serves as the primary export point for TypeScript consumers of the AccessControl contract.
  */
 
+export type {
+  AccessControlLedger,
+  AccessControlRole,
+} from './types/ledger';
+export type { RoleValue } from './types/role';
+export type { IContractSimulator } from './types/test';
 // biome-ignore lint/performance/noBarrelFile: entrypoint module
 export {
   AccessContractPrivateState,
   AccessControlWitnesses,
 } from './witnesses/AccessControlWitnesses';
-
 export type { IAccessControlWitnesses } from './witnesses/interface';
-
-export type {
-  AccessControlRole,
-  AccessControlLedger,
-} from './types/ledger';
-
-export type { RoleValue } from './types/role';
-
-export type { IContractSimulator } from './types/test';
