@@ -31,6 +31,23 @@ runs:
         node-version: "22.x"
         cache: "pnpm"
 
+    - name: Setup Compact Compiler
+      if: ${{ inputs.skip-compact != 'true' }}
+      uses: midnightntwrk/setup-compact-action@4130145456ad3f45934788dd4a65647eb283e658
+      with:
+        compact-version: "0.26.0"
+
+    - name: Verify Compact Compiler Installation
+      if: ${{ inputs.skip-compact != 'true' }}
+      shell: bash
+      run: |
+        if ! command -v compact >/dev/null 2>&1; then
+          echo "::error::Compact CLI not found in PATH"
+          exit 1
+        fi
+        echo "✅ Compact CLI is available"
+        compact --version || true
+
     - name: Install dependencies
       shell: bash
       run: pnpm install --frozen-lockfile --prefer-offline
@@ -41,9 +58,3 @@ runs:
         TURBO_MAJOR_VERSION: 2
         TURBO_TELEMETRY_DISABLED: 1
       run: pnpm install turbo@${{ env.TURBO_MAJOR_VERSION }} -g
-
-    - name: Setup Compact Compiler
-      if: ${{ inputs.skip-compact != 'true' }}
-      uses: midnightntwrk/setup-compact-action@4130145456ad3f45934788dd4a65647eb283e658
-      with:
-        compact-version: "0.26.0"

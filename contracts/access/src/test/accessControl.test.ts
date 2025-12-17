@@ -4,7 +4,7 @@ import {
 } from '@midnight-ntwrk/compact-runtime';
 import { sampleCoinPublicKey } from '@midnight-ntwrk/zswap';
 import { beforeEach, describe, expect, test } from 'vitest';
-import { pureCircuits } from '../artifacts/AccessControl.mock/contract/index.cjs';
+import { pureCircuits } from '../../artifacts/AccessControl.mock/contract/index.cjs';
 import { AccessControlRole } from '../types/ledger';
 import type { RoleValue } from '../types/role';
 import { AccessControlSimulator } from './AccessControlSimulator';

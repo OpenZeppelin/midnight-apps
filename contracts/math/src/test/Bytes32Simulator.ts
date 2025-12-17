@@ -13,7 +13,7 @@ import {
   Contract,
   type Ledger,
   ledger,
-} from '../artifacts/Bytes32.mock/contract/index.cjs';
+} from '../../artifacts/Bytes32.mock/contract/index.cjs';
 import type { IContractSimulator } from '../types/test';
 import { Bytes32PrivateState, Bytes32Witnesses } from '../witnesses/Bytes32';
 

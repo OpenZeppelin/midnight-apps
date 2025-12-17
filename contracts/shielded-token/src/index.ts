@@ -11,7 +11,7 @@ export {
   type PureCircuits,
   pureCircuits,
   type Witnesses,
-} from './artifacts/ShieldedFungibleToken/contract/index.cjs';
+} from '../artifacts/ShieldedFungibleToken/contract/index.cjs';
 
 // Export witnesses
 export {

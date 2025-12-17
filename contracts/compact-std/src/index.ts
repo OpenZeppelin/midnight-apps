@@ -15,4 +15,4 @@ export type {
   QualifiedCoinInfo,
   SendResult,
   ZswapCoinPublicKey,
-} from './artifacts/Index/contract/index.cjs';
+} from '../artifacts/Index/contract/index.cjs';

@@ -27,6 +27,9 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/setup
 
+      - name: Compile contracts
+        run: pnpm compact:fast --filter './contracts/*'
+
       - name: Run tests
         run: pnpm test:contracts
 

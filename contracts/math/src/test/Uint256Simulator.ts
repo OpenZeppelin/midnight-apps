@@ -13,12 +13,12 @@ import type {
   DivResultU128,
   DivResultU256,
   U256,
-} from '../artifacts/Index/contract/index.d.cts';
+} from '../../artifacts/Index/contract/index.d.cts';
 import {
   Contract,
   type Ledger,
   ledger,
-} from '../artifacts/Uint256.mock/contract/index.cjs';
+} from '../../artifacts/Uint256.mock/contract/index.cjs';
 import type { IContractSimulator } from '../types/test';
 import { Uint256PrivateState, Uint256Witnesses } from '../witnesses/Uint256';
 

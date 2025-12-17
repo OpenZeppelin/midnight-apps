@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from 'vitest';
-import type { U256 } from '../artifacts/Index/contract/index.d.cts';
+import type { U256 } from '../../artifacts/Index/contract/index.d.cts';
 import {
   MAX_UINT8,
   MAX_UINT16,

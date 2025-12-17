@@ -34,7 +34,7 @@ pragma language_version >= 0.18.0;
 module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
   import CompactStandardLibrary;
   import Utils prefix Utils_;
-  import "../../node_modules/@openzeppelin/midnight-apps-math/dist/Bytes32" prefix Bytes32_;
+  import "../../../math/src/Bytes32" prefix Bytes32_;
 
   // Public state
   export ledger _counter: Counter;

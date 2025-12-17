@@ -18,7 +18,7 @@ import {
   Contract,
   type Ledger,
   ledger,
-} from '../artifacts/ShieldedFungibleToken/contract/index.cjs';
+} from '../../artifacts/ShieldedFungibleToken/contract/index.cjs';
 import type { IContractSimulator } from '../types/test';
 import {
   ShieldedFungibleTokenPrivateState,

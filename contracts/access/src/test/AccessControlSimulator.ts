@@ -13,8 +13,8 @@ import {
   type Ledger,
   ledger,
   Contract as MockAccessControl,
-} from '../artifacts/AccessControl.mock/contract/index.cjs';
-import type { AccessControl_Role } from '../artifacts/Index/contract/index.cjs';
+} from '../../artifacts/AccessControl.mock/contract/index.cjs';
+import type { AccessControl_Role } from '../../artifacts/Index/contract/index.cjs';
 import type { IContractSimulator } from '../types/test';
 import {
   AccessContractPrivateState,
