@@ -8,6 +8,7 @@
     "compact": "pnpm exec compact-compiler",
     "compact:fast": "pnpm exec compact-compiler --skip-zk",
     "build": "pnpm exec compact-builder && tsc",
+    "build:fast": "pnpm exec compact-builder --skip-zk && tsc",
     "test": "vitest run --printConsoleTrace",
     "test:watch": "vitest watch",
     "test:ui": "vitest --ui",
