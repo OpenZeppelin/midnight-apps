@@ -20,7 +20,7 @@
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
     "lint:ci": "turbo run lint:ci",
-    "types": "pnpm compact:fast && turbo run types",
+    "types": "turbo run types",
     "types:apps": "turbo run types --filter './apps/*'",
     "types:contracts": "turbo run types --filter './contracts/*'",
     "types:packages": "turbo run types --filter './packages/*'",
