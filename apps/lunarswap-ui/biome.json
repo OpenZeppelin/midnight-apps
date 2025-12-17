@@ -1,6 +1,3 @@
 {
-  "extends": ["@openzeppelin/midnight-apps-biome-config"],
-  "vcs": {
-    "useIgnoreFile": true
-  }
+	"extends": ["@openzeppelin/midnight-apps-biome-config"]
 }
