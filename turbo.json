@@ -53,15 +53,15 @@
       "outputs": [],
       "cache": false
     },
-    "fmt": {
-      "outputs": [],
-      "cache": false
-    },
     "lint": {
       "outputs": [],
       "cache": false
     },
     "lint:fix": {
+      "outputs": [],
+      "cache": false
+    },
+    "lint:ci": {
       "outputs": [],
       "cache": false
     }
