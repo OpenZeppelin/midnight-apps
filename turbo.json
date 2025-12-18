@@ -2,9 +2,6 @@
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
     "compact": {
-      "dependsOn": [
-        "^build"
-      ],
       "env": [
         "COMPACT_HOME"
       ],
@@ -13,26 +10,62 @@
       ],
       "outputLogs": "new-only",
       "outputs": [
-        "src/artifacts/**",
-        "src/gen/**",
-        "gen/**"
+        "src/artifacts/**"
+       ]
+    },
+    "compact:fast": {
+      "env": [
+        "COMPACT_HOME",
+        "SKIP_ZK"
+      ],
+      "inputs": [
+        "src/**/*.compact"
+      ],
+      "outputLogs": "new-only",
+      "outputs": [
+        "src/artifacts/**"
       ]
     },
     "test": {
-      "outputs": [],
+      "dependsOn": [
+        "compact:fast",
+        "^compact:fast"
+      ],
+      "env": [
+        "COMPACT_HOME"
+      ],
       "cache": false
     },
     "build": {
       "dependsOn": [
-        "^build",
-        "compact"
+        "^build"
       ],
       "env": [
         "COMPACT_HOME"
       ],
       "inputs": [
         "src/**/*.ts",
-        "src/**/*.mts",
+        "src/**/*.tsx",
+        "!src/**/*.test.ts",
+        "!tests/**/*.ts",
+        "tsconfig.json",
+        "tsconfig.build.json",
+        ".env"
+      ],
+      "outputs": [
+        "dist/**"
+      ]
+    },
+    "build:fast": {
+      "dependsOn": [
+        "^build:fast"
+      ],
+      "env": [
+        "COMPACT_HOME",
+        "SKIP_ZK"
+      ],
+      "inputs": [
+        "src/**/*.ts",
         "src/**/*.tsx",
         "!src/**/*.test.ts",
         "!tests/**/*.ts",
@@ -45,24 +78,27 @@
       ]
     },
     "types": {
-      "outputs": [],
+      "dependsOn": [
+        "compact:fast",
+        "^compact:fast",
+        "^build:fast"
+      ],
       "cache": false
     },
     "precommit": {
-      "dependsOn": [],
-      "outputs": [],
-      "cache": false
-    },
-    "fmt": {
-      "outputs": [],
+      "dependsOn": [
+        "types",
+        "^types"
+      ],
       "cache": false
     },
     "lint": {
-      "outputs": [],
       "cache": false
     },
     "lint:fix": {
-      "outputs": [],
+      "cache": false
+    },
+    "lint:ci": {
       "cache": false
     }
   }

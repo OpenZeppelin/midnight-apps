@@ -16,18 +16,18 @@ export interface LoggerOptions {
 
 /**
  * Get or create the singleton logger instance
- * 
+ *
  * Logger is silent by default (no output). To enable logging, pass options on first call:
- * 
+ *
  * @example
  * ```typescript
  * // Silent by default
  * const logger = getLogger();
- * 
+ *
  * // Enable with specific level
  * const logger = getLogger({ level: 'info' });
  * ```
- * 
+ *
  * @param options - Optional configuration for the logger (only used on first initialization)
  * @returns The singleton logger instance
  */
@@ -59,4 +59,3 @@ export function resetLogger(): void {
 export function isLoggerInitialized(): boolean {
   return singletonLogger !== null;
 }
-
