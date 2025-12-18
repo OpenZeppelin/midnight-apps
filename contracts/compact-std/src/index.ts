@@ -4,15 +4,15 @@
  * Excludes standard runtime types from @midnight-ntwrk/compact-runtime.
  */
 export type {
-  Maybe,
-  Either,
-  CurvePoint,
-  MerkleTreeDigest,
-  MerkleTreePathEntry,
-  MerkleTreePath,
-  ContractAddress,
   CoinInfo,
+  ContractAddress,
+  CurvePoint,
+  Either,
+  Maybe,
+  MerkleTreeDigest,
+  MerkleTreePath,
+  MerkleTreePathEntry,
   QualifiedCoinInfo,
-  ZswapCoinPublicKey,
   SendResult,
+  ZswapCoinPublicKey,
 } from './artifacts/Index/contract/index.cjs';

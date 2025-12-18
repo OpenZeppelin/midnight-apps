@@ -7,7 +7,7 @@ import {
   MAX_UINT64,
   MAX_UINT128,
 } from '../utils/consts';
-import { Uint128Simulator, createMaliciousSimulator } from './Uint128Simulator';
+import { createMaliciousSimulator, Uint128Simulator } from './Uint128Simulator';
 
 let uint128Simulator: Uint128Simulator;
 

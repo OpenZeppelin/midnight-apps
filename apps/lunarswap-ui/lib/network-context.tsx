@@ -1,15 +1,15 @@
 'use client';
 
-import { useWallet } from '@/hooks/use-wallet';
 import {
-  type PropsWithChildren,
   createContext,
+  type PropsWithChildren,
   useCallback,
   useEffect,
   useMemo,
   useState,
 } from 'react';
-import { type Network, detectWalletNetwork } from './wallet-utils';
+import { useWallet } from '@/hooks/use-wallet';
+import { detectWalletNetwork, type Network } from './wallet-utils';
 
 export type NetworkContextType = {
   currentNetwork: Network;
@@ -69,13 +69,10 @@ export const NetworkProvider: React.FC<Readonly<NetworkProviderProps>> = ({
         setCurrentNetwork(walletNetwork);
         setIsNetworkSynced(true);
       } else {
-        // Network detection is not currently supported, keep current network
-        console.warn(
-          'Network detection not supported. Using current network setting.',
-        );
         setIsNetworkSynced(false);
       }
     } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: report to user
       console.error('Failed to sync network with wallet:', error);
       setIsNetworkSynced(false);
     }

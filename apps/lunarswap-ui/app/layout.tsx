@@ -4,11 +4,11 @@ import Script from 'next/script';
 // layout.tsx
 import type React from 'react';
 import './globals.css';
+import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/hot-toast';
 import { NetworkProvider } from '@/lib/network-context';
 import { VersionProvider } from '@/lib/version-context';
 import { WalletProvider } from '@/lib/wallet-context';
-import { ThemeProvider } from 'next-themes';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -32,7 +32,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: { children: React.ReactNode }) {
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>

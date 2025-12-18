@@ -1,4 +1,7 @@
 'use client';
+import { Search } from 'lucide-react';
+import Image from 'next/image';
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -6,9 +9,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
-import Image from 'next/image';
-import { useState } from 'react';
 
 const popularTokens = [
   {

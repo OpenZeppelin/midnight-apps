@@ -12,8 +12,8 @@ import {
   CompactCliNotFoundError,
   CompilationError,
   DirectoryNotFoundError,
-  type PromisifiedChildProcessError,
   isPromisifiedChildProcessError,
+  type PromisifiedChildProcessError,
 } from './types/errors.js';
 
 const logger = getLogger({
@@ -233,8 +233,6 @@ export class FileDiscovery {
  * ```
  */
 export class CompilerService {
-  private execFn: ExecFunction;
-
   /**
    * Creates a new CompilerService instance.
    *

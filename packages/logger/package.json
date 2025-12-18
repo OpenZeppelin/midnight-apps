@@ -2,7 +2,10 @@
   "name": "@openzeppelin/midnight-apps-logger",
   "private": true,
   "version": "0.0.1",
-  "keywords": ["logger", "pino"],
+  "keywords": [
+    "logger",
+    "pino"
+  ],
   "author": "",
   "license": "MIT",
   "description": "Singleton logger for Midnight apps",
@@ -34,4 +37,3 @@
     "pino-pretty": "^13.0.0"
   }
 }
-

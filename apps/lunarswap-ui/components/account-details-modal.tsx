@@ -1,10 +1,10 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import type { DAppConnectorWalletState } from '@midnight-ntwrk/dapp-connector-api';
 import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { Button } from '@/components/ui/button';
 import { Identicon } from './identicon';
 
 interface AccountDetailsModalProps {
@@ -99,6 +99,7 @@ export function AccountDetailsModal({
       setCopiedField(label);
       setTimeout(() => setCopiedField(null), 2000);
     } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: report to user
       console.error('Failed to copy:', error);
     }
   };

@@ -1,5 +1,4 @@
 {
-  "root": false,
   "$schema": "https://biomejs.dev/schemas/2.3.9/schema.json",
   "files": {
     "ignoreUnknown": true,
@@ -52,7 +51,8 @@
             "allow": ["log"]
           }
         },
-        "noExplicitAny": "off"
+        "noExplicitAny": "off",
+        "noUnknownAtRules": "off"
       }
     }
   },

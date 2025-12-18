@@ -51,10 +51,6 @@ export const detectWalletNetwork = async (
   if (!wallet) {
     return null;
   }
-
-  console.warn(
-    'Network detection from wallet state is not currently supported. Please set network manually.',
-  );
   return null;
 };
 
@@ -109,10 +105,7 @@ export const connectToWallet = async (
           };
         }
       }
-    } catch (error) {
-      // If checking existing connection fails, continue with fresh connection
-      console.warn('Failed to check existing wallet connection:', error);
-    }
+    } catch (_error) {}
   }
 
   // Enable the wallet with timeout
@@ -153,9 +146,7 @@ export const disconnectWallet = () => {
       localStorage.removeItem('wallet_connection_status');
       localStorage.removeItem('wallet_state');
       localStorage.removeItem('wallet_address');
-    } catch (error) {
-      console.warn('Failed to clear localStorage:', error);
-    }
+    } catch (_error) {}
   }
 };
 
