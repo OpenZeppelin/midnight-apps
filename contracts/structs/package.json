@@ -7,12 +7,14 @@
   "scripts": {
     "compact": "pnpm exec compact-compiler",
     "compact:fast": "pnpm exec compact-compiler --skip-zk",
+    "compact:fmt": "compact format --check",
+    "compact:fmt:fix": "compact format --write",
     "build": "pnpm exec compact-builder && tsc",
     "build:fast": "pnpm exec compact-builder --skip-zk && tsc",
     "test": "vitest run --printConsoleTrace",
     "types": "tsc -p tsconfig.json --noEmit",
-    "lint": "biome check . && compact format --check",
-    "lint:fix": "biome check . --write && compact format",
+    "lint": "biome check .",
+    "lint:fix": "biome check . --write",
     "lint:ci": "biome ci . --changed --since=main --no-errors-on-unmatched",
     "precommit": "lint-staged --no-stash && pnpm run types"
   },

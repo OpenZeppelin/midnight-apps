@@ -10,6 +10,8 @@
     "compact:fast": "turbo run compact:fast",
     "compact:version": "turbo run compact -- --version",
     "compact:language-version": "turbo run compact -- --language-version",
+    "compact:fmt": "turbo run compact:fmt",
+    "compact:fmt:fix": "turbo run compact:fmt:fix",
     "build": "turbo run build",
     "build:contracts": "turbo run build --filter './contracts/*'",
     "build:apps": "turbo run build --filter './apps/*'",

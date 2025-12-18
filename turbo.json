@@ -10,10 +10,8 @@
       ],
       "outputLogs": "new-only",
       "outputs": [
-        "src/artifacts/**",
-        "src/gen/**",
-        "gen/**"
-      ]
+        "src/artifacts/**"
+       ]
     },
     "compact:fast": {
       "env": [
@@ -25,9 +23,7 @@
       ],
       "outputLogs": "new-only",
       "outputs": [
-        "src/artifacts/**",
-        "src/gen/**",
-        "gen/**"
+        "src/artifacts/**"
       ]
     },
     "test": {
@@ -38,12 +34,6 @@
       "env": [
         "COMPACT_HOME"
       ],
-      "inputs": [
-        "src/**/*.ts",
-        "vitest.config.ts",
-        "package.json"
-      ],
-      "outputs": [],
       "cache": false
     },
     "build": {
@@ -97,22 +87,15 @@
         "src/**/*.ts",
         "src/**/*.tsx",
         "tsconfig.json",
-        "tsconfig.build.json",
-        "package.json"
+        "tsconfig.build.json"
       ],
-      "outputs": [],
-      "cache": false
+      "outputs": []
     },
     "precommit": {
       "dependsOn": [
         "types",
         "^types"
       ],
-      "inputs": [
-        ".lintstagedrc.json",
-        "package.json"
-      ],
-      "outputs": [],
       "cache": false
     },
     "lint": {
@@ -120,32 +103,20 @@
         "src/**/*.ts",
         "src/**/*.tsx",
         "src/**/*.compact",
-        "biome.json",
-        "package.json"
+        "biome.json"
       ],
-      "outputs": [],
-      "cache": false
+      "outputs": []
     },
     "lint:fix": {
-      "inputs": [
-        "src/**/*.ts",
-        "src/**/*.tsx",
-        "src/**/*.compact",
-        "biome.json",
-        "package.json"
-      ],
-      "outputs": [],
       "cache": false
     },
     "lint:ci": {
       "inputs": [
         "src/**/*.ts",
         "src/**/*.tsx",
-        "biome.json",
-        "package.json"
+        "biome.json"
       ],
-      "outputs": [],
-      "cache": false
+      "outputs": []
     }
   }
 }
