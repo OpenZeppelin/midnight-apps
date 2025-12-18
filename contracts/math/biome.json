@@ -1,3 +1,4 @@
 {
+  "root": false,
   "extends": ["@openzeppelin/midnight-apps-biome-config"]
 }

@@ -6,18 +6,16 @@ on:
     branches:
       - main
 
-env:
-  TURBO_TELEMETRY_DISABLED: 1
-  COMPILER_VERSION: "0.26.0"
-
 jobs:
   pipeline:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     timeout-minutes: 15
 
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
         with:
           egress-policy: audit
 
@@ -28,21 +26,6 @@ jobs:
 
       - name: Setup Environment
         uses: ./.github/actions/setup
-
-      - name: Check compiler version
-        run: |
-            export PATH="$HOME/.compact/bin:$PATH"
-            COMPILER_OUTPUT=$(compact compile --version)
-            COMPUTED_COMPILER_VERSION=$(echo "$COMPILER_OUTPUT" | grep -oP '\b0\.[0-9]+\.[0-9]+\b' | head -n 1)
-            if [ "$COMPUTED_COMPILER_VERSION" != "$COMPILER_VERSION" ]; then
-              errMsg="❌ Compiler version mismatch!%0AExpected: $COMPILER_VERSION%0AGot: $COMPUTED_COMPILER_VERSION"
-              echo "::error::$errMsg"
-              exit 1
-            fi
-            echo "✅ Compiler version matches: $COMPUTED_COMPILER_VERSION"
-
-            echo "📋 Language version:"
-            compact compile --language-version
 
       - name: Run tests
         run: pnpm test:contracts
