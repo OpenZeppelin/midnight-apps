@@ -21,7 +21,10 @@
   "scripts": {
     "build": "tsc -p .",
     "types": "tsc -p tsconfig.json --noEmit",
-    "clean": "git clean -fXd"
+    "clean": "git clean -fXd",
+    "lint": "biome check .",
+    "lint:fix": "biome check . --write",
+    "lint:ci": "biome ci . --changed --since=main --no-errors-on-unmatched"
   },
   "devDependencies": {
     "@openzeppelin/midnight-apps-biome-config": "workspace:^",

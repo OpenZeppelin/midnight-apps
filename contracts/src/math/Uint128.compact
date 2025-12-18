@@ -222,7 +222,7 @@ module Uint128 {
   /**
    * @title Is Zero circuit
    * @description Checks if a Uint<128> value equals zero.
-   * 
+   *
    * @circuitInfo k=10, rows=451
    *
    * @param {Uint<128>} a - The Uint<128> value to check.
@@ -236,7 +236,7 @@ module Uint128 {
   /**
    * @title Is Zero U128 circuit
    * @description Checks if a U128 value equals zero.
-   * 
+   *
    * @circuitInfo k=10, rows=451
    *
    * @param {U128} a - The U128 value to check.
@@ -498,7 +498,7 @@ module Uint128 {
   /**
    * @title Add Checked circuit
    * @description Adds two Uint<128> values with overflow checking.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `a` and `b` must be valid `Uint<128>` values.
@@ -520,7 +520,7 @@ module Uint128 {
   /**
    * @title Add Checked U128 circuit
    * @description Adds two U128 values with overflow checking.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `a` and `b` must be valid `U128` structs.
@@ -752,7 +752,7 @@ module Uint128 {
   /**
    * @title Multiply circuit
    * @description Multiplies two Uint<128> values.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `a` and `b` must be valid `Uint<128>` values.
@@ -774,7 +774,7 @@ module Uint128 {
   /**
    * @title Multiply U128 circuit
    * @description Multiplies two U128 values.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `a` and `b` must be valid `U128` structs.
@@ -794,7 +794,7 @@ module Uint128 {
   /**
    * @title Multiply Checked circuit
    * @description Multiplies two Uint<128> values with overflow checking.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `a` and `b` must be valid `Uint<128>` values.
@@ -818,7 +818,7 @@ module Uint128 {
   /**
    * @title Multiply Checked U128 circuit
    * @description Multiplies two U128 values with overflow checking.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `a` and `b` must be valid `U128` structs.
@@ -901,9 +901,9 @@ module Uint128 {
                 return DivResultU128 { quotient: ZERO_U128(), remainder: a };
              }
              else {
-                assert(gteU128(b, ZERO_U128()), "MathU128: division by zero");
+                assert(!isZeroU128(b), "MathU128: division by zero");
                 const result = divU128Locally(a, b);
-                assert(lteU128(result.remainder, b), "MathU128: remainder error");
+                assert(ltU128(result.remainder, b), "MathU128: remainder error");
 
                 // quotient * b + remainder == a
                 // Compute sumU256 = productU256 + remainderU256
@@ -1193,7 +1193,7 @@ module Uint128 {
   /**
    * @title Square Root circuit
    * @description Computes the square root of a Uint<128> value.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `radicand` must be a valid `Uint<128>` value.
@@ -1218,7 +1218,7 @@ module Uint128 {
   /**
    * @title Square Root U128 circuit
    * @description Computes the square root of a U128 value.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `radicand` must be a valid `U128` struct.
@@ -1376,7 +1376,7 @@ module Uint128 {
   /**
    * @title Is Multiple U128 circuit
    * @description Checks if a U128 value is a multiple of another.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `b` must not be zero.

@@ -2,9 +2,6 @@
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
     "compact": {
-      "dependsOn": [
-        "^build"
-      ],
       "env": [
         "COMPACT_HOME"
       ],
@@ -18,21 +15,67 @@
         "gen/**"
       ]
     },
-    "test": {
-      "outputs": [],
-      "cache": false
+    "compact:fast": {
+      "env": [
+        "COMPACT_HOME",
+        "SKIP_ZK"
+      ],
+      "inputs": [
+        "src/**/*.compact"
+      ],
+      "outputLogs": "new-only",
+      "outputs": [
+        "src/artifacts/**",
+        "src/gen/**",
+        "gen/**"
+      ]
     },
-    "build": {
+    "test": {
       "dependsOn": [
-        "^build",
-        "compact"
+        "compact:fast",
+        "^compact:fast"
       ],
       "env": [
         "COMPACT_HOME"
       ],
       "inputs": [
         "src/**/*.ts",
-        "src/**/*.mts",
+        "vitest.config.ts",
+        "package.json"
+      ],
+      "outputs": [],
+      "cache": false
+    },
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "env": [
+        "COMPACT_HOME"
+      ],
+      "inputs": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "!src/**/*.test.ts",
+        "!tests/**/*.ts",
+        "tsconfig.json",
+        "tsconfig.build.json",
+        ".env"
+      ],
+      "outputs": [
+        "dist/**"
+      ]
+    },
+    "build:fast": {
+      "dependsOn": [
+        "^build:fast"
+      ],
+      "env": [
+        "COMPACT_HOME",
+        "SKIP_ZK"
+      ],
+      "inputs": [
+        "src/**/*.ts",
         "src/**/*.tsx",
         "!src/**/*.test.ts",
         "!tests/**/*.ts",
@@ -45,23 +88,62 @@
       ]
     },
     "types": {
+      "dependsOn": [
+        "compact:fast",
+        "^compact:fast",
+        "^build:fast"
+      ],
+      "inputs": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "tsconfig.json",
+        "tsconfig.build.json",
+        "package.json"
+      ],
       "outputs": [],
       "cache": false
     },
     "precommit": {
-      "dependsOn": [],
-      "outputs": [],
-      "cache": false
-    },
-    "fmt": {
+      "dependsOn": [
+        "types",
+        "^types"
+      ],
+      "inputs": [
+        ".lintstagedrc.json",
+        "package.json"
+      ],
       "outputs": [],
       "cache": false
     },
     "lint": {
+      "inputs": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "src/**/*.compact",
+        "biome.json",
+        "package.json"
+      ],
       "outputs": [],
       "cache": false
     },
     "lint:fix": {
+      "inputs": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "src/**/*.compact",
+        "biome.json",
+        "package.json"
+      ],
+      "outputs": [],
+      "cache": false
+    },
+    "lint:ci": {
+      "inputs": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "biome.json",
+        "package.json"
+      ],
       "outputs": [],
       "cache": false
     }

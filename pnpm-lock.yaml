@@ -842,9 +842,6 @@ packages:
   '@midnight-ntwrk/compact-runtime@0.11.0-rc.1':
     resolution: {integrity: sha512-uoGjsk/pj/ZOZu0Dgpo5Lrm1P4TT+hgpZkATzNPJHYmWoiM9WI98Bi1VXrJNoqJaOYgMCcvWRrIFCx1GXU5rAA==}
 
-  '@midnight-ntwrk/compact-runtime@0.9.0':
-    resolution: {integrity: sha512-Dsms+SWRWlaTIay4SO7ITxTJvo8lgEKkMss+dQnIZDnEoCEO5lHTSj4TckBAvyYSWm4KElN3tir/MVm5hHgfDA==}
-
   '@midnight-ntwrk/dapp-connector-api@3.0.0':
     resolution: {integrity: sha512-A/AhsNjibrOSaUiPhQhxANeW9178uYnzeBFBf30YCvyvWg0YWCbhQfc7dRpiL7iBoX3Sxt9mtf+Svx4ZygLajg==}
 
@@ -856,9 +853,6 @@ packages:
 
   '@midnight-ntwrk/onchain-runtime-v1@1.0.0-alpha.5':
     resolution: {integrity: sha512-f2l6PaWFycNukB8kk8w/E5TuR2P8DX1TJ1papbIoEFPYJadHozzMwg0OW9IEYWNIDw3S/adL0B9Qx7F8VODlPQ==}
-
-  '@midnight-ntwrk/onchain-runtime@0.3.0':
-    resolution: {integrity: sha512-vZWPoz7MhXO5UgWZET50g7APOcT5dbAfADDcrSreeOagV8lj7JJzlnYIIhrcUaMOv+NHWxPaUcJUYUkmu9LoTA==}
 
   '@midnight-ntwrk/wallet-api@3.5.0':
     resolution: {integrity: sha512-1ucwit8lfCywkE2ExhlLCbJ9fx+q8QSGlvYWGrBpLEm1roA7BMh6IRIl27Lurl6T2g8EQI8pco23+2+tcDshDA==}
@@ -4395,12 +4389,6 @@ snapshots:
       '@types/object-inspect': 1.13.0
       object-inspect: 1.13.4
 
-  '@midnight-ntwrk/compact-runtime@0.9.0':
-    dependencies:
-      '@midnight-ntwrk/onchain-runtime': 0.3.0
-      '@types/object-inspect': 1.13.0
-      object-inspect: 1.13.4
-
   '@midnight-ntwrk/dapp-connector-api@3.0.0(rxjs@7.8.2)':
     dependencies:
       '@midnight-ntwrk/wallet-api': 5.0.0(rxjs@7.8.2)
@@ -4414,8 +4402,6 @@ snapshots:
   '@midnight-ntwrk/midnight-js-network-id@2.1.0': {}
 
   '@midnight-ntwrk/onchain-runtime-v1@1.0.0-alpha.5': {}
-
-  '@midnight-ntwrk/onchain-runtime@0.3.0': {}
 
   '@midnight-ntwrk/wallet-api@3.5.0(rxjs@7.8.2)':
     dependencies:
@@ -4482,7 +4468,7 @@ snapshots:
 
   '@openzeppelin/compact-tools-simulator@file:compact-tools/packages/simulator':
     dependencies:
-      '@midnight-ntwrk/compact-runtime': 0.9.0
+      '@midnight-ntwrk/compact-runtime': 0.11.0-rc.1
 
   '@pinojs/redact@0.4.0': {}
 

@@ -728,7 +728,7 @@ describe('Uint128', () => {
       const a: U128 = { low: 10n, high: 0n };
       const b: U128 = { low: 5n, high: 0n };
       expect(() => uint128Simulator.divU128(a, b)).toThrow(
-        'failed assert: MathU128: conversion invalid',
+        'failed assert: MathU128: remainder error',
       );
     });
   });
@@ -851,7 +851,7 @@ describe('Uint128', () => {
       const a: U128 = { low: 20n, high: 0n };
       const b: U128 = { low: 10n, high: 0n };
       expect(() => uint128Simulator.remU128(a, b)).toThrow(
-        'failed assert: MathU128: conversion invalid',
+        'failed assert: MathU128: remainder error',
       );
     });
   });

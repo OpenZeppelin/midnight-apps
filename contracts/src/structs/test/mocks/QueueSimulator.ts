@@ -32,7 +32,7 @@ const QueueSimulatorBase = createSimulator<
 /**
  * @description A simulator implementation for testing Queue operations.
  */
-export class QueueContractSimulator extends QueueSimulatorBase {
+export class QueueSimulator extends QueueSimulatorBase {
   constructor(
     options: BaseSimulatorOptions<
       QueueContractPrivateState,

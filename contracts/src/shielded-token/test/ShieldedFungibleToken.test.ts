@@ -1,4 +1,7 @@
-import { encodeTokenType, tokenType } from '@midnight-ntwrk/compact-runtime';
+import {
+  encodeRawTokenType,
+  rawTokenType,
+} from '@midnight-ntwrk/compact-runtime';
 import {
   NetworkId,
   getZswapNetworkId,
@@ -88,8 +91,8 @@ describe('ShieldedFungibleToken', () => {
 
       // Calculate the expected token type from domain and contract address
       const publicState = token.getPublicState();
-      const expectedType = encodeTokenType(
-        tokenType(
+      const expectedType = encodeRawTokenType(
+        rawTokenType(
           publicState.ShieldedFungibleToken__domain,
           token.contractAddress,
         ),
@@ -116,8 +119,8 @@ describe('ShieldedFungibleToken', () => {
 
       // Verify the minted coin
       const publicState = token.getPublicState();
-      const expectedType = encodeTokenType(
-        tokenType(
+      const expectedType = encodeRawTokenType(
+        rawTokenType(
           publicState.ShieldedFungibleToken__domain,
           token.contractAddress,
         ),

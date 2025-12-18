@@ -300,7 +300,7 @@ describe('Uint64', () => {
 
     test('should fail if number exceeds MAX_64', () => {
       expect(() => uint64Simulator.sqrt(MAX_UINT64 + 1n)).toThrow(
-        'expected value of type Uint<0..18446744073709551615> but received 18446744073709551616',
+        'expected value of type Uint<0..18446744073709551616> but received 18446744073709551616',
       );
     });
 
