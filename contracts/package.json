@@ -32,6 +32,8 @@
     "compact:shielded-token": "compact-compiler $npm_package_config_compactVersion --dir shielded-token --hierarchical",
     "compact:structs": "compact-compiler $npm_package_config_compactVersion --dir structs --hierarchical",
     "compact:math": "compact-compiler $npm_package_config_compactVersion --dir math --hierarchical",
+    "compact:fmt": "compact format --check",
+    "compact:fmt:fix": "compact format --write",
     "build": "compact-builder $npm_package_config_compactVersion --hierarchical",
     "build:fast": "compact-builder $npm_package_config_compactVersion --skip-zk --hierarchical",
     "test": "vitest run",
@@ -40,7 +42,7 @@
     "test:watch": "vitest watch",
     "types": "tsc -p tsconfig.json --noEmit",
     "lint": "biome check . && compact format --check",
-    "lint:fix": "biome check . --write && compact format",
+    "lint:fix": "biome check . --write",
     "lint:ci": "biome ci . --changed --since=main --no-errors-on-unmatched",
     "clean": "git clean -fXd"
   },
