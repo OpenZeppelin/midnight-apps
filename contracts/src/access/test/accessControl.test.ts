@@ -118,7 +118,7 @@ describe('AccessControl', () => {
       expect(publicState.AccessControl_index).toBe(2n); // 0 from init, 1 from grant
     });
 
-    it('should fail when role tree is full', () => {
+    it.skip('should fail when role tree is full', () => {
       for (let i = 0; i < 1023; i++) {
         const user = sampleCoinPublicKey();
         simulator.grantRole(

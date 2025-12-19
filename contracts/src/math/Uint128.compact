@@ -67,7 +67,7 @@ module Uint128 {
    * @param b The number to divide by.
    * @returns DivResultU128 The quotient and remainder of the division as U128 values.
    */
-  export witness divU128Locally(a: U128, b: U128): DivResultU128;
+  export witness wit_divU128Locally(a: U128, b: U128): DivResultU128;
 
   /**
    * @description Computes division of two Uint<128> values locally (off-chain).
@@ -76,7 +76,7 @@ module Uint128 {
    * @param b The number to divide by.
    * @returns DivResultU128 The quotient and remainder of the division as U128 values.
    */
-  export witness divUint128Locally(a: Uint<128>, b: Uint<128>): DivResultU128;
+  export witness wit_divUint128Locally(a: Uint<128>, b: Uint<128>): DivResultU128;
 
   /**
    * @description Computes the square root of a U128 value locally (off-chain).
@@ -84,7 +84,7 @@ module Uint128 {
    * @param radicand The U128 value to compute the square root of.
    * @returns Uint<64> The square root of radicand.
    */
-  export witness sqrtU128Locally(radicand: U128): Uint<64>;
+  export witness wit_sqrtU128Locally(radicand: U128): Uint<64>;
 
   /**
    * @title Modulus U128 circuit
@@ -172,7 +172,7 @@ module Uint128 {
    * @throws {Error} "MathU128: conversion invalid" If the reconstructed value does not match the input.
    */
   export circuit toU128(value: Uint<128>): U128 {
-    const result = divUint128Locally(value, MODULUS());
+    const result = wit_divUint128Locally(value, MODULUS());
     const high = result.quotient.low;
     const low = result.remainder.low;
 
@@ -855,7 +855,7 @@ module Uint128 {
   *    - Else if A < B (using MathU128__le), return { quotient: ZERO_U128, remainder: A }.
   * 2. Division Computation:
   *    - Compute a_uint128 = a.high * 2^64 + a.low and b_uint128 = b.high * 2^64 + b.low using fromU128.
-  *    - Compute result = (quotient, remainder) using divU128Locally, where quotient = floor(a_uint128 / b_uint128)
+  *    - Compute result = (quotient, remainder) using wit_divU128Locally, where quotient = floor(a_uint128 / b_uint128)
   *      and remainder = a_uint128 mod b_uint128.
   * 3. Remainder Verification:
   *    - Assert remainder <= b using _le, ensuring remainder < b.
@@ -902,7 +902,7 @@ module Uint128 {
              }
              else {
                 assert(!isZeroU128(b), "MathU128: division by zero");
-                const result = divU128Locally(a, b);
+                const result = wit_divU128Locally(a, b);
                 assert(ltU128(result.remainder, b), "MathU128: remainder error");
 
                 // quotient * b + remainder == a
@@ -1097,7 +1097,7 @@ module Uint128 {
    *    - Else if N = 2^128 - 1 (radicand.low = radicand.high = Max_U64), return Max_U64.
    * 2. General Case Computation:
    *    - Compute N_uint128 = radicand.high * 2^64 + radicand.low using fromU128.
-   *    - Compute R = floor(sqrt(N_uint128)) using sqrtU128Locally, where R is in [0, 2^64 - 1].
+   *    - Compute R = floor(sqrt(N_uint128)) using wit_sqrtU128Locally, where R is in [0, 2^64 - 1].
    * 3. Root Verification:
    *    - Define rootU128 = { low: R, high: 0 }.
    *    - Compute rootSquareU256 = rootU128 * rootU128 using _mul.
@@ -1171,7 +1171,7 @@ module Uint128 {
                                      return MAX_UINT64();
                                   }
                                   else {
-                                     const root = sqrtU128Locally(radicand);
+                                     const root = wit_sqrtU128Locally(radicand);
                                      const rootU128 = U128 { low: root, high: 0 };
                                      const rootSquareU256 = _mul(rootU128, rootU128); // U256 { low: U128, high: U128 }
                                      assert(eqU128(rootSquareU256.high, ZERO_U128()), "MathU128: sqrt root^2 overflow");

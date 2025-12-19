@@ -184,7 +184,7 @@ export function createMaliciousField254Simulator({
   const witnesses = {
     ...baseWitnesses,
     ...(mockSqrtU256 && {
-      sqrtU256Locally(
+      wit_sqrtU256Locally(
         context: WitnessContext<Ledger, Field254PrivateState>,
         radicand: U256,
       ): [Field254PrivateState, bigint] {
@@ -192,7 +192,7 @@ export function createMaliciousField254Simulator({
       },
     }),
     ...(mockDivU256 && {
-      divU256Locally(
+      wit_divU256Locally(
         context: WitnessContext<Ledger, Field254PrivateState>,
         a: U256,
         b: U256,

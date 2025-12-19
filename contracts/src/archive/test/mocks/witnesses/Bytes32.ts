@@ -31,7 +31,7 @@ export const Bytes32PrivateState = {
  */
 export const Bytes32Witnesses = () => ({
   // Witness functions required by MathU256_fromField
-  divUint254Locally(
+  wit_divUint254Locally(
     context: WitnessContext<Ledger, Bytes32PrivateState>,
     a: bigint,
     b: bigint,
@@ -72,7 +72,7 @@ export const Bytes32Witnesses = () => ({
     ];
   },
 
-  divUint128Locally(
+  wit_divUint128Locally(
     context: WitnessContext<Ledger, Bytes32PrivateState>,
     a: bigint,
     b: bigint,

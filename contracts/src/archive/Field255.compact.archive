@@ -97,7 +97,7 @@ module Field255 {
    *
    * Mathematical Steps:
    * 1. Cast the field element to Uint<254>.
-   * 2. Split into 128-bit halves via `divUint254Locally`:
+   * 2. Split into 128-bit halves via `wit_divUint254Locally`:
    *    - `low`      = value mod 2^128 (least significant 128 bits).
    *    - `high`     = floor(value / 2^128) (remaining bits, guaranteed <2^128).
    * 3. Extract the U128 limbs from each half:

@@ -166,8 +166,8 @@ import { Uint64Witnesses } from '@openzeppelin/midnight-apps-math-contracts';
 const witnesses = Uint64Witnesses();
 
 // Use in contract context
-const [newState, sqrtResult] = witnesses.sqrtU64Locally(context, 64n);
-const [newState2, divResult] = witnesses.divU64Locally(context, 10n, 3n);
+const [newState, sqrtResult] = witnesses.wit_sqrtU64Locally(context, 64n);
+const [newState2, divResult] = witnesses.wit_divU64Locally(context, 10n, 3n);
 // divResult = { quotient: 3n, remainder: 1n }
 ```
 
@@ -183,8 +183,8 @@ module Uint64 {
         remainder: Uint<64>
     }
 
-    export witness divU64Locally(a: Uint<64>, b: Uint<64>): DivResultU64;
-    export witness sqrtU64Locally(radicand: Uint<64>): Uint<32>;
+    export witness wit_divU64Locally(a: Uint<64>, b: Uint<64>): DivResultU64;
+    export witness wit_sqrtU64Locally(radicand: Uint<64>): Uint<32>;
 }
 ```
 
@@ -219,8 +219,8 @@ Factory function that creates witness implementations for Uint64 operations.
 - Object implementing `Uint64Witnesses` interface
 
 **Available Methods:**
-- `sqrtU64Locally(context, radicand)` - Computes square root off-chain
-- `divU64Locally(context, dividend, divisor)` - Computes division off-chain
+- `wit_sqrtU64Locally(context, radicand)` - Computes square root off-chain
+- `wit_divU64Locally(context, dividend, divisor)` - Computes division off-chain
 
 ### Types
 

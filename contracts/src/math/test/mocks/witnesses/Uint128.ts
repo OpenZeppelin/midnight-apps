@@ -38,13 +38,13 @@ const fromU128 = (value: U128): bigint =>
  * @description Factory function creating witness implementations for Uint128 module operations.
  */
 export const Uint128Witnesses = (): Witnesses<Uint128PrivateState> => ({
-  sqrtU128Locally(context, radicand) {
+  wit_sqrtU128Locally(context, radicand) {
     const radicandBigInt = fromU128(radicand);
     const root = sqrtBigint(radicandBigInt);
     return [context.privateState, root];
   },
 
-  divU128Locally(context, a, b): [Uint128PrivateState, DivResultU128] {
+  wit_divU128Locally(context, a, b): [Uint128PrivateState, DivResultU128] {
     const aValue = fromU128(a);
     const bValue = fromU128(b);
     const quotient = aValue / bValue;
@@ -58,7 +58,7 @@ export const Uint128Witnesses = (): Witnesses<Uint128PrivateState> => ({
     ];
   },
 
-  divUint128Locally(context, a, b) {
+  wit_divUint128Locally(context, a, b) {
     const quotient = a / b;
     const remainder = a - quotient * b;
     return [

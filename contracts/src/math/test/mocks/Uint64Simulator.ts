@@ -7,7 +7,8 @@ import {
   Contract,
   ledger,
 } from '../../../../artifacts/math/test/mocks/contracts/Uint64.mock/contract/index.js';
-import { Uint64PrivateState, Uint64Witnesses } from './witnesses/Uint64.js';
+import type { Uint64PrivateState } from './witnesses/Uint64.js';
+import { Uint64Witnesses } from './witnesses/Uint64.js';
 
 /**
  * Base simulator for Uint64 mock contract
@@ -20,7 +21,7 @@ const Uint64SimulatorBase = createSimulator<
   readonly []
 >({
   contractFactory: (witnesses) => new Contract<Uint64PrivateState>(witnesses),
-  defaultPrivateState: () => Uint64PrivateState.generate(),
+  defaultPrivateState: () => ({}),
   contractArgs: () => [],
   ledgerExtractor: (state) => ledger(state),
   witnessesFactory: () => Uint64Witnesses(),

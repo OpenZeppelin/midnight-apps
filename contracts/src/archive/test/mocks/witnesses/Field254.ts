@@ -39,7 +39,7 @@ export const Field254Witnesses = () => ({
    * @param b - The Uint<254> value to divide by.
    * @returns A tuple of the unchanged private state and a DivResultU256 with quotient and remainder.
    */
-  divUint254Locally(
+  wit_divUint254Locally(
     context: WitnessContext<Ledger, Field254PrivateState>,
     a: bigint,
     b: bigint,
@@ -91,7 +91,7 @@ export const Field254Witnesses = () => ({
    * @param radicand - The U256 value to compute the square root of.
    * @returns A tuple of the unchanged private state and the square root as a bigint (Uint<128>).
    */
-  sqrtU256Locally(
+  wit_sqrtU256Locally(
     context: WitnessContext<Ledger, Field254PrivateState>,
     radicand: U256,
   ): [Field254PrivateState, bigint] {
@@ -115,7 +115,7 @@ export const Field254Witnesses = () => ({
    * @param b - The U256 value to divide by (divisor).
    * @returns A tuple of the unchanged private state and a DivResultU256 with quotient and remainder.
    */
-  divU256Locally(
+  wit_divU256Locally(
     context: WitnessContext<Ledger, Field254PrivateState>,
     a: U256,
     b: U256,
@@ -180,7 +180,7 @@ export const Field254Witnesses = () => ({
    * @param divisor - The number to divide by.
    * @returns A tuple of the unchanged private state and a DivResultU64 with quotient and remainder.
    */
-  divUint128Locally(
+  wit_divUint128Locally(
     context: WitnessContext<Ledger, Field254PrivateState>,
     a: bigint,
     b: bigint,

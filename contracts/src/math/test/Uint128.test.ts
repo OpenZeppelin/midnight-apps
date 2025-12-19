@@ -52,7 +52,7 @@ describe('Uint128', () => {
     });
 
     test('should fail when reconstruction is invalid', () => {
-      uint128Simulator.overrideWitness('divUint128Locally', (context) => [
+      uint128Simulator.overrideWitness('wit_divUint128Locally', (context) => [
         context.privateState,
         { quotient: { low: 1n, high: 0n }, remainder: { low: 1n, high: 0n } },
       ]);
@@ -653,7 +653,7 @@ describe('Uint128', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      uint128Simulator.overrideWitness('divUint128Locally', (context) => [
+      uint128Simulator.overrideWitness('wit_divUint128Locally', (context) => [
         context.privateState,
         { quotient: { low: 1n, high: 0n }, remainder: { low: 5n, high: 0n } },
       ]);
@@ -721,7 +721,7 @@ describe('Uint128', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      uint128Simulator.overrideWitness('divU128Locally', (context) => [
+      uint128Simulator.overrideWitness('wit_divU128Locally', (context) => [
         context.privateState,
         { quotient: { low: 1n, high: 0n }, remainder: { low: 5n, high: 0n } },
       ]);
@@ -776,7 +776,7 @@ describe('Uint128', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      uint128Simulator.overrideWitness('divUint128Locally', (context) => [
+      uint128Simulator.overrideWitness('wit_divUint128Locally', (context) => [
         context.privateState,
         { quotient: { low: 1n, high: 0n }, remainder: { low: 10n, high: 0n } },
       ]);
@@ -844,7 +844,7 @@ describe('Uint128', () => {
     });
 
     test('remU128 should fail when remainder >= divisor', () => {
-      uint128Simulator.overrideWitness('divU128Locally', (context) => [
+      uint128Simulator.overrideWitness('wit_divU128Locally', (context) => [
         context.privateState,
         { quotient: { low: 1n, high: 0n }, remainder: { low: 10n, high: 0n } },
       ]);
@@ -1001,7 +1001,7 @@ describe('Uint128', () => {
     });
 
     test('should fail if sqrt witness overestimates (root^2 > radicand)', () => {
-      uint128Simulator.overrideWitness('sqrtU128Locally', (context) => [
+      uint128Simulator.overrideWitness('wit_sqrtU128Locally', (context) => [
         context.privateState,
         11n,
       ]);
@@ -1011,7 +1011,7 @@ describe('Uint128', () => {
     });
 
     test('should fail if sqrt witness underestimates (next^2 <= radicand)', () => {
-      uint128Simulator.overrideWitness('sqrtU128Locally', (context) => [
+      uint128Simulator.overrideWitness('wit_sqrtU128Locally', (context) => [
         context.privateState,
         9n,
       ]);

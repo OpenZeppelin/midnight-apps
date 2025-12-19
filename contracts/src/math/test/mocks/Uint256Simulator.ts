@@ -2,14 +2,12 @@ import {
   type BaseSimulatorOptions,
   createSimulator,
 } from '@openzeppelin/compact-tools-simulator';
-import type {
-  DivResultU256,
-  U256,
-} from '../../../../artifacts/math/Index/contract/index.cjs';
 import {
   Contract,
+  type DivResultU256,
+  type U256,
   ledger,
-} from '../../../../artifacts/math/test/Uint256.mock/contract/index.cjs';
+} from '../../../../artifacts/math/test/mocks/contracts/Uint256.mock/contract/index.js';
 import { Uint256PrivateState, Uint256Witnesses } from './witnesses/Uint256.js';
 
 /**
@@ -43,114 +41,110 @@ export class Uint256Simulator extends Uint256SimulatorBase {
   }
 
   public MODULUS(): bigint {
-    return this.circuits.pure.MODULUS();
+    return this.circuits.impure.MODULUS();
   }
 
   public MODULUS_U256(): U256 {
-    return this.circuits.pure.MODULUS_U256();
+    return this.circuits.impure.MODULUS_U256();
   }
 
   public ZERO_U256(): U256 {
-    return this.circuits.pure.ZERO_U256();
+    return this.circuits.impure.ZERO_U256();
   }
 
-  public fromU256(a: U256): bigint {
-    return this.circuits.pure.fromU256(a);
-  }
-
-  public toU256(a: bigint): U256 {
-    return this.circuits.pure.toU256(a);
+  public toBytes(value: U256): Uint8Array {
+    return this.circuits.impure.toBytes(value);
   }
 
   public eq(a: U256, b: U256): boolean {
-    return this.circuits.pure.eq(a, b);
+    return this.circuits.impure.eq(a, b);
   }
 
   public lt(a: U256, b: U256): boolean {
-    return this.circuits.pure.lt(a, b);
+    return this.circuits.impure.lt(a, b);
   }
 
   public lte(a: U256, b: U256): boolean {
-    return this.circuits.pure.lte(a, b);
+    return this.circuits.impure.lte(a, b);
   }
 
   public gt(a: U256, b: U256): boolean {
-    return this.circuits.pure.gt(a, b);
+    return this.circuits.impure.gt(a, b);
   }
 
   public gte(a: U256, b: U256): boolean {
-    return this.circuits.pure.gte(a, b);
+    return this.circuits.impure.gte(a, b);
   }
 
   public add(a: U256, b: U256): U256 {
-    return this.circuits.pure.add(a, b);
+    return this.circuits.impure.add(a, b);
   }
 
   public sub(a: U256, b: U256): U256 {
-    return this.circuits.pure.sub(a, b);
+    return this.circuits.impure.sub(a, b);
   }
 
   public mul(a: U256, b: U256): U256 {
-    return this.circuits.pure.mul(a, b);
+    return this.circuits.impure.mul(a, b);
   }
 
   public div(a: U256, b: U256): U256 {
-    return this.circuits.pure.div(a, b);
+    return this.circuits.impure.div(a, b);
   }
 
   public rem(a: U256, b: U256): U256 {
-    return this.circuits.pure.rem(a, b);
+    return this.circuits.impure.rem(a, b);
   }
 
   public divRem(a: U256, b: U256): DivResultU256 {
-    return this.circuits.pure.divRem(a, b);
+    return this.circuits.impure.divRem(a, b);
   }
 
   public sqrt(radicand: U256): bigint {
-    return this.circuits.pure.sqrt(radicand);
+    return this.circuits.impure.sqrt(radicand);
   }
 
   public min(a: U256, b: U256): U256 {
-    return this.circuits.pure.min(a, b);
+    return this.circuits.impure.min(a, b);
   }
 
   public max(a: U256, b: U256): U256 {
-    return this.circuits.pure.max(a, b);
+    return this.circuits.impure.max(a, b);
   }
 
   public isZero(a: U256): boolean {
-    return this.circuits.pure.isZero(a);
+    return this.circuits.impure.isZero(a);
   }
 
   public isExceedingFieldSize(a: U256): boolean {
-    return this.circuits.pure.isExceedingFieldSize(a);
+    return this.circuits.impure.isExceedingFieldSize(a);
   }
 
   public isLowestLimbOnly(val: U256, limbValue: bigint): boolean {
-    return this.circuits.pure.isLowestLimbOnly(val, limbValue);
+    return this.circuits.impure.isLowestLimbOnly(val, limbValue);
   }
 
   public isSecondLimbOnly(val: U256, limbValue: bigint): boolean {
-    return this.circuits.pure.isSecondLimbOnly(val, limbValue);
+    return this.circuits.impure.isSecondLimbOnly(val, limbValue);
   }
 
   public isThirdLimbOnly(val: U256, limbValue: bigint): boolean {
-    return this.circuits.pure.isThirdLimbOnly(val, limbValue);
+    return this.circuits.impure.isThirdLimbOnly(val, limbValue);
   }
 
   public isHighestLimbOnly(val: U256, limbValue: bigint): boolean {
-    return this.circuits.pure.isHighestLimbOnly(val, limbValue);
+    return this.circuits.impure.isHighestLimbOnly(val, limbValue);
   }
 
   public isMultiple(value: U256, divisor: U256): boolean {
-    return this.circuits.pure.isMultiple(value, divisor);
+    return this.circuits.impure.isMultiple(value, divisor);
   }
 
   public MAX_UINT254(): U256 {
-    return this.circuits.pure.MAX_UINT254();
+    return this.circuits.impure.MAX_UINT254();
   }
 
   public MAX_U256(): U256 {
-    return this.circuits.pure.MAX_U256();
+    return this.circuits.impure.MAX_U256();
   }
 }

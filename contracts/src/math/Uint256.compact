@@ -18,7 +18,7 @@ pragma language_version >= 0.19.0;
  * - v0.27.0: Max Uint<248> (31 bytes) — Uint<254> no longer compiles
  *
  * AFFECTED OPERATIONS:
- * - divUint254Locally(): Witness using Uint<254> parameters
+ * - wit_divUint254Locally(): Witness using Uint<254> parameters
  * - fromU256(): Returns Uint<254> for Field-compatible conversion
  * - toU256(): Accepts Uint<254> parameter for Field-compatible conversion
  *
@@ -63,13 +63,27 @@ pragma language_version >= 0.19.0;
  *
  * TODO: Future Operations:
  * - pow(), powU256(): Compute the power of a 256-bit number raised to a given exponent.
- * - Refactor fromU256()/toU256() to work within Uint<248> limit or use alternative approach.
  */
 module Uint256 {
-  import CompactStandardLibrary;
-
-  import Uint64 prefix Uint64_;
-  import Uint128 prefix Uint128_;
+  import { wit_divU64Locally, wit_sqrtU64Locally, MAX_UINT8, MAX_UINT16, MAX_UINT32, MAX_UINT64 } from Uint64 prefix Uint64_;
+  import {
+   wit_divU128Locally,
+   wit_sqrtU128Locally,
+   MAX_U128,
+   toU128,
+   fromU128,
+   eqU128,
+   ltU128,
+   lteU128,
+   gtU128,
+   add,
+   addU128,
+   subU128,
+   mul,
+   mulU128,
+   isZeroU128,
+   ZERO_U128,
+   MAX_UINT128 } from Uint128 prefix Uint128_;
 
   // U256 type is imported from the types module to avoid cyclic dependencies
   // between Uint128 and Uint256 modules. See TU256 module documentation.
@@ -97,7 +111,7 @@ module Uint256 {
    * @param b The number to divide by.
    * @returns DivResultU256 The quotient and remainder of the division as U256 structs.
    */
-  export witness divU256Locally(a: U256, b: U256): DivResultU256;
+  export witness wit_divU256Locally(a: U256, b: U256): DivResultU256;
 
   /**
    * @description Computes the square root of a U256 value locally (off-chain).
@@ -105,22 +119,13 @@ module Uint256 {
    * @param radicand The number to compute the square root of.
    * @returns Uint<128> The square root of radicand.
    */
-  export witness sqrtU256Locally(radicand: U256): Uint<128>;
-
-  /**
-   * @description Computes division of two Uint<254> values locally (off-chain).
-   *
-   * @param a The Uint<254> value to divide.
-   * @param b The Uint<254> value to divide by.
-   * @returns DivResultU256 The quotient and remainder of the division as U256 structs.
-   */
-  export witness divUint254Locally(a: Uint<254>, b: Uint<254>): DivResultU256;
+  export witness wit_sqrtU256Locally(radicand: U256): Uint<128>;
 
   /**
    * @title MODULUS circuit
    * @description A pure circuit that returns the modulus value for U256 high part (2^128).
    *
-   * @circuitInfo k=10, rows=128
+   * @circuitInfo k=10, rows=29
    *
    * @returns {Uint<129>} The value 2^128 (340282366920938463463374607431768211456).
    */
@@ -132,7 +137,7 @@ module Uint256 {
    * @title MODULUS_U256 circuit
    * @description A pure circuit that returns the modulus value for U256 high part (2^128) as a U256 struct.
    *
-   * @circuitInfo k=10, rows=128
+   * @circuitInfo k=10, rows=71
    *
    * @returns {U256} The value 2^128 as a U256 struct { low: {0, 0}, high: {1, 0} }.
    */
@@ -149,7 +154,7 @@ module Uint256 {
    * {low: {0, 0}, high: {0, 0}}, representing the 256-bit value 0.
    * No computations are performed, only struct construction.
    *
-   * @circuitInfo k=10, rows=128
+   * @circuitInfo k=10, rows=71
    *
    * @returns {U256} A U256 struct representing 0.
    */
@@ -163,7 +168,7 @@ module Uint256 {
    *
    * MAX_Uint254 = 2^254 - 1 = 28948022309329048855892746252171976963317496166410141009864396001978282409983
    *
-   * @circuitInfo k=10, rows=128
+   * @circuitInfo k=10, rows=73
    *
    * @returns {U256} The maximum Uint<254> value (2^254 - 1) as a U256 struct.
    */
@@ -177,7 +182,7 @@ module Uint256 {
    * @description Returns the maximum value for a U256 struct, where both low and high
    * fields are set to the maximum 128-bit value (2^128 - 1).
    *
-   * @circuitInfo k=10, rows=128
+   * @circuitInfo k=10, rows=72
    *
    * @returns {U256} A U256 struct representing 2^256 - 1.
    */
@@ -186,93 +191,32 @@ module Uint256 {
   }
 
   /**
-   * @title fromU256 circuit
-   * @description Converts a U256 struct to a Uint<254>, checking if the value fits within 254 bits.
+    * @title toBytes circuit
+    * @description Converts a U256 struct to a 32-byte array using little-endian byte ordering.
+    *
+    * @remarks
+    * This circuit converts a U256 struct to a Bytes<32> value by casting each Uint<64> limb
+    * to an 8-byte array and concatenating them in little-endian order.
+    *
+    * Byte layout: [low.low][low.high][high.low][high.high]
+    * - Bytes 0-7: least significant limb (low.low)
+    * - Bytes 8-15: second limb (low.high)
+    * - Bytes 16-23: third limb (high.low)
+    * - Bytes 24-31: most significant limb (high.high)
+    *
+   * @circuitInfo k=14, rows=14786
    *
-   * @remark
-   * Theoretical Description:
-   * This circuit converts a U256 struct to a 254-bit unsigned integer, ensuring the value
-   * doesn't exceed 254 bits. The U256 value is reconstructed as value = high * 2^128 + low
-   * and validated against the 254-bit limit.
+   * @param {U256} value - The U256 struct to convert.
    *
-   * Mathematical Steps:
-   * 1. Reconstruct U256 Value:
-   *    - Convert high U128 to Uint<128> using Uint128_fromU128.
-   *    - Convert low U128 to Uint<128> using Uint128_fromU128.
-   *    - Compute value = high * 2^128 + low.
-   * 2. 254-bit Validation:
-   *    - Check if value < 2^254 (254-bit limit).
-   *    - If value >= 2^254, throw "MathU256: value exceeds 254 bits".
-   * 3. Convert to Uint<254>:
-   *    - Cast the validated value to Uint<254>.
-   * 4. Return Result:
-   *    - Return the 254-bit unsigned integer.
-   *
-   * @circuitInfo k=10, rows=816
-   *
-   * @param {U256} a - The U256 struct to convert.
-   *
-   * @throws {Error} "MathU256: fromU256() - value exceeds 254 bits" If the U256 value is >= 2^254.
-   *
-   * @returns {Uint<254>} The 254-bit representation of the U256 value.
+   * @returns {Bytes<32>} The corresponding 32-byte array (little-endian).
    */
-  export circuit fromU256(a: U256): Uint<254> {
-    assert(!isExceedingFieldSize(a), "MathU256: fromU256() - value exceeds 254 bits");
+  export pure circuit toBytes(value: U256): Bytes<32> {
+    const b0 = value.low.low as Bytes<8>;   // least significant
+    const b1 = value.low.high as Bytes<8>;
+    const b2 = value.high.low as Bytes<8>;
+    const b3 = value.high.high as Bytes<8>; // most significant
 
-    // Compute highShifted = valueU256.high * 2^128 as a U256 struct
-    const highShiftedU256 = U256 { low: U128 { low: 0, high: 0 }, high: a.high }; // Equivalent to value.high * 2^128
-    // Represent valueU256.low as a U256 struct
-    const lowU256 = U256 { low: a.low, high: U128 { low: 0, high: 0 } };
-    // Add using addU256 to get the combined result
-    const resultU256 = add(highShiftedU256, lowU256);
-
-    // Extract the actual values from U128 structs
-    const highValue = Uint128_fromU128(resultU256.high);
-    const lowValue = Uint128_fromU128(resultU256.low);
-
-    // Combine high and low parts: high * 2^128 + low, with explicit casts
-    const highField = highValue as Field;
-    const modulusField = MODULUS() as Field;
-    const lowField = lowValue as Field;
-    const result = highField * modulusField + lowField;
-
-    return result as Uint<254>;
-  }
-
-  /**
-   * @title toU256 circuit
-   * @description Converts a Uint<254> to a U256 struct.
-   *
-   * @remarks
-   * Splits the 254-bit integer into two 128-bit halves and packs them into
-   * the U256 struct, then verifies lossless conversion.
-   *
-   * @circuitInfo k=10, rows=739
-   *
-   * @param {Uint<254>} a - The 254-bit unsigned integer to convert.
-   *
-   * @returns {U256} The U256 struct representation.
-   */
-  export circuit toU256(a: Uint<254>): U256 {
-    // split into high and low 128-bit parts
-    const {quotient, remainder} = divUint254Locally(a, MODULUS());
-
-    // extract the U128 limbs
-    const lowU128 = remainder.low;
-    const highU128 = quotient.low;
-
-    // build the result struct
-    const result = U256 { low: lowU128, high: highU128 };
-
-    // reconstruct via placement + add, no 256-bit multiply
-    const lowU256 = U256 { low: lowU128, high: U128 { low: 0, high: 0 } };
-    const highU256 = U256 { low: U128 { low: 0, high: 0 }, high: highU128 };
-    const reconstructed = add(highU256, lowU256);
-
-    // verify we recovered the original `a` exactly
-    assert(eq(reconstructed, result), "MathU256: conversion invalid");
-
-    return result;
+    return Bytes[...b0, ...b1, ...b2, ...b3];
   }
 
   /**
@@ -291,7 +235,7 @@ module Uint256 {
    * - A.low == B.low (using Uint128_eqU128).
    * The result is true only if both conditions hold.
    *
-   * @circuitInfo k=11, rows=1410
+   * @circuitInfo k=10, rows=270
    *
    * @param {U256} a - The first U256 value.
    * @param {U256} b - The second U256 value.
@@ -315,7 +259,7 @@ module Uint256 {
    * equal, returning true if A < B, false otherwise. No arithmetic operations are performed,
    * only comparisons and logical operations (OR, AND).
    *
-   * @circuitInfo k=11, rows=1495
+   * @circuitInfo k=10, rows=335
    *
    * @param {U256} a - The first U256 value.
    * @param {U256} b - The second U256 value.
@@ -339,7 +283,7 @@ module Uint256 {
    * parts first, then the low parts if the high parts are equal, returning true if A <= B,
    * false otherwise.
    *
-   * @circuitInfo k=11, rows=1518
+   * @circuitInfo k=10, rows=350
    *
    * @param {U256} a - The first U256 value.
    * @param {U256} b - The second U256 value.
@@ -363,7 +307,7 @@ module Uint256 {
    * equal, returning true if A > B, false otherwise. No arithmetic operations are performed,
    * only comparisons and logical operations (OR, AND).
    *
-   * @circuitInfo k=11, rows=1495
+   * @circuitInfo k=10, rows=335
    *
    * @param {U256} a - The first U256 value.
    * @param {U256} b - The second U256 value.
@@ -387,7 +331,7 @@ module Uint256 {
    * parts first, then the low parts if the high parts are equal, returning true if A >= B,
    * false otherwise.
    *
-   * @circuitInfo k=11, rows=1518
+   * @circuitInfo k=10, rows=350
    *
    * @param {U256} a - The first U256 value.
    * @param {U256} b - The second U256 value.
@@ -427,7 +371,7 @@ module Uint256 {
    *    - Return U256 {low: lowResult, high: highSum.low}, representing
    *      S = highSum.low * 2^128 + lowResult.
    *
-   * @circuitInfo k=12, rows=2208
+   * @circuitInfo k=11, rows=1255
    *
    * @param {U256} a - The first U256 value to add.
    * @param {U256} b - The second U256 value to add.
@@ -475,10 +419,10 @@ module Uint256 {
    *    - Assert A >= B using gt and eq (i.e., A > B or A == B).
    *    - If false, D < 0, throw "MathU256: subtraction underflow".
    * 3. Low Part Subtraction:
-   *    - Compute borrow = 1 if a.low < b.low (using Uint128_leU128), else 0.
+   *    - Compute borrow = 1 if a.low < b.low (using Uint128_ltU128), else 0.
    *    - If borrow = 0 (a.low >= b.low), compute lowDiff = a.low - b.low using Uint128_subU128.
-   *    - If borrow = 1 (a.low < b.low), set lowDiff = 2^128 - 1 (Uint128_MAX_U128) to reflect
-   *      borrowing from the high part, ensuring lowDiff is in [0, 2^128 - 1].
+   *    - If borrow = 1 (a.low < b.low), compute lowDiff = 2^128 + a.low - b.low, which is
+   *      calculated as (MAX_U128 - b.low) + a.low + 1 to handle the modular wrap.
    * 4. High Part Subtraction with Borrow:
    *    - Compute highWithBorrow = b.high + borrow using Uint128_addU128.
    *    - Compute highDiff = a.high - highWithBorrow using Uint128_subU128.
@@ -487,7 +431,7 @@ module Uint256 {
    *      D = highDiff * 2^128 + lowDiff.
    * The underflow check ensures D >= 0, and the result is in [0, 2^256 - 1].
    *
-   * @circuitInfo k=11, rows=1271
+   * @circuitInfo k=11, rows=1396
    *
    * @param {U256} a - The U256 value to subtract from (minuend).
    * @param {U256} b - The U256 value to subtract (subtrahend).
@@ -497,30 +441,26 @@ module Uint256 {
    * @returns {U256} The difference between a and b.
    */
   export circuit sub(a: U256, b: U256): U256 {
-    if (isZero(b)) {
-       // Special case: b = 0, return a
-       return a;
-    } else
-       if (eq(a, b)) {
-          // Special case: a = b return 0
-          return ZERO_U256();
-       } else {
-          // Check for underflow: a must be >= b
-          assert(gt(a, b) || eq(a, b), "MathU256: subtraction underflow");
+   assert(gte(a, b), "MathU256: subtraction underflow");
 
-          // Handle low part subtraction with borrow
-          const borrow = Uint128_lteU128(a.low, b.low) ? 1 : 0;
-          const highWithBorrow = Uint128_addU128(b.high, Uint128_toU128(borrow)).low;
-          const highDiff = Uint128_subU128(a.high, highWithBorrow);
+   const borrow = Uint128_ltU128(a.low, b.low) ? 1 : 0;
 
-          // TODO: check tenary operator
-          if (borrow == 0) {
-             const lowDiff = Uint128_subU128(a.low, b.low);
-             return U256 { low: lowDiff, high: highDiff };
-          } else {
-             return U256 { low: Uint128_MAX_U128(), high: highDiff };
-          }
-       }
+   if (borrow == 0) {
+      // No borrow: direct subtraction
+      return U256 {
+         low: Uint128_subU128(a.low, b.low),
+         high: Uint128_subU128(a.high, b.high)
+      };
+   } else {
+      // Borrow case
+      const highWithBorrow = Uint128_addU128(b.high, U128 { low: 1, high: 0 }).low;
+      const highDiff = Uint128_subU128(a.high, highWithBorrow);
+      const aLow = Uint128_fromU128(a.low);
+      const bLow = Uint128_fromU128(b.low);
+      const lowDiffUint = (aLow + MODULUS() - bLow) as Uint<128>;
+      const lowDiff = Uint128_toU128(lowDiffUint);
+      return U256 { low: lowDiff, high: highDiff };
+   }
   }
 
   /**
@@ -560,7 +500,7 @@ module Uint256 {
    * 5. Return Result:
    *    - Return result as a U256 struct.
    *
-   * @circuitInfo k=14, rows=9249
+   * @circuitInfo k=14, rows=8860
    *
    * @param {U256} a - The first U256 value to multiply.
    * @param {U256} b - The second U256 value to multiply.
@@ -608,96 +548,61 @@ module Uint256 {
           }
   }
 
-  /**
-   * @title div circuit
-   * @description Internal implementation to divide a U256 a by a U256 b, returning quotient and remainder.
-   *
-   * @remarks
-   * Theoretical Description:
-   * This circuit computes the quotient `quot` and remainder `rem` of dividing a 256-bit number
-   * a = a.high * 2^128 + a.low by another 256-bit number
-   * b = b.high * 2^128 + b.low, 
-   * where a.high, a.low, b.high, b.low are in [0, 2^128 - 1]. The result is a DivResultU256 struct
-   * containing quot and rem as U256 structs, satisfying a = quot * b + rem with 0 <= rem < b.
-   *
-   * Mathematical Steps:
-   * 1. Handle Special Cases:
-   *    - If B = 0 (using isZero), throw "MathU256: division by zero".
-   *    - Else if A = 0 (using isZero), return { quotient: ZERO_U256, remainder: ZERO_U256 }.
-   *    - Else if B = 1 (b.low = {1, 0}, b.high = {0, 0}), return { quotient: A, remainder: ZERO_U256 }.
-   *    - Else if A = B (using eq), return { quotient: {low: {1, 0}, high: {0, 0}}, remainder: ZERO_U256 }.
-   *    - Else if A < B (using le), return { quotient: ZERO_U256, remainder: A }.
-   * 2. Division Computation:
-   *    - Use a division witness (divU256Locally) to compute quot_U256 = floor(a / b)
-   *      and rem_U256 = a mod b as U256 structs: quotientU256, remainderU256.
-   * 3. Verify Remainder:
-   *    - Assert remainderU256 <= b using le, ensuring rem < b.
-   *    - Assert remainderU256 >= ZERO_U256(), ensuring rem >= 0.
-   * 4. Verify Correctness:
-   *    - Compute P = quot * b using mul.
-   *    - Compute S = P + rem using add.
-   *    - Assert S = A, ensuring S = a.
-   *    - Assert P <= a, ensuring no overflow in intermediate calculations.
-   * 5. Return Result:
-   *    - Return DivResultU256 {quotient: quotientU256, remainder: remainderU256}.
-   *
-   * @circuitInfo k=14, rows=10912
-   *
-   * @param {U256} a - The U256 value to divide (dividend).
-   * @param {U256} b - The U256 value to divide by (divisor).
-   *
-   * @throws {Error} "MathU256: division by zero" If b = 0.
-   * @throws {Error} "MathU256: remainder error" If remainder is not less than or equal to b.
-   * @throws {Error} "MathU256: division invalid" If quotient * b + remainder does not equal a.
-   *
-   * @returns {DivResultU256} The quotient and remainder of the division as U256 structs.
-   */
-  circuit _div(a: U256, b: U256): DivResultU256 {
+   /**
+    * @title div circuit (internal)
+    * @description Internal implementation to divide a U256 a by a U256 b.
+    *
+    * @remarks
+    * Computes quotient and remainder such that a = quotient * b + remainder,
+    * where 0 <= remainder < b.
+    *
+    * This implementation uses a witness-based approach with on-chain verification,
+    * eliminating special case checks for optimal circuit efficiency. The witness
+    * computation handles all edge cases (a=0, b=1, a<b) correctly, and the
+    * verification ensures correctness for all inputs.
+    *
+    * Algorithm:
+    * 1. Assert b != 0 (division by zero check).
+    * 2. Compute quotient and remainder using witness (wit_divU256Locally).
+    * 3. Verify remainder < b (strict inequality).
+    * 4. Verify quotient * b + remainder == a (reconstruction check).
+    * 5. Return result.
+    *
+    * The verification step ensures correctness even for edge cases:
+    * - If a = 0: witness returns {0, 0}, verification passes.
+    * - If b = 1: witness returns {a, 0}, verification passes.
+    * - If a < b: witness returns {0, a}, verification passes.
+    *
+    * @param {U256} a - The dividend.
+    * @param {U256} b - The divisor.
+    *
+    * @throws {Error} "MathU256: division by zero" If b = 0.
+    * @throws {Error} "MathU256: remainder error" If remainder >= b.
+    * @throws {Error} "MathU256: division invalid" If quotient * b + remainder != a.
+    *
+    * @returns {DivResultU256} The quotient and remainder.
+    */
+    circuit _div(a: U256, b: U256): DivResultU256 {
     assert(!isZero(b), "MathU256: division by zero");
 
-    if (isZero(a)) {
-       // Dividend is zero: quotient = 0, remainder = 0
-       return DivResultU256 { quotient: ZERO_U256(), remainder: ZERO_U256() };
-    }
-    else
-       if (Uint128_isZeroU128(b.high) && b.low.high == 0 && b.low.low == 1) {
-          // Divisor is one: quotient = a, remainder = 0
-          return DivResultU256 { quotient: a, remainder: ZERO_U256() };
-       }
-       else
-          if (eq(a, b)) {
-             // Dividend equals divisor: quotient = 1, remainder = 0
-             return DivResultU256 { quotient: U256 { low: U128 { low: 1, high: 0 },
-                                                     high: U128 { low: 0, high: 0 } },
-                                    remainder: ZERO_U256() };
-          }
-          else
-             if (lte(a, b)) {
-                // Dividend less than divisor: quotient = 0, remainder = a
-                return DivResultU256 { quotient: ZERO_U256(), remainder: a };
-             } else {
-                const result = divU256Locally(a, b);
+    // General case for everything else
+    const result = wit_divU256Locally(a, b);
 
-                // Verify remainder < b
-                const remainderU256 = result.remainder;
-                assert(lte(remainderU256, b), "MathU256: remainder error");
+    // Verification
+    assert(lt(result.remainder, b), "MathU256: remainder error");
 
-                // Verify: quotient * b + remainder == a
-                const quotientU256 = result.quotient;
-                const product = mul(quotientU256, b);
-                const sum = add(product, remainderU256);
+    const product = mul(result.quotient, b);
+    const sum = add(product, result.remainder);
+    assert(eq(sum, a), "MathU256: division invalid");
 
-                assert(eq(sum, a), "MathU256: division invalid");
-
-                return result;
-             }
+    return result;
   }
 
   /**
    * @title div circuit
    * @description Divides a U256 a by a U256 b, returning quotient.
    *
-   * @circuitInfo k=14, rows=10912
+   * @circuitInfo k=14, rows=10083
    *
    * @param {U256} a - The U256 value to divide.
    * @param {U256} b - The U256 value to divide by.
@@ -712,7 +617,7 @@ module Uint256 {
    * @title rem circuit
    * @description Computes the remainder of dividing a U256 a by a U256 b.
    *
-   * @circuitInfo k=14, rows=10912
+   * @circuitInfo k=14, rows=10080
    *
    * @param {U256} a - The U256 value to divide.
    * @param {U256} b - The U256 value to divide by.
@@ -727,7 +632,7 @@ module Uint256 {
    * @title divRem circuit
    * @description Computes the quotient and remainder of dividing a U256 a by a U256 b.
    *
-   * @circuitInfo k=14, rows=11020
+   * @circuitInfo k=14, rows=10126
    *
    * @param {U256} a - The U256 value to divide.
    * @param {U256} b - The U256 value to divide by.
@@ -746,100 +651,72 @@ module Uint256 {
    * Theoretical Description:
    * This circuit computes the floor of the square root R = floor(sqrt(N)) of a 256-bit number
    * N = radicand.high * 2^128 + radicand.low, where radicand.high, radicand.low are in
-   * [0, 2^128 - 1]. The result is a Uint<128> value R in [0, 2^128 - 1]. It uses the
-   * Newton-Raphson method via a witness for the general case and includes special cases for efficiency.
+   * [0, 2^128 - 1]. The result is a Uint<128> value R in [0, 2^128 - 1].
+   *
+   * The implementation uses a witness-based approach with on-chain verification for efficiency.
+   * Special case checks have been minimized to reduce circuit costs while maintaining correctness.
    *
    * Mathematical Steps:
-   * 1. Handle Special Cases:
+   * 1. Handle Zero Special Case:
    *    - If N = 0 (using isZero), return 0.
-   *    - Else if N = 1 (radicand.low = {1, 0}, radicand.high = {0, 0}), return 1.
-   *    - Else if N = 2 (radicand.low = {2, 0}, radicand.high = {0, 0}), return 1.
-   *    - Else if N = 3 (radicand.low = {3, 0}, radicand.high = {0, 0}), return 1.
-   *    - Else if N = 4 (radicand.low = {4, 0}, radicand.high = {0, 0}), return 2.
-   *    - Else if N = 9 (radicand.low = {9, 0}, radicand.high = {0, 0}), return 3.
-   *    - Else if N = 2^8 - 1 (radicand.low = Max_U8, radicand.high = {0, 0}), return 15.
-   *    - Else if N = 2^16 - 1 (radicand.low = Max_U16, radicand.high = {0, 0}), return 255.
-   *    - Else if N = 2^32 - 1 (radicand.low = Max_U32, radicand.high = {0, 0}), return 65535.
-   *    - Else if N = 2^64 - 1 (radicand.low = Max_U64, radicand.high = {0, 0}), return 4294967295.
-   *    - Else if N = 2^128 - 1 (radicand.low = Max_U128, radicand.high = {0, 0}), return 2^64 - 1.
-   *    - Else if N = 2^256 - 1 (using MAX_U256), return 2^128 - 1.
-   * 2. General Case:
-   *    - Compute R = floor(sqrt(N)) using a Newton-Raphson witness (sqrtU256Locally).
-   * 3. Verify Correctness:
-   *    - Compute R^2 using Uint128_mul with R as a U256 struct {low: R, high: 0}.
-   *    - Compute (R + 1)^2 with R + 1 as a U256 struct {low: R + 1, high: 0}.
-   *    - Assert R^2 <= N using !gt, ensuring R^2 <= N.
-   *    - Assert (R + 1)^2 > N using gt, ensuring (R + 1)^2 > N.
-   * 4. Return Result:
+   * 2. Witness Computation:
+   *    - Compute R = floor(sqrt(N)) using Newton-Raphson witness (wit_sqrtU256Locally).
+   *    - Convert R to U128 struct for efficient arithmetic operations.
+   * 3. Lower Bound Verification:
+   *    - Compute R^2 using Uint128_mulU128 (optimized 128-bit multiplication).
+   *    - Assert R^2 <= N, ensuring the root is not an overestimate.
+   * 4. Upper Bound Verification:
+   *    - Compute (R + 1) using U128 addition.
+   *    - Compute (R + 1)^2 using Uint128_mulU128.
+   *    - Assert (R + 1)^2 > N, ensuring the root is not an underestimate.
+   * 5. Return Result:
    *    - Return R as Uint<128>.
    *
-   * @circuitInfo k=14, rows=11693
+   * Implementation Notes:
+   * - Uses U128 struct operations (Uint128_mulU128) instead of full U256 multiplication
+   *   for significant circuit cost reduction since sqrt result is always ≤ 2^128.
+   * - The two-sided verification (R^2 <= N < (R+1)^2) ensures correctness.
+   *
+   * @circuitInfo k=12, rows=3672
    *
    * @param {U256} radicand - The U256 value to compute the square root of.
    *
-   * @throws {Error} "MathU256: sqrt overestimate" If R^2 > N.
-   * @throws {Error} "MathU256: sqrt underestimate" If (R + 1)^2 <= N.
+   * @throws {Error} "MathU256: sqrt overestimate" If R^2 > radicand.
+   * @throws {Error} "MathU256: sqrt underestimate" If (R + 1)^2 <= radicand.
    *
    * @returns {Uint<128>} The floor of the square root of radicand.
    */
   export circuit sqrt(radicand: U256): Uint<128> {
     if (isZero(radicand)) {
        return 0;
-    } else
-       if (isLowestLimbOnly(radicand, 1)) {
-          return 1;
-       } else
-          if (isLowestLimbOnly(radicand, 2)) {
-             return 1;
-          }
-          else
-             if (isLowestLimbOnly(radicand, 3)) {
-                return 1;
-             }
-             else
-                if (isLowestLimbOnly(radicand, 4)) {
-                   return 2;
-                }
-                else
-                   if (isLowestLimbOnly(radicand, 9)) {
-                      return 3;
-                   }
-                   else
-                      if (isLowestLimbOnly(radicand, Uint64_MAX_UINT8())) {
-                         return 15;
-                      }
-                      else
-                         if (isLowestLimbOnly(radicand, Uint64_MAX_UINT16())) {
-                            return Uint64_MAX_UINT8();
-                         }
-                         else
-                            if (isLowestLimbOnly(radicand, Uint64_MAX_UINT32())) {
-                               return Uint64_MAX_UINT16();
-                            }
-                            else
-                               if (isLowestLimbOnly(radicand, Uint64_MAX_UINT64())) {
-                                  return Uint64_MAX_UINT32();
-                               }
-                               else
-                                  if (Uint128_eqU128(radicand.low, Uint128_MAX_U128()) &&
-                                      Uint128_isZeroU128(radicand.high)) {
-                                     return Uint64_MAX_UINT64();
-                                  }
-                                  else
-                                     if (eq(radicand, MAX_U256())) {
-                                        return Uint128_MAX_UINT128();
-                                     }
-                                     else {
-                                        const root = sqrtU256Locally(radicand);
-                                        const rootSquareU256 = Uint128_mul(root, root);
-                                        assert(!gt(rootSquareU256, radicand), "MathU256: sqrt overestimate");
+    }
 
-                                        const next = Uint128_add(root, 1);
-                                        const nextSquareU256 = mul(next, next);
-                                        assert(gt(nextSquareU256, radicand), "MathU256: sqrt underestimate");
+    const root = wit_sqrtU256Locally(radicand);
 
-                                        return root;
-                                     }
+    // Convert to U128 for arithmetic
+    const rootU128 = Uint128_toU128(root);
+
+    // Verify root² <= radicand
+    const rootSquareU256 = Uint128_mulU128(rootU128, rootU128);
+    assert(lte(rootSquareU256, radicand), "MathU256: sqrt overestimate");
+
+    // Verify (root+1)² > radicand
+    // Special handling for overflow case
+    const one = U128 { low: 1, high: 0 };
+    const rootPlus1Full = Uint128_addU128(rootU128, one);  // U256
+    // Check if root+1 overflowed 128 bits
+    if (!Uint128_isZeroU128(rootPlus1Full.high)) {
+      // root+1 >= 2^128, so (root+1)² >= 2^256 > any U256 value
+      // Verification automatically passes for overflow case
+      return root;
+    }
+
+    // Normal case: root+1 fits in U128
+    const rootPlus1 = rootPlus1Full.low;
+    const nextSquareU256 = Uint128_mulU128(rootPlus1, rootPlus1);
+    assert(gt(nextSquareU256, radicand), "MathU256: sqrt underestimate");
+
+    return root;
   }
 
   /**
@@ -861,7 +738,7 @@ module Uint256 {
    * The operation involves comparison and conditional selection, with no arithmetic operations
    * beyond the comparison logic. The result is a U256 struct representing min(A, B).
    *
-   * @circuitInfo k=12, rows=2208
+   * @circuitInfo k=10, rows=409
    *
    * @param {U256} a - The first U256 value.
    * @param {U256} b - The second U256 value.
@@ -891,7 +768,7 @@ module Uint256 {
    * The operation involves comparison and conditional selection, with no arithmetic operations
    * beyond the comparison logic. The result is a U256 struct representing max(A, B).
    *
-   * @circuitInfo k=12, rows=2208
+   * @circuitInfo k=10, rows=409
    *
    * @param {U256} a - The first U256 value.
    * @param {U256} b - The second U256 value.
@@ -913,7 +790,7 @@ module Uint256 {
    * Returns true if A = 0, false otherwise. No arithmetic operations are performed,
    * only field comparisons and logical operations (AND).
    *
-   * @circuitInfo k=10, rows=128
+   * @circuitInfo k=10, rows=161
    *
    * @param {U256} a - The U256 value to check.
    *
@@ -947,7 +824,7 @@ module Uint256 {
    *
    * This approach is much more efficient than reconstructing the full value and comparing.
    *
-   * @circuitInfo k=10, rows=128
+   * @circuitInfo k=10, rows=217
    *
    * @param {U256} a - The U256 value to check.
    *
@@ -981,7 +858,7 @@ module Uint256 {
    * @title isLowestLimbOnly circuit
    * @description Checks if a U256 value has a specific value in its lowest limb and zeros elsewhere.
    *
-   * @circuitInfo k=10, rows=128
+   * @circuitInfo k=10, rows=198
    *
    * @param {U256} val - The U256 value to check.
    * @param {Uint<64>} limbValue - The value to check in the lowest limb.
@@ -996,7 +873,7 @@ module Uint256 {
    * @title isSecondLimbOnly circuit
    * @description Checks if a U256 value has a specific value in its second lowest limb and zeros elsewhere.
    *
-   * @circuitInfo k=10, rows=128
+   * @circuitInfo k=10, rows=198
    *
    * @param {U256} val - The U256 value to check.
    * @param {Uint<64>} limbValue - The value to check in the second lowest limb.
@@ -1011,7 +888,7 @@ module Uint256 {
    * @title isThirdLimbOnly circuit
    * @description Checks if a U256 value has a specific value in its second highest limb and zeros elsewhere.
    *
-   * @circuitInfo k=10, rows=128
+   * @circuitInfo k=10, rows=198
    *
    * @param {U256} val - The U256 value to check.
    * @param {Uint<64>} limbValue - The value to check in the second highest limb.
@@ -1026,7 +903,7 @@ module Uint256 {
    * @title isHighestLimbOnly circuit
    * @description Checks if a U256 value has a specific value in its highest limb and zeros elsewhere.
    *
-   * @circuitInfo k=10, rows=128
+   * @circuitInfo k=10, rows=198
    *
    * @param {U256} val - The U256 value to check.
    * @param {Uint<64>} limbValue - The value to check in the highest limb.
@@ -1059,7 +936,7 @@ module Uint256 {
    * The operations include division, comparison, and logical checks. The result is a boolean
    * indicating whether N is a multiple of M.
    *
-   * @circuitInfo k=14, rows=10897
+   * @circuitInfo k=14, rows=10040
    *
    * @param {U256} value - The U256 value to check.
    * @param {U256} b - The U256 b to test against.

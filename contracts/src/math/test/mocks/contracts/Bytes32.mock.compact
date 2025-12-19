@@ -1,0 +1,53 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/test/Bytes32.mock.compact)
+
+pragma language_version >= 0.19.0;
+
+import CompactStandardLibrary;
+
+import { U128 } from "../../../types/TU128";
+import { U256 } from "../../../types/TU256";
+import "../../../Bytes32" prefix Bytes32_;
+
+export { U128, U256 };
+
+ledger _exposeCircuitInfo: Boolean;
+
+export circuit toU256(value: Bytes<32>): U256 {
+  _exposeCircuitInfo = true;
+  return disclose(Bytes32_toU256(value));
+}
+
+export circuit eq(a: Bytes<32>, b: Bytes<32>): Boolean {
+  _exposeCircuitInfo = true;
+  return Bytes32_eq(a, b);
+}
+
+export circuit lt(a: Bytes<32>, b: Bytes<32>): Boolean {
+  _exposeCircuitInfo = true;
+  const result = disclose(Bytes32_lt(a, b));
+  return result;
+}
+
+export circuit lte(a: Bytes<32>, b: Bytes<32>): Boolean {
+  _exposeCircuitInfo = true;
+  const result = disclose(Bytes32_lte(a, b));
+  return result;
+}
+
+export circuit gt(a: Bytes<32>, b: Bytes<32>): Boolean {
+  _exposeCircuitInfo = true;
+  const result = disclose(Bytes32_gt(a, b));
+  return result;
+}
+
+export circuit gte(a: Bytes<32>, b: Bytes<32>): Boolean {
+  _exposeCircuitInfo = true;
+  const result = disclose(Bytes32_gte(a, b));
+  return result;
+}
+
+export circuit isZero(a: Bytes<32>): Boolean {
+  _exposeCircuitInfo = true;
+  return Bytes32_isZero(a);
+}

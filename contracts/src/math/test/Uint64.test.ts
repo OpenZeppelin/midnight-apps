@@ -108,7 +108,7 @@ describe('Uint64', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      uint64Simulator.overrideWitness('divU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_divU64Locally', (context) => [
         context.privateState,
         { quotient: 1n, remainder: 10n },
       ]);
@@ -118,7 +118,7 @@ describe('Uint64', () => {
     });
 
     test('should fail when quotient * b + remainder != a', () => {
-      uint64Simulator.overrideWitness('divU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_divU64Locally', (context) => [
         context.privateState,
         { quotient: 1n, remainder: 1n },
       ]);
@@ -164,7 +164,7 @@ describe('Uint64', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      uint64Simulator.overrideWitness('divU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_divU64Locally', (context) => [
         context.privateState,
         { quotient: 1n, remainder: 5n },
       ]);
@@ -174,7 +174,7 @@ describe('Uint64', () => {
     });
 
     test('should fail when quotient * b + remainder != a', () => {
-      uint64Simulator.overrideWitness('divU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_divU64Locally', (context) => [
         context.privateState,
         { quotient: 0n, remainder: 2n },
       ]);
@@ -234,7 +234,7 @@ describe('Uint64', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      uint64Simulator.overrideWitness('divU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_divU64Locally', (context) => [
         context.privateState,
         { quotient: 1n, remainder: 5n },
       ]);
@@ -244,7 +244,7 @@ describe('Uint64', () => {
     });
 
     test('should fail when quotient * b + remainder != a', () => {
-      uint64Simulator.overrideWitness('divU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_divU64Locally', (context) => [
         context.privateState,
         { quotient: 2n, remainder: 0n },
       ]);
@@ -254,7 +254,7 @@ describe('Uint64', () => {
     });
 
     test('should fail when remainder >= divisor (duplicate)', () => {
-      uint64Simulator.overrideWitness('divU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_divU64Locally', (context) => [
         context.privateState,
         { quotient: 1n, remainder: 10n },
       ]);
@@ -317,7 +317,7 @@ describe('Uint64', () => {
     });
 
     test('should fail with overestimated root', () => {
-      uint64Simulator.overrideWitness('sqrtU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_sqrtU64Locally', (context) => [
         context.privateState,
         5n,
       ]);
@@ -327,7 +327,7 @@ describe('Uint64', () => {
     });
 
     test('should fail with underestimated root', () => {
-      uint64Simulator.overrideWitness('sqrtU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_sqrtU64Locally', (context) => [
         context.privateState,
         3n,
       ]);

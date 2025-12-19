@@ -1,0 +1,175 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/Bytes32.compact)
+
+pragma language_version >= 0.19.0;
+
+/**
+ * @title Bytes32 module
+ * @description A utility module providing conversions between Bytes<32> and U256 structs
+ * using little-endian (LE) byte ordering.
+ *
+ * @remarks
+ * This module provides two conversion functions:
+ * - fromBytes(): Converts Bytes<32> to U256 using little-endian ordering
+ * - toBytes(): Converts U256 to Bytes<32> using little-endian ordering
+ *
+ * Byte ordering convention (little-endian):
+ * - Least significant byte first. Bytes 0-7 contain low.low (LSB).
+ * - Byte layout: [low.low][low.high][high.low][high.high]
+ *
+ * The U256 struct represents a 256-bit unsigned integer as:
+ *   value = high.high * 2^192 + high.low * 2^128 + low.high * 2^64 + low.low
+ *
+ * TODO: Add big-endian (BE) support:
+ * - fromBytesBE(): Converts Bytes<32> to U256 using big-endian ordering
+ * - toBytesBE(): Converts U256 to Bytes<32> using big-endian ordering
+ */
+module Bytes32 {
+    import { upgradeFromTransient } from CompactStandardLibrary;
+
+    import { U256 } from "./types/TU256";
+
+    import { toBytes, lt } from "./Uint256" prefix Uint256_;
+
+    /**
+    * @title bytesToU256Locally witness
+    * @description Converts Bytes<32> to U256 off-chain (little-endian).
+    */
+    witness wit_bytesToU256Locally(bytes: Bytes<32>): U256;
+
+    /**
+    * @title fromBytes circuit (witness-optimized)
+    * @description Converts little-endian Bytes<32> to U256 using witness verification.
+    *
+    * @remarks
+    * Instead of expensive slicing + casting (28,321 rows), we:
+    * 1. Get U256 from witness (computed off-chain)
+    * 2. Verify by converting back to bytes: toBytes(result) == input
+    *
+    * If the roundtrip matches, the conversion must be correct.
+    *
+    * @circuitInfo k=14, rows=14868
+    *
+    * @param {Bytes<32>} value - Little-endian 32-byte value.
+    *
+    * @throws {Error} "Bytes32: fromBytes verification failed" if roundtrip doesn't match.
+    *
+    * @returns {U256} The U256 decimal representation.
+    */
+    export circuit toU256(value: Bytes<32>): U256 {
+        const result = wit_bytesToU256Locally(value);
+
+        // Verify: convert back to bytes and check equality
+        const reconstructed = Uint256_toBytes(result);
+        assert(reconstructed == value, "Bytes32: fromBytes verification failed");
+
+        return result;
+    }
+
+    /**
+   * @title eq circuit
+   * @description Compares two Bytes<32> for equality.
+   *
+   * @remarks
+   * This function performs a direct equality comparison between two 32-byte arrays.
+   * Uses the built-in equality operator for byte comparison.
+   *
+   * @param {Bytes<32>} a - First bytes value to compare.
+   * @param {Bytes<32>} b - Second bytes value to compare.
+   *
+   * @returns {Boolean} - True if the bytes are equal, false otherwise.
+   */
+  export circuit eq(a: Bytes<32>, b: Bytes<32>): Boolean {
+    return a == b;
+  }
+
+  /**
+   * @title lt circuit
+   * @description Compares two Bytes<32> for less than using U256 conversion and comparison.
+   *
+   * @remarks
+   * This function converts both byte arrays to U256 structs using little-endian ordering,
+   * then compares them using the Uint256 module's lt function.
+   * The comparison is consistent and deterministic for any 32-byte arrays.
+   *
+   * @param {Bytes<32>} a - First bytes value to compare.
+   * @param {Bytes<32>} b - Second bytes value to compare.
+   *
+   * @returns {Boolean} - True if a < b (based on U256 comparison), false otherwise.
+   */
+  export circuit lt(a: Bytes<32>, b: Bytes<32>): Boolean {
+    if (eq(a, b)) {
+      return false;
+    }
+
+    const aU256 = toU256(a);
+    const bU256 = toU256(b);
+    return Uint256_lt(aU256, bU256);
+  }
+
+  /**
+   * @title lte circuit
+   * @description Compares two Bytes<32> for less than or equal using U256 comparison.
+   *
+   * @remarks
+   * This function combines the less than and equality comparisons.
+   * Returns true if a <= b based on the combined comparison logic.
+   *
+   * @param {Bytes<32>} a - First bytes value to compare.
+   * @param {Bytes<32>} b - Second bytes value to compare.
+   *
+   * @returns {Boolean} - True if a <= b, false otherwise.
+   */
+  export circuit lte(a: Bytes<32>, b: Bytes<32>): Boolean {
+    return lt(a, b) || eq(a, b);
+  }
+
+  /**
+   * @title gt circuit
+   * @description Compares two Bytes<32> for greater than using U256 comparison.
+   *
+   * @remarks
+   * This function uses the less than comparison with swapped operands.
+   * Returns true if a > b based on the comparison logic.
+   *
+   * @param {Bytes<32>} a - First bytes value to compare.
+   * @param {Bytes<32>} b - Second bytes value to compare.
+   *
+   * @returns {Boolean} - True if a > b, false otherwise.
+   */
+  export circuit gt(a: Bytes<32>, b: Bytes<32>): Boolean {
+    return lt(b, a);
+  }
+
+  /**
+   * @title gte circuit
+   * @description Compares two Bytes<32> for greater than or equal using U256 comparison.
+   *
+   * @remarks
+   * This function combines the greater than and equality comparisons.
+   * Returns true if a >= b based on the combined comparison logic.
+   *
+   * @param {Bytes<32>} a - First bytes value to compare.
+   * @param {Bytes<32>} b - Second bytes value to compare.
+   *
+   * @returns {Boolean} - True if a >= b, false otherwise.
+   */
+  export circuit gte(a: Bytes<32>, b: Bytes<32>): Boolean {
+    return lt(b, a) || eq(a, b);
+  }
+
+  /**
+   * @title isZero circuit
+   * @description Checks if a Bytes<32> is zero.
+   *
+   * @remarks
+   * This function performs a direct comparison of the bytes with zero.
+   *
+   * @param {Bytes<32>} a - The bytes value to check.
+   *
+   * @returns {Boolean} - True if the bytes are zero, false otherwise.
+   */
+  export circuit isZero(a: Bytes<32>): Boolean {
+    return a == upgradeFromTransient(0 as Field);
+  }
+}
