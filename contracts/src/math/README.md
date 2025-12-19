@@ -18,7 +18,7 @@ This package provides mathematical contract operations for the Midnight Network,
 
 ### Supported Integer Types
 - `Uint<64>` - 64-bit unsigned integers
-- `Uint<128>` - 128-bit unsigned integers  
+- `Uint<128>` - 128-bit unsigned integers
 - `Uint<256>` - 256-bit unsigned integers (archived - see note above)
 
 ### Mathematical Operations

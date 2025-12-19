@@ -478,7 +478,7 @@ module Uint128 {
   /**
    * @title Add U128 circuit
    * @description Adds two U128 values.
-   * 
+   *
    * @remarks
    * Requirements:
    * - `a` and `b` must be valid `U128` structs.
