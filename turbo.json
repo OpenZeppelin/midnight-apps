@@ -10,7 +10,7 @@
       ],
       "outputLogs": "new-only",
       "outputs": [
-        "src/artifacts/**"
+        "artifacts/**"
        ]
     },
     "compact:fast": {
@@ -23,8 +23,17 @@
       ],
       "outputLogs": "new-only",
       "outputs": [
-        "src/artifacts/**"
+        "artifacts/**"
       ]
+    },
+    "compact:fmt": {
+      "inputs": [
+        "src/**/*.compact"
+      ],
+      "outputs": []
+    },
+    "compact:fmt:fix": {
+      "cache": false
     },
     "test": {
       "dependsOn": [

@@ -2,7 +2,10 @@
   "name": "@openzeppelin/midnight-apps-compact",
   "private": true,
   "version": "0.0.1",
-  "keywords": ["compact", "compiler"],
+  "keywords": [
+    "compact",
+    "compiler"
+  ],
   "author": "",
   "license": "MIT",
   "description": "Compact fetcher",
@@ -17,6 +20,7 @@
   },
   "scripts": {
     "build": "tsc -p .",
+    "build:fast": "tsc -p .",
     "types": "tsc -p tsconfig.json --noEmit",
     "clean": "git clean -fXd"
   },

@@ -14,6 +14,7 @@
     "compact:fmt:fix": "turbo run compact:fmt:fix",
     "build": "turbo run build",
     "build:contracts": "turbo run build --filter './contracts/*'",
+    "build:fast": "turbo run build:fast",
     "build:apps": "turbo run build --filter './apps/*'",
     "build:packages": "turbo run build --filter './packages/*'",
     "test": "turbo run test",

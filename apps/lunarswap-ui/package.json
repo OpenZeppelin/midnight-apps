@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:fast": "next build",
     "start": "next start",
     "types": "tsc --noEmit",
     "lint": "biome check .",
