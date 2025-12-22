@@ -53,7 +53,8 @@
         ".env"
       ],
       "outputs": [
-        "dist/**"
+        "dist/**",
+        ".next/**"
       ]
     },
     "build:fast": {
