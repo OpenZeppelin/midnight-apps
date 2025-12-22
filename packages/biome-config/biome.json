@@ -9,7 +9,8 @@
       "!**/tsconfig*.json",
       "!**/*.compact",
       "!**/artifacts/**",
-      "!**/*.css"
+      "!**/*.css",
+      "!**/dist/**"
     ]
   },
   "formatter": {
