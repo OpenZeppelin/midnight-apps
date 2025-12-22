@@ -1,10 +1,10 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { Logo } from './logo';
 import { VersionSwitcher } from './version-switcher';
 import { WalletConnect } from './wallet-connect';

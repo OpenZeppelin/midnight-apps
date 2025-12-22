@@ -5,8 +5,8 @@ import type {
   DAppConnectorWalletState,
 } from '@midnight-ntwrk/dapp-connector-api';
 import {
-  type PropsWithChildren,
   createContext,
+  type PropsWithChildren,
   useCallback,
   useEffect,
   useMemo,

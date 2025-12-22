@@ -1,11 +1,11 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/hooks/use-wallet';
 import { cn } from '@/lib/utils';
 import { connectToWallet, disconnectWallet } from '@/lib/wallet-utils';
-import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
 import { AccountPanel } from './account-panel';
 import { Identicon } from './identicon';
 

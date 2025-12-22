@@ -90,10 +90,10 @@ Turbo manages tasks across the monorepo, defined in `turbo.json`. Key tasks:
   - Checks TypeScript types without emitting files.
   - Run: `pnpm types`.
 
-- **`fmt`**, **`lint`**, **`lint:fix`**:
-  - `pnpm fmt`: Formats TypeScript/JavaScript code with Biome and `.compact` files with Compact CLI.
-  - `pnpm lint`: Lints code with Biome.
-  - `pnpm lint:fix`: Auto-fixes linting issues with Biome.
+- **`lint`**, **`lint:fix`**, **`lint:ci`**:
+  - `pnpm lint`: Checks formatting and linting of all TypeScript/JavaScript code with Biome, and `.compact` files with Compact CLI.
+  - `pnpm lint:fix`: Auto-fixes formatting and linting issues with Biome for all files, and formats `.compact` files with Compact CLI.
+  - `pnpm lint:ci`: CI-specific check that only checks changed files (compared to `main` branch) for faster CI runs. Doesn't fail on unmatched files.
 
 ### Commit Workflow
 Commits are linted with `commitlint` and staged files are processed with `lint-staged` and Biome.

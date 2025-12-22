@@ -6,7 +6,7 @@ import type {
 import type {
   AccessControl_Role,
   Ledger,
-} from '../artifacts/Index/contract/index.cjs';
+} from '../../artifacts/Index/contract/index.cjs';
 
 /**
  * @description Interface defining the witness methods for access control operations.

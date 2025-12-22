@@ -1,15 +1,15 @@
 'use client';
 
-import { useWallet } from '@/hooks/use-wallet';
 import {
-  type PropsWithChildren,
   createContext,
+  type PropsWithChildren,
   useCallback,
   useEffect,
   useMemo,
   useState,
 } from 'react';
-import { type Network, detectWalletNetwork } from './wallet-utils';
+import { useWallet } from '@/hooks/use-wallet';
+import { detectWalletNetwork, type Network } from './wallet-utils';
 
 export type NetworkContextType = {
   currentNetwork: Network;

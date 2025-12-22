@@ -4,7 +4,7 @@ import {
 } from '@midnight-ntwrk/compact-runtime';
 import { sampleCoinPublicKey } from '@midnight-ntwrk/zswap';
 import { beforeEach, describe, expect, test } from 'vitest';
-import { pureCircuits } from '../artifacts/AccessControl.mock/contract/index.cjs';
+import { pureCircuits } from '../../artifacts/AccessControl.mock/contract/index.cjs';
 import { AccessControlRole } from '../types/ledger';
 import type { RoleValue } from '../types/role';
 import { AccessControlSimulator } from './AccessControlSimulator';
@@ -140,27 +140,24 @@ describe('AccessControl', () => {
       ).toThrowError('AccessControl: Role commitments tree is full!');
     }, 60000); // 60s timeout
 
-    test.concurrent(
-      'should handle concurrent grants to unique users',
-      async () => {
-        const user1 = sampleCoinPublicKey();
-        const user2 = sampleCoinPublicKey();
-        await Promise.all([
-          mockAccessControlContract.grantRole(
-            { bytes: encodeCoinPublicKey(user1) },
-            AccessControlRole.Lp,
-            admin,
-          ),
-          mockAccessControlContract.grantRole(
-            { bytes: encodeCoinPublicKey(user2) },
-            AccessControlRole.Trader,
-            admin,
-          ),
-        ]);
-        const privateState = mockAccessControlContract.getCurrentPrivateState();
-        expect(Object.keys(privateState.roles).length).toBe(3); // Admin + 2 new roles
-      },
-    );
+    test.concurrent('should handle concurrent grants to unique users', async () => {
+      const user1 = sampleCoinPublicKey();
+      const user2 = sampleCoinPublicKey();
+      await Promise.all([
+        mockAccessControlContract.grantRole(
+          { bytes: encodeCoinPublicKey(user1) },
+          AccessControlRole.Lp,
+          admin,
+        ),
+        mockAccessControlContract.grantRole(
+          { bytes: encodeCoinPublicKey(user2) },
+          AccessControlRole.Trader,
+          admin,
+        ),
+      ]);
+      const privateState = mockAccessControlContract.getCurrentPrivateState();
+      expect(Object.keys(privateState.roles).length).toBe(3); // Admin + 2 new roles
+    });
 
     test('should grant None role', () => {
       const user = sampleCoinPublicKey();

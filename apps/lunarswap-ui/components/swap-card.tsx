@@ -1,5 +1,7 @@
 'use client';
 
+import { ArrowDown, Fuel, Info, Settings } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -13,8 +15,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { ArrowDown, Fuel, Info, Settings } from 'lucide-react';
-import { useState } from 'react';
 import { TokenInput } from './token-input';
 import { TokenSelectModal } from './token-select-modal';
 
