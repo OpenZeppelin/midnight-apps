@@ -62,20 +62,20 @@ describe('Uint128', () => {
     });
   });
 
-  describe('fromU128', () => {
+  describe('toUint128', () => {
     test('should convert U128 to small Uint<128>', () => {
       const u128: U128 = { low: 123n, high: 0n };
-      expect(uint128Simulator.fromU128(u128)).toBe(123n);
+      expect(uint128Simulator.toUint128(u128)).toBe(123n);
     });
 
     test('should convert U128 to max Uint<128>', () => {
       const u128: U128 = { low: MAX_UINT64, high: MAX_UINT64 };
-      expect(uint128Simulator.fromU128(u128)).toBe(MAX_UINT128);
+      expect(uint128Simulator.toUint128(u128)).toBe(MAX_UINT128);
     });
 
     test('should handle zero U128', () => {
       const u128: U128 = { low: 0n, high: 0n };
-      expect(uint128Simulator.fromU128(u128)).toBe(0n);
+      expect(uint128Simulator.toUint128(u128)).toBe(0n);
     });
   });
 
@@ -1206,7 +1206,7 @@ describe('Checked Operations', () => {
       const a = MAX_UINT128;
       const b = 1n;
       expect(() => uint128Simulator.addChecked(a, b)).toThrow(
-        'cast from Field or Uint value to smaller Uint value failed: 340282366920938463463374607431768211456 is greater than 340282366920938463463374607431768211455',
+        'failed assert: MathU128: addition overflow',
       );
     });
   });
@@ -1223,7 +1223,7 @@ describe('Checked Operations', () => {
       const a = uint128Simulator.toU128(2n ** 128n - 1n);
       const b = uint128Simulator.toU128(1n);
       expect(() => uint128Simulator.addCheckedU128(a, b)).toThrow(
-        'cast from Field or Uint value to smaller Uint value failed: 340282366920938463463374607431768211456 is greater than 340282366920938463463374607431768211455',
+        'failed assert: MathU128: addition overflow',
       );
     });
   });

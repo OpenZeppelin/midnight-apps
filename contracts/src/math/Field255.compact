@@ -8,103 +8,36 @@ pragma language_version >= 0.19.0;
  * @notice A utility module providing mathematical operations for Field elements
  * using Bytes<32> as the intermediate representation.
  *
- * @dev IMPLEMENTATION APPROACH:
- * This module converts Field elements to Bytes<32> (a native Compact cast), then uses
- * the Bytes32 module's APIs which internally convert to U256 for arithmetic operations.
- * This approach avoids the Uint<254> limitation (removed in Compact v0.27.0) that
- * affected the archived Field255 module.
- *
  * CONVERSION CHAIN:
  *   Field → Bytes<32> (native cast) → U256 (via Bytes32) → arithmetic → U256 → Bytes<32> → Field
  *
- * The JubJub scalar field maximum value is:
- *   52435875175126190479447740508185965837690552500527637822603658699938581184512
+ * BLS12-381 Scalar Field:
+ *   Modulus (r) = 52435875175126190479447740508185965837690552500527637822603658699938581184513
+ *   Max Field   = r - 1 = 52435875175126190479447740508185965837690552500527637822603658699938581184512
  *
  * This fits within Bytes<32> (256 bits) and can be safely converted and operated upon.
  *
  * @remarks
  * Supported Mathematical Operations:
- * - Conversions:
- *   - toBytes(): Converts a Field to Bytes<32>.
- *   - fromBytes(): Converts Bytes<32> to a Field.
- *   - toU256(): Converts a Field to a U256 struct.
- *   - fromU256(): Converts a U256 struct to a Field.
- * - Comparisons:
- *   - eq(): Checks if two Field values are equal.
- *   - lt(): Checks if one Field value is less than another.
- *   - lte(): Checks if one Field value is less than or equal to another.
- *   - gt(): Checks if one Field value is greater than another.
- *   - gte(): Checks if one Field value is greater than or equal to another.
- * - Arithmetic:
- *   - add(): Adds two Field values, checking for overflow.
- *   - sub(): Subtracts one Field value from another, checking for underflow.
- *   - mul(): Multiplies two Field values, checking for overflow.
- * - Division:
- *   - div(): Computes the quotient of dividing one Field value by another.
- *   - rem(): Computes the remainder of dividing one Field value by another.
- *   - divRem(): Computes both quotient and remainder.
- * - Square Root:
- *   - sqrt(): Computes the floor of the square root of a Field value.
- * - Utility:
- *   - min(): Returns the smaller of two Field values.
- *   - max(): Returns the larger of two Field values.
- *   - isZero(): Checks if a Field value is zero.
+ * - Conversions: toBytes(), fromBytes(), toU256(), fromU256()
+ * - Comparisons: eq(), lt(), lte(), gt(), gte()
+ * - Utility: isZero()
  */
 module Field255 {
   import { upgradeFromTransient } from CompactStandardLibrary;
 
   import { toU256, eq, lt, lte, gt, gte, isZero } from "./Bytes32" prefix Bytes32_;
-  import {
-    add,
-    sub,
-    mul,
-    div,
-    rem,
-    divRem,
-    sqrt,
-    min,
-    max,
-    toBytes,
-    DivResultU256
-  } from "./Uint256" prefix Uint256_;
+  import { toBytes } from "./Uint256" prefix Uint256_;
   import { toU128 } from "./Uint128" prefix Uint128_;
-
-  import "./types/TU256";
-  import "./types/TU128";
+  import { U256 } from "./types/TU256";
 
   /**
-   * @title DivResultField struct
-   * @description A struct representing the result of a division operation on Field values.
-   */
-  export struct DivResultField {
-    /**
-     * @description The quotient result of the division operation
-     */
-    quotient: Field,
-    /**
-     * @description The remainder result of the division operation
-     */
-    remainder: Field
-  }
-
-  /**
-   * @description Computes division of two Field values locally (off-chain).
+   * @title MAX_FIELD circuit
+   * @description Returns the maximum Field value.
    *
-   * @param a The Field value to divide.
-   * @param b The Field value to divide by.
-   * @returns DivResultField The quotient and remainder of the division as Field structs.
+   * @returns {Field} The maximum Field value.
    */
-  export witness wit_divFieldLocally(a: Field, b: Field): DivResultField;
-
-  /**
-   * @description Computes square root of a Field value locally (off-chain).
-   *
-   * @param radicand The Field value to compute the square root of.
-   * @returns Field The floor of the square root of the radicand.
-   */
-  export witness wit_sqrtFieldLocally(radicand: Field): Field;
-
-  export circuit MAX_FIELD(): Field {
+  export pure circuit MAX_FIELD(): Field {
     return 52435875175126190479447740508185965837690552500527637822603658699938581184512 as Field;
   }
 
@@ -141,7 +74,8 @@ module Field255 {
    * @returns {U256} The U256 struct representation of the Field value.
    */
   export circuit toU256(value: Field): U256 {
-    return Bytes32_toU256(toBytes(value));
+    const bytes = toBytes(value);
+    return Bytes32_toU256(bytes);
   }
 
   /**
@@ -160,9 +94,7 @@ module Field255 {
    * @returns {Boolean} True if a == b, false otherwise.
    */
   export circuit eq(a: Field, b: Field): Boolean {
-    const aBytes = toBytes(a);
-    const bBytes = toBytes(b);
-    return Bytes32_eq(aBytes, bBytes);
+    return a == b;
   }
 
   /**
@@ -202,9 +134,7 @@ module Field255 {
    * @returns {Boolean} True if a <= b, false otherwise.
    */
   export circuit lte(a: Field, b: Field): Boolean {
-    const aBytes = toBytes(a);
-    const bBytes = toBytes(b);
-    return Bytes32_lte(aBytes, bBytes);
+    return lt(a, b) || eq(a, b);
   }
 
   /**
@@ -223,9 +153,7 @@ module Field255 {
    * @returns {Boolean} True if a > b, false otherwise.
    */
   export circuit gt(a: Field, b: Field): Boolean {
-    const aBytes = toBytes(a);
-    const bBytes = toBytes(b);
-    return Bytes32_gt(aBytes, bBytes);
+    return lt(b, a);
   }
 
   /**
@@ -244,9 +172,7 @@ module Field255 {
    * @returns {Boolean} True if a >= b, false otherwise.
    */
   export circuit gte(a: Field, b: Field): Boolean {
-    const aBytes = toBytes(a);
-    const bBytes = toBytes(b);
-    return Bytes32_gte(aBytes, bBytes);
+    return gt(a, b) || eq(a, b);
   }
 
   /**
@@ -266,417 +192,4 @@ module Field255 {
   export circuit isZero(a: Field): Boolean {
     return a == 0 as Field;
   }
-
-  /**
-   * @title add circuit
-   * @description Safely adds two Field values with overflow check.
-   *
-   * @remarks
-   * This circuit performs a safe addition by first computing the sum using native
-   * Field addition, then verifying that the result is not smaller than either operand
-   * (which would indicate overflow due to modular arithmetic).
-   *
-   * Use this function when you need Solidity 0.8+ style behavior where overflow causes
-   * a revert. For modular arithmetic (wrapping) behavior, use unsafeAdd instead.
-   *
-   * Requirements:
-   * - The sum must not exceed MAX_FIELD.
-   *
-   * @circuitInfo k=14, rows=32000
-   *
-   * @param {Field} a - The first Field value to add.
-   * @param {Field} b - The second Field value to add.
-   *
-   * @throws {Error} "Field255: addition overflow" if the sum exceeds MAX_FIELD.
-   *
-   * @returns {Field} The sum of a and b.
-   */
-  export circuit add(a: Field, b: Field): Field {
-    const sum = a + b;
-    // If overflow occurred, sum will be smaller than at least one operand
-    assert(gte(sum, a) && gte(sum, b), "Field255: addition overflow");
-    return sum;
-  }
-
-  /**
-   * @title unsafeAdd circuit
-   * @description Adds two Field values using modular arithmetic (no overflow check).
-   *
-   * @remarks
-   * This circuit uses native Field addition which performs modular arithmetic over the
-   * JubJub scalar field. If the sum exceeds MAX_FIELD, the result wraps around:
-   *   unsafeAdd(MAX_FIELD, 1) = 0
-   *   unsafeAdd(MAX_FIELD, 2) = 1
-   *
-   * This is mathematically correct for finite field arithmetic and is useful for:
-   * - Cryptographic operations that require modular arithmetic
-   * - Performance-critical code where you've already validated inputs
-   * - Cases where wrapping behavior is intentionally desired
-   *
-   * WARNING: This function does NOT check for overflow. If you need safe addition
-   * that reverts on overflow, use add() instead.
-   *
-   * @circuitInfo k=10, rows=128
-   *
-   * @param {Field} a - The first Field value to add.
-   * @param {Field} b - The second Field value to add.
-   *
-   * @returns {Field} The modular sum of a and b (may wrap around if result exceeds MAX_FIELD).
-   */
-  export circuit unsafeAdd(a: Field, b: Field): Field {
-    return a + b;
-  }
-
-  /**
-   * @title sub circuit
-   * @description Safely subtracts one Field value from another with underflow check.
-   *
-   * @remarks
-   * This circuit performs a safe subtraction by first checking that a >= b to prevent
-   * underflow. Unlike native Field subtraction which wraps around (modular arithmetic),
-   * this function will assert if b > a.
-   *
-   * Use this function when you need Solidity 0.8+ style behavior where underflow causes
-   * a revert. For modular arithmetic (wrapping) behavior, use unsafeSub instead.
-   *
-   * Requirements:
-   * - a must be greater than or equal to b to prevent underflow.
-   *
-   * @circuitInfo k=14, rows=32000
-   *
-   * @param {Field} a - The Field value to subtract from (minuend).
-   * @param {Field} b - The Field value to subtract (subtrahend).
-   *
-   * @throws {Error} "Field255: subtraction underflow" if a < b.
-   *
-   * @returns {Field} The difference of a and b.
-   */
-  export circuit sub(a: Field, b: Field): Field {
-    assert(gte(a, b), "Field255: subtraction underflow");
-    return a - b;
-  }
-
-  /**
-   * @title unsafeSub circuit
-   * @description Subtracts one Field value from another using modular arithmetic (no underflow check).
-   *
-   * @remarks
-   * This circuit uses native Field subtraction which performs modular arithmetic over the
-   * JubJub scalar field. If b > a, the result wraps around:
-   *   unsafeSub(5, 10) = field_order - 5 = MAX_FIELD - 4
-   *
-   * This is mathematically correct for finite field arithmetic and is useful for:
-   * - Cryptographic operations that require modular arithmetic
-   * - Performance-critical code where you've already validated inputs
-   * - Cases where wrapping behavior is intentionally desired
-   *
-   * WARNING: This function does NOT check for underflow. If you need safe subtraction
-   * that reverts on underflow, use sub() instead.
-   *
-   * @circuitInfo k=10, rows=128
-   *
-   * @param {Field} a - The Field value to subtract from (minuend).
-   * @param {Field} b - The Field value to subtract (subtrahend).
-   *
-   * @returns {Field} The modular difference of a and b (may wrap around if b > a).
-   */
-  export circuit unsafeSub(a: Field, b: Field): Field {
-    return a - b;
-  }
-
-  /**
- * @title mul circuit
- * @description Multiplies two Field values with overflow checking.
- *
- * @remarks
- * This circuit multiplies two Field elements using native multiplication,
- * then verifies no overflow occurred by checking the result is >= both operands
- * (unless one is zero).
- *
- * @circuitInfo k=10, rows=256
- *
- * @param {Field} a - The first Field value to multiply.
- * @param {Field} b - The second Field value to multiply.
- *
- * @throws {Error} "Field255: multiplication overflow" if the product overflows.
- *
- * @returns {Field} The product of a and b.
- */
-export circuit mul(a: Field, b: Field): Field {
-  const product = a * b;
-
-  // TODO: Add overflow check
 }
-
-  /**
-   * @title unsafeMul circuit
-   * @description Multiplies two Field values using modular arithmetic (no overflow check).
-   *
-   * @remarks
-   * This circuit uses native Field multiplication which performs modular arithmetic over
-   * the JubJub scalar field. If the product exceeds MAX_FIELD, the result wraps around:
-   *   unsafeMul(MAX_FIELD, 2) = MAX_FIELD - 1
-   *   unsafeMul(MAX_FIELD, MAX_FIELD) = 1
-   *
-   * This is mathematically correct for finite field arithmetic and is useful for:
-   * - Cryptographic operations that require modular arithmetic
-   * - Performance-critical code where you've already validated inputs
-   * - Cases where wrapping behavior is intentionally desired
-   *
-   * WARNING: This function does NOT check for overflow. If you need safe multiplication
-   * that reverts on overflow, use mul() instead.
-   *
-   * @circuitInfo k=10, rows=128
-   *
-   * @param {Field} a - The first Field value to multiply.
-   * @param {Field} b - The second Field value to multiply.
-   *
-   * @returns {Field} The modular product of a and b (may wrap around if result exceeds MAX_FIELD).
-   */
-  export circuit unsafeMul(a: Field, b: Field): Field {
-    return a * b;
-  }
-
-  /**
- * @title fromU256 circuit
- * @description Converts a U256 struct back to a Field value.
- *
- * @remarks
- * This circuit converts a U256 struct to a Field element by first converting
- * to Bytes<32> using Uint256_toBytes, then casting to Field.
- *
- * @circuitInfo k=10, rows=256
- *
- * @param {U256} value - The U256 value to convert.
- *
- * @returns {Field} The Field representation of the U256 value.
- */
-circuit fromU256(value: U256): Field {
-  const bytes = Uint256_toBytes(value);
-  return bytes as Field;
-}
-
-/**
- * @title Internal Division circuit
- * @description Computes the quotient and remainder of dividing two Field values.
- *
- * @remarks
- * This circuit divides two Field elements using a witness function to compute
- * the division off-chain, then verifies the result using native Field operations.
- *
- * Mathematical Steps:
- * 1. Handle Special Cases:
- *    - If b = 0, throw "MathField: division by zero".
- *    - Else if a = 0, return { quotient: 0, remainder: 0 }.
- *    - Else if b = 1, return { quotient: a, remainder: 0 }.
- *    - Else if a = b, return { quotient: 1, remainder: 0 }.
- *    - Else if a < b, return { quotient: 0, remainder: a }.
- * 2. Division Computation:
- *    - Compute result using wit_divFieldLocally witness function.
- * 3. Verification:
- *    - Assert remainder < b, ensuring 0 <= remainder < b.
- *    - Assert quotient * b + remainder == a, ensuring correctness.
- * 4. Result:
- *    - Return DivResultField { quotient, remainder }.
- *
- * Requirements:
- * - `b` must not be zero.
- * - `remainder` must be less than `b`.
- * - `quotient * b + remainder` must equal `a`.
- *
- * @circuitInfo k=14, rows=1000
- *
- * @param {Field} a - The field value to divide (dividend).
- * @param {Field} b - The field value to divide by (divisor).
- *
- * @throws {Error} "MathField: division by zero" if b is zero.
- * @throws {Error} "MathField: remainder error" if remainder is not less than b.
- * @throws {Error} "MathField: division invalid" if quotient * b + remainder does not equal a.
- *
- * @returns {DivResultField} The quotient and remainder of the division as Field values.
- */
-circuit _div(a: Field, b: Field): DivResultField {
-  assert(b != 0 as Field, "MathField: division by zero");
-
-  // Special case: dividend is zero
-  if (isZero(a)) {
-    return DivResultField { quotient: 0 as Field, remainder: 0 as Field };
-  }
-  else if (eq(b, 1 as Field)) {
-    // Special case: divisor is one
-    return DivResultField { quotient: a, remainder: 0 as Field };
-  }
-  else if (eq(a, b)) {
-    // Special case: dividend equals divisor
-    return DivResultField { quotient: 1 as Field, remainder: 0 as Field };
-  }
-  else if (lt(a, b)) {
-    // Special case: dividend less than divisor
-    return DivResultField { quotient: 0 as Field, remainder: a };
-  }
-  else {
-    // General case: use witness and verify
-    const result = wit_divFieldLocally(a, b);
-
-    // Verify remainder < b
-    assert(lt(result.remainder, b), "MathField: remainder error");
-
-    // Verify quotient * b + remainder == a
-    const product = mul(result.quotient, b);
-    const sum = add(product, result.remainder);
-    assert(eq(sum, a), "MathField: division invalid");
-
-    return result;
-  }
-}
-
-/**
- * @title div circuit
- * @description Divides a Field a by a Field b, returning the quotient.
- *
- * @remarks
- * This circuit divides two Field elements by converting them to U256 structs,
- * performing the division using Uint256_div, and converting the result back to Field.
- *
- * Requirements:
- * - b must not be zero.
- *
- * @circuitInfo k=14, rows=42000
- *
- * @param {Field} a - The Field value to divide (dividend).
- * @param {Field} b - The Field value to divide by (divisor).
- *
- * @throws {Error} "MathField: division by zero" if b = 0.
- *
- * @returns {Field} The quotient of the division.
- */
-export circuit div(a: Field, b: Field): Field {
-  return _div(a, b).quotient;
-}
-
-/**
- * @title rem circuit
- * @description Computes the remainder of dividing a Field a by a Field b.
- *
- * @remarks
- * This circuit computes the remainder of dividing two Field elements
- * by converting them to U256 structs, performing the operation using Uint256_rem,
- * and converting the result back to Field.
- *
- * Requirements:
- * - b must not be zero.
- *
- * @circuitInfo k=14, rows=42000
- *
- * @param {Field} a - The Field value to divide (dividend).
- * @param {Field} b - The Field value to divide by (divisor).
- *
- * @throws {Error} "MathField: division by zero" if b = 0.
- *
- * @returns {Field} The remainder of the division.
- */
-export circuit rem(a: Field, b: Field): Field {
-  return _div(a, b).remainder;
-}
-
-/**
- * @title divRem circuit
- * @description Computes the quotient and remainder of dividing a Field a by a Field b.
- *
- * @remarks
- * This circuit computes both the quotient and remainder of dividing two Field elements
- * by converting them to U256 structs, performing the division using Uint256_divRem,
- * and converting the results back to Field.
- *
- * Requirements:
- * - b must not be zero.
- *
- * @circuitInfo k=14, rows=44000
- *
- * @param {Field} a - The Field value to divide (dividend).
- * @param {Field} b - The Field value to divide by (divisor).
- *
- * @throws {Error} "MathField: division by zero" if b = 0.
- *
- * @returns {DivResultField} The quotient and remainder of the division as Field values.
- */
-export circuit divRem(a: Field, b: Field): DivResultField {
-  return _div(a, b);
-}
-
-  /**
-   * @title sqrt circuit
-   * @description Computes the square root of a Field value.
-   *
-   * @remarks
-   * This circuit computes the floor of the square root of a Field element by converting
-   * it to a U256 struct, performing the square root operation using Uint256_sqrt, and
-   * converting the result back to Field.
-   *
-   * The result is guaranteed to be the floor of the square root, meaning:
-   *   sqrt(a)^2 <= a < (sqrt(a) + 1)^2
-   *
-   * @circuitInfo k=14, rows=35000
-   *
-   * @param {Field} radicand - The Field value to compute the square root of.
-   *
-   * @throws {Error} "MathU256: sqrt overestimate" if the computed root squared exceeds radicand.
-   * @throws {Error} "MathU256: sqrt underestimate" if (root + 1)^2 <= radicand.
-   *
-   * @returns {Field} The floor of the square root of radicand.
-   */
-  export circuit sqrt(radicand: Field): Field {
-    // General case: use witness and verify
-    const root = wit_sqrtFieldLocally(radicand);
-
-    // Verify root^2 <= radicand
-    const rootSquare = mul(root, root);
-    assert(lte(rootSquare, radicand), "MathField: sqrt overestimate");
-
-    // Verify (root + 1)^2 > radicand
-    const next = add(root, 1 as Field);
-    const nextSquare = mul(next, next);
-    assert(gt(nextSquare, radicand), "MathField: sqrt underestimate");
-
-    return root;
-  }
-
-  /**
-   * @title min circuit
-   * @description Returns the minimum of two Field values.
-   *
-   * @remarks
-   * This circuit computes the minimum of two Field elements by converting them to U256 structs,
-   * performing the minimum operation using Uint256_min, and converting the result back to Field.
-   *
-   * @circuitInfo k=14, rows=32000
-   *
-   * @param {Field} a - The first Field value.
-   * @param {Field} b - The second Field value.
-   *
-   * @returns {Field} The smaller of a and b.
-   */
-  export circuit min(a: Field, b: Field): Field {
-    return lt(a, b) ? a : b;
-  }
-
-  /**
-   * @title max circuit
-   * @description Returns the maximum of two Field values.
-   *
-   * @remarks
-   * This circuit computes the maximum of two Field elements by converting them to U256 structs,
-   * performing the maximum operation using Uint256_max, and converting the result back to Field.
-   *
-   * @circuitInfo k=14, rows=32000
-   *
-   * @param {Field} a - The first Field value.
-   * @param {Field} b - The second Field value.
-   *
-   * @returns {Field} The larger of a and b.
-   */
-  export circuit max(a: Field, b: Field): Field {
-    return gt(a, b) ? a : b;
-  }
-}
-

@@ -25,60 +25,60 @@ pragma language_version >= 0.19.0;
  * - toBytesBE(): Converts U256 to Bytes<32> using big-endian ordering
  */
 module Bytes32 {
-    import { upgradeFromTransient } from CompactStandardLibrary;
+  import { upgradeFromTransient } from CompactStandardLibrary;
 
-    import { U256 } from "./types/TU256";
+  import { U256 } from "./types/TU256";
 
-    import { toBytes, lt } from "./Uint256" prefix Uint256_;
+  import { toBytes, lt } from "./Uint256" prefix Uint256_;
 
-    /**
-    * @title bytesToU256Locally witness
-    * @description Converts Bytes<32> to U256 off-chain (little-endian).
-    */
-    witness wit_bytesToU256Locally(bytes: Bytes<32>): U256;
+  /**
+  * @title bytesToU256Locally witness
+  * @description Converts Bytes<32> to U256 off-chain (little-endian).
+  */
+  witness wit_bytesToU256Locally(bytes: Bytes<32>): U256;
 
-    /**
-    * @title fromBytes circuit (witness-optimized)
-    * @description Converts little-endian Bytes<32> to U256 using witness verification.
-    *
-    * @remarks
-    * Instead of expensive slicing + casting (28,321 rows), we:
-    * 1. Get U256 from witness (computed off-chain)
-    * 2. Verify by converting back to bytes: toBytes(result) == input
-    *
-    * If the roundtrip matches, the conversion must be correct.
-    *
-    * @circuitInfo k=14, rows=14868
-    *
-    * @param {Bytes<32>} value - Little-endian 32-byte value.
-    *
-    * @throws {Error} "Bytes32: fromBytes verification failed" if roundtrip doesn't match.
-    *
-    * @returns {U256} The U256 decimal representation.
-    */
-    export circuit toU256(value: Bytes<32>): U256 {
-        const result = wit_bytesToU256Locally(value);
+  /**
+  * @title fromBytes circuit (witness-optimized)
+  * @description Converts little-endian Bytes<32> to U256 using witness verification.
+  *
+  * @remarks
+  * Instead of expensive slicing + casting (28,321 rows), we:
+  * 1. Get U256 from witness (computed off-chain)
+  * 2. Verify by converting back to bytes: toBytes(result) == input
+  *
+  * If the roundtrip matches, the conversion must be correct.
+  *
+  * @circuitInfo k=14, rows=14868
+  *
+  * @param {Bytes<32>} value - Little-endian 32-byte value.
+  *
+  * @throws {Error} "Bytes32: fromBytes verification failed" if roundtrip doesn't match.
+  *
+  * @returns {U256} The U256 decimal representation.
+  */
+  export circuit toU256(value: Bytes<32>): U256 {
+    const result = wit_bytesToU256Locally(value);
 
-        // Verify: convert back to bytes and check equality
-        const reconstructed = Uint256_toBytes(result);
-        assert(reconstructed == value, "Bytes32: fromBytes verification failed");
+    // Verify: convert back to bytes and check equality
+    const reconstructed = Uint256_toBytes(result);
+    assert(reconstructed == value, "Bytes32: fromBytes verification failed");
 
-        return result;
-    }
+    return result;
+  }
 
-    /**
-   * @title eq circuit
-   * @description Compares two Bytes<32> for equality.
-   *
-   * @remarks
-   * This function performs a direct equality comparison between two 32-byte arrays.
-   * Uses the built-in equality operator for byte comparison.
-   *
-   * @param {Bytes<32>} a - First bytes value to compare.
-   * @param {Bytes<32>} b - Second bytes value to compare.
-   *
-   * @returns {Boolean} - True if the bytes are equal, false otherwise.
-   */
+  /**
+  * @title eq circuit
+  * @description Compares two Bytes<32> for equality.
+  *
+  * @remarks
+  * This function performs a direct equality comparison between two 32-byte arrays.
+  * Uses the built-in equality operator for byte comparison.
+  *
+  * @param {Bytes<32>} a - First bytes value to compare.
+  * @param {Bytes<32>} b - Second bytes value to compare.
+  *
+  * @returns {Boolean} - True if the bytes are equal, false otherwise.
+  */
   export circuit eq(a: Bytes<32>, b: Bytes<32>): Boolean {
     return a == b;
   }

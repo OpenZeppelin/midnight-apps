@@ -5,25 +5,15 @@ pragma language_version >= 0.18.0;
 
 import CompactStandardLibrary;
 
-import { DivResultU256 } from "../../../Uint256";
 import { U256 } from "../../../types/TU256";
+
 import "../../../Uint256" prefix Uint256_;
 
-export { DivResultU256, U256 };
+export { U256 };
 
 // Helper for test suite: toggling this variable activates circuit metadata reporting.
 // Only increases circuit size by 3 rows per exposed circuit.
 ledger _exposeCircuitInfo: Boolean;
-
-export circuit MODULUS(): Uint<129> {
-  _exposeCircuitInfo = true;
-  return Uint256_MODULUS();
-}
-
-export circuit MODULUS_U256(): U256 {
-  _exposeCircuitInfo = true;
-  return Uint256_MODULUS_U256();
-}
 
 export circuit ZERO_U256(): U256 {
   _exposeCircuitInfo = true;
@@ -58,92 +48,4 @@ export circuit gt(a: U256, b: U256): Boolean {
 export circuit gte(a: U256, b: U256): Boolean {
   _exposeCircuitInfo = true;
   return Uint256_gte(a, b);
-}
-
-export circuit add(a: U256, b: U256): U256 {
-  _exposeCircuitInfo = true;
-  return disclose(Uint256_add(a, b));
-}
-
-export circuit sub(a: U256, b: U256): U256 {
-  return disclose(Uint256_sub(a, b));
-}
-
-export circuit mul(a: U256, b: U256): U256 {
-  return disclose(Uint256_mul(a, b));
-}
-
-export circuit div(a: U256, b: U256): U256 {
-  _exposeCircuitInfo = true;
-  return disclose(Uint256_div(a, b));
-}
-
-export circuit rem(a: U256, b: U256): U256 {
-  _exposeCircuitInfo = true;
-  return disclose(Uint256_rem(a, b));
-}
-
-export circuit divRem(a: U256, b: U256): DivResultU256 {
-  _exposeCircuitInfo = true;
-  return disclose(Uint256_divRem(a, b));
-}
-
-export circuit sqrt(radicand: U256): Uint<128> {
-  _exposeCircuitInfo = true;
-  return disclose(Uint256_sqrt(radicand));
-}
-
-export circuit min(a: U256, b: U256): U256 {
-  _exposeCircuitInfo = true;
-  return disclose(Uint256_min(a, b));
-}
-
-export circuit max(a: U256, b: U256): U256 {
-  _exposeCircuitInfo = true;
-  return disclose(Uint256_max(a, b));
-}
-
-export circuit isZero(a: U256): Boolean {
-  _exposeCircuitInfo = true;
-  return Uint256_isZero(a);
-}
-
-export circuit isExceedingFieldSize(a: U256): Boolean {
-  _exposeCircuitInfo = true;
-  return Uint256_isExceedingFieldSize(a);
-}
-
-export circuit isLowestLimbOnly(val: U256, limbValue: Uint<64>): Boolean {
-  _exposeCircuitInfo = true;
-  return Uint256_isLowestLimbOnly(val, limbValue);
-}
-
-export circuit isSecondLimbOnly(val: U256, limbValue: Uint<64>): Boolean {
-  _exposeCircuitInfo = true;
-  return Uint256_isSecondLimbOnly(val, limbValue);
-}
-
-export circuit isThirdLimbOnly(val: U256, limbValue: Uint<64>): Boolean {
-  _exposeCircuitInfo = true;
-  return Uint256_isThirdLimbOnly(val, limbValue);
-}
-
-export circuit isHighestLimbOnly(val: U256, limbValue: Uint<64>): Boolean {
-  _exposeCircuitInfo = true;
-  return Uint256_isHighestLimbOnly(val, limbValue);
-}
-
-export circuit isMultiple(value: U256, b: U256): Boolean {
-  _exposeCircuitInfo = true;
-  return disclose(Uint256_isMultiple(value, b));
-}
-
-export circuit MAX_UINT254(): U256 {
-  _exposeCircuitInfo = true;
-  return Uint256_MAX_UINT254();
-}
-
-export circuit MAX_U256(): U256 {
-  _exposeCircuitInfo = true;
-  return Uint256_MAX_U256();
 }

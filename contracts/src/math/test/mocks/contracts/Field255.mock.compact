@@ -5,11 +5,11 @@ pragma language_version >= 0.19.0;
 
 import CompactStandardLibrary;
 
-import { DivResultField } from "../../../Field255";
 import "../../../Field255" prefix Field255_;
+
 import { U256 } from "../../../types/TU256";
 
-export { DivResultField, U256 };
+export { U256 };
 
 // Helper for test suite: toggling this variable activates circuit metadata reporting.
 // Only increases circuit size by 3 rows per exposed circuit.
@@ -54,64 +54,3 @@ export circuit isZero(a: Field): Boolean {
   _exposeCircuitInfo = true;
   return Field255_isZero(a);
 }
-
-export circuit add(a: Field, b: Field): Field {
-  _exposeCircuitInfo = true;
-  return disclose(Field255_add(a, b));
-}
-
-export circuit unsafeAdd(a: Field, b: Field): Field {
-  _exposeCircuitInfo = true;
-  return disclose(Field255_unsafeAdd(a, b));
-}
-
-export circuit sub(a: Field, b: Field): Field {
-  _exposeCircuitInfo = true;
-  return disclose(Field255_sub(a, b));
-}
-
-export circuit unsafeSub(a: Field, b: Field): Field {
-  _exposeCircuitInfo = true;
-  return disclose(Field255_unsafeSub(a, b));
-}
-
-export circuit mul(a: Field, b: Field): Field {
-  _exposeCircuitInfo = true;
-  return disclose(Field255_mul(a, b));
-}
-
-export circuit unsafeMul(a: Field, b: Field): Field {
-  _exposeCircuitInfo = true;
-  return disclose(Field255_unsafeMul(a, b));
-}
-
-export circuit div(a: Field, b: Field): Field {
-  _exposeCircuitInfo = true;
-  return disclose(Field255_div(a, b));
-}
-
-export circuit rem(a: Field, b: Field): Field {
-  _exposeCircuitInfo = true;
-  return disclose(Field255_rem(a, b));
-}
-
-export circuit divRem(a: Field, b: Field): DivResultField {
-  _exposeCircuitInfo = true;
-  return disclose(Field255_divRem(a, b));
-}
-
-export circuit sqrt(radicand: Field): Field {
-  _exposeCircuitInfo = true;
-  return disclose(Field255_sqrt(radicand));
-}
-
-export circuit min(a: Field, b: Field): Field {
-  _exposeCircuitInfo = true;
-  return disclose(Field255_min(a, b));
-}
-
-export circuit max(a: Field, b: Field): Field {
-  _exposeCircuitInfo = true;
-  return disclose(Field255_max(a, b));
-}
-

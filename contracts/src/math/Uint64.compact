@@ -57,14 +57,14 @@ module Uint64 {
    */
   export witness wit_sqrtU64Locally(radicand: Uint<64>): Uint<32>;
 
-    /**
-   * @title MAX_UINT8 circuit
-   * @description Returns the maximum value for an 8-bit unsigned integer (2^8 - 1).
-   *
-   * @circuitInfo k=10, rows=128
-   *
-   * @returns {Uint<8>} The value 255 (0xFF).
-   */
+  /**
+  * @title MAX_UINT8 circuit
+  * @description Returns the maximum value for an 8-bit unsigned integer (2^8 - 1).
+  *
+  * @circuitInfo k=10, rows=128
+  *
+  * @returns {Uint<8>} The value 255 (0xFF).
+  */
   export pure circuit MAX_UINT8(): Uint<8> {
     return 255;
   }

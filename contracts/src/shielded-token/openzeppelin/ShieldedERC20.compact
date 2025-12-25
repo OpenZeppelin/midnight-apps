@@ -32,22 +32,22 @@ pragma language_version >= 0.19.0;
  * - Should this be a part of the Shielded module itself or as an extension?
  */
 module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
-  import {
-    ShieldedCoinInfo,
-    ShieldedSendResult,
-    sendImmediateShielded,
-    mintShieldedToken,
-    shieldedBurnAddress,
-    ZswapCoinPublicKey,
-    ContractAddress,
-    Either,
-    left,
-    ownPublicKey,
-    receiveShielded,
-    evolveNonce,
-    upgradeFromTransient,
-    Counter
-  } from CompactStandardLibrary;
+  import
+    { ShieldedCoinInfo,
+      ShieldedSendResult,
+      sendImmediateShielded,
+      mintShieldedToken,
+      shieldedBurnAddress,
+      ZswapCoinPublicKey,
+      ContractAddress,
+      Either,
+      left,
+      ownPublicKey,
+      receiveShielded,
+      evolveNonce,
+      upgradeFromTransient,
+      Counter }
+    from CompactStandardLibrary;
   import { isKeyOrAddressZero } from "../../../../compact-contracts/contracts/src/utils/Utils";
 
   // Public state

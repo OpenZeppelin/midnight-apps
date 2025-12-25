@@ -55,8 +55,8 @@ export class Uint128Simulator extends Uint128SimulatorBase {
     return this.circuits.impure.toU128(value);
   }
 
-  public fromU128(value: U128): bigint {
-    return this.circuits.pure.fromU128(value);
+  public toUint128(value: U128): bigint {
+    return this.circuits.pure.toUint128(value);
   }
 
   public isZero(value: bigint): boolean {
@@ -116,11 +116,11 @@ export class Uint128Simulator extends Uint128SimulatorBase {
   }
 
   public addChecked(a: bigint, b: bigint): bigint {
-    return this.circuits.pure.addChecked(a, b);
+    return this.circuits.impure.addChecked(a, b);
   }
 
   public addCheckedU128(a: U128, b: U128): bigint {
-    return this.circuits.pure.addCheckedU128(a, b);
+    return this.circuits.impure.addCheckedU128(a, b);
   }
 
   public sub(a: bigint, b: bigint): bigint {

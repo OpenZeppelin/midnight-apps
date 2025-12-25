@@ -4,7 +4,6 @@ import {
 } from '@openzeppelin/compact-tools-simulator';
 import {
   Contract,
-  type DivResultField,
   type U256,
   ledger,
 } from '../../../../artifacts/math/test/mocks/contracts/Field255.mock/contract/index.js';
@@ -97,95 +96,5 @@ export class Field255Simulator extends Field255SimulatorBase {
    */
   public isZero(a: bigint): boolean {
     return this.circuits.impure.isZero(a);
-  }
-
-  /**
-   * Safely adds two Field values with overflow check.
-   * @throws If the sum exceeds MAX_FIELD (overflow)
-   */
-  public add(a: bigint, b: bigint): bigint {
-    return this.circuits.impure.add(a, b);
-  }
-
-  /**
-   * Adds two Field values using modular arithmetic (no overflow check).
-   * If the sum exceeds MAX_FIELD, the result wraps around.
-   */
-  public unsafeAdd(a: bigint, b: bigint): bigint {
-    return this.circuits.impure.unsafeAdd(a, b);
-  }
-
-  /**
-   * Safely subtracts one Field value from another with underflow check.
-   * @throws If b > a (underflow)
-   */
-  public sub(a: bigint, b: bigint): bigint {
-    return this.circuits.impure.sub(a, b);
-  }
-
-  /**
-   * Subtracts one Field value from another using modular arithmetic (no underflow check).
-   * If b > a, the result wraps around: unsafeSub(5, 10) = field_order - 5
-   */
-  public unsafeSub(a: bigint, b: bigint): bigint {
-    return this.circuits.impure.unsafeSub(a, b);
-  }
-
-  /**
-   * Safely multiplies two Field values with overflow check.
-   * @throws If the product exceeds MAX_FIELD (overflow)
-   */
-  public mul(a: bigint, b: bigint): bigint {
-    return this.circuits.impure.mul(a, b);
-  }
-
-  /**
-   * Multiplies two Field values using modular arithmetic (no overflow check).
-   * If the product exceeds MAX_FIELD, the result wraps around.
-   */
-  public unsafeMul(a: bigint, b: bigint): bigint {
-    return this.circuits.impure.unsafeMul(a, b);
-  }
-
-  /**
-   * Divides one Field value by another, returning the quotient.
-   */
-  public div(a: bigint, b: bigint): bigint {
-    return this.circuits.impure.div(a, b);
-  }
-
-  /**
-   * Computes the remainder of dividing one Field value by another.
-   */
-  public rem(a: bigint, b: bigint): bigint {
-    return this.circuits.impure.rem(a, b);
-  }
-
-  /**
-   * Computes both quotient and remainder of dividing one Field value by another.
-   */
-  public divRem(a: bigint, b: bigint): DivResultField {
-    return this.circuits.impure.divRem(a, b);
-  }
-
-  /**
-   * Computes the floor of the square root of a Field value.
-   */
-  public sqrt(radicand: bigint): bigint {
-    return this.circuits.impure.sqrt(radicand);
-  }
-
-  /**
-   * Returns the smaller of two Field values.
-   */
-  public min(a: bigint, b: bigint): bigint {
-    return this.circuits.impure.min(a, b);
-  }
-
-  /**
-   * Returns the larger of two Field values.
-   */
-  public max(a: bigint, b: bigint): bigint {
-    return this.circuits.impure.max(a, b);
   }
 }
