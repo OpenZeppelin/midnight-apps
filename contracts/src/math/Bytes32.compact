@@ -32,10 +32,10 @@ module Bytes32 {
   import { toBytes, lt } from "./Uint256" prefix Uint256_;
 
   /**
-  * @title bytesToU256Locally witness
+  * @title bytesToU256 witness
   * @description Converts Bytes<32> to U256 off-chain (little-endian).
   */
-  witness wit_bytesToU256Locally(bytes: Bytes<32>): U256;
+  witness wit_bytesToU256(bytes: Bytes<32>): U256;
 
   /**
   * @title fromBytes circuit (witness-optimized)
@@ -57,7 +57,7 @@ module Bytes32 {
   * @returns {U256} The U256 decimal representation.
   */
   export circuit toU256(value: Bytes<32>): U256 {
-    const result = wit_bytesToU256Locally(value);
+    const result = wit_bytesToU256(value);
 
     // Verify: convert back to bytes and check equality
     const reconstructed = Uint256_toBytes(result);

@@ -1,9 +1,7 @@
-import type {
-  DivResultU128,
-  U128,
-  Witnesses,
-} from '../../../../../artifacts/math/test/mocks/contracts/Uint128.mock/contract/index.d.ts';
-import { sqrtBigint } from '../../../utils/sqrtBigint.js';
+import type { Witnesses } from '../../../../../artifacts/math/test/mocks/contracts/Uint128.mock/contract/index.js';
+import { wit_divU128 } from '../../../witnesses/wit_divU128.js';
+import { wit_divUint128 } from '../../../witnesses/wit_divUint128.js';
+import { wit_sqrtU128 } from '../../../witnesses/wit_sqrtU128.js';
 
 /**
  * @description Represents the private state of the Uint128 module.
@@ -24,49 +22,19 @@ export const Uint128PrivateState = {
   },
 };
 
-const UINT64_MASK = BigInt('0xFFFFFFFFFFFFFFFF');
-
-const toU128 = (value: bigint): U128 => ({
-  low: value & UINT64_MASK,
-  high: value >> 64n,
-});
-
-const fromU128 = (value: U128): bigint =>
-  (BigInt(value.high) << 64n) + BigInt(value.low);
-
 /**
  * @description Factory function creating witness implementations for Uint128 module operations.
  */
 export const Uint128Witnesses = (): Witnesses<Uint128PrivateState> => ({
-  wit_sqrtU128Locally(context, radicand) {
-    const radicandBigInt = fromU128(radicand);
-    const root = sqrtBigint(radicandBigInt);
-    return [context.privateState, root];
+  wit_sqrtU128(_context, radicand) {
+    return [{}, wit_sqrtU128(radicand)];
   },
 
-  wit_divU128Locally(context, a, b): [Uint128PrivateState, DivResultU128] {
-    const aValue = fromU128(a);
-    const bValue = fromU128(b);
-    const quotient = aValue / bValue;
-    const remainder = aValue - quotient * bValue;
-    return [
-      context.privateState,
-      {
-        quotient: toU128(quotient),
-        remainder: toU128(remainder),
-      },
-    ];
+  wit_divU128(_context, a, b) {
+    return [{}, wit_divU128(a, b)];
   },
 
-  wit_divUint128Locally(context, a, b) {
-    const quotient = a / b;
-    const remainder = a - quotient * b;
-    return [
-      context.privateState,
-      {
-        quotient: toU128(quotient),
-        remainder: toU128(remainder),
-      },
-    ];
+  wit_divUint128(_context, a, b) {
+    return [{}, wit_divUint128(a, b)];
   },
 });

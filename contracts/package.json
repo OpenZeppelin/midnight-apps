@@ -20,6 +20,18 @@
   },
   "homepage": "",
   "type": "module",
+  "exports": {
+    "./math/witnesses/*": {
+      "types": "./src/math/witnesses/*.ts",
+      "import": "./src/math/witnesses/*.js",
+      "default": "./src/math/witnesses/*.js"
+    },
+    "./math/utils/*": {
+      "types": "./src/math/utils/*.ts",
+      "import": "./src/math/utils/*.js",
+      "default": "./src/math/utils/*.js"
+    }
+  },
   "config": {
     "compactVersion": "+0.27.0-rc.1"
   },

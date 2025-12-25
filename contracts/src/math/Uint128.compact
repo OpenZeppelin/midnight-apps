@@ -47,7 +47,7 @@ module Uint128 {
    * @param b The number to divide by.
    * @returns DivResultU128 The quotient and remainder of the division as U128 values.
    */
-  export witness wit_divU128Locally(a: U128, b: U128): DivResultU128;
+  export witness wit_divU128(a: U128, b: U128): DivResultU128;
 
   /**
    * @description Computes division of two Uint<128> values locally (off-chain).
@@ -56,7 +56,7 @@ module Uint128 {
    * @param b The number to divide by.
    * @returns DivResultU128 The quotient and remainder of the division as U128 values.
    */
-  export witness wit_divUint128Locally(a: Uint<128>, b: Uint<128>): DivResultU128;
+  export witness wit_divUint128(a: Uint<128>, b: Uint<128>): DivResultU128;
 
   /**
    * @description Computes the square root of a U128 value locally (off-chain).
@@ -64,7 +64,7 @@ module Uint128 {
    * @param radicand The U128 value to compute the square root of.
    * @returns Uint<64> The square root of radicand.
    */
-  export witness wit_sqrtU128Locally(radicand: U128): Uint<64>;
+  export witness wit_sqrtU128(radicand: U128): Uint<64>;
 
   /**
    * @title Modulus U128 circuit
@@ -139,7 +139,7 @@ module Uint128 {
    * @returns {U128} A U128 struct representing the 128-bit value.
    */
   export circuit toU128(value: Uint<128>): U128 {
-    const result = wit_divUint128Locally(value, MODULUS());
+    const result = wit_divUint128(value, MODULUS());
     const high = result.quotient.low;
     const low = result.remainder.low;
 
@@ -803,7 +803,7 @@ module Uint128 {
     assert(!isZeroU128(b), "MathU128: division by zero");
 
     // Step 3: General case - get witness for quotient and remainder
-    const result = wit_divU128Locally(a, b);
+    const result = wit_divU128(a, b);
 
     // Step 4: Verify remainder bounds (0 ≤ r < b)
     assert(ltU128(result.remainder, b), "MathU128: remainder error");
@@ -1041,7 +1041,7 @@ module Uint128 {
   */
   circuit _sqrt(radicand: U128): Uint<64> {
     // Step 1: Get witness for the square root
-    const root = wit_sqrtU128Locally(radicand);
+    const root = wit_sqrtU128(radicand);
 
     // Step 2: Verify lower bound (root² ≤ radicand)
     const rootU128 = U128 { low: root, high: 0 };

@@ -47,7 +47,7 @@ module Uint64 {
    * @param b The number to divide by.
    * @returns DivResultU64 The quotient and remainder of the division.
    */
-  export witness wit_divU64Locally(a: Uint<64>, b: Uint<64>): DivResultU64;
+  export witness wit_divU64(a: Uint<64>, b: Uint<64>): DivResultU64;
 
   /**
    * @description Computes the square root of a Uint<64> value locally (off-chain).
@@ -55,7 +55,7 @@ module Uint64 {
    * @param radicand The number to compute the square root of.
    * @returns Uint<32> The square root of radicand.
    */
-  export witness wit_sqrtU64Locally(radicand: Uint<64>): Uint<32>;
+  export witness wit_sqrtU64(radicand: Uint<64>): Uint<32>;
 
   /**
   * @title MAX_UINT8 circuit
@@ -227,7 +227,7 @@ module Uint64 {
                 return DivResultU64 { quotient: 0 as Uint<64>, remainder: a };
              }
              else {
-                const result = wit_divU64Locally(a, b);
+                const result = wit_divU64(a, b);
                 assert(result.remainder < b, "Math: remainder error");
                 assert((result.quotient * b + result.remainder) as Uint<64> == a, "Math: division invalid");
                 return result;
@@ -346,7 +346,7 @@ module Uint64 {
    * @returns {Uint<32>} The floor of the square root of radicand.
    */
   export circuit sqrt(radicand: Uint<64>): Uint<32> {
-    const root = wit_sqrtU64Locally(radicand);
+    const root = wit_sqrtU64(radicand);
     const rootSquare = mul(root, root);
     assert(rootSquare <= radicand, "Math: sqrt overestimate");
 
