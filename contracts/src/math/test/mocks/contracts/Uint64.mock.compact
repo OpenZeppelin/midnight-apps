@@ -11,58 +11,86 @@ import "../../../Uint64" prefix Uint64_;
 
 export { DivResultU64 };
 
+// Helper for test suite: toggling this variable activates circuit metadata reporting.
+// Only increases circuit size by 3 rows per exposed circuit.
+ledger _isCircuitInfoExposed: Boolean;
+
 export circuit add(a: Uint<64>, b: Uint<64>): Uint<128> {
+  _isCircuitInfoExposed = true;
   return Uint64_add(a, b);
 }
 
+export circuit addChecked(a: Uint<64>, b: Uint<64>): Uint<64> {
+  _isCircuitInfoExposed = true;
+  return Uint64_addChecked(a, b);
+}
+
 export circuit sub(a: Uint<64>, b: Uint<64>): Uint<64> {
+  _isCircuitInfoExposed = true;
   return Uint64_sub(a, b);
 }
 
 export circuit mul(a: Uint<64>, b: Uint<64>): Uint<128> {
+  _isCircuitInfoExposed = true;
   return Uint64_mul(a, b);
 }
 
+export circuit mulChecked(a: Uint<64>, b: Uint<64>): Uint<64> {
+  _isCircuitInfoExposed = true;
+  return Uint64_mulChecked(a, b);
+}
+
 export circuit div(a: Uint<64>, b: Uint<64>): Uint<64> {
+  _isCircuitInfoExposed = true;
   return disclose(Uint64_div(a, b));
 }
 
 export circuit rem(a: Uint<64>, b: Uint<64>): Uint<64> {
+  _isCircuitInfoExposed = true;
   return disclose(Uint64_rem(a, b));
 }
 
 export circuit divRem(a: Uint<64>, b: Uint<64>): DivResultU64 {
+  _isCircuitInfoExposed = true;
   return disclose(Uint64_divRem(a, b));
 }
 
 export circuit sqrt(radical: Uint<64>): Uint<32> {
+  _isCircuitInfoExposed = true;
   return disclose(Uint64_sqrt(radical));
 }
 
 export circuit isMultiple(value: Uint<64>, b: Uint<64>): Boolean {
+  _isCircuitInfoExposed = true;
   return disclose(Uint64_isMultiple(value, b));
 }
 
 export circuit min(a: Uint<64>, b: Uint<64>): Uint<64> {
+  _isCircuitInfoExposed = true;
   return Uint64_min(a, b);
 }
 
 export circuit max(a: Uint<64>, b: Uint<64>): Uint<64> {
+  _isCircuitInfoExposed = true;
   return Uint64_max(a, b);
 }
 
-export pure circuit MAX_UINT8(): Uint<8> {
+export circuit MAX_UINT8(): Uint<8> {
+  _isCircuitInfoExposed = true;
   return Uint64_MAX_UINT8();
 }
 
-export pure circuit MAX_UINT16(): Uint<16> {
+export circuit MAX_UINT16(): Uint<16> {
+  _isCircuitInfoExposed = true;
   return Uint64_MAX_UINT16();
 }
 
-export pure circuit MAX_UINT32(): Uint<32> {
+export circuit MAX_UINT32(): Uint<32> {
+  _isCircuitInfoExposed = true;
   return Uint64_MAX_UINT32();
 }
 
-export pure circuit MAX_UINT64(): Uint<64> {
+export circuit MAX_UINT64(): Uint<64> {
+  _isCircuitInfoExposed = true;
   return Uint64_MAX_UINT64();
 }

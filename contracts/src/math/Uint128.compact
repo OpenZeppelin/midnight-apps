@@ -584,15 +584,15 @@ module Uint128 {
     *
     * 5. Overflow Check:
     *    Max product = (2¹²⁸ - 1)² = 2²⁵⁶ - 2¹²⁹ + 1 < 2²⁵⁶
-    *    Assert final high carry = 0 (always true for valid U128 inputs)
+    *    Assert final high carry = 0
     *
-    * @circuitInfo k=11, rows=~1550 (estimated, optimized from 1750)
+    * @circuitInfo k=11, rows=1750
     *
     * @param {U128} a - The first U128 value to multiply.
     * @param {U128} b - The second U128 value to multiply.
     *
     * @throws {Error} "MathU128: multiplication overflow" if the intermediate computation
-    *                 suggests result would exceed 256 bits (should never happen for valid U128 inputs).
+    *                 suggests result would exceed 256 bits.
     *
     * @returns {U256} The product a * b as a U256 struct.
     */

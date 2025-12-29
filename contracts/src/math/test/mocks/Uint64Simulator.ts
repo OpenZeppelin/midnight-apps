@@ -41,15 +41,23 @@ export class Uint64Simulator extends Uint64SimulatorBase {
   }
 
   public add(a: bigint, b: bigint): bigint {
-    return this.circuits.pure.add(a, b);
+    return this.circuits.impure.add(a, b);
+  }
+
+  public addChecked(a: bigint, b: bigint): bigint {
+    return this.circuits.impure.addChecked(a, b);
   }
 
   public sub(a: bigint, b: bigint): bigint {
-    return this.circuits.pure.sub(a, b);
+    return this.circuits.impure.sub(a, b);
   }
 
   public mul(a: bigint, b: bigint): bigint {
-    return this.circuits.pure.mul(a, b);
+    return this.circuits.impure.mul(a, b);
+  }
+
+  public mulChecked(a: bigint, b: bigint): bigint {
+    return this.circuits.impure.mulChecked(a, b);
   }
 
   public div(a: bigint, b: bigint): bigint {
@@ -73,26 +81,26 @@ export class Uint64Simulator extends Uint64SimulatorBase {
   }
 
   public min(a: bigint, b: bigint): bigint {
-    return this.circuits.pure.min(a, b);
+    return this.circuits.impure.min(a, b);
   }
 
   public max(a: bigint, b: bigint): bigint {
-    return this.circuits.pure.max(a, b);
+    return this.circuits.impure.max(a, b);
   }
 
   public MAX_UINT8(): bigint {
-    return this.circuits.pure.MAX_UINT8();
+    return this.circuits.impure.MAX_UINT8();
   }
 
   public MAX_UINT16(): bigint {
-    return this.circuits.pure.MAX_UINT16();
+    return this.circuits.impure.MAX_UINT16();
   }
 
   public MAX_UINT32(): bigint {
-    return this.circuits.pure.MAX_UINT32();
+    return this.circuits.impure.MAX_UINT32();
   }
 
   public MAX_UINT64(): bigint {
-    return this.circuits.pure.MAX_UINT64();
+    return this.circuits.impure.MAX_UINT64();
   }
 }

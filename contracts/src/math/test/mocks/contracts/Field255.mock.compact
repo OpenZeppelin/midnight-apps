@@ -13,44 +13,44 @@ export { U256 };
 
 // Helper for test suite: toggling this variable activates circuit metadata reporting.
 // Only increases circuit size by 3 rows per exposed circuit.
-ledger _exposeCircuitInfo: Boolean;
+ledger _isCircuitInfoExposed: Boolean;
 
 export circuit toBytes(value: Field): Bytes<32> {
-  _exposeCircuitInfo = true;
+  _isCircuitInfoExposed = true;
   return disclose(Field255_toBytes(value));
 }
 
 export circuit toU256(value: Field): U256 {
-  _exposeCircuitInfo = true;
+  _isCircuitInfoExposed = true;
   return disclose(Field255_toU256(value));
 }
 
 export circuit eq(a: Field, b: Field): Boolean {
-  _exposeCircuitInfo = true;
+  _isCircuitInfoExposed = true;
   return Field255_eq(a, b);
 }
 
 export circuit lt(a: Field, b: Field): Boolean {
-  _exposeCircuitInfo = true;
+  _isCircuitInfoExposed = true;
   return disclose(Field255_lt(a, b));
 }
 
 export circuit lte(a: Field, b: Field): Boolean {
-  _exposeCircuitInfo = true;
+  _isCircuitInfoExposed = true;
   return disclose(Field255_lte(a, b));
 }
 
 export circuit gt(a: Field, b: Field): Boolean {
-  _exposeCircuitInfo = true;
+  _isCircuitInfoExposed = true;
   return disclose(Field255_gt(a, b));
 }
 
 export circuit gte(a: Field, b: Field): Boolean {
-  _exposeCircuitInfo = true;
+  _isCircuitInfoExposed = true;
   return disclose(Field255_gte(a, b));
 }
 
 export circuit isZero(a: Field): Boolean {
-  _exposeCircuitInfo = true;
+  _isCircuitInfoExposed = true;
   return Field255_isZero(a);
 }

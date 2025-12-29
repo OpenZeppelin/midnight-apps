@@ -5,21 +5,23 @@ pragma language_version >= 0.19.0;
 
 /**
  * @title Uint64
- * @dev A utility module providing mathematical operations for unsigned integers. Most functions operate on
- * `Uint<64>` values in the range [0, 2^64 - 1], while the `sqrt` function accepts a `Uint<128>` input in the range
- * [0, 2^128 - 1]. The module supports arithmetic, division, square root, and utility functions with overflow and
- * underflow checks where applicable.
+ * @dev A utility module providing mathematical operations for unsigned integers. Functions operate on
+ * `Uint<64>` values in the range [0, 2^64 - 1]. The module supports arithmetic, division, square root,
+ * and utility functions with overflow and underflow checks where applicable.
  *
  * Supported Mathematical Operations:
  * - Arithmetic:
  *   - add(): Adds two `Uint<64>` numbers, returning a `Uint<128>` result to handle potential overflow.
+ *   - addChecked(): Adds two `Uint<64>` numbers with overflow checking, returning a `Uint<64>` result.
  *   - sub(): Subtracts one `Uint<64>` number from another, checking for underflow.
  *   - mul(): Multiplies two `Uint<64>` numbers, returning a `Uint<128>` result.
+ *   - mulChecked(): Multiplies two `Uint<64>` numbers with overflow checking, returning a `Uint<64>` result.
  * - Division:
  *   - div(): Computes the quotient of dividing one `Uint<64>` number by another.
  *   - rem(): Computes the remainder of dividing one `Uint<64>` number by another.
+ *   - divRem(): Computes both quotient and remainder of a division.
  * - Square Root:
- *   - sqrt(): Computes the floor of the square root of a `Uint<128>` number using the Newton-Raphson method.
+ *   - sqrt(): Computes the floor of the square root of a `Uint<64>` number.
  * - Utility:
  *   - isMultiple(): Checks if one `Uint<64>` number is a multiple of another.
  *   - min(): Returns the smaller of two `Uint<64>` numbers.
@@ -125,6 +127,28 @@ module Uint64 {
   }
 
   /**
+   * @title Add Checked circuit
+   * @description Adds two `Uint<64>` numbers with overflow checking, returning a `Uint<64>` result.
+   *
+   * @remarks
+   * Requirements:
+   * - `a` and `b` must be valid `Uint<64>` values in range [0, 2^64 - 1].
+   * - The sum of `a` and `b` must not exceed `MAX_UINT64` (2^64 - 1).
+   *
+   * @param {Uint<64>} a - The first unsigned 64-bit integer.
+   * @param {Uint<64>} b - The second unsigned 64-bit integer.
+   *
+   * @throws {Error} "Math: addition overflow" if `a + b > MAX_UINT64`.
+   *
+   * @returns {Uint<64>} The sum of `a` and `b` as a `Uint<64>` value.
+   */
+  export circuit addChecked(a: Uint<64>, b: Uint<64>): Uint<64> {
+    const sum: Uint<128> = a + b;
+    assert(sum <= MAX_UINT64(), "Math: addition overflow");
+    return sum as Uint<64>;
+  }
+
+  /**
    * @title Subtract circuit
    * @description Subtracts `b` from `a`, checking for underflow to ensure the result is non-negative.
    *
@@ -168,6 +192,28 @@ module Uint64 {
   }
 
   /**
+   * @title Multiply Checked circuit
+   * @description Multiplies two `Uint<64>` values with overflow checking, returning a `Uint<64>` result.
+   *
+   * @remarks
+   * Requirements:
+   * - `a` and `b` must be valid `Uint<64>` values in range [0, 2^64 - 1].
+   * - The product of `a` and `b` must not exceed `MAX_UINT64` (2^64 - 1).
+   *
+   * @param {Uint<64>} a - The first unsigned 64-bit integer (multiplicand).
+   * @param {Uint<64>} b - The second unsigned 64-bit integer (multiplier).
+   *
+   * @throws {Error} "Math: multiplication overflow" if `a * b > MAX_UINT64`.
+   *
+   * @returns {Uint<64>} The product of `a` and `b` as a `Uint<64>` value.
+   */
+  export circuit mulChecked(a: Uint<64>, b: Uint<64>): Uint<64> {
+    const product: Uint<128> = a * b;
+    assert(product <= MAX_UINT64(), "Math: multiplication overflow");
+    return product as Uint<64>;
+  }
+
+  /**
    * @title Internal Division circuit
    * @description Internal circuit to divide a Uint<64> number by another, returning quotient and remainder.
    *
@@ -177,14 +223,9 @@ module Uint64 {
    * quotient and remainder, satisfying a = quotient * b + remainder, where 0 <= remainder < b.
    *
    * Mathematical Steps:
-   * 1. Handle Special Cases:
-   *    - If b = 0, throw "Math: division by zero".
-   *    - Else if a = 0, return { quotient: 0, remainder: 0 }.
-   *    - Else if b = 1, return { quotient: a, remainder: 0 }.
-   *    - Else if a = b, return { quotient: 1, remainder: 0 }.
-   *    - Else if a < b, return { quotient: 0, remainder: a }.
+   * 1. Check for division by zero.
    * 2. Division Computation:
-   *    - Compute result = (quotient, remainder) using wit_divU64Locally, where quotient = floor(a / b)
+   *    - Compute result = (quotient, remainder) using wit_divU64, where quotient = floor(a / b)
    *      and remainder = a mod b.
    * 3. Verification:
    *    - Assert remainder < b, ensuring 0 <= remainder < b.
@@ -198,8 +239,6 @@ module Uint64 {
    * - `remainder` must be less than `b`.
    * - `quotient * b + remainder` must equal `a`.
    *
-   * @circuitInfo k=10, rows=277
-   *
    * @param {Uint<64>} a - The Uint<64> value to divide (dividend).
    * @param {Uint<64>} b - The Uint<64> value to divide by (divisor).
    *
@@ -212,26 +251,10 @@ module Uint64 {
   circuit _div(a: Uint<64>, b: Uint<64>): DivResultU64 {
     assert(b != 0, "Math: division by zero");
 
-    if (a == 0) {
-       return DivResultU64 { quotient: 0 as Uint<64>, remainder: 0 as Uint<64> };
-    } else
-       if (b == 1) {
-          return DivResultU64 { quotient: a, remainder: 0 as Uint<64> };
-       }
-       else
-          if (a == b) {
-             return DivResultU64 { quotient: 1 as Uint<64>, remainder: 0 as Uint<64> };
-          }
-          else
-             if (a < b) {
-                return DivResultU64 { quotient: 0 as Uint<64>, remainder: a };
-             }
-             else {
-                const result = wit_divU64(a, b);
-                assert(result.remainder < b, "Math: remainder error");
-                assert((result.quotient * b + result.remainder) as Uint<64> == a, "Math: division invalid");
-                return result;
-             }
+    const result = wit_divU64(a, b);
+    assert(result.remainder < b, "Math: remainder error");
+    assert((result.quotient * b + result.remainder) as Uint<64> == a, "Math: division invalid");
+    return result;
   }
 
   /**

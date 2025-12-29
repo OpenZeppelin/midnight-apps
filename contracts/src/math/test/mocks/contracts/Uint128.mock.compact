@@ -15,9 +15,8 @@ import "../../../Uint128" prefix Uint128_;
 
 export { DivResultU128, U128, U256 };
 
-/**
- * @description A mock contract for testing the MathU128 module's circuits.
- */
+// Helper for test suite: toggling this variable activates circuit metadata reporting.
+// Only increases circuit size by 3 rows per exposed circuit.
 ledger _isCircuitInfoExposed: Boolean;
 
 export circuit MODULUS(): Uint<128> {

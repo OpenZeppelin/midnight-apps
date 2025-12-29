@@ -9,20 +9,18 @@ pragma language_version >= 0.19.0;
  * using little-endian (LE) byte ordering.
  *
  * @remarks
- * This module provides two conversion functions:
- * - fromBytes(): Converts Bytes<32> to U256 using little-endian ordering
- * - toBytes(): Converts U256 to Bytes<32> using little-endian ordering
- *
  * Byte ordering convention (little-endian):
  * - Least significant byte first. Bytes 0-7 contain low.low (LSB).
  * - Byte layout: [low.low][low.high][high.low][high.high]
  *
- * The U256 struct represents a 256-bit unsigned integer as:
- *   value = high.high * 2^192 + high.low * 2^128 + low.high * 2^64 + low.low
- *
- * TODO: Add big-endian (BE) support:
- * - fromBytesBE(): Converts Bytes<32> to U256 using big-endian ordering
- * - toBytesBE(): Converts U256 to Bytes<32> using big-endian ordering
+ * Supported circuits:
+ * - toU256(value): Converts Bytes<32> to U256 using little-endian ordering
+ * - eq(a, b): Checks if two Bytes<32> are equal
+ * - lt(a, b): Checks if a < b
+ * - lte(a, b): Checks if a <= b
+ * - gt(a, b): Checks if a > b
+ * - gte(a, b): Checks if a >= b
+ * - isZero(a): Checks if Bytes<32> is zero
  */
 module Bytes32 {
   import { upgradeFromTransient } from CompactStandardLibrary;

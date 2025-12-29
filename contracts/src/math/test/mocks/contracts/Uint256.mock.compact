@@ -13,39 +13,39 @@ export { U256 };
 
 // Helper for test suite: toggling this variable activates circuit metadata reporting.
 // Only increases circuit size by 3 rows per exposed circuit.
-ledger _exposeCircuitInfo: Boolean;
+ledger _isCircuitInfoExposed: Boolean;
 
 export circuit ZERO_U256(): U256 {
-  _exposeCircuitInfo = true;
+  _isCircuitInfoExposed = true;
   return Uint256_ZERO_U256();
 }
 
 export circuit toBytes(value: U256): Bytes<32> {
-  _exposeCircuitInfo = true;
+  _isCircuitInfoExposed = true;
   return disclose(Uint256_toBytes(value));
 }
 
 export circuit eq(a: U256, b: U256): Boolean {
-  _exposeCircuitInfo = true;
+  _isCircuitInfoExposed = true;
   return Uint256_eq(a, b);
 }
 
 export circuit lt(a: U256, b: U256): Boolean {
-  _exposeCircuitInfo = true;
+  _isCircuitInfoExposed = true;
   return Uint256_lt(a, b);
 }
 
 export circuit lte(a: U256, b: U256): Boolean {
-  _exposeCircuitInfo = true;
+  _isCircuitInfoExposed = true;
   return Uint256_lte(a, b);
 }
 
 export circuit gt(a: U256, b: U256): Boolean {
-  _exposeCircuitInfo = true;
+  _isCircuitInfoExposed = true;
   return Uint256_gt(a, b);
 }
 
 export circuit gte(a: U256, b: U256): Boolean {
-  _exposeCircuitInfo = true;
+  _isCircuitInfoExposed = true;
   return Uint256_gte(a, b);
 }

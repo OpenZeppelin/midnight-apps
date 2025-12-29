@@ -23,6 +23,39 @@ describe('Uint64', () => {
     });
   });
 
+  describe('AddChecked', () => {
+    test('should add two small numbers', () => {
+      expect(uint64Simulator.addChecked(5n, 3n)).toBe(8n);
+    });
+
+    test('should add zero', () => {
+      expect(uint64Simulator.addChecked(5n, 0n)).toBe(5n);
+      expect(uint64Simulator.addChecked(0n, 5n)).toBe(5n);
+    });
+
+    test('should add at boundary without overflow', () => {
+      expect(uint64Simulator.addChecked(MAX_UINT64 - 1n, 1n)).toBe(MAX_UINT64);
+      expect(uint64Simulator.addChecked(1n, MAX_UINT64 - 1n)).toBe(MAX_UINT64);
+    });
+
+    test('should fail on overflow', () => {
+      expect(() => uint64Simulator.addChecked(MAX_UINT64, 1n)).toThrowError(
+        'failed assert: Math: addition overflow',
+      );
+    });
+
+    test('should fail on large overflow', () => {
+      expect(() =>
+        uint64Simulator.addChecked(MAX_UINT64, MAX_UINT64),
+      ).toThrowError('failed assert: Math: addition overflow');
+    });
+
+    test('should handle half max values without overflow', () => {
+      const halfMax = MAX_UINT64 / 2n;
+      expect(uint64Simulator.addChecked(halfMax, halfMax)).toBe(halfMax * 2n);
+    });
+  });
+
   describe('Sub', () => {
     test('should subtract two numbers', () => {
       expect(uint64Simulator.sub(10n, 4n)).toBe(6n);
@@ -76,6 +109,50 @@ describe('Uint64', () => {
     });
   });
 
+  describe('MulChecked', () => {
+    test('should multiply two small numbers', () => {
+      expect(uint64Simulator.mulChecked(4n, 3n)).toBe(12n);
+    });
+
+    test('should multiply by zero', () => {
+      expect(uint64Simulator.mulChecked(5n, 0n)).toBe(0n);
+      expect(uint64Simulator.mulChecked(0n, 5n)).toBe(0n);
+    });
+
+    test('should multiply by one', () => {
+      expect(uint64Simulator.mulChecked(MAX_UINT64, 1n)).toBe(MAX_UINT64);
+      expect(uint64Simulator.mulChecked(1n, MAX_UINT64)).toBe(MAX_UINT64);
+    });
+
+    test('should multiply at boundary without overflow', () => {
+      // sqrt(MAX_UINT64) ≈ 4294967295, so 4294967295 * 4294967295 should be within range
+      const sqrtMax = MAX_UINT32;
+      expect(uint64Simulator.mulChecked(sqrtMax, sqrtMax)).toBe(
+        sqrtMax * sqrtMax,
+      );
+    });
+
+    test('should fail on overflow', () => {
+      expect(() => uint64Simulator.mulChecked(MAX_UINT64, 2n)).toThrowError(
+        'failed assert: Math: multiplication overflow',
+      );
+    });
+
+    test('should fail on large overflow', () => {
+      expect(() =>
+        uint64Simulator.mulChecked(MAX_UINT64, MAX_UINT64),
+      ).toThrowError('failed assert: Math: multiplication overflow');
+    });
+
+    test('should fail when product exceeds MAX_UINT64', () => {
+      // MAX_UINT32 + 1 = 2^32, and (2^32)^2 = 2^64 which overflows
+      const sqrtMaxPlusOne = MAX_UINT32 + 1n;
+      expect(() =>
+        uint64Simulator.mulChecked(sqrtMaxPlusOne, sqrtMaxPlusOne),
+      ).toThrowError('failed assert: Math: multiplication overflow');
+    });
+  });
+
   describe('div', () => {
     test('should divide small numbers', () => {
       expect(uint64Simulator.div(10n, 3n)).toBe(3n);
@@ -108,7 +185,7 @@ describe('Uint64', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      uint64Simulator.overrideWitness('wit_divU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_divU64', (context) => [
         context.privateState,
         { quotient: 1n, remainder: 10n },
       ]);
@@ -118,7 +195,7 @@ describe('Uint64', () => {
     });
 
     test('should fail when quotient * b + remainder != a', () => {
-      uint64Simulator.overrideWitness('wit_divU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_divU64', (context) => [
         context.privateState,
         { quotient: 1n, remainder: 1n },
       ]);
@@ -164,7 +241,7 @@ describe('Uint64', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      uint64Simulator.overrideWitness('wit_divU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_divU64', (context) => [
         context.privateState,
         { quotient: 1n, remainder: 5n },
       ]);
@@ -174,7 +251,7 @@ describe('Uint64', () => {
     });
 
     test('should fail when quotient * b + remainder != a', () => {
-      uint64Simulator.overrideWitness('wit_divU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_divU64', (context) => [
         context.privateState,
         { quotient: 0n, remainder: 2n },
       ]);
@@ -234,7 +311,7 @@ describe('Uint64', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      uint64Simulator.overrideWitness('wit_divU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_divU64', (context) => [
         context.privateState,
         { quotient: 1n, remainder: 5n },
       ]);
@@ -244,7 +321,7 @@ describe('Uint64', () => {
     });
 
     test('should fail when quotient * b + remainder != a', () => {
-      uint64Simulator.overrideWitness('wit_divU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_divU64', (context) => [
         context.privateState,
         { quotient: 2n, remainder: 0n },
       ]);
@@ -254,7 +331,7 @@ describe('Uint64', () => {
     });
 
     test('should fail when remainder >= divisor (duplicate)', () => {
-      uint64Simulator.overrideWitness('wit_divU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_divU64', (context) => [
         context.privateState,
         { quotient: 1n, remainder: 10n },
       ]);
@@ -317,7 +394,7 @@ describe('Uint64', () => {
     });
 
     test('should fail with overestimated root', () => {
-      uint64Simulator.overrideWitness('wit_sqrtU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_sqrtU64', (context) => [
         context.privateState,
         5n,
       ]);
@@ -327,7 +404,7 @@ describe('Uint64', () => {
     });
 
     test('should fail with underestimated root', () => {
-      uint64Simulator.overrideWitness('wit_sqrtU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_sqrtU64', (context) => [
         context.privateState,
         3n,
       ]);
