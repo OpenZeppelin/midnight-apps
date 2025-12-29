@@ -84,7 +84,8 @@
         ".env"
       ],
       "outputs": [
-        "dist/**"
+        "dist/**",
+        ".next/**"
       ]
     },
     "types": {

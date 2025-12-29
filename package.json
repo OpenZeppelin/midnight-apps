@@ -8,7 +8,7 @@
     "prepare": "is-ci || husky && pnpm --filter @openzeppelin/midnight-apps-logger run build && pnpm --filter @openzeppelin/midnight-apps-compact run build",
     "compact": "turbo run compact",
     "compact:fast": "turbo run compact:fast",
-    "compact:version": "turbo run compact -- --version",
+    "compact:version": "compact compile --version",
     "compact:language-version": "turbo run compact -- --language-version",
     "compact:fmt": "turbo run compact:fmt",
     "compact:fmt:fix": "turbo run compact:fmt:fix",
