@@ -1,0 +1,214 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.2 (lunarswap/LunarswapFactory.compact)
+
+pragma language_version >= 0.19.0;
+
+/**
+ * @title LunarswapFactory
+ * @description Factory contract for creating and managing trading pairs in the Lunarswap protocol.
+ *
+ * @remarks
+ * The LunarswapFactory is responsible for the creation, storage, and management of all trading pairs
+ * in the protocol. It implements a factory pattern where each unique token pair has a corresponding
+ * pair contract that handles the actual trading logic and liquidity management.
+ *
+ * Key Features:
+ * - Pair creation and initialization
+ * - Pair storage and retrieval
+ * - Reserve management and updates
+ * - Deterministic pair identification through token sorting
+ */
+module LunarswapFactory {
+  import
+    {
+      ZswapCoinPublicKey,
+      ContractAddress,
+      Either,
+      left,
+      right,
+      Map,
+      ShieldedCoinInfo,
+      QualifiedShieldedCoinInfo,
+    } from CompactStandardLibrary;
+
+  import { isKeyOrAddressZero } from "../../../compact-contracts/contracts/src/utils/Utils" prefix Utils_;
+
+  import { Pair } from "./types/TPair";
+
+  import { initializePair } from "./LunarswapPair" prefix LunarswapPair_;
+  import { getPairId } from "./LunarswapLibrary" prefix LunarswapLibrary_;
+
+  /**
+   * @title pool ledger
+   * @description Stores all trading pairs in the factory, mapping a unique pair id (Bytes<32>)
+   *              to its corresponding Pair struct. This ledger enables efficient lookup and management
+   *              of all created pairs within the Lunarswap protocol.
+   *
+   * @type {Map<Bytes<32>, Pair>}
+   */
+  export ledger pool: Map<Bytes<32>, Pair>;
+
+  /**
+   * @title reserves ledger
+   * @description Maintains the reserves for each trading pair. It maps a unique pair id (Bytes<32>)
+   *              to a nested map of token color (Bytes<32>) to its QualifiedShieldedCoinInfo. This structure allows
+   *              for tracking and updating the reserves of each token within every pair.
+   *
+   * @type {Map<reserveType, QualifiedShieldedCoinInfo>}
+   * @type {Map<Bytes<32>, QualifiedShieldedCoinInfo>}
+   */
+  export ledger reserves: Map<Bytes<32>, QualifiedShieldedCoinInfo>;
+
+  /**
+   * @title getAllPairLength circuit
+   * @description Returns the total number of trading pairs in the factory.
+   *
+   * @remarks
+   * This circuit provides a count of all registered trading pairs stored in the liquidity pool.
+   *
+   * @returns {Uint<64>} - The total number of trading pairs.
+   */
+  export circuit getAllPairLength(): Uint<64> {
+    return pool.size();
+  }
+
+  /**
+   * @title exists circuit
+   * @description Checks if a trading pair exists for the given id hash.
+   *
+   * @remarks
+   * This circuit verifies whether a pair with the specified id hash exists
+   * in the liquidity pool.
+   *
+   * @param {Bytes<32>} id - The unique id hash of the pair.
+   *
+   * @returns {Boolean} - True if the pair exists, false otherwise.
+   */
+  export circuit exists(id: Bytes<32>): Boolean {
+    return pool.member(id);
+  }
+
+  /**
+   * @title getPair circuit
+   * @description Retrieves the pair information for a given id hash.
+   *
+   * @remarks
+   * This circuit returns the complete pair data including reserves and metadata.
+   * The pair must exist for this circuit to succeed.
+   *
+   * @param {Bytes<32>} id - The unique id hash of the pair.
+   *
+   * @throws {Error} "LunarswapFactory: getPair() - Pair does not exist" if the pair doesn't exist.
+   *
+   * @returns {Pair} - The pair information including reserves and metadata.
+   */
+  export circuit getPair(id: Bytes<32>): Pair {
+    assert(exists(id), "LunarswapFactory: getPair() - Pair does not exist");
+    return pool.lookup(id);
+  }
+
+  /**
+   * @title getReserves circuit
+   * @description Returns the current reserves for a trading pair.
+   *
+   * @remarks
+   * This circuit retrieves the reserves for a pair identified by its id hash
+   * and token information. The reserves are returned in the order of token0 and token1.
+   *
+   * @param {Bytes<32>} id - The unique id hash of the pair.
+   * @param {Bytes<32>} reserve0Id - The id of the first reserve.
+   * @param {Bytes<32>} reserve1Id - The id of the second reserve.
+   *
+   * @throws {Error} "LunarswapFactory: getPair() - Pair does not exist" if the pair doesn't exist.
+   *
+   * @returns {[QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo]} - The reserves for token0 and token1 respectively.
+   */
+  export circuit getReserves(id: Bytes<32>, reserve0Id: Bytes<32>, reserve1Id: Bytes<32>): [QualifiedShieldedCoinInfo,
+                                                                                                QualifiedShieldedCoinInfo] {
+    assert(exists(id), "LunarswapFactory: getReserves() - Pair does not exist");
+    assert(reserves.member(reserve0Id), "LunarswapFactory: getReserves() - Reserve0 does not exist");
+    assert(reserves.member(reserve1Id), "LunarswapFactory: getReserves() - Reserve1 does not exist");
+    const reserve0 = reserves.lookup(reserve0Id);
+    const reserve1 = reserves.lookup(reserve1Id);
+    return [reserve0, reserve1];
+  }
+
+  /**
+   * @title createPair circuit
+   * @description Creates a new trading pair for the given tokens.
+   *
+   * @remarks
+   * This circuit initializes a new trading pair with zero reserves and stores it
+   * in the liquidity pool. The pair is identified by a unique hash generated from
+   * the sorted token colors. Requires the contract to be initialized first.
+   *
+   * Requirements:
+   * - The contract must be initialized
+   * - The token colors must be valid (non-zero)
+   * - The pair must not already exist
+   *
+   * @param {Bytes<32>} id - The unique id hash for the new pair.
+   * @param {ShieldedCoinInfo} token0    - The first token in the pair.
+   * @param {ShieldedCoinInfo} token1    - The second token in the pair.
+   *
+   * @throws {Error} "LunarswapFactory: Invalid token0 color" if token0 color is zero.
+   * @throws {Error} "LunarswapFactory: Invalid token1 color" if token1 color is zero.
+   *
+   * @returns {Pair} - The created pair.
+   */
+  export circuit createPair(id: Bytes<32>, token0: ShieldedCoinInfo, token1: ShieldedCoinInfo): Pair {
+    // assert to prevent zero color tokens
+    assert(!Utils_isKeyOrAddressZero(right<ZswapCoinPublicKey, ContractAddress>(ContractAddress { bytes: token0.color })), "LunarswapFactory: Invalid token0 color");
+    assert(!Utils_isKeyOrAddressZero(right<ZswapCoinPublicKey, ContractAddress>(ContractAddress { bytes: token1.color })), "LunarswapFactory: Invalid token1 color");
+    const pair = LunarswapPair_initializePair(id, token0, token1);
+    pool.insert(id, pair);
+    return pair;
+  }
+
+  /**
+   * @title updatePair circuit
+   * @description Updates an existing trading pair with new data.
+   *
+   * @remarks
+   * This circuit updates the pair data in the liquidity pool. The pair must already
+   * exist for this operation to succeed.
+   *
+   * Requirements:
+   * - The pair must already exist in the liquidity pool
+   *
+   * @param {Bytes<32>} id - The unique id hash of the pair.
+   * @param {Pair} pair - The updated pair data.
+   *
+   * @throws {Error} "LunarswapFactory: updatePair() - Pair does not exist" if the pair doesn't exist.
+   *
+   * @returns {Pair} - The updated pair data.
+   */
+  export circuit updatePair(id: Bytes<32>, pair: Pair): Pair {
+    assert(exists(id), "LunarswapFactory: updatePair() - Pair does not exist");
+    pool.insert(id, disclose(pair));
+    return pair;
+  }
+
+  /**
+   * @title removePair circuit
+   * @description Removes a trading pair from the liquidity pool.
+   *
+   * @remarks
+   * This circuit removes a pair from the liquidity pool based on the pair's
+   * token information. The pair must exist for this operation to succeed.
+   *
+   * Requirements:
+   * - The pair must exist in the liquidity pool
+   *
+   * @param {Pair} pair - The pair to remove.
+   *
+   * @throws {Error} "LunarswapFactory: removePair() - Pair does not exist" if the pair doesn't exist.
+   *
+   * @returns [] - No return values.
+   */
+  export circuit removePair(pair: Pair): [] {
+    const id = LunarswapLibrary_getPairId(pair.token0Type, pair.token1Type);
+    assert(exists(id), "LunarswapFactory: removePair() - Pair does not exist");
+    return pool.remove(id);
+  }
+}

@@ -1,0 +1,72 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.2 (lunarswap/test/mocks/LunarswapFactory.mock.compact)
+
+pragma language_version >= 0.19.0;
+
+import {
+  QualifiedShieldedCoinInfo,
+  ShieldedCoinInfo,
+} from CompactStandardLibrary;
+
+import { Pair } from "../../../types/TPair";
+
+import { pool, reserves } from "../../../LunarswapFactory";
+
+import
+  {
+    getAllPairLength,
+    exists,
+    getPair,
+    getReserves,
+    createPair,
+    updatePair,
+    removePair } from "../../../LunarswapFactory" prefix LunarswapFactory_;
+
+export { Pair, pool, reserves, QualifiedShieldedCoinInfo, ShieldedCoinInfo };
+
+// Helper for test suite: toggling this variable activates circuit metadata reporting.
+// Only increases circuit size by 3 rows per exposed circuit.
+ledger _isCircuitInfoExposed: Boolean;
+
+export circuit getAllPairLength(): Uint<64> {
+  _isCircuitInfoExposed = true;
+  return LunarswapFactory_getAllPairLength();
+}
+
+export circuit exists(id: Bytes<32>): Boolean {
+  _isCircuitInfoExposed = true;
+  return LunarswapFactory_exists(disclose(id));
+}
+
+export circuit getPair(id: Bytes<32>): Pair {
+  _isCircuitInfoExposed = true;
+  return LunarswapFactory_getPair(disclose(id));
+}
+
+export circuit getReserves(
+  id: Bytes<32>,
+  reserve0Id: Bytes<32>,
+  reserve1Id: Bytes<32>
+): [QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo] {
+  _isCircuitInfoExposed = true;
+  return LunarswapFactory_getReserves(disclose(id), disclose(reserve0Id), disclose(reserve1Id));
+}
+
+export circuit createPair(
+  id: Bytes<32>,
+  token0: ShieldedCoinInfo,
+  token1: ShieldedCoinInfo
+): Pair {
+  _isCircuitInfoExposed = true;
+  return LunarswapFactory_createPair(disclose(id), disclose(token0), disclose(token1));
+}
+
+export circuit updatePair(id: Bytes<32>, pair: Pair): Pair {
+  _isCircuitInfoExposed = true;
+  return LunarswapFactory_updatePair(disclose(id), disclose(pair));
+}
+
+export circuit removePair(pair: Pair): [] {
+  _isCircuitInfoExposed = true;
+  return LunarswapFactory_removePair(disclose(pair));
+}

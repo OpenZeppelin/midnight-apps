@@ -1,12 +1,18 @@
 {
     "extends": "@tsconfig/node24/tsconfig.json",
     "include": [
-      "src/**/witnesses/**/*.ts"
-, "src/access/test/mocks/witnesses/AccessControl.ts"    ],
+      "src/**/witnesses/**/*.ts",
+      "src/**/test/mocks/**/*.ts"
+    ],
     "exclude": ["src/archive/"],
     "compilerOptions": {
       "rootDir": "src",
       "outDir": "dist",
+      "baseUrl": ".",
+      "paths": {
+        "@src/*": ["src/*"],
+        "@artifacts/*": ["artifacts/*"]
+      },
       "declaration": true,
       "allowJs": true,
       "forceConsistentCasingInFileNames": true,

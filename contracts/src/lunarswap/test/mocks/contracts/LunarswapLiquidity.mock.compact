@@ -1,0 +1,87 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.2 (lunarswap/test/mocks/LunarswapLiquidity.mock.compact)
+
+pragma language_version >= 0.19.0;
+
+import {
+  ShieldedCoinInfo,
+  QualifiedShieldedCoinInfo,
+  ShieldedSendResult,
+  ZswapCoinPublicKey,
+  ContractAddress,
+  Either,
+} from CompactStandardLibrary;
+
+import {
+  nonce,
+  totalSupply,
+  name,
+  symbol,
+  decimals,
+  type
+} from "../../../LunarswapLiquidity";
+
+import {
+  initialize,
+  initializePairToken,
+  getTotalSupply,
+  mint,
+  burn
+} from "../../../LunarswapLiquidity" prefix LunarswapLiquidity_;
+
+// Expose ledger state for testing
+export {
+  nonce,
+  totalSupply,
+  name,
+  symbol,
+  decimals,
+  type,
+  ShieldedCoinInfo,
+  QualifiedShieldedCoinInfo,
+  ShieldedSendResult,
+  ZswapCoinPublicKey,
+  ContractAddress,
+  Either,
+};
+
+// Helper for test suite: toggling this variable activates circuit metadata reporting.
+ledger _isCircuitInfoExposed: Boolean;
+
+constructor(
+  nonce_: Bytes<32>,
+  name_: Opaque<"string">,
+  symbol_: Opaque<"string">,
+  decimals_: Uint<8>
+) {
+  _isCircuitInfoExposed = true;
+  return LunarswapLiquidity_initialize(nonce_, name_, symbol_, decimals_);
+}
+
+export circuit initializePairToken(id: Bytes<32>): [] {
+  _isCircuitInfoExposed = true;
+  return LunarswapLiquidity_initializePairToken(disclose(id));
+}
+
+export circuit getTotalSupply(id: Bytes<32>): QualifiedShieldedCoinInfo {
+  _isCircuitInfoExposed = true;
+  return LunarswapLiquidity_getTotalSupply(disclose(id));
+}
+
+export circuit mint(
+  id: Bytes<32>,
+  recipient: Either<ZswapCoinPublicKey, ContractAddress>,
+  amount: Uint<64>
+): ShieldedCoinInfo {
+  _isCircuitInfoExposed = true;
+  return LunarswapLiquidity_mint(disclose(id), disclose(recipient), disclose(amount));
+}
+
+export circuit burn(
+  id: Bytes<32>,
+  coin: ShieldedCoinInfo,
+  amount: Uint<128>
+): ShieldedSendResult {
+  _isCircuitInfoExposed = true;
+  return LunarswapLiquidity_burn(disclose(id), disclose(coin), disclose(amount));
+}

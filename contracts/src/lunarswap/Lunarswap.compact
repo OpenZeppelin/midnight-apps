@@ -1,0 +1,39 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.2 (lunarswap/Lunarswap.compact)
+
+pragma language_version >= 0.19.0;
+
+import { initialize, assertInitialized } from "../../../compact-contracts/contracts/src/security/Initializable" prefix Initializable_;
+
+import { initialize } from "./LunarswapLiquidity" prefix LunarswapLiquidity_;
+
+/**
+ * @title Lunarswap
+ * @description Main module for the Lunarswap protocol.
+ *
+ * @remarks
+ * The Lunarswap module is the main entry point for the Lunarswap protocol.
+ * It provides the core functionality for creating, managing, and interacting with trading pairs.
+ * Uses the Initializable pattern to ensure the contract can only be initialized once.
+ */
+
+/**
+ * @title Lunarswap Constructor
+ * @description Initializes the Lunarswap contract with LP token configuration.
+ *
+ * @remarks
+ * This constructor sets up the initial configuration for LP tokens including name,
+ * symbol, decimals, and nonce. Uses the Initializable pattern to prevent
+ * re-initialization. Delegates to `LunarswapLiquidity.initialize()`.
+ *
+ * @param {Bytes<32>} nonce - The initial nonce for LP token generation.
+ * @param {Opaque<"string">} name - The name of the LP token.
+ * @param {Opaque<"string">} symbol - The symbol of the LP token.
+ * @param {Uint<8>} decimals - The number of decimals for the LP token.
+ *
+ * @throws {Error} "Initializable: contract already initialized" if called more than once.
+ */
+constructor(nonce: Bytes<32>, name: Opaque<"string">, symbol: Opaque<"string">, decimals: Uint<8>) {
+  Initializable_initialize();
+  LunarswapLiquidity_initialize(nonce, name, symbol, decimals);
+}

@@ -1,0 +1,117 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.2 (lunarswap/test/mocks/LunarswapLibrary.mock.compact)
+
+pragma language_version >= 0.19.0;
+
+import {
+  ShieldedCoinInfo,
+  QualifiedShieldedCoinInfo,
+} from CompactStandardLibrary;
+
+import { SplitCoinResult } from "../../../LunarswapLibrary";
+
+import {
+  splitCoin,
+  sortCoinsAsc,
+  sortCoinsAndAmountsAsc,
+  addCoinValue,
+  subCoinValue,
+  getPairId,
+  getReserveId,
+  quote,
+  getAmountOut,
+  getAmountIn,
+  upcastCoinInfo,
+  downcastCoinInfo
+} from "../../../LunarswapLibrary" prefix LunarswapLibrary_;
+
+export { SplitCoinResult, ShieldedCoinInfo, QualifiedShieldedCoinInfo };
+
+// Helper for test suite: toggling this variable activates circuit metadata reporting.
+// Only increases circuit size by 3 rows per exposed circuit.
+ledger _isCircuitInfoExposed: Boolean;
+
+export circuit splitCoin(coin: ShieldedCoinInfo, amount: Uint<128>): SplitCoinResult<ShieldedCoinInfo> {
+  _isCircuitInfoExposed = true;
+  return LunarswapLibrary_splitCoin<ShieldedCoinInfo>(coin, amount);
+}
+
+export circuit splitQualifiedCoin(coin: QualifiedShieldedCoinInfo, amount: Uint<128>): SplitCoinResult<QualifiedShieldedCoinInfo> {
+  _isCircuitInfoExposed = true;
+  return LunarswapLibrary_splitCoin<QualifiedShieldedCoinInfo>(coin, amount);
+}
+
+export circuit sortCoinsAsc(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo): [ShieldedCoinInfo, ShieldedCoinInfo] {
+  _isCircuitInfoExposed = true;
+  return disclose(LunarswapLibrary_sortCoinsAsc<ShieldedCoinInfo>(tokenA, tokenB));
+}
+
+export circuit sortQualifiedCoinsAsc(tokenA: QualifiedShieldedCoinInfo, tokenB: QualifiedShieldedCoinInfo): [QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo] {
+  _isCircuitInfoExposed = true;
+  return disclose(LunarswapLibrary_sortCoinsAsc<QualifiedShieldedCoinInfo>(tokenA, tokenB));
+}
+
+export circuit sortCoinsAndAmountsAsc(
+  tokenA: ShieldedCoinInfo,
+  tokenB: ShieldedCoinInfo,
+  amountA: Uint<128>,
+  amountB: Uint<128>
+): [ShieldedCoinInfo, ShieldedCoinInfo, Uint<128>, Uint<128>] {
+  _isCircuitInfoExposed = true;
+  return disclose(LunarswapLibrary_sortCoinsAndAmountsAsc(tokenA, tokenB, amountA, amountB));
+}
+
+export circuit addCoinValue(coin: ShieldedCoinInfo, amount: Uint<128>): ShieldedCoinInfo {
+  _isCircuitInfoExposed = true;
+  return disclose(LunarswapLibrary_addCoinValue<ShieldedCoinInfo>(coin, amount));
+}
+
+export circuit addQualifiedCoinValue(coin: QualifiedShieldedCoinInfo, amount: Uint<128>): QualifiedShieldedCoinInfo {
+  _isCircuitInfoExposed = true;
+  return disclose(LunarswapLibrary_addCoinValue<QualifiedShieldedCoinInfo>(coin, amount));
+}
+
+export circuit subCoinValue(coin: ShieldedCoinInfo, amount: Uint<128>): ShieldedCoinInfo {
+  _isCircuitInfoExposed = true;
+  return LunarswapLibrary_subCoinValue<ShieldedCoinInfo>(coin, amount);
+}
+
+export circuit subQualifiedCoinValue(coin: QualifiedShieldedCoinInfo, amount: Uint<128>): QualifiedShieldedCoinInfo {
+  _isCircuitInfoExposed = true;
+  return LunarswapLibrary_subCoinValue<QualifiedShieldedCoinInfo>(coin, amount);
+}
+
+export circuit getPairId(type0: Bytes<32>, type1: Bytes<32>): Bytes<32> {
+  _isCircuitInfoExposed = true;
+  return LunarswapLibrary_getPairId(type0, type1);
+}
+
+export circuit getReserveId(type0: Bytes<32>, type1: Bytes<32>): Bytes<32> {
+  _isCircuitInfoExposed = true;
+  return LunarswapLibrary_getReserveId(type0, type1);
+}
+
+export circuit quote(amount0: Uint<128>, reserve0: Uint<128>, reserve1: Uint<128>): Uint<128> {
+  _isCircuitInfoExposed = true;
+  return LunarswapLibrary_quote(amount0, reserve0, reserve1);
+}
+
+export circuit getAmountOut(amountIn: Uint<128>, reserveIn: Uint<128>, reserveOut: Uint<128>): Uint<128> {
+  _isCircuitInfoExposed = true;
+  return LunarswapLibrary_getAmountOut(amountIn, reserveIn, reserveOut);
+}
+
+export circuit getAmountIn(amountOut: Uint<128>, reserveIn: Uint<128>, reserveOut: Uint<128>): Uint<128> {
+  _isCircuitInfoExposed = true;
+  return disclose(LunarswapLibrary_getAmountIn(amountOut, reserveIn, reserveOut));
+}
+
+export circuit upcastCoinInfo(coin: ShieldedCoinInfo): QualifiedShieldedCoinInfo {
+  _isCircuitInfoExposed = true;
+  return LunarswapLibrary_upcastCoinInfo(coin);
+}
+
+export circuit downcastCoinInfo(coin: QualifiedShieldedCoinInfo): ShieldedCoinInfo {
+  _isCircuitInfoExposed = true;
+  return LunarswapLibrary_downcastCoinInfo(coin);
+}

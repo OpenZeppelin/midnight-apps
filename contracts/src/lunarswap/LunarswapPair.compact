@@ -1,0 +1,166 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.2 (lunarswap/LunarswapPair.compact)
+
+pragma language_version >= 0.19.0;
+
+/**
+ * @title LunarswapPair
+ * @description Core trading pair implementation for the Lunarswap protocol, handling liquidity provision and pair state management.
+ *
+ * @remarks
+ * The LunarswapPair module implements the core logic for individual trading pairs in the Lunarswap protocol.
+ * It manages liquidity provision, LP token minting, fee collection, and maintains the pair's state including
+ * reserves, cumulative price data, and trading statistics.
+ *
+ * Key Features:
+ * - Liquidity provision and LP token minting
+ * - Protocol fee calculation and distribution
+ * - Reserve management and updates
+ * - Price oracle functionality through VWAP tracking
+ * - Trading volume and price cumulative tracking
+ */
+module LunarswapPair {
+  import {
+    ShieldedCoinInfo,
+    QualifiedShieldedCoinInfo,
+  } from CompactStandardLibrary;
+
+  import { isKeyOrAddressZero } from "../../../compact-contracts/contracts/src/utils/Utils" prefix Utils_;
+  import { addChecked, sub, div, mulChecked } from "../math/Uint128" prefix Uint128_;
+
+  import { Pair } from "./types/TPair";
+
+  import { initialize, initializePairToken } from "./LunarswapLiquidity" prefix LunarswapLiquidity_;
+  import { getReserveId } from "./LunarswapLibrary" prefix LunarswapLibrary_;
+
+  /**
+   * @title initializePair circuit
+   * @description Initializes a new trading pair with zero reserves.
+   *
+   * @remarks
+   * This circuit creates a new trading pair structure with zero reserves and
+   * initializes the LP token tracking for the pair. The pair is ready to accept
+   * the first liquidity provision.
+   *
+   * @circuitInfo k=11, rows=1000
+   *
+   * @param {Bytes<32>} pairId - The unique pairId hash for the new pair.
+   * @param {ShieldedCoinInfo} token0 - The first token in the pair.
+   * @param {ShieldedCoinInfo} token1 - The second token in the pair.
+   *
+   * @returns {Pair} - The initialized pair with zero reserves and metadata.
+   */
+  export circuit initializePair(pairId: Bytes<32>, token0: ShieldedCoinInfo, token1: ShieldedCoinInfo): Pair {
+    LunarswapLiquidity_initializePairToken(pairId);
+    const reserve0Id = LunarswapLibrary_getReserveId(pairId, token0.color);
+    const reserve1Id = LunarswapLibrary_getReserveId(pairId, token1.color);
+
+    return Pair { token0Type: token0.color,
+                  token1Type: token1.color,
+                  // TODO: calculate the expected lpTokenType
+                  lpTokenType: default<Bytes<32>>,
+                  reserve0Id: reserve0Id,
+                  reserve1Id: reserve1Id,
+                  price0VolCumulative: default<Uint<128>>,
+                  price1VolCumulative: default<Uint<128>>,
+                  volume0Cumulative: default<Uint<128>>,
+                  volume1Cumulative: default<Uint<128>>,
+                  kLast: default<Uint<128>>, };
+  }
+
+  /**
+   * @title _update circuit
+   * @description Updates the pair state with new balances, metadata, and cumulative statistics.
+   *
+   * @remarks
+   * This internal circuit combines the functionality of _updatePairPrice and _updatePair
+   * to provide a single interface for updating pair state. It updates cumulative price
+   * and volume data, then creates a new pair state with the updated values.
+   *
+   * When fees are enabled, kLast is recalculated as balance0 * balance1.
+   *
+   * @param {Pair} pair           - The current pair state.
+   * @param {Bytes<32>} lpTokenType - The LP token type/color for this pair.
+   * @param {Boolean} isFeeOn     - Whether protocol fees are enabled.
+   * @param {Uint<128>} amount0In - The amount of token0 being traded in.
+   * @param {Uint<128>} amount1In - The amount of token1 being traded in.
+   * @param {Uint<128>} balance0  - The new balance of token0.
+   * @param {Uint<128>} balance1  - The new balance of token1.
+   * @param {QualifiedShieldedCoinInfo} reserve0 - The current reserve of token0.
+   * @param {QualifiedShieldedCoinInfo} reserve1 - The current reserve of token1.
+   *
+   * @returns {Pair} - The updated pair state.
+   */
+  circuit _update(pair: Pair,
+                  lpTokenType: Bytes<32>,
+                  isFeeOn: Boolean,
+                  amount0In: Uint<128>,
+                  amount1In: Uint<128>,
+                  balance0: Uint<128>,
+                  balance1: Uint<128>,
+                  reserve0: QualifiedShieldedCoinInfo,
+                  reserve1: QualifiedShieldedCoinInfo
+                  ): Pair {
+    const [price0VolCumulative, price1VolCumulative, volume0Cumulative, volume1Cumulative] =
+                  _updatePairPrice(pair, reserve0, reserve1, amount0In, amount1In);
+    const updatedKLast = isFeeOn ? Uint128_mulChecked(balance0, balance1) : 0;
+    return Pair { token0Type: pair.token0Type,
+                  token1Type: pair.token1Type,
+                  lpTokenType: lpTokenType,
+                  reserve0Id: pair.reserve0Id,
+                  reserve1Id: pair.reserve1Id,
+                  price0VolCumulative: price0VolCumulative,
+                  price1VolCumulative: price1VolCumulative,
+                  volume0Cumulative: volume0Cumulative,
+                  volume1Cumulative: volume1Cumulative,
+                  kLast: updatedKLast, };
+  }
+
+  /**
+   * @title _updatePairPrice circuit
+   * @description Updates cumulative price and volume data for the pair.
+   *
+   * @remarks
+   * This internal circuit updates the cumulative price and volume statistics
+   * for the trading pair using VWAP (Volume Weighted Average Price).
+   * These values are used for price oracle functionality and tracking trading activity.
+   *
+   * @param {Pair} pair         - The current pair state.
+   * @param {QualifiedShieldedCoinInfo} reserve0 - The current reserve of token0.
+   * @param {QualifiedShieldedCoinInfo} reserve1 - The current reserve of token1.
+   * @param {Uint<128>} amount0In - The amount of token0 being traded in.
+   * @param {Uint<128>} amount1In - The amount of token1 being traded in.
+   *
+   * @returns {[Uint<128>, Uint<128>, Uint<128>, Uint<128>]} - Updated cumulativalus [price0VolCumulative, price1VolCumulative, volume0Cumulative, volume1Cumulative].
+   */
+  circuit _updatePairPrice(
+            pair: Pair,
+            reserve0: QualifiedShieldedCoinInfo,
+            reserve1: QualifiedShieldedCoinInfo,
+            amount0In: Uint<128>,
+            amount1In: Uint<128>,
+            ): [Uint<128>, Uint<128>, Uint<128>, Uint<128>] {
+    if (reserve0.value != 0 && reserve1.value != 0) {
+       const price0 = disclose(Uint128_div(reserve1.value, reserve0.value));
+       const price1 = disclose(Uint128_div(reserve0.value, reserve1.value));
+
+       const price0VolCumulative =
+                     Uint128_addChecked(
+                       pair.price0VolCumulative, Uint128_mulChecked(price0, amount0In));
+       const price1VolCumulative =
+                     Uint128_addChecked(
+                       pair.price1VolCumulative, Uint128_mulChecked(price1, amount1In));
+
+       const volume0Cumulative = Uint128_addChecked(pair.volume0Cumulative, amount0In);
+       const volume1Cumulative = Uint128_addChecked(pair.volume1Cumulative, amount1In);
+
+       return [price0VolCumulative, price1VolCumulative, volume0Cumulative, volume1Cumulative];
+    }
+    else {
+       return [pair.price0VolCumulative,
+               pair.price1VolCumulative,
+               pair.volume0Cumulative,
+               pair.volume1Cumulative];
+    }
+  }
+}

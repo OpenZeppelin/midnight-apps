@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/midnight-apps-contracts",
-  "version": "0.0.1-alpha.1",
+  "version": "0.0.1-alpha.2",
   "description": "OpenZeppelin Midnight Apps contracts",
   "keywords": [
     "openzeppelin",
@@ -44,6 +44,7 @@
     "compact:shielded-token": "compact-compiler $npm_package_config_compactVersion --dir shielded-token --hierarchical",
     "compact:structs": "compact-compiler $npm_package_config_compactVersion --dir structs --hierarchical",
     "compact:math": "compact-compiler $npm_package_config_compactVersion --dir math --hierarchical",
+    "compact:lunarswap": "compact-compiler $npm_package_config_compactVersion --dir lunarswap --hierarchical",
     "compact:fmt": "compact format --check",
     "compact:fmt:fix": "compact format --write",
     "build": "compact-builder $npm_package_config_compactVersion --hierarchical",
@@ -69,7 +70,8 @@
     "@types/node": "24.10.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.14"
+    "vitest": "^4.0.14",
+    "vitest-tsconfig-paths": "^3.4.1"
   },
   "dependencies": {
     "@midnight-ntwrk/midnight-js-network-id": "^2.1.0",
