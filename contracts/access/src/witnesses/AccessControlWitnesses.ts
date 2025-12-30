@@ -8,7 +8,7 @@ import type {
 import {
   AccessControl_Role,
   type Ledger,
-} from '../artifacts/Index/contract/index.cjs';
+} from '../../artifacts/Index/contract/index.cjs';
 import type { RoleValue } from '../types/role';
 import { maybeFromNullable } from '../utils/compactHelper';
 import { emptyMerkleTreePath } from '../utils/test';

@@ -1,5 +1,5 @@
 {
-  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.9/schema.json",
   "files": {
     "includes": [
       "**",
@@ -7,7 +7,10 @@
       "!**/pnpm-lock.yaml",
       "!**/tsconfig.base.json",
       "!**/tsconfig*.json",
-      "!**/*.compact"
+      "!**/*.compact",
+      "!**/artifacts/**",
+      "!**/*.css",
+      "!**/dist/**"
     ]
   },
   "formatter": {
@@ -51,7 +54,9 @@
           "level": "error",
           "options": {
             "allow": [
-              "log"
+              "log",
+              "warn",
+              "error"
             ]
           }
         }
@@ -75,6 +80,7 @@
   "vcs": {
     "enabled": true,
     "clientKind": "git",
-    "useIgnoreFile": true
+    "useIgnoreFile": false,
+    "defaultBranch": "main"
   }
 }

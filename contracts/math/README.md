@@ -253,8 +253,11 @@ pnpm test
 # Type checking
 pnpm types
 
-# Format code
-pnpm fmt
+# Check formatting and linting
+pnpm lint
+
+# Fix formatting and linting
+pnpm lint:fix
 
 # Lint code
 pnpm lint

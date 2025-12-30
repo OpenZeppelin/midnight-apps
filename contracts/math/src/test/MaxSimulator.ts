@@ -1,16 +1,16 @@
 import {
   type CircuitContext,
   type ContractState,
-  QueryContext,
   constructorContext,
+  QueryContext,
 } from '@midnight-ntwrk/compact-runtime';
 import { sampleContractAddress } from '@midnight-ntwrk/zswap';
-import type { U128, U256 } from '../artifacts/Index/contract/index.d.cts';
+import type { U128, U256 } from '../../artifacts/Index/contract/index.d.cts';
 import {
   Contract,
   type Ledger,
   ledger,
-} from '../artifacts/Max.mock/contract/index.cjs';
+} from '../../artifacts/Max.mock/contract/index.cjs';
 import type { IContractSimulator } from '../types/test';
 import { type MaxPrivateState, MaxWitnesses } from '../witnesses/Max';
 

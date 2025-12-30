@@ -1,4 +1,4 @@
-import type { U256 } from '../artifacts/Index/contract/index.d.cts';
+import type { U256 } from '../../artifacts/Index/contract/index.d.cts';
 import { MAX_UINT64 } from './consts';
 
 /**

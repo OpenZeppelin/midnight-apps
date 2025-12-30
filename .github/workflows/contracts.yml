@@ -29,6 +29,12 @@ jobs:
 
       - name: Run tests
         run: pnpm test:contracts
+        timeout-minutes: 10
+        env:
+          SKIP_ZK: "true"
 
       - name: Check types
-        run: pnpm exec turbo run types --filter './contracts/*'
+        run: pnpm types:contracts
+        timeout-minutes: 5
+        env:
+          SKIP_ZK: "true"

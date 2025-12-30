@@ -1,6 +1,6 @@
+import { HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { HelpCircle } from 'lucide-react';
 
 export function TokenRewards() {
   return (

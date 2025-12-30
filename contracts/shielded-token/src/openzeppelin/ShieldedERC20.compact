@@ -34,7 +34,7 @@ pragma language_version >= 0.18.0;
 module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
   import CompactStandardLibrary;
   import Utils prefix Utils_;
-  import "../../node_modules/@openzeppelin/midnight-apps-math/dist/Bytes32" prefix Bytes32_;
+  import "../../../math/src/Bytes32" prefix Bytes32_;
 
   // Public state
   export ledger _counter: Counter;
@@ -53,12 +53,12 @@ module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
    * @return {[]} - None.
    */
   export circuit initialize(
-    initNonce: Bytes<32>,
-    name_: Opaque<"string">,
-    symbol_: Opaque<"string">,
-    decimals_ :Uint<8>,
-    domain_: Bytes<32>
-  ): [] {
+                   initNonce: Bytes<32>,
+                   name_: Opaque<"string">,
+                   symbol_: Opaque<"string">,
+                   decimals_: Uint<8>,
+                   domain_: Bytes<32>
+                   ): [] {
     _nonce = disclose(initNonce);
     _domain = disclose(domain_);
     _name = disclose(name_);
@@ -123,19 +123,19 @@ module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
    * @param {amount} - The value of tokens minted.
    * @return {CoinInfo} - The description of the newly created coin.
    */
-   // TODO: if we use Uint<128> we get this compilation error: 
-   // no compatible function named mintToken is in scope at this call
-   //   one function is incompatible with the supplied argument types
-   //     supplied argument types:
-   //       (Bytes<32>, Uint<128>, Bytes<32>, struct Either<is_left: Boolean, left: struct
-   //       ZswapCoinPublicKey<bytes: Bytes<32>>, right: struct ContractAddress<bytes:
-   //       Bytes<32>>>)
-   //     declared argument types for function at <standard library>:
-   //       (Bytes<32>, Uint<64>, Bytes<32>, struct Either<is_left: Boolean, left: struct
-   //       ZswapCoinPublicKey<bytes: Bytes<32>>, right: struct ContractAddress<bytes:
-   //       Bytes<32>>>)
+  // TODO: if we use Uint<128> we get this compilation error: 
+  // no compatible function named mintToken is in scope at this call
+  //   one function is incompatible with the supplied argument types
+  //     supplied argument types:
+  //       (Bytes<32>, Uint<128>, Bytes<32>, struct Either<is_left: Boolean, left: struct
+  //       ZswapCoinPublicKey<bytes: Bytes<32>>, right: struct ContractAddress<bytes:
+  //       Bytes<32>>>)
+  //     declared argument types for function at <standard library>:
+  //       (Bytes<32>, Uint<64>, Bytes<32>, struct Either<is_left: Boolean, left: struct
+  //       ZswapCoinPublicKey<bytes: Bytes<32>>, right: struct ContractAddress<bytes:
+  //       Bytes<32>>>)
   export circuit mint(recipient: Either<ZswapCoinPublicKey, ContractAddress>, amount: Uint<64>): CoinInfo {
-    assert (!Utils_isKeyOrAddressZero(recipient), "ShieldedToken: invalid recipient");
+    assert(!Utils_isKeyOrAddressZero(recipient), "ShieldedToken: invalid recipient");
 
     // TODO: Is that correct here? Do we need to increment after minting? not before?
     _counter.increment(1);
@@ -163,8 +163,8 @@ module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
    * spending the output if available.
    */
   export circuit burn(coin: CoinInfo, amount: Uint<128>): SendResult {
-    assert (coin.color == _type, "ShieldedToken: token not created from this contract");
-    assert (coin.value >= amount, "ShieldedToken: insufficient token amount to burn");
+    assert(coin.color == _type, "ShieldedToken: token not created from this contract");
+    assert(coin.value >= amount, "ShieldedToken: insufficient token amount to burn");
 
     receive(disclose(coin));
     _totalSupply = _totalSupply - disclose(amount);
