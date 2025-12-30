@@ -1,10 +1,10 @@
 'use client';
 
+import Image from 'next/image';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import Image from 'next/image';
-import { useState } from 'react';
 
 interface SetDepositStepProps {
   pairData: any;

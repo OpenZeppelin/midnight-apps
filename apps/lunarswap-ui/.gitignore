@@ -1,0 +1,10 @@
+# Next.js build output
+.next
+out
+dist
+
+# TypeScript
+*.tsbuildinfo
+
+# Dependencies
+node_modules

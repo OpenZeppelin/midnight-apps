@@ -1,21 +1,21 @@
 // Export contract types and interfaces from ShieldedFungibleToken
 // biome-ignore lint/performance/noBarrelFile: entrypoint module
 export {
-  type Witnesses,
-  type ImpureCircuits,
-  type PureCircuits,
   type Circuits,
-  type Ledger,
+  Contract,
   type ContractReferenceLocations,
   contractReferenceLocations,
-  Contract,
+  type ImpureCircuits,
+  type Ledger,
   ledger,
+  type PureCircuits,
   pureCircuits,
-} from './artifacts/ShieldedFungibleToken/contract/index.cjs';
+  type Witnesses,
+} from '../artifacts/ShieldedFungibleToken/contract/index.cjs';
 
 // Export witnesses
 export {
+  type IShieldedFungibleTokenWitnesses,
   ShieldedFungibleTokenPrivateState,
   ShieldedFungibleTokenWitnesses,
-  type IShieldedFungibleTokenWitnesses,
 } from './witnesses/index.js';

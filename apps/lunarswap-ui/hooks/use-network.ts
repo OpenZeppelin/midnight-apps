@@ -1,5 +1,5 @@
-import { NetworkContext, type NetworkContextType } from '@/lib/network-context';
 import { useContext } from 'react';
+import { NetworkContext, type NetworkContextType } from '@/lib/network-context';
 
 /**
  * Retrieves the currently in-scope network provider.

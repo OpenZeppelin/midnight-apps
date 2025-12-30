@@ -1,9 +1,9 @@
 import {
   type CircuitContext,
   type ContractState,
+  constructorContext,
   QueryContext,
   type WitnessContext,
-  constructorContext,
 } from '@midnight-ntwrk/compact-runtime';
 import {
   sampleCoinPublicKey,
@@ -13,11 +13,11 @@ import {
   Contract,
   type Ledger,
   ledger,
-} from '../artifacts/Field254.mock/contract/index.cjs';
+} from '../../artifacts/Field254.mock/contract/index.cjs';
 import type {
   DivResultU256,
   U256,
-} from '../artifacts/Index/contract/index.d.cts';
+} from '../../artifacts/Index/contract/index.d.cts';
 import type { IContractSimulator } from '../types/test';
 import { Field254PrivateState, Field254Witnesses } from '../witnesses/Field254';
 

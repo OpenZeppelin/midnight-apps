@@ -2,15 +2,15 @@ import {
   type CircuitContext,
   type CoinPublicKey,
   type ContractState,
-  QueryContext,
   constructorContext,
+  QueryContext,
   sampleContractAddress,
 } from '@midnight-ntwrk/compact-runtime';
 import {
   type Ledger,
-  Contract as MockQueue,
   ledger,
-} from '../artifacts/Queue.mock/contract/index.cjs';
+  Contract as MockQueue,
+} from '../../artifacts/Queue.mock/contract/index.cjs';
 import type { IContractSimulator } from '../types/test';
 import {
   QueueContractPrivateState,

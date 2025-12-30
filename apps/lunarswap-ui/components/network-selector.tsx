@@ -1,5 +1,7 @@
 'use client';
 
+import { Check, ChevronDown, Wifi, WifiOff } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -9,8 +11,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useNetwork } from '@/hooks/use-network';
 import { useWallet } from '@/hooks/use-wallet';
-import { Check, ChevronDown, Wifi, WifiOff } from 'lucide-react';
-import { useEffect, useState } from 'react';
 
 export function NetworkSelector() {
   const {

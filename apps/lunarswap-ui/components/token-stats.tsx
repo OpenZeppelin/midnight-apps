@@ -1,5 +1,5 @@
-import { Card, CardContent } from '@/components/ui/card';
 import { ArrowDown, ArrowUp } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 
 export function TokenStats() {
   return (

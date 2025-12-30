@@ -1,10 +1,10 @@
 import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
-import type { Ledger } from '../artifacts/Field254/contract/index.cjs';
+import type { Ledger } from '../../artifacts/Field254/contract/index.cjs';
 import type {
   DivResultU128,
   DivResultU256,
   U256,
-} from '../artifacts/Index/contract/index.cjs';
+} from '../../artifacts/Index/contract/index.cjs';
 import type { EmptyState } from '../types/state';
 import { sqrtBigint } from '../utils/sqrtBigint';
 

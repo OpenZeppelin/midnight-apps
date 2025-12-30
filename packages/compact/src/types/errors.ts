@@ -8,12 +8,10 @@
  *
  * @prop {string} stdout stdout of a child process
  * @prop {string} stderr stderr of a child process
- * @prop {number} code exit code of a child process
  */
 export interface PromisifiedChildProcessError extends Error {
-  stdout: string;
-  stderr: string;
-  code?: number;
+	stdout: string;
+	stderr: string;
 }
 
 /**
@@ -24,9 +22,9 @@ export interface PromisifiedChildProcessError extends Error {
  * type is a PromisifiedChildProcessError
  */
 export function isPromisifiedChildProcessError(
-  error: unknown,
+	error: unknown,
 ): error is PromisifiedChildProcessError {
-  return error instanceof Error && 'stdout' in error && 'stderr' in error;
+	return error instanceof Error && "stdout" in error && "stderr" in error;
 }
 
 /**
@@ -38,15 +36,15 @@ export function isPromisifiedChildProcessError(
  * @extends Error
  */
 export class CompactCliNotFoundError extends Error {
-  /**
-   * Creates a new CompactCliNotFoundError instance.
-   *
-   * @param message - Error message describing the CLI availability issue
-   */
-  constructor(message: string) {
-    super(message);
-    this.name = 'CompactCliNotFoundError';
-  }
+	/**
+	 * Creates a new CompactCliNotFoundError instance.
+	 *
+	 * @param message - Error message describing the CLI availability issue
+	 */
+	constructor(message: string) {
+		super(message);
+		this.name = "CompactCliNotFoundError";
+	}
 }
 
 /**
@@ -58,23 +56,20 @@ export class CompactCliNotFoundError extends Error {
  * @extends Error
  */
 export class CompilationError extends Error {
-  public readonly file?: string;
-  public readonly cause?: unknown;
+	public readonly file?: string;
 
-  /**
-   * Creates a new CompilationError instance.
-   *
-   * @param message - Error message describing the compilation failure
-   * @param file - Optional relative path to the file that failed to compile
-   * @param cause - Optional cause of the error
-   */
-  constructor(message: string, file?: string, cause?: unknown) {
-    super(message);
+	/**
+	 * Creates a new CompilationError instance.
+	 *
+	 * @param message - Error message describing the compilation failure
+	 * @param file - Optional relative path to the file that failed to compile
+	 */
+	constructor(message: string, file?: string, cause?: unknown) {
+		super(message, { cause });
 
-    this.file = file;
-    this.cause = cause;
-    this.name = 'CompilationError';
-  }
+		this.file = file;
+		this.name = "CompilationError";
+	}
 }
 
 /**
@@ -86,17 +81,17 @@ export class CompilationError extends Error {
  * @extends Error
  */
 export class DirectoryNotFoundError extends Error {
-  public readonly directory: string;
+	public readonly directory: string;
 
-  /**
-   * Creates a new DirectoryNotFoundError instance.
-   *
-   * @param message - Error message describing the directory issue
-   * @param directory - The directory path that was not found
-   */
-  constructor(message: string, directory: string) {
-    super(message);
-    this.directory = directory;
-    this.name = 'DirectoryNotFoundError';
-  }
+	/**
+	 * Creates a new DirectoryNotFoundError instance.
+	 *
+	 * @param message - Error message describing the directory issue
+	 * @param directory - The directory path that was not found
+	 */
+	constructor(message: string, directory: string) {
+		super(message);
+		this.directory = directory;
+		this.name = "DirectoryNotFoundError";
+	}
 }

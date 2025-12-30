@@ -6,7 +6,7 @@ import type {
   Ledger,
   U128,
   U256,
-} from '../artifacts/Index/contract/index.cjs';
+} from '../../artifacts/Index/contract/index.cjs';
 
 export interface IUint64Witnesses<P> {
   sqrtU64Locally(
