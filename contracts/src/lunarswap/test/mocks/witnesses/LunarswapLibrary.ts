@@ -1,5 +1,5 @@
 import type { Witnesses } from '@artifacts/lunarswap/test/mocks/contracts/LunarswapLibrary.mock/contract/index.js';
-import { wit_bytesToU256 } from '@src/math/witnesses/wit_bytesToU256.js';
+import { wit_bytes32ToU256 } from '@src/math/witnesses/wit_bytes32ToU256.js';
 import { wit_divU128 } from '@src/math/witnesses/wit_divU128.js';
 import { wit_divUint128 } from '@src/math/witnesses/wit_divUint128.js';
 
@@ -31,8 +31,8 @@ export const LunarswapLibraryWitnesses =
     wit_divU128(_context, a, b) {
       return [{}, wit_divU128(a, b)];
     },
-    wit_bytesToU256(_context, bytes) {
-      return [{}, wit_bytesToU256(bytes)];
+    wit_bytes32ToU256(_context, bytes) {
+      return [{}, wit_bytes32ToU256(bytes)];
     },
     wit_divUint128(_context, a, b) {
       return [{}, wit_divUint128(a, b)];

@@ -28,10 +28,9 @@ pragma language_version >= 0.19.0;
  *   - max(): Returns the larger of two `Uint<64>` numbers.
  * - Conversion:
  *   - toVector(value): Converts Uint<64> to Vector<8, Uint<8>> (little-endian)
- *   - toBytes(value): Converts Uint<64> to Bytes<8> (little-endian)
  */
 module Uint64 {
-  import { toUint64, toBytes } from "./Vector8" prefix Vector8_;
+  import { toUint64 } from "./Vector8" prefix Vector8_;
   /**
    * @dev Struct containing the quotient and remainder from a division operation
    */
@@ -143,26 +142,6 @@ module Uint64 {
     assert(reconstructed == value, "Uint64: toVector verification failed");
 
     return vec;
-  }
-
-  /**
-   * @title toBytes circuit
-   * @description Converts a Uint<64> to a Bytes<8> using little-endian byte ordering.
-   *
-   * @remarks
-   * This circuit converts a 64-bit unsigned integer to an 8-byte array.
-   * The conversion is done by first unpacking to a vector via `toVector`,
-   * then casting to `Bytes<8>` via `Vector8.toBytes`.
-   *
-   * @param {Uint<64>} value - The 64-bit value to convert.
-   *
-   * @throws {Error} "Uint64: toVector verification failed" if witness verification fails.
-   *
-   * @returns {Bytes<8>} - The 8-byte array representation.
-   */
-  export circuit toBytes(value: Uint<64>): Bytes<8> {
-    const vec = toVector(value);
-    return Vector8_toBytes(vec);
   }
 
   /**

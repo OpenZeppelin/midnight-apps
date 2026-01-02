@@ -6,22 +6,24 @@ pragma language_version >= 0.19.0;
 /**
  * @title Uint256 module
  *
- * @description A utility module providing mathematical operations for 256-bit unsigned integers
- * using the U256 struct, which represents numbers as high * 2^128 + low, where high and low are
- * 128-bit unsigned integers (Uint<128>) in [0, 2^128 - 1]. The module supports a range of
- * operations including comparisons, arithmetic, division, square root, and utility functions.
- * All operations work directly with U256 struct inputs.
+ * @description A utility module providing mathematical operations and conversions for 256-bit
+ * unsigned integers using the U256 struct. The U256 type represents numbers as
+ * `high * 2^128 + low`, where high and low are U128 structs (each containing two Uint<64> limbs).
  *
  * @remarks
- * Supported Mathematical Operations:
+ * Supported Operations:
  * - Comparisons:
  *   - eq(): Checks if two 256-bit numbers are equal.
  *   - lt(): Checks if one 256-bit number is less than another.
  *   - lte(): Checks if one 256-bit number is less than or equal to another.
  *   - gt(): Checks if one 256-bit number is greater than another.
  *   - gte(): Checks if one 256-bit number is greater than or equal to another.
+ * - Conversions:
+ *   - toBytes(value): Converts U256 to Bytes<32> (little-endian)
+ *   - toVector(value): Converts U256 to Vector<32, Uint<8>> (little-endian)
  */
 module Uint256 {
+  import { toVector } from Uint64 prefix Uint64_;
   import { MAX_U128, eqU128, ltU128, gtU128 } from Uint128 prefix Uint128_;
 
   // U256 type is imported from the types module to avoid cyclic dependencies
@@ -60,32 +62,81 @@ module Uint256 {
   }
 
   /**
-    * @title toBytes circuit
-    * @description Converts a U256 struct to a 32-byte array using little-endian byte ordering.
-    *
-    * @remarks
-    * This circuit converts a U256 struct to a Bytes<32> value by casting each Uint<64> limb
-    * to an 8-byte array and concatenating them in little-endian order.
-    *
-    * Byte layout: [low.low][low.high][high.low][high.high]
-    * - Bytes 0-7: least significant limb (low.low)
-    * - Bytes 8-15: second limb (low.high)
-    * - Bytes 16-23: third limb (high.low)
-    * - Bytes 24-31: most significant limb (high.high)
-    *
-   * @circuitInfo k=14, rows=14786
+   * @title toVector circuit
+   * @description Converts a U256 to a Vector<32, Uint<8>> using little-endian byte ordering.
    *
-   * @param {U256} value - The U256 struct to convert.
+   * @remarks
+   * This circuit unpacks a 256-bit unsigned integer into a 32-element vector of bytes.
+   * Each 64-bit limb of the U256 is unpacked via `Uint64.toVector`, then the bytes
+   * are assembled into the final vector.
    *
-   * @returns {Bytes<32>} The corresponding 32-byte array (little-endian).
+   * Limb unpacking order (little-endian):
+   * - low.low   → bytes 0-7   (least significant)
+   * - low.high  → bytes 8-15
+   * - high.low  → bytes 16-23
+   * - high.high → bytes 24-31 (most significant)
+   *
+   * @param {U256} value - The 256-bit value to convert.
+   *
+   * @returns {Vector<32, Uint<8>>} - The 32-element byte vector representation.
    */
-  export pure circuit toBytes(value: U256): Bytes<32> {
-    const b0 = value.low.low as Bytes<8>; // least significant
-    const b1 = value.low.high as Bytes<8>;
-    const b2 = value.high.low as Bytes<8>;
-    const b3 = value.high.high as Bytes<8>; // most significant
+  export circuit toVector(value: U256): Vector<32, Uint<8>> {
+    // Unpack each limb into 8 bytes
+    const [v0, v1, v2, v3, v4, v5, v6, v7] = Uint64_toVector(value.low.low);
+    const [v8, v9, v10, v11, v12, v13, v14, v15] = Uint64_toVector(value.low.high);
+    const [v16, v17, v18, v19, v20, v21, v22, v23] = Uint64_toVector(value.high.low);
+    const [v24, v25, v26, v27, v28, v29, v30, v31] = Uint64_toVector(value.high.high);
 
-    return Bytes[...b0, ...b1, ...b2, ...b3];
+    return [v0,
+            v1,
+            v2,
+            v3,
+            v4,
+            v5,
+            v6,
+            v7,
+            v8,
+            v9,
+            v10,
+            v11,
+            v12,
+            v13,
+            v14,
+            v15,
+            v16,
+            v17,
+            v18,
+            v19,
+            v20,
+            v21,
+            v22,
+            v23,
+            v24,
+            v25,
+            v26,
+            v27,
+            v28,
+            v29,
+            v30,
+            v31];
+  }
+
+  /**
+   * @title toBytes circuit
+   * @description Converts a U256 to a Bytes<32> using little-endian byte ordering.
+   *
+   * @remarks
+   * This circuit converts a 256-bit unsigned integer to a 32-byte array.
+   * The conversion is done by first unpacking the U256 into a vector via
+   * `toVector`, then casting the vector to `Bytes<32>`.
+   *
+   * @param {U256} value - The 256-bit value to convert.
+   *
+   * @returns {Bytes<32>} - The 32-byte array representation.
+   */
+  export circuit toBytes(value: U256): Bytes<32> {
+    const vec = toVector(value);
+    return vec as Bytes<32>;
   }
 
   /**

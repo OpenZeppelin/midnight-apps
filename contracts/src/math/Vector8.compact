@@ -1,0 +1,78 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/Vector8.compact)
+
+pragma language_version >= 0.19.0;
+
+/**
+ * @title Vector8 module
+ * @description A utility module providing conversions from Vector<8, Uint<8>> to Uint<64>
+ * using little-endian (LE) byte ordering.
+ *
+ * @remarks
+ * Byte ordering convention (little-endian):
+ * - Element 0 is the least significant byte, element 7 is the most significant.
+ * - This mirrors the pattern of Vector32 ↔ U256 conversions.
+ *
+ * Supported circuits:
+ * - toUint64(vec): Converts Vector<8, Uint<8>> to Uint<64>
+ */
+module Vector8 {
+  /**
+   * @title toUint64 circuit
+   * @description Converts a Vector<8, Uint<8>> to a Uint<64> using pure arithmetic.
+   *
+   * @remarks
+   * This circuit converts an 8-element vector of bytes to a 64-bit unsigned integer
+   * using little-endian byte ordering (element 0 is the LSB, element 7 is the MSB).
+   *
+   * The explicit type annotation `const result: Uint<64>` forces the entire arithmetic
+   * expression to be evaluated in a Uint<64> context, avoiding the need for explicit
+   * type casts on each operand.
+   *
+   * Each multiplier is a power of 256 (2^8), positioning each byte at its correct bit offset:
+   *   b0 * 256^0 = b0 * 1                   (bits 0-7)
+   *   b1 * 256^1 = b1 * 256                 (bits 8-15)
+   *   b2 * 256^2 = b2 * 65536               (bits 16-23)
+   *   b3 * 256^3 = b3 * 16777216            (bits 24-31)
+   *   b4 * 256^4 = b4 * 4294967296          (bits 32-39)
+   *   b5 * 256^5 = b5 * 1099511627776       (bits 40-47)
+   *   b6 * 256^6 = b6 * 281474976710656     (bits 48-55)
+   *   b7 * 256^7 = b7 * 72057594037927936   (bits 56-63)
+   *
+   * @param {Vector<8, Uint<8>>} vec - The vector of 8 bytes to convert.
+   *
+   * @returns {Uint<64>} - The packed 64-bit value.
+   */
+  export pure circuit toUint64(vec: Vector<8, Uint<8>>): Uint<64> {
+    const [b0, b1, b2, b3, b4, b5, b6, b7] = vec;
+    // The explicit Uint<64> type annotation ensures the arithmetic is evaluated
+    // in a 64-bit context, eliminating the need for explicit casts.
+    const result: Uint<64> =
+      b0 +                        // 256^0 = 1
+      b1 * 256 +                  // 256^1
+      b2 * 65536 +                // 256^2
+      b3 * 16777216 +             // 256^3
+      b4 * 4294967296 +           // 256^4
+      b5 * 1099511627776 +        // 256^5
+      b6 * 281474976710656 +      // 256^6
+      b7 * 72057594037927936;     // 256^7
+
+    return result;
+  }
+
+  /**
+   * @title toBytes circuit
+   * @description Converts a Vector<8, Uint<8>> to a Bytes<8> using pure arithmetic.
+   *
+   * @remarks
+   * This circuit converts an 8-element vector of bytes to a 8-byte array
+   * using little-endian byte ordering.
+   *
+   * @param {Vector<8, Uint<8>>} vec - The vector of 8 bytes to convert.
+   *
+   * @returns {Bytes<8>} - The 8-byte array.
+   */
+  export circuit toBytes(vec: Vector<8, Uint<8>>): Bytes<8> {
+    return Bytes[...vec];
+  }
+}

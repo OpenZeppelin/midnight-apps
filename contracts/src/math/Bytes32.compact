@@ -15,6 +15,7 @@ pragma language_version >= 0.19.0;
  *
  * Supported circuits:
  * - toU256(value): Converts Bytes<32> to U256 using little-endian ordering
+ * - toVector(bytes): Converts Bytes<32> to Vector<32, Uint<8>>
  * - eq(a, b): Checks if two Bytes<32> are equal
  * - lt(a, b): Checks if a < b
  * - lte(a, b): Checks if a <= b
@@ -33,7 +34,13 @@ module Bytes32 {
   * @title bytesToU256 witness
   * @description Converts Bytes<32> to U256 off-chain (little-endian).
   */
-  witness wit_bytesToU256(bytes: Bytes<32>): U256;
+  witness wit_bytes32ToU256(bytes: Bytes<32>): U256;
+
+  /**
+  * @title bytesToVector witness
+  * @description Converts Bytes<32> to Vector<32, Uint<8>> off-chain.
+  */
+  witness wit_bytes32ToVector(bytes: Bytes<32>): Vector<32, Uint<8>>;
 
   /**
   * @title fromBytes circuit (witness-optimized)
@@ -55,13 +62,42 @@ module Bytes32 {
   * @returns {U256} The U256 decimal representation.
   */
   export circuit toU256(value: Bytes<32>): U256 {
-    const result = wit_bytesToU256(value);
+    const result = wit_bytes32ToU256(value);
 
     // Verify: convert back to bytes and check equality
     const reconstructed = Uint256_toBytes(result);
     assert(reconstructed == value, "Bytes32: fromBytes verification failed");
 
     return result;
+  }
+
+  /**
+   * @title toVector circuit
+   * @description Converts a Bytes<32> to a Vector<32, Uint<8>> using witness verification.
+   *
+   * @remarks
+   * This circuit converts a 32-byte array to a vector of 32 individual bytes.
+   * The conversion is performed off-chain via a witness, then verified on-chain
+   * by casting the vector back to bytes and checking equality.
+   *
+   * The verification uses the cheaper direction (vector to bytes cast) to minimize
+   * circuit complexity.
+   *
+   * @param {Bytes<32>} bytes - The 32-byte array to convert.
+   *
+   * @throws {Error} "toVector: verification failed" if the witness result doesn't match input.
+   *
+   * @returns {Vector<32, Uint<8>>} - The vector of 32 individual bytes.
+   */
+  export circuit toVector(bytes: Bytes<32>): Vector<32, Uint<8>> {
+    // Get vector from witness (computed off-chain)
+    const vec = wit_bytes32ToVector(bytes);
+
+    // Verify by casting back (cheaper direction!)
+    const reconstructed = vec as Bytes<32>;
+    assert(reconstructed == bytes, "toVector: verification failed");
+
+    return vec;
   }
 
   /**

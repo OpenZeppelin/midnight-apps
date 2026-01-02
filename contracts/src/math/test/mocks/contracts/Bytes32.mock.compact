@@ -22,6 +22,11 @@ export circuit toU256(value: Bytes<32>): U256 {
   return disclose(Bytes32_toU256(value));
 }
 
+export circuit toVector(bytes: Bytes<32>): Vector<32, Uint<8>> {
+  _isCircuitInfoExposed = true;
+  return disclose(Bytes32_toVector(bytes));
+}
+
 export circuit eq(a: Bytes<32>, b: Bytes<32>): Boolean {
   _isCircuitInfoExposed = true;
   return Bytes32_eq(a, b);

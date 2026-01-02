@@ -1,0 +1,39 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/test/Vector.mock.compact)
+
+pragma language_version >= 0.19.0;
+
+import CompactStandardLibrary;
+
+import { U128 } from "../../../types/TU128";
+
+import { U256 } from "../../../types/TU256";
+
+import "../../../Vector8" prefix Vector8_;
+import "../../../Bytes8" prefix Bytes8_;
+import "../../../Uint64" prefix Uint64_;
+
+export { U128, U256 };
+
+// Helper for test suite: toggling this variable activates circuit metadata reporting.
+// Only increases circuit size by 3 rows per exposed circuit.
+ledger _isCircuitInfoExposed: Boolean;
+
+// Vector8 circuits
+export circuit vecToUint64(vec: Vector<8, Uint<8>>): Uint<64> {
+  return Vector8_toUint64(vec);
+}
+
+// Uint64 circuits
+export circuit toVector(value: Uint<64>): Vector<8, Uint<8>> {
+  return Uint64_toVector(value);
+}
+
+// Bytes8 circuits
+export circuit bytesToUint64(bytes: Bytes<8>): Uint<64> {
+  return Bytes8_toUint64(bytes);
+}
+
+export circuit toBytes8(value: Uint<64>): Bytes<8> {
+  return Bytes8_toBytes8(value);
+}

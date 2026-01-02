@@ -1,6 +1,6 @@
 import type { Witnesses } from '../../../../../artifacts/math/test/mocks/contracts/Uint64.mock/contract/index.js';
-import { wit_divU64 } from '../../../witnesses/wit_divU64.js';
-import { wit_sqrtU64 } from '../../../witnesses/wit_sqrtU64.js';
+import { wit_divU64 } from '../../../witnesses/wit_divUint64.js';
+import { wit_sqrtUint64 } from '../../../witnesses/wit_sqrtUint64.js';
 
 /**
  * @description Represents the private state of the Uint64 module.
@@ -12,8 +12,8 @@ export type Uint64PrivateState = Record<string, never>;
  * @description Factory function creating witness implementations for Math module operations.
  */
 export const Uint64Witnesses = (): Witnesses<Uint64PrivateState> => ({
-  wit_sqrtU64(_context, radicand) {
-    return [{}, wit_sqrtU64(radicand)];
+  wit_sqrtUint64(_context, radicand) {
+    return [{}, wit_sqrtUint64(radicand)];
   },
 
   wit_divU64(_context, dividend, divisor) {

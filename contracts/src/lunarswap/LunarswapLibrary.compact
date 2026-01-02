@@ -77,8 +77,8 @@ module LunarswapLibrary {
     const used = C { ...coin, value: amount, nonce: evolveNonce(0, coin.nonce) };
     // Index 1: derive nonce for the remainder portion
     const remainder = C { ...coin,
-                          value: Uint128_sub(coin.value, amount),
-                          nonce: evolveNonce(1, coin.nonce) };
+                             value: Uint128_sub(coin.value, amount),
+                             nonce: evolveNonce(1, coin.nonce) };
     return SplitCoinResult<C> { used, remainder };
   }
 
@@ -135,9 +135,9 @@ module LunarswapLibrary {
    */
   export circuit sortCoinsAndAmountsAsc(
                    tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo, amountA: Uint<128>, amountB: Uint<128>): [ShieldedCoinInfo,
-                                                                                                    ShieldedCoinInfo,
-                                                                                                    Uint<128>,
-                                                                                                    Uint<128>] {
+                                                                                                     ShieldedCoinInfo,
+                                                                                                     Uint<128>,
+                                                                                                     Uint<128>] {
     const [token0, token1] = sortCoinsAsc<ShieldedCoinInfo>(tokenA, tokenB);
     const amount0 = token0 == tokenA ? amountA : amountB;
     const amount1 = token0 == tokenA ? amountB : amountA;
@@ -225,7 +225,7 @@ module LunarswapLibrary {
    * @returns {Bytes<32>} - The unique reserve ID hash.
    */
   export circuit getReserveId(type0: Bytes<32>, type1: Bytes<32>): Bytes<32> {
-    return persistentHash<Vector<3, Bytes<32>>>([pad(32, "reserve-id"), type0, type1]);
+       return persistentHash<Vector<3, Bytes<32>>>([pad(32, "reserve-id"), type0, type1]);
   }
 
   /**

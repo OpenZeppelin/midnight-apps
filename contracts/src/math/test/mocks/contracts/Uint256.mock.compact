@@ -20,9 +20,18 @@ export circuit ZERO_U256(): U256 {
   return Uint256_ZERO_U256();
 }
 
+export circuit toBytesExpensive(value: U256): Bytes<32> {
+  _isCircuitInfoExposed = true;
+  return disclose(Uint256_toBytesExpensive(value));
+}
+
 export circuit toBytes(value: U256): Bytes<32> {
   _isCircuitInfoExposed = true;
   return disclose(Uint256_toBytes(value));
+}
+export circuit toVector(value: U256): Vector<32, Uint<8>> {
+  _isCircuitInfoExposed = true;
+  return disclose(Uint256_toVector(value));
 }
 
 export circuit eq(a: U256, b: U256): Boolean {

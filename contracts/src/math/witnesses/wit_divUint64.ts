@@ -6,7 +6,10 @@ import type { DivResultU64 } from './types.js';
  * @param divisor - The divisor.
  * @returns An object containing the quotient and remainder.
  */
-export const wit_divU64 = (dividend: bigint, divisor: bigint): DivResultU64 => {
+export const wit_divUint64 = (
+  dividend: bigint,
+  divisor: bigint,
+): DivResultU64 => {
   const quotient = dividend / divisor;
   const remainder = dividend % divisor;
   return { quotient, remainder };

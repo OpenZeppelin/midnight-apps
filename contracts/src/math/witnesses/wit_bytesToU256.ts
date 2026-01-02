@@ -14,7 +14,7 @@ import type { U256 } from './types.js';
  * - bytes[16..23] → high.low  (next 64 bits)
  * - bytes[24..31] → high.high (most significant 64 bits)
  */
-export const wit_bytesToU256 = (bytes: Uint8Array): U256 => {
+export const wit_bytes32ToU256 = (bytes: Uint8Array): U256 => {
   const lowLow =
     BigInt(bytes[0]) |
     (BigInt(bytes[1]) << 8n) |

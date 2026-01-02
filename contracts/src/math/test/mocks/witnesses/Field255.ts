@@ -1,5 +1,5 @@
 import type { Witnesses } from '../../../../../artifacts/math/test/mocks/contracts/Field255.mock/contract/index.js';
-import { wit_bytesToU256 } from '../../../witnesses/wit_bytesToU256.js';
+import { wit_bytes32ToU256 } from '../../../witnesses/wit_bytes32ToU256.js';
 
 /**
  * @description Represents the private state of the Field255 module.
@@ -32,7 +32,7 @@ export const Field255Witnesses = (): Witnesses<Field255PrivateState> => ({
    * @param bytes - The 32-byte array to convert.
    * @returns A tuple of [privateState, U256].
    */
-  wit_bytesToU256(_context, bytes) {
-    return [{}, wit_bytesToU256(bytes)];
+  wit_bytes32ToU256(_context, bytes) {
+    return [{}, wit_bytes32ToU256(bytes)];
   },
 });

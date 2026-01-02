@@ -1,0 +1,79 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/Vector32.compact)
+
+pragma language_version >= 0.19.0;
+
+import CompactStandardLibrary;
+
+/**
+ * @title Vector32 module
+ * @description A utility module providing conversions from Vector<32, Uint<8>> to U256
+ * using little-endian (LE) byte ordering.
+ *
+ * @remarks
+ * Byte ordering convention (little-endian):
+ * - Element 0 is the least significant byte, element 31 is the most significant.
+ * - This mirrors the pattern of Vector8 ↔ Uint<64> conversions.
+ *
+ * Supported circuits:
+ * - toU256(vec): Converts Vector<32, Uint<8>> to U256
+ * - toBytes(vec): Converts Vector<32, Uint<8>> to Bytes<32>
+ *
+ * For the reverse conversion (U256 to Vector), see Uint256.toVector.
+ */
+module Vector32 {
+  import { U128 } from "./types/TU128";
+  import { U256 } from "./types/TU256";
+  import { toUint64 } from "./Vector8" prefix Vector8_;
+
+  /**
+   * @title toU256 circuit
+   * @description Converts a Vector<32, Uint<8>> to a U256 using pure arithmetic.
+   *
+   * @remarks
+   * This circuit converts a 32-element vector of bytes to a 256-bit unsigned integer
+   * using little-endian byte ordering. The vector is split into four 8-byte chunks,
+   * each converted to a Uint<64> limb via Vector8.toUint64.
+   *
+   * Limb packing order (little-endian):
+   * - v0-v7   → low.low   (least significant)
+   * - v8-v15  → low.high
+   * - v16-v23 → high.low
+   * - v24-v31 → high.high (most significant)
+   *
+   * @param {Vector<32, Uint<8>>} vec - The vector of 32 bytes to convert.
+   *
+   * @returns {U256} - The 256-bit unsigned integer.
+   */
+  export circuit toU256(vec: Vector<32, Uint<8>>): U256 {
+    const [v0, v1, v2, v3, v4, v5, v6, v7,
+           v8, v9, v10, v11, v12, v13, v14, v15,
+           v16, v17, v18, v19, v20, v21, v22, v23,
+           v24, v25, v26, v27, v28, v29, v30, v31] = vec;
+
+    // Pack into 4 limbs (little-endian) using Vector8.toUint64
+    const lowLow = Vector8_toUint64([v0, v1, v2, v3, v4, v5, v6, v7]);
+    const lowHigh = Vector8_toUint64([v8, v9, v10, v11, v12, v13, v14, v15]);
+    const highLow = Vector8_toUint64([v16, v17, v18, v19, v20, v21, v22, v23]);
+    const highHigh = Vector8_toUint64([v24, v25, v26, v27, v28, v29, v30, v31]);
+
+    return disclose(U256 { low: U128 { low: lowLow, high: lowHigh },
+                           high: U128 { low: highLow, high: highHigh } });
+  }
+
+  /**
+   * @title toBytes circuit
+   * @description Converts a Vector<32, Uint<8>> to a Bytes<32>.
+   *
+   * @remarks
+   * This circuit converts a 32-element vector of bytes to a 32-byte array
+   * by spreading the vector elements into a Bytes literal.
+   *
+   * @param {Vector<32, Uint<8>>} vec - The vector of 32 bytes to convert.
+   *
+   * @returns {Bytes<32>} - The 32-byte array.
+   */
+  export circuit toBytes(vec: Vector<32, Uint<8>>): Bytes<32> {
+    return Bytes[...vec];
+  }
+}

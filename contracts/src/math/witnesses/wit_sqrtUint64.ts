@@ -5,6 +5,6 @@ import { sqrtBigint } from '../utils/sqrtBigint.js';
  * @param radicand - The value to compute the square root of.
  * @returns The floor of the square root as a 32-bit result.
  */
-export const wit_sqrtU64 = (radicand: bigint): bigint => {
+export const wit_sqrtUint64 = (radicand: bigint): bigint => {
   return sqrtBigint(radicand);
 };
