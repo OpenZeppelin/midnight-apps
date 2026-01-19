@@ -29,8 +29,6 @@ jobs:
 
       - name: Setup Environment
         uses: ./.github/actions/setup
-        with:
-          skip-compact: "true"
 
       - name: Lint and Format
         run: pnpm lint:ci
