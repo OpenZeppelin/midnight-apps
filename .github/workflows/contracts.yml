@@ -6,11 +6,12 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   pipeline:
     runs-on: ubuntu-24.04
-    permissions:
-      contents: read
     timeout-minutes: 15
 
     steps:
