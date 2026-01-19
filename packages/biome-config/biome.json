@@ -10,7 +10,8 @@
       "!**/*.compact",
       "!**/artifacts/**",
       "!**/*.css",
-      "!**/dist/**"
+      "!**/dist/**",
+      "!**/.next/**"
     ]
   },
   "formatter": {
