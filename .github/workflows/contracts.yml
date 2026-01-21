@@ -28,6 +28,9 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/setup
 
+      - name: Clear stale ZK params cache
+        run: rm -rf ~/.cache/midnight/zk-params
+
       - name: Compile contracts (full ZK IR)
         run: pnpm compact
         timeout-minutes: 25
