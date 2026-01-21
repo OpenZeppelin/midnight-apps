@@ -28,12 +28,33 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/setup
 
-      - name: Clear stale ZK params cache
-        run: rm -rf ~/.cache/midnight/zk-params
-
-      - name: Compile contracts (full ZK IR)
-        run: pnpm compact
+      - name: Compile contracts (with retry on hash mismatch)
+        shell: bash
         timeout-minutes: 25
+        run: |
+          set -euo pipefail
+
+          compile() {
+            echo "⚙️ Running Compact compilation..."
+            if ! output=$(pnpm compact -- --concurrency=1 2>&1); then
+              echo "$output"
+              echo "❌ Compilation failed."
+
+              if echo "$output" | grep -q "Hash mismatch" && [ -d "$HOME/.cache/midnight/zk-params" ]; then
+                echo "⚠️ Hash mismatch detected *and* zk-params exists. Removing cache..."
+                rm -rf "$HOME/.cache/midnight/zk-params"
+                echo "::notice::♻️ Retrying compilation after clearing zk-params..."
+                pnpm compact -- --concurrency=1 || { echo "::error::❌ Retry also failed."; exit 1; }
+              else
+                echo "🚫 Compilation failed for another reason or zk-params missing. No retry."
+                exit 1
+              fi
+            else
+              echo "$output"
+            fi
+          }
+
+          compile
 
   test:
     runs-on: ubuntu-24.04
