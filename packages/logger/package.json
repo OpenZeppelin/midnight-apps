@@ -2,7 +2,10 @@
   "name": "@openzeppelin/midnight-apps-logger",
   "private": true,
   "version": "0.0.1",
-  "keywords": ["logger", "pino"],
+  "keywords": [
+    "logger",
+    "pino"
+  ],
   "author": "",
   "license": "MIT",
   "description": "Singleton logger for Midnight apps",
@@ -22,6 +25,9 @@
     "build": "tsc -p .",
     "build:fast": "tsc -p .",
     "types": "tsc -p tsconfig.json --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check . --write",
+    "lint:ci": "biome ci . --changed --since=main --no-errors-on-unmatched",
     "clean": "git clean -fXd"
   },
   "devDependencies": {
@@ -35,4 +41,3 @@
     "pino-pretty": "^13.0.0"
   }
 }
-

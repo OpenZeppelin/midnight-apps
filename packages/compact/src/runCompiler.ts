@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-import chalk from "chalk";
-import ora, { type Ora } from "ora";
-import { CompactCompiler } from "./Compiler.js";
+import chalk from 'chalk';
+import ora, { type Ora } from 'ora';
+import { CompactCompiler } from './Compiler.js';
 import {
-	type CompilationError,
-	isPromisifiedChildProcessError,
-} from "./types/errors.js";
+  type CompilationError,
+  isPromisifiedChildProcessError,
+} from './types/errors.js';
 
 /**
  * Executes the Compact compiler CLI with improved error handling and user feedback.
@@ -44,16 +44,16 @@ import {
  * ```
  */
 async function runCompiler(): Promise<void> {
-	const spinner = ora(chalk.blue("[COMPILE] Compact compiler started")).info();
+  const spinner = ora(chalk.blue('[COMPILE] Compact compiler started')).info();
 
-	try {
-		const args = process.argv.slice(2);
-		const compiler = CompactCompiler.fromArgs(args);
-		await compiler.compile();
-	} catch (error) {
-		handleError(error, spinner);
-		process.exit(1);
-	}
+  try {
+    const args = process.argv.slice(2);
+    const compiler = CompactCompiler.fromArgs(args);
+    await compiler.compile();
+  } catch (error) {
+    handleError(error, spinner);
+    process.exit(1);
+  }
 }
 
 /**
@@ -72,156 +72,156 @@ async function runCompiler(): Promise<void> {
  * @param spinner - Ora spinner instance for consistent UI messaging
  */
 function handleError(error: unknown, spinner: Ora): void {
-	// CompactCliNotFoundError
-	if (error instanceof Error && error.name === "CompactCliNotFoundError") {
-		spinner.fail(chalk.red(`[COMPILE] Error: ${error.message}`));
-		spinner.info(
-			chalk.blue(
-				`[COMPILE] Install with: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh | sh`,
-			),
-		);
-		return;
-	}
+  // CompactCliNotFoundError
+  if (error instanceof Error && error.name === 'CompactCliNotFoundError') {
+    spinner.fail(chalk.red(`[COMPILE] Error: ${error.message}`));
+    spinner.info(
+      chalk.blue(
+        `[COMPILE] Install with: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh | sh`,
+      ),
+    );
+    return;
+  }
 
-	// DirectoryNotFoundError
-	if (error instanceof Error && error.name === "DirectoryNotFoundError") {
-		spinner.fail(chalk.red(`[COMPILE] Error: ${error.message}`));
-		showAvailableDirectories();
-		return;
-	}
+  // DirectoryNotFoundError
+  if (error instanceof Error && error.name === 'DirectoryNotFoundError') {
+    spinner.fail(chalk.red(`[COMPILE] Error: ${error.message}`));
+    showAvailableDirectories();
+    return;
+  }
 
-	// CompilationError
-	if (error instanceof Error && error.name === "CompilationError") {
-		// The compilation error details (file name, stdout/stderr) are already displayed
-		// by `compileFile`; therefore, this just handles the final err state
-		const compilationError = error as CompilationError;
-		spinner.fail(
-			chalk.red(
-				`[COMPILE] Compilation failed for file: ${compilationError.file || "unknown"}`,
-			),
-		);
+  // CompilationError
+  if (error instanceof Error && error.name === 'CompilationError') {
+    // The compilation error details (file name, stdout/stderr) are already displayed
+    // by `compileFile`; therefore, this just handles the final err state
+    const compilationError = error as CompilationError;
+    spinner.fail(
+      chalk.red(
+        `[COMPILE] Compilation failed for file: ${compilationError.file || 'unknown'}`,
+      ),
+    );
 
-		if (isPromisifiedChildProcessError(compilationError.cause)) {
-			const execError = compilationError.cause;
-			if (
-				execError.stderr &&
-				!execError.stderr.includes("stdout") &&
-				!execError.stderr.includes("stderr")
-			) {
-				console.log(
-					chalk.red(`    Additional error details: ${execError.stderr}`),
-				);
-			}
-		}
-		return;
-	}
+    if (isPromisifiedChildProcessError(compilationError.cause)) {
+      const execError = compilationError.cause;
+      if (
+        execError.stderr &&
+        !execError.stderr.includes('stdout') &&
+        !execError.stderr.includes('stderr')
+      ) {
+        console.log(
+          chalk.red(`    Additional error details: ${execError.stderr}`),
+        );
+      }
+    }
+    return;
+  }
 
-	// Env validation errors (non-CLI errors)
-	if (isPromisifiedChildProcessError(error)) {
-		spinner.fail(
-			chalk.red(`[COMPILE] Environment validation failed: ${error.message}`),
-		);
-		console.log(chalk.gray("\nTroubleshooting:"));
-		console.log(
-			chalk.gray("  • Check that Compact CLI is installed and in PATH"),
-		);
-		console.log(chalk.gray("  • Verify the specified Compact version exists"));
-		console.log(chalk.gray("  • Ensure you have proper permissions"));
-		return;
-	}
+  // Env validation errors (non-CLI errors)
+  if (isPromisifiedChildProcessError(error)) {
+    spinner.fail(
+      chalk.red(`[COMPILE] Environment validation failed: ${error.message}`),
+    );
+    console.log(chalk.gray('\nTroubleshooting:'));
+    console.log(
+      chalk.gray('  • Check that Compact CLI is installed and in PATH'),
+    );
+    console.log(chalk.gray('  • Verify the specified Compact version exists'));
+    console.log(chalk.gray('  • Ensure you have proper permissions'));
+    return;
+  }
 
-	// Arg parsing
-	const errorMessage = error instanceof Error ? error.message : String(error);
-	if (errorMessage.includes("--dir flag requires a directory name")) {
-		spinner.fail(
-			chalk.red("[COMPILE] Error: --dir flag requires a directory name"),
-		);
-		showUsageHelp();
-		return;
-	}
+  // Arg parsing
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  if (errorMessage.includes('--dir flag requires a directory name')) {
+    spinner.fail(
+      chalk.red('[COMPILE] Error: --dir flag requires a directory name'),
+    );
+    showUsageHelp();
+    return;
+  }
 
-	// Unexpected errors
-	spinner.fail(chalk.red(`[COMPILE] Unexpected error: ${errorMessage}`));
-	console.log(chalk.gray("\nIf this error persists, please check:"));
-	console.log(chalk.gray("  • Compact CLI is installed and in PATH"));
-	console.log(chalk.gray("  • Source files exist and are readable"));
-	console.log(chalk.gray("  • Specified Compact version exists"));
-	console.log(chalk.gray("  • File system permissions are correct"));
+  // Unexpected errors
+  spinner.fail(chalk.red(`[COMPILE] Unexpected error: ${errorMessage}`));
+  console.log(chalk.gray('\nIf this error persists, please check:'));
+  console.log(chalk.gray('  • Compact CLI is installed and in PATH'));
+  console.log(chalk.gray('  • Source files exist and are readable'));
+  console.log(chalk.gray('  • Specified Compact version exists'));
+  console.log(chalk.gray('  • File system permissions are correct'));
 }
 
 /**
  * Shows available directories when `DirectoryNotFoundError` occurs.
  */
 function showAvailableDirectories(): void {
-	console.log(chalk.yellow("\nAvailable directories:"));
-	console.log(
-		chalk.yellow("  --dir access    # Compile access control contracts"),
-	);
-	console.log(chalk.yellow("  --dir archive   # Compile archive contracts"));
-	console.log(chalk.yellow("  --dir security  # Compile security contracts"));
-	console.log(chalk.yellow("  --dir token     # Compile token contracts"));
-	console.log(chalk.yellow("  --dir utils     # Compile utility contracts"));
+  console.log(chalk.yellow('\nAvailable directories:'));
+  console.log(
+    chalk.yellow('  --dir access    # Compile access control contracts'),
+  );
+  console.log(chalk.yellow('  --dir archive   # Compile archive contracts'));
+  console.log(chalk.yellow('  --dir security  # Compile security contracts'));
+  console.log(chalk.yellow('  --dir token     # Compile token contracts'));
+  console.log(chalk.yellow('  --dir utils     # Compile utility contracts'));
 }
 
 /**
  * Shows usage help with examples for different scenarios.
  */
 function showUsageHelp(): void {
-	console.log(chalk.yellow("\nUsage: compact-compiler [options]"));
-	console.log(chalk.yellow("\nOptions:"));
-	console.log(
-		chalk.yellow(
-			"  --dir <directory> Compile specific directory (access, archive, security, token, utils)",
-		),
-	);
-	console.log(
-		chalk.yellow("  --skip-zk         Skip zero-knowledge proof generation"),
-	);
-	console.log(
-		chalk.yellow(
-			"  +<version>        Use specific toolchain version (e.g., +0.26.0)",
-		),
-	);
-	console.log(chalk.yellow("\nExamples:"));
-	console.log(
-		chalk.yellow(
-			"  compact-compiler                           # Compile all files",
-		),
-	);
-	console.log(
-		chalk.yellow(
-			"  compact-compiler --dir security             # Compile security directory",
-		),
-	);
-	console.log(
-		chalk.yellow(
-			"  compact-compiler --dir access --skip-zk     # Compile access with flags",
-		),
-	);
-	console.log(
-		chalk.yellow(
-			"  SKIP_ZK=true compact-compiler --dir token   # Use environment variable",
-		),
-	);
-	console.log(
-		chalk.yellow(
-			"  compact-compiler --skip-zk +0.26.0          # Use specific version",
-		),
-	);
-	console.log(chalk.yellow("\nTurbo integration:"));
-	console.log(
-		chalk.yellow("  turbo compact                               # Full build"),
-	);
-	console.log(
-		chalk.yellow(
-			"  turbo compact:security -- --skip-zk         # Directory with flags",
-		),
-	);
-	console.log(
-		chalk.yellow(
-			"  SKIP_ZK=true turbo compact                  # Environment variables",
-		),
-	);
+  console.log(chalk.yellow('\nUsage: compact-compiler [options]'));
+  console.log(chalk.yellow('\nOptions:'));
+  console.log(
+    chalk.yellow(
+      '  --dir <directory> Compile specific directory (access, archive, security, token, utils)',
+    ),
+  );
+  console.log(
+    chalk.yellow('  --skip-zk         Skip zero-knowledge proof generation'),
+  );
+  console.log(
+    chalk.yellow(
+      '  +<version>        Use specific toolchain version (e.g., +0.26.0)',
+    ),
+  );
+  console.log(chalk.yellow('\nExamples:'));
+  console.log(
+    chalk.yellow(
+      '  compact-compiler                           # Compile all files',
+    ),
+  );
+  console.log(
+    chalk.yellow(
+      '  compact-compiler --dir security             # Compile security directory',
+    ),
+  );
+  console.log(
+    chalk.yellow(
+      '  compact-compiler --dir access --skip-zk     # Compile access with flags',
+    ),
+  );
+  console.log(
+    chalk.yellow(
+      '  SKIP_ZK=true compact-compiler --dir token   # Use environment variable',
+    ),
+  );
+  console.log(
+    chalk.yellow(
+      '  compact-compiler --skip-zk +0.26.0          # Use specific version',
+    ),
+  );
+  console.log(chalk.yellow('\nTurbo integration:'));
+  console.log(
+    chalk.yellow('  turbo compact                               # Full build'),
+  );
+  console.log(
+    chalk.yellow(
+      '  turbo compact:security -- --skip-zk         # Directory with flags',
+    ),
+  );
+  console.log(
+    chalk.yellow(
+      '  SKIP_ZK=true turbo compact                  # Environment variables',
+    ),
+  );
 }
 
 runCompiler();

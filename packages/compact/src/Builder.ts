@@ -160,10 +160,8 @@ export class CompactBuilder {
       if (isPromisifiedChildProcessError(error)) {
         this.printOutput(error.stdout, chalk.cyan);
         this.printOutput(error.stderr, chalk.red);
-        // biome-ignore lint/suspicious/noConsole: Needed to display build failure reason
         console.error(chalk.red('[BUILD] ❌ Build failed:', error.message));
       } else if (error instanceof Error) {
-        // biome-ignore lint/suspicious/noConsole: Needed to display build failure reason
         console.error(chalk.red('[BUILD] ❌ Build failed:', error.message));
       }
 
