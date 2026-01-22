@@ -87,4 +87,6 @@ runs:
 
     - name: Install dependencies
       shell: bash
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
       run: pnpm install --frozen-lockfile --prefer-offline
