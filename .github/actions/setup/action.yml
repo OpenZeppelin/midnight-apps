@@ -6,6 +6,9 @@ inputs:
     description: "Skip the fast compile step"
     required: false
     default: "false"
+  github-token:
+    description: "GitHub token for accessing GitHub Package Registry (needs read:packages scope for @midnight-ntwrk)"
+    required: true
 
 runs:
   using: "composite"
@@ -89,5 +92,5 @@ runs:
     - name: Install dependencies
       shell: bash
       env:
-        GITHUB_TOKEN: ${{ github.token }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
       run: pnpm install --frozen-lockfile --prefer-offline

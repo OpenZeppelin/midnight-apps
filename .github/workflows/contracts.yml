@@ -28,6 +28,8 @@ jobs:
 
       - name: Setup Environment
         uses: ./.github/actions/setup
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
 
       - name: Compile contracts (with retry on hash mismatch)
         shell: bash
@@ -74,6 +76,8 @@ jobs:
 
       - name: Setup Environment
         uses: ./.github/actions/setup
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
 
       - name: Run tests
         run: pnpm test:contracts
