@@ -69,8 +69,8 @@ importers:
         specifier: 4.0.0-beta.2
         version: 4.0.0-beta.2
       '@midnight-ntwrk/ledger':
-        specifier: ^4.0.0
-        version: 4.0.0
+        specifier: 6.1.0-alpha.1
+        version: 6.1.0-alpha.1
       '@midnight-ntwrk/wallet-api':
         specifier: ^5.0.0
         version: 5.0.0(rxjs@7.8.2)
@@ -845,8 +845,8 @@ packages:
   '@midnight-ntwrk/dapp-connector-api@4.0.0-beta.2':
     resolution: {integrity: sha512-GLEt1tOZzJR2egK3CCdr+8MQdrg+oMP7EsurAxIL+L3ZahjB3+PObzKFAuXNsk5uO+kfhguWbZl93GVo+oM1tA==, tarball: https://npm.pkg.github.com/download/@midnight-ntwrk/dapp-connector-api/4.0.0-beta.2/7326e85ed27885605f9f4ac224aea59e7a3335d1}
 
-  '@midnight-ntwrk/ledger@4.0.0':
-    resolution: {integrity: sha512-cnJisY8uQ4NO54miDnjs/ov6n102ZPfKEPxtiDKVEdlKijcc70jz/CI2yBCc0itlwwaqma7FM2Ou5N4pWpbwbg==}
+  '@midnight-ntwrk/ledger@6.1.0-alpha.1':
+    resolution: {integrity: sha512-AU36sSAMVhKG2tOrqWkZgE/sfUSg+82fRJ6Q2cFOGbwvVpLK1XobUcX6GFWzryoVd0wqbO/ZV0AyShIlhcq1aQ==, tarball: https://npm.pkg.github.com/download/@midnight-ntwrk/ledger/6.1.0-alpha.1/dbe3303618ec9fa67558172d4a4f21bae13513c0}
 
   '@midnight-ntwrk/midnight-js-network-id@2.1.0':
     resolution: {integrity: sha512-uYIxvYNbrjCQW4ntJz/kKWZUeoBX4ahYaI9k37GrX02EJRPs7wJ+3iIJstTiL36JUxJUyTkePufL+lFgTadP8A==}
@@ -4370,7 +4370,7 @@ snapshots:
 
   '@midnight-ntwrk/dapp-connector-api@4.0.0-beta.2': {}
 
-  '@midnight-ntwrk/ledger@4.0.0': {}
+  '@midnight-ntwrk/ledger@6.1.0-alpha.1': {}
 
   '@midnight-ntwrk/midnight-js-network-id@2.1.0': {}
 
