@@ -1,8 +1,8 @@
 'use client';
 
-import { Input } from '@/components/ui/input';
 import { ChevronDown } from 'lucide-react';
 import Image from 'next/image';
+import { Input } from '@/components/ui/input';
 
 interface TokenInputProps {
   token: {

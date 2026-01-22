@@ -8,12 +8,10 @@
  *
  * @prop {string} stdout stdout of a child process
  * @prop {string} stderr stderr of a child process
- * @prop {number} code exit code of a child process
  */
 export interface PromisifiedChildProcessError extends Error {
   stdout: string;
   stderr: string;
-  code?: number;
 }
 
 /**
@@ -59,20 +57,17 @@ export class CompactCliNotFoundError extends Error {
  */
 export class CompilationError extends Error {
   public readonly file?: string;
-  public readonly cause?: unknown;
 
   /**
    * Creates a new CompilationError instance.
    *
    * @param message - Error message describing the compilation failure
    * @param file - Optional relative path to the file that failed to compile
-   * @param cause - Optional cause of the error
    */
   constructor(message: string, file?: string, cause?: unknown) {
-    super(message);
+    super(message, { cause });
 
     this.file = file;
-    this.cause = cause;
     this.name = 'CompilationError';
   }
 }

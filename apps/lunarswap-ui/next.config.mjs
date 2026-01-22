@@ -1,7 +1,7 @@
-let userConfig = undefined;
+let userConfig;
 try {
   userConfig = await import('./v0-user-next.config');
-} catch { }
+} catch {}
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {

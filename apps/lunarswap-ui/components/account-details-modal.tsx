@@ -1,10 +1,10 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import type { DAppConnectorWalletState } from '@midnight-ntwrk/dapp-connector-api';
 import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { Button } from '@/components/ui/button';
 import { Identicon } from './identicon';
 
 interface AccountDetailsModalProps {
@@ -194,6 +194,7 @@ export function AccountDetailsModal({
       data-modal-portal
     >
       <div
+        role="dialog"
         className="bg-background rounded-xl shadow-2xl w-full max-w-4xl max-h-[80vh] overflow-hidden relative pointer-events-auto"
         style={{
           zIndex: 100000,

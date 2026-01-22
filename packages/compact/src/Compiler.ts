@@ -1,37 +1,24 @@
 #!/usr/bin/env node
 
-import { exec as execCallback, spawn } from 'node:child_process';
+import { exec as execCallback } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { readdir } from 'node:fs/promises';
 import { basename, join, relative } from 'node:path';
 import { promisify } from 'node:util';
-import { getLogger } from '@openzeppelin/midnight-apps-logger';
 import chalk from 'chalk';
 import ora from 'ora';
 import {
   CompactCliNotFoundError,
   CompilationError,
   DirectoryNotFoundError,
-  type PromisifiedChildProcessError,
   isPromisifiedChildProcessError,
-} from './types/errors.js';
-
-const logger = getLogger({
-  level: 'info',
-  transport: {
-    target: 'pino-pretty',
-    options: {
-      colorize: true,
-      ignore: 'time,pid,hostname',
-      messageFormat: '{msg}',
-    },
-  },
-});
+} from './types/errors.ts';
+import { COMPACT_VERSION } from './versions.ts';
 
 /** Source directory containing .compact files */
 const SRC_DIR: string = 'src';
 /** Output directory for compiled artifacts */
-const ARTIFACTS_DIR: string = 'src/artifacts';
+const ARTIFACTS_DIR: string = 'artifacts';
 
 /**
  * Function type for executing shell commands.
@@ -202,7 +189,7 @@ export class FileDiscovery {
           }
           return [];
         } catch (err) {
-          logger.warn({ err }, `Error accessing ${fullPath}`);
+          console.warn(`Error accessing ${fullPath}:`, err);
           return [];
         }
       });
@@ -210,7 +197,7 @@ export class FileDiscovery {
       const results = await Promise.all(filePromises);
       return results.flat();
     } catch (err) {
-      logger.error({ err }, `Failed to read dir: ${dir}`);
+      console.error(`Failed to read dir: ${dir}`, err);
       return [];
     }
   }
@@ -245,78 +232,12 @@ export class CompilerService {
   }
 
   /**
-   * Spawns the compact CLI process with appropriate stdio configuration.
-   * Handles both interactive (with circuit details) and non-interactive modes.
-   *
-   * @param args - Command-line arguments for the compact CLI
-   * @param showCircuits - Whether to show detailed circuit compilation output
-   * @returns Spawned child process
-   * @private
-   */
-  private spawnCompactProcess(
-    args: string[],
-    showCircuits: boolean,
-  ): ReturnType<typeof spawn> {
-    // Only inherit stderr (for interactive progress) if showCircuits is enabled AND we have a TTY
-    const shouldShowInteractive =
-      showCircuits && process.stderr.isTTY && process.stdout.isTTY;
-    return spawn('compact', args, {
-      stdio: ['inherit', 'pipe', shouldShowInteractive ? 'inherit' : 'pipe'],
-      env: { ...process.env, FORCE_COLOR: '1' },
-    });
-  }
-
-  /**
-   * Sets up output stream handlers for the compact compilation process.
-   * Handles stdout/stderr capture and optional real-time streaming.
-   *
-   * @param child - Spawned child process
-   * @param showCircuits - Whether to stream output in real-time
-   * @returns Object containing stdout and stderr accumulators
-   * @private
-   */
-  private setupOutputHandlers(
-    child: ReturnType<typeof spawn>,
-    showCircuits: boolean,
-  ): { stdout: { value: string }; stderr: { value: string } } {
-    const stdout = { value: '' };
-    const stderr = { value: '' };
-    let firstOutput = true;
-    const shouldShowInteractive =
-      showCircuits && process.stderr.isTTY && process.stdout.isTTY;
-
-    child.stdout?.on('data', (data) => {
-      const chunk = data.toString();
-      stdout.value += chunk;
-      // Add newline before first output to separate from spinner (only if showing circuits)
-      if (showCircuits && firstOutput && chunk.trim()) {
-        process.stdout.write('\n');
-        firstOutput = false;
-      }
-      // Stream stdout in real-time only if showing circuits
-      if (showCircuits) {
-        process.stdout.write(chalk.cyan(chunk));
-      }
-    });
-
-    // Capture stderr when not showing interactive output
-    if (!shouldShowInteractive) {
-      child.stderr?.on('data', (data) => {
-        stderr.value += data.toString();
-      });
-    }
-
-    return { stdout, stderr };
-  }
-
-  /**
    * Compiles a single .compact file using the Compact CLI.
    * Constructs the appropriate command with flags and version, then executes it.
    *
    * @param file - Relative path to the .compact file from SRC_DIR
    * @param flags - Space-separated compiler flags (e.g., '--skip-zk --verbose')
    * @param version - Optional specific toolchain version to use
-   * @param showCircuits - Whether to show detailed circuit compilation output (default: false)
    * @returns Promise resolving to compilation output (stdout/stderr)
    * @throws {CompilationError} If compilation fails for any reason
    * @example
@@ -325,8 +246,7 @@ export class CompilerService {
    *   const result = await compiler.compileFile(
    *     'security/AccessControl.compact',
    *     '--skip-zk',
-   *     '0.26.0',
-   *     true
+   *     '0.26.0'
    *   );
    *   console.log('Success:', result.stdout);
    * } catch (error) {
@@ -340,55 +260,31 @@ export class CompilerService {
     file: string,
     flags: string,
     version?: string,
-    showCircuits = false,
   ): Promise<{ stdout: string; stderr: string }> {
-    const inputPath = join(process.cwd(), SRC_DIR, file);
+    const inputPath = join(SRC_DIR, file);
     const outputDir = join(ARTIFACTS_DIR, basename(file, '.compact'));
 
     const versionFlag = version ? `+${version}` : '';
-    const flagsArray = flags ? flags.split(' ').filter(Boolean) : [];
-    const args = [
-      'compile',
-      ...(versionFlag ? [versionFlag] : []),
-      ...flagsArray,
-      inputPath,
-      outputDir,
-    ];
+    const flagsStr = flags ? ` ${flags}` : '';
+    const command = `compact compile${versionFlag ? ` ${versionFlag}` : ''}${flagsStr} "${inputPath}" "${outputDir}"`;
 
-    return new Promise((resolve, reject) => {
-      const child = this.spawnCompactProcess(args, showCircuits);
-      const output = this.setupOutputHandlers(child, showCircuits);
+    try {
+      return await this.execFn(command);
+    } catch (error: unknown) {
+      let message: string;
 
-      child.on('close', (code) => {
-        if (code === 0) {
-          resolve({ stdout: output.stdout.value, stderr: output.stderr.value });
-        } else {
-          const error = new Error(
-            `Command failed with exit code ${code}`,
-          ) as PromisifiedChildProcessError;
-          error.stdout = output.stdout.value;
-          error.stderr = output.stderr.value;
-          error.code = code ?? undefined;
-          reject(
-            new CompilationError(
-              `Failed to compile ${file}: Command exited with code ${code}`,
-              inputPath,
-              error,
-            ),
-          );
-        }
-      });
+      if (error instanceof Error) {
+        message = error.message;
+      } else {
+        message = String(error); // fallback for strings, objects, numbers, etc.
+      }
 
-      child.on('error', (error) => {
-        reject(
-          new CompilationError(
-            `Failed to compile ${file}: ${error.message}`,
-            inputPath,
-            error,
-          ),
-        );
-      });
-    });
+      throw new CompilationError(
+        `Failed to compile ${file}: ${message}`,
+        file,
+        error,
+      );
+    }
   }
 }
 
@@ -421,9 +317,7 @@ export const UIService = {
       .split('\n')
       .filter((line) => line.trim() !== '')
       .map((line) => `    ${line}`);
-    if (lines.length > 0) {
-      logger.info(colorFn(lines.join('\n')));
-    }
+    console.log(colorFn(lines.join('\n')));
   },
 
   /**
@@ -551,8 +445,6 @@ export class CompactCompiler {
   private readonly targetDir?: string;
   /** Optional specific toolchain version to use */
   private readonly version?: string;
-  /** Whether to show detailed circuit compilation output */
-  private readonly showCircuits: boolean;
 
   /**
    * Creates a new CompactCompiler instance with specified configuration.
@@ -560,7 +452,6 @@ export class CompactCompiler {
    * @param flags - Space-separated compiler flags (e.g., '--skip-zk --verbose')
    * @param targetDir - Optional subdirectory within src/ to compile (e.g., 'security', 'token')
    * @param version - Optional toolchain version to use (e.g., '0.26.0')
-   * @param showCircuits - Whether to show detailed circuit compilation output (default: false)
    * @param execFn - Optional custom exec function for dependency injection
    * @example
    * ```typescript
@@ -570,25 +461,23 @@ export class CompactCompiler {
    * // Compile specific directory
    * const compiler = new CompactCompiler('', 'security');
    *
-   * // Compile with specific version and show circuits
-   * const compiler = new CompactCompiler('--skip-zk', undefined, '0.26.0', true);
+   * // Compile with specific version
+   * const compiler = new CompactCompiler('--skip-zk', undefined, '0.26.0');
    *
    * // For testing with custom exec function
    * const mockExec = vi.fn();
-   * const compiler = new CompactCompiler('', undefined, undefined, false, mockExec);
+   * const compiler = new CompactCompiler('', undefined, undefined, mockExec);
    * ```
    */
   constructor(
     flags = '',
     targetDir?: string,
     version?: string,
-    showCircuits = false,
     execFn?: ExecFunction,
   ) {
     this.flags = flags.trim();
     this.targetDir = targetDir;
     this.version = version;
-    this.showCircuits = showCircuits;
     this.environmentValidator = new EnvironmentValidator(execFn);
     this.fileDiscovery = new FileDiscovery();
     this.compilerService = new CompilerService(execFn);
@@ -600,7 +489,6 @@ export class CompactCompiler {
    *
    * Supported argument patterns:
    * - `--dir <directory>` - Target specific directory
-   * - `--show-circuits` - Show detailed circuit compilation output
    * - `+<version>` - Use specific toolchain version
    * - Other arguments - Treated as compiler flags
    * - `SKIP_ZK=true` environment variable - Adds --skip-zk flag
@@ -611,11 +499,10 @@ export class CompactCompiler {
    * @throws {Error} If --dir flag is provided without a directory name
    * @example
    * ```typescript
-   * // Parse command line: compact-compiler --dir security --skip-zk --show-circuits +0.26.0
+   * // Parse command line: compact-compiler --dir security --skip-zk +0.26.0
    * const compiler = CompactCompiler.fromArgs([
    *   '--dir', 'security',
    *   '--skip-zk',
-   *   '--show-circuits',
    *   '+0.26.0'
    * ]);
    *
@@ -636,7 +523,6 @@ export class CompactCompiler {
     let targetDir: string | undefined;
     const flags: string[] = [];
     let version: string | undefined;
-    let showCircuits = false;
 
     if (env.SKIP_ZK === 'true') {
       flags.push('--skip-zk');
@@ -652,8 +538,6 @@ export class CompactCompiler {
         } else {
           throw new Error('--dir flag requires a directory name');
         }
-      } else if (args[i] === '--show-circuits') {
-        showCircuits = true;
       } else if (args[i].startsWith('+')) {
         version = args[i].slice(1);
       } else {
@@ -664,12 +548,12 @@ export class CompactCompiler {
       }
     }
 
-    return new CompactCompiler(
-      flags.join(' '),
-      targetDir,
-      version,
-      showCircuits,
-    );
+    // Apply default toolchain version if none provided; allow env to override
+    if (!version) {
+      version = env.COMPACT_TOOLCHAIN_VERSION ?? COMPACT_VERSION;
+    }
+
+    return new CompactCompiler(flags.join(' '), targetDir, version);
   }
 
   /**
@@ -783,19 +667,20 @@ export class CompactCompiler {
     ).start();
 
     try {
-      // Stop spinner before compilation to avoid overlap with circuit output
-      if (this.showCircuits) {
-        spinner.stop();
-      }
-      await this.compilerService.compileFile(
+      const result = await this.compilerService.compileFile(
         file,
         this.flags,
         this.version,
-        this.showCircuits,
       );
 
       spinner.succeed(chalk.green(`[COMPILE] ${step} Compiled ${file}`));
-      // Output already streamed in real-time during compilation (if showCircuits enabled)
+      // Filter out compactc version output from compact compile
+      const filteredOutput = result.stdout.split('\n').slice(1).join('\n');
+
+      if (filteredOutput) {
+        UIService.printOutput(filteredOutput, chalk.cyan);
+      }
+      UIService.printOutput(result.stderr, chalk.yellow);
     } catch (error) {
       spinner.fail(chalk.red(`[COMPILE] ${step} Failed ${file}`));
 
@@ -803,7 +688,14 @@ export class CompactCompiler {
         error instanceof CompilationError &&
         isPromisifiedChildProcessError(error)
       ) {
-        // Error output already streamed in real-time during compilation
+        const execError = error;
+        // Filter out compactc version output from compact compile
+        const filteredOutput = execError.stdout.split('\n').slice(1).join('\n');
+
+        if (filteredOutput) {
+          UIService.printOutput(filteredOutput, chalk.cyan);
+        }
+        UIService.printOutput(execError.stderr, chalk.red);
       }
 
       throw error;

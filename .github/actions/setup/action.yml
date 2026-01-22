@@ -1,126 +1,49 @@
-name: 'Setup Environment'
-description: 'Sets up the environment with Compact compiler, pnpm, and Node.js'
+name: "Setup Environment"
+description: "Sets up the environment with Compact compiler, pnpm, and Node.js"
 
 inputs:
-  skip-compile:
-    description: 'Skip the fast compile step'
+  skip-compact:
+    description: "Skip the fast compile step"
     required: false
-    default: 'false'
+    default: "false"
 
 runs:
   using: "composite"
   steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+    - name: Cache turbo build setup
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       with:
-        fetch-depth: 1
-
-    - name: Set Compact environment variables
-      shell: bash
-      env:
-        COMPILER_VERSION: "0.26.0"
-      run: |
-        echo "COMPILER_VERSION=$COMPILER_VERSION" >> "$GITHUB_ENV"
-
-    - name: Cache Compact developer tools
-      id: cache-compact
-      uses: actions/cache@v4
-      with:
-        path: ~/.compact
-        key: compact-tools-${{ env.COMPILER_VERSION }}
+        path: .turbo
+        key: ${{ runner.os }}-turbo-${{ github.sha }}
         restore-keys: |
-          compact-tools-
-
-    - name: Install Compact developer tools
-      if: steps.cache-compact.outputs.cache-hit != 'true'
-      shell: bash
-      run: |
-        curl --proto '=https' --tlsv1.2 -LsSf https://github.com/midnightntwrk/compact/releases/download/compact-v0.2.0/compact-installer.sh | sh
-
-    - name: Add Compact to PATH
-      shell: bash
-      run: |
-        echo "$HOME/.compact/bin" >> "$GITHUB_PATH"
-
-    - name: Verify Compact installation
-      shell: bash
-      run: |
-        echo "🔍 Checking Compact installation..."
-        echo "HOME: $HOME"
-        ls -la "$HOME/.compact/bin/" || echo "⚠️  .compact/bin directory not found"
-        if [ -f "$HOME/.compact/bin/compact" ]; then
-          echo "✅ Compact binary found at $HOME/.compact/bin/compact"
-        else
-          echo "❌ Compact binary not found, installing..."
-          curl --proto '=https' --tlsv1.2 -LsSf https://github.com/midnightntwrk/compact/releases/download/compact-v0.2.0/compact-installer.sh | sh
-        fi
-
-    - name: Install and verify toolchain
-      shell: bash
-      run: |
-        export PATH="$HOME/.compact/bin:$PATH"
-        compact update ${{ env.COMPILER_VERSION }}
-        echo "🤖 Testing installation..."
-        compact compile --version
-        compact compile --language-version
+          ${{ runner.os }}-turbo-
 
     - name: Install pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: 10.4.1
+      uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
 
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
       with:
-        node-version: '22.x'
-        cache: 'pnpm'
-    
-    - name: Build compact package
-      shell: bash
-      run: |
-        cd packages/compact
-        pnpm install
-        pnpm run build
+        node-version-file: ".nvmrc"
+        cache: "pnpm"
 
-    - name: Validate build artifacts
+    - name: Setup Compact Compiler
+      if: ${{ inputs.skip-compact != 'true' }}
+      uses: midnightntwrk/setup-compact-action@4130145456ad3f45934788dd4a65647eb283e658
+      with:
+        compact-version: "0.26.0"
+
+    - name: Verify Compact Compiler Installation
+      if: ${{ inputs.skip-compact != 'true' }}
       shell: bash
       run: |
-        REQUIRED_FILES=(
-          "packages/compact/dist/runCompiler.js"
-          "packages/compact/dist/runBuilder.js"
-        )
-        for file in "${REQUIRED_FILES[@]}"; do
-          if [ ! -f "$file" ]; then
-            echo "::error::❌ Missing required file: $file"
-            exit 1
-          fi
-        done
+        if ! command -v compact >/dev/null 2>&1; then
+          echo "::error::Compact CLI not found in PATH"
+          exit 1
+        fi
+        echo "✅ Compact CLI is available"
+        compact --version || true
 
     - name: Install dependencies
       shell: bash
       run: pnpm install --frozen-lockfile --prefer-offline
-
-    - name: Build contract packages (with retry on hash mismatch)
-      if: inputs.skip-compile != 'true'
-      shell: bash
-      run: |
-        set -euo pipefail
-        export PATH="$HOME/.compact/bin:$PATH"
-
-        build_contracts() {
-          echo "⚙️ Building contract packages..."
-          if ! pnpm build:contracts; then
-            echo "❌ Build failed."
-            if [ -d "$HOME/.cache/midnight/zk-params" ]; then
-              echo "⚠️ zk-params exists. Removing cache and retrying..."
-              rm -rf "$HOME/.cache/midnight/zk-params"
-              echo "::notice::♻️ Retrying build after clearing zk-params..."
-              pnpm build:contracts || { echo "::error::❌ Retry also failed."; exit 1; }
-            else
-              echo "🚫 Build failed and zk-params missing. No retry."
-              exit 1
-            fi
-          fi
-        }
-
-        build_contracts

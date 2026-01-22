@@ -1,20 +1,20 @@
 import {
   type CircuitContext,
   type ContractState,
+  constructorContext,
   QueryContext,
   type WitnessContext,
-  constructorContext,
 } from '@midnight-ntwrk/compact-runtime';
 import {
   sampleCoinPublicKey,
   sampleContractAddress,
 } from '@midnight-ntwrk/zswap';
-import type { DivResultU64 } from '../artifacts/Index/contract/index.cjs';
+import type { DivResultU64 } from '../../artifacts/Index/contract/index.cjs';
 import {
   Contract,
   type Ledger,
   ledger,
-} from '../artifacts/Uint64.mock/contract/index.cjs';
+} from '../../artifacts/Uint64.mock/contract/index.cjs';
 import type { IContractSimulator } from '../types/test';
 import { Uint64PrivateState, Uint64Witnesses } from '../witnesses/Uint64';
 

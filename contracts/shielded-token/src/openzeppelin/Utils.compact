@@ -14,9 +14,9 @@ module Utils {
    */
   export pure circuit isKeyOrAddressZero(keyOrAddress: Either<ZswapCoinPublicKey, ContractAddress>): Boolean {
     if (keyOrAddress.is_left) {
-      return keyOrAddress == eitherZeroZPK();
+       return keyOrAddress == eitherZeroZPK();
     } else {
-      return keyOrAddress == eitherZeroContractAddress();
+       return keyOrAddress == eitherZeroContractAddress();
     }
   }
 
@@ -26,7 +26,7 @@ module Utils {
    * @return {Bytes<32>} - A 32-byte array filled with zeros.
    */
   export pure circuit zeroBytes(): Bytes<32> {
-    return pad(32, ""); 
+    return pad(32, "");
   }
 
   /**
@@ -73,7 +73,7 @@ module Utils {
    */
   export pure circuit eitherZeroZPK(): Either<ZswapCoinPublicKey, ContractAddress> {
     return left<ZswapCoinPublicKey, ContractAddress>(zeroZPK());
-    }
+  }
 
   /**
    * @description Returns a zero contract address as the right variant of an Either type.
@@ -81,7 +81,7 @@ module Utils {
    * @return {Either<ZswapCoinPublicKey, ContractAddress>} - Zero ContractAddress as the right variant.
    */
   export pure circuit eitherZeroContractAddress(): Either<ZswapCoinPublicKey, ContractAddress> {
-    return right<ZswapCoinPublicKey, ContractAddress>(ContractAddress{ zeroBytes() });
+    return right<ZswapCoinPublicKey, ContractAddress>(ContractAddress { zeroBytes() });
   }
 
   /**

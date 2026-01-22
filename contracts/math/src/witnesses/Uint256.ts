@@ -4,8 +4,8 @@ import type {
   DivResultU256,
   U128,
   U256,
-} from '../artifacts/Index/contract/index.cjs';
-import type { Ledger } from '../artifacts/Uint256/contract/index.cjs';
+} from '../../artifacts/Index/contract/index.cjs';
+import type { Ledger } from '../../artifacts/Uint256/contract/index.cjs';
 import type { EmptyState } from '../types/state';
 import { sqrtBigint } from '../utils/sqrtBigint';
 import type { IUint256Witnesses } from './interfaces';

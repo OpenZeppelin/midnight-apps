@@ -2,8 +2,8 @@ import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
 import type {
   DivResultU128,
   U128,
-} from '../artifacts/Index/contract/index.cjs';
-import type { Ledger } from '../artifacts/Uint128/contract/index.cjs';
+} from '../../artifacts/Index/contract/index.cjs';
+import type { Ledger } from '../../artifacts/Uint128/contract/index.cjs';
 import type { EmptyState } from '../types/state';
 import { sqrtBigint } from '../utils/sqrtBigint';
 import type { IUint128Witnesses } from './interfaces';

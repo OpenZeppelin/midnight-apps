@@ -6,18 +6,17 @@ on:
     branches:
       - main
 
-env:
-  TURBO_TELEMETRY_DISABLED: 1
-  COMPILER_VERSION: "0.26.0"
+permissions:
+  contents: read
 
 jobs:
-  pipeline:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 15
+  compile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
 
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
         with:
           egress-policy: audit
 
@@ -29,23 +28,60 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/setup
 
-      - name: Check compiler version
+      - name: Compile contracts (with retry on hash mismatch)
+        shell: bash
+        timeout-minutes: 25
         run: |
-            export PATH="$HOME/.compact/bin:$PATH"
-            COMPILER_OUTPUT=$(compact compile --version)
-            COMPUTED_COMPILER_VERSION=$(echo "$COMPILER_OUTPUT" | grep -oP '\b0\.[0-9]+\.[0-9]+\b' | head -n 1)
-            if [ "$COMPUTED_COMPILER_VERSION" != "$COMPILER_VERSION" ]; then
-              errMsg="❌ Compiler version mismatch!%0AExpected: $COMPILER_VERSION%0AGot: $COMPUTED_COMPILER_VERSION"
-              echo "::error::$errMsg"
-              exit 1
-            fi
-            echo "✅ Compiler version matches: $COMPUTED_COMPILER_VERSION"
+          set -euo pipefail
 
-            echo "📋 Language version:"
-            compact compile --language-version
+          compile() {
+            echo "⚙️ Running Compact compilation..."
+            if ! output=$(pnpm exec turbo compact --concurrency=1 2>&1); then
+              echo "$output"
+              echo "❌ Compilation failed."
+
+              if echo "$output" | grep -q "Hash mismatch" && [ -d "$HOME/.cache/midnight/zk-params" ]; then
+                echo "⚠️ Hash mismatch detected *and* zk-params exists. Removing cache..."
+                rm -rf "$HOME/.cache/midnight/zk-params"
+                echo "::notice::♻️ Retrying compilation after clearing zk-params..."
+                pnpm exec turbo compact --concurrency=1 || { echo "::error::❌ Retry also failed."; exit 1; }
+              else
+                echo "🚫 Compilation failed for another reason or zk-params missing. No retry."
+                exit 1
+              fi
+            else
+              echo "$output"
+            fi
+          }
+
+          compile
+
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
+        with:
+          egress-policy: audit
+
+      - name: Check out code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 2 # Recommended by turbo team
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup
 
       - name: Run tests
         run: pnpm test:contracts
+        timeout-minutes: 10
+        env:
+          SKIP_ZK: "true"
 
       - name: Check types
-        run: pnpm exec turbo run types --filter './contracts/*'
+        run: pnpm types:contracts
+        timeout-minutes: 5
+        env:
+          SKIP_ZK: "true"

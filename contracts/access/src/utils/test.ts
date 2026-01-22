@@ -3,9 +3,9 @@ import {
   type CoinPublicKey,
   type ContractAddress,
   type ContractState,
+  emptyZswapLocalState,
   type MerkleTreePath,
   QueryContext,
-  emptyZswapLocalState,
 } from '@midnight-ntwrk/compact-runtime';
 import type { IContractSimulator } from '../types/test';
 

@@ -12,4 +12,4 @@
 export {
   AccessControl_Role as AccessControlRole,
   Ledger as AccessControlLedger,
-} from '../artifacts/Index/contract/index.cjs';
+} from '../../artifacts/Index/contract/index.cjs';

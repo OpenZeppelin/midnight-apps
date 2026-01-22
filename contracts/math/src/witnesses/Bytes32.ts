@@ -1,9 +1,9 @@
 import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
-import type { Ledger } from '../artifacts/Bytes32/contract/index.d.cts';
+import type { Ledger } from '../../artifacts/Bytes32/contract/index.d.cts';
 import type {
   DivResultU128,
   U256,
-} from '../artifacts/Index/contract/index.d.cts';
+} from '../../artifacts/Index/contract/index.d.cts';
 import type { EmptyState } from '../types/state';
 
 /**

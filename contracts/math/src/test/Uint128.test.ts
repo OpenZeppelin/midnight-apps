@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from 'vitest';
-import type { U128, U256 } from '../artifacts/Index/contract/index.d.cts';
+import type { U128, U256 } from '../../artifacts/Index/contract/index.d.cts';
 import {
   MAX_UINT8,
   MAX_UINT16,
@@ -7,7 +7,7 @@ import {
   MAX_UINT64,
   MAX_UINT128,
 } from '../utils/consts';
-import { Uint128Simulator, createMaliciousSimulator } from './Uint128Simulator';
+import { createMaliciousSimulator, Uint128Simulator } from './Uint128Simulator';
 
 let uint128Simulator: Uint128Simulator;
 

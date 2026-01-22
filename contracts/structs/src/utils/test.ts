@@ -1,8 +1,8 @@
 import {
   type CircuitContext,
   type CoinPublicKey,
-  QueryContext,
   emptyZswapLocalState,
+  QueryContext,
 } from '@midnight-ntwrk/compact-runtime';
 import type { IContractSimulator } from '../types/test';
 

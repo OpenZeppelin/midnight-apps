@@ -6,17 +6,20 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 concurrency:
   group: checks-${{ github.run_id }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   pipeline:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
         with:
           egress-policy: audit
 
@@ -29,14 +32,14 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Lint and Format
-        run: pnpm lint && pnpm fmt
+        run: pnpm lint:ci
         timeout-minutes: 10
 
       - name: Commitlint
         run: pnpm commitlint --from=${{ github.event.pull_request.base.sha }} --to=${{ github.event.pull_request.head.sha }}
 
       - name: Spell Check with Typos
-        uses: crate-ci/typos@07d900b8fa1097806b8adb6391b0d3e0ac2fdea7 # v1.39.0
+        uses: crate-ci/typos@2d0ce569feab1f8752f1dde43cc2f2aa53236e06 # v1.40.0
         with:
           config: .github/workflows/config/typos.toml
 

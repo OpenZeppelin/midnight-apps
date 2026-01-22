@@ -1,8 +1,5 @@
 #!/usr/bin/env node
 
-import { existsSync } from 'node:fs';
-import { basename, dirname, join } from 'node:path';
-import { getLogger } from '@openzeppelin/midnight-apps-logger';
 import chalk from 'chalk';
 import ora, { type Ora } from 'ora';
 import { CompactCompiler } from './Compiler.js';
@@ -10,18 +7,6 @@ import {
   type CompilationError,
   isPromisifiedChildProcessError,
 } from './types/errors.js';
-
-const logger = getLogger({
-  level: 'info',
-  transport: {
-    target: 'pino-pretty',
-    options: {
-      colorize: true,
-      ignore: 'time,pid,hostname',
-      messageFormat: '{msg}',
-    },
-  },
-});
 
 /**
  * Executes the Compact compiler CLI with improved error handling and user feedback.
@@ -56,12 +41,6 @@ const logger = getLogger({
  * @example Version specification
  * ```bash
  * npx compact-compiler --dir security --skip-zk +0.26.0
- * ```
- *
- * @example Show circuit compilation details
- * ```bash
- * npx compact-compiler --show-circuits
- * turbo compact:access -- --show-circuits
  * ```
  */
 async function runCompiler(): Promise<void> {
@@ -116,15 +95,10 @@ function handleError(error: unknown, spinner: Ora): void {
     // The compilation error details (file name, stdout/stderr) are already displayed
     // by `compileFile`; therefore, this just handles the final err state
     const compilationError = error as CompilationError;
-    // Convert absolute path to use ~ notation for better readability
-    const fullPath = compilationError.file || 'unknown';
-    const homeDir = process.env.HOME || process.env.USERPROFILE || '';
-    const readablePath = fullPath.startsWith(homeDir)
-      ? fullPath.replace(homeDir, '~')
-      : fullPath;
-
     spinner.fail(
-      chalk.red(`[COMPILE] Compilation failed for file: ${readablePath}`),
+      chalk.red(
+        `[COMPILE] Compilation failed for file: ${compilationError.file || 'unknown'}`,
+      ),
     );
 
     if (isPromisifiedChildProcessError(compilationError.cause)) {
@@ -134,45 +108,8 @@ function handleError(error: unknown, spinner: Ora): void {
         !execError.stderr.includes('stdout') &&
         !execError.stderr.includes('stderr')
       ) {
-        const fullPath = compilationError.file || '';
-        const fileDir = fullPath ? dirname(fullPath) : '';
-        const homeDir = process.env.HOME || process.env.USERPROFILE || '';
-
-        /**
-         * NOTE (error path normalization):
-         * The Compact CLI often emits relative filenames in diagnostics and,
-         * when compiling mocks under src/test, references may point to the
-         * main contract file name (e.g. AccessControl.compact, not AccessControl.mock.compact) rather than the
-         * mock. This made errors hard to click/navigate.
-         *
-         * Fix: Print tilde-shortened absolute paths and, if the failing file
-         * lives under src/test, prefer resolving bare "Name.compact" to
-         * src/Name.compact (the main contract). Otherwise, resolve in the
-         * failing file's directory. Keep the logic terse and deterministic.
-         */
-        const isTest = fullPath.includes('/src/test/');
-        const srcRoot = fullPath.includes('/src/')
-          ? `${fullPath.split('/src/')[0]}/src`
-          : '';
-        const shorten = (p: string) =>
-          homeDir && p.startsWith(homeDir) ? p.replace(homeDir, '~') : p;
-        const updatedStderr = execError.stderr.replace(
-          /([A-Za-z0-9_.\-\/]+\.compact)\b/g,
-          (match) => {
-            if (match.startsWith('/') || match.startsWith('~'))
-              return shorten(match);
-            const filename = basename(match);
-            const baseDir = isTest && srcRoot ? srcRoot : fileDir;
-            if (baseDir) {
-              const candidate = join(baseDir, filename);
-              if (existsSync(candidate)) return shorten(candidate);
-            }
-            return match;
-          },
-        );
-
-        logger.info(
-          chalk.red(`    Additional error details: ${updatedStderr}`),
+        console.log(
+          chalk.red(`    Additional error details: ${execError.stderr}`),
         );
       }
     }
@@ -184,12 +121,12 @@ function handleError(error: unknown, spinner: Ora): void {
     spinner.fail(
       chalk.red(`[COMPILE] Environment validation failed: ${error.message}`),
     );
-    logger.info(chalk.gray('\nTroubleshooting:'));
-    logger.info(
+    console.log(chalk.gray('\nTroubleshooting:'));
+    console.log(
       chalk.gray('  • Check that Compact CLI is installed and in PATH'),
     );
-    logger.info(chalk.gray('  • Verify the specified Compact version exists'));
-    logger.info(chalk.gray('  • Ensure you have proper permissions'));
+    console.log(chalk.gray('  • Verify the specified Compact version exists'));
+    console.log(chalk.gray('  • Ensure you have proper permissions'));
     return;
   }
 
@@ -205,82 +142,82 @@ function handleError(error: unknown, spinner: Ora): void {
 
   // Unexpected errors
   spinner.fail(chalk.red(`[COMPILE] Unexpected error: ${errorMessage}`));
-  logger.info(chalk.gray('\nIf this error persists, please check:'));
-  logger.info(chalk.gray('  • Compact CLI is installed and in PATH'));
-  logger.info(chalk.gray('  • Source files exist and are readable'));
-  logger.info(chalk.gray('  • Specified Compact version exists'));
-  logger.info(chalk.gray('  • File system permissions are correct'));
+  console.log(chalk.gray('\nIf this error persists, please check:'));
+  console.log(chalk.gray('  • Compact CLI is installed and in PATH'));
+  console.log(chalk.gray('  • Source files exist and are readable'));
+  console.log(chalk.gray('  • Specified Compact version exists'));
+  console.log(chalk.gray('  • File system permissions are correct'));
 }
 
 /**
  * Shows available directories when `DirectoryNotFoundError` occurs.
  */
 function showAvailableDirectories(): void {
-  logger.info(chalk.yellow('\nAvailable directories:'));
-  logger.info(
+  console.log(chalk.yellow('\nAvailable directories:'));
+  console.log(
     chalk.yellow('  --dir access    # Compile access control contracts'),
   );
-  logger.info(chalk.yellow('  --dir archive   # Compile archive contracts'));
-  logger.info(chalk.yellow('  --dir security  # Compile security contracts'));
-  logger.info(chalk.yellow('  --dir token     # Compile token contracts'));
-  logger.info(chalk.yellow('  --dir utils     # Compile utility contracts'));
+  console.log(chalk.yellow('  --dir archive   # Compile archive contracts'));
+  console.log(chalk.yellow('  --dir security  # Compile security contracts'));
+  console.log(chalk.yellow('  --dir token     # Compile token contracts'));
+  console.log(chalk.yellow('  --dir utils     # Compile utility contracts'));
 }
 
 /**
  * Shows usage help with examples for different scenarios.
  */
 function showUsageHelp(): void {
-  logger.info(chalk.yellow('\nUsage: compact-compiler [options]'));
-  logger.info(chalk.yellow('\nOptions:'));
-  logger.info(
+  console.log(chalk.yellow('\nUsage: compact-compiler [options]'));
+  console.log(chalk.yellow('\nOptions:'));
+  console.log(
     chalk.yellow(
       '  --dir <directory> Compile specific directory (access, archive, security, token, utils)',
     ),
   );
-  logger.info(
+  console.log(
     chalk.yellow('  --skip-zk         Skip zero-knowledge proof generation'),
   );
-  logger.info(
+  console.log(
     chalk.yellow(
       '  +<version>        Use specific toolchain version (e.g., +0.26.0)',
     ),
   );
-  logger.info(chalk.yellow('\nExamples:'));
-  logger.info(
+  console.log(chalk.yellow('\nExamples:'));
+  console.log(
     chalk.yellow(
       '  compact-compiler                           # Compile all files',
     ),
   );
-  logger.info(
+  console.log(
     chalk.yellow(
       '  compact-compiler --dir security             # Compile security directory',
     ),
   );
-  logger.info(
+  console.log(
     chalk.yellow(
       '  compact-compiler --dir access --skip-zk     # Compile access with flags',
     ),
   );
-  logger.info(
+  console.log(
     chalk.yellow(
       '  SKIP_ZK=true compact-compiler --dir token   # Use environment variable',
     ),
   );
-  logger.info(
+  console.log(
     chalk.yellow(
       '  compact-compiler --skip-zk +0.26.0          # Use specific version',
     ),
   );
-  logger.info(chalk.yellow('\nTurbo integration:'));
-  logger.info(
+  console.log(chalk.yellow('\nTurbo integration:'));
+  console.log(
     chalk.yellow('  turbo compact                               # Full build'),
   );
-  logger.info(
+  console.log(
     chalk.yellow(
       '  turbo compact:security -- --skip-zk         # Directory with flags',
     ),
   );
-  logger.info(
+  console.log(
     chalk.yellow(
       '  SKIP_ZK=true turbo compact                  # Environment variables',
     ),

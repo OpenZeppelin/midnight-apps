@@ -1,8 +1,8 @@
 import {
   type CircuitContext,
   type ContractState,
-  QueryContext,
   constructorContext,
+  QueryContext,
 } from '@midnight-ntwrk/compact-runtime';
 import {
   sampleCoinPublicKey,
@@ -18,7 +18,7 @@ import {
   Contract,
   type Ledger,
   ledger,
-} from '../artifacts/ShieldedFungibleToken/contract/index.cjs';
+} from '../../artifacts/ShieldedFungibleToken/contract/index.cjs';
 import type { IContractSimulator } from '../types/test';
 import {
   ShieldedFungibleTokenPrivateState,

@@ -59,7 +59,7 @@ compact --version
    cd ../math && pnpm build
    cd ../structs && pnpm build
    ```
-   - **Note**: Running `pnpm build:contracts`, `pnpm compact`, `pnpm compact:fast`, `pnpm compact:version`, or `pnpm compact:language-version` from the root may cause repetitive output due to Turbo's logging behavior. It's recommended to compile contracts individually from within each package directory.
+   - **Note**: Running `pnpm build:contracts`, `pnpm compact`, or `pnpm compact:fast` from the root may cause repetitive output due to Turbo's logging behavior. It's recommended to compile contracts individually from within each package directory.
    - **Feature Request**: A logging output mode flag is being requested to fix Turbo animation log flooding. See [GitHub Issue #1188](https://github.com/midnightntwrk/compactc/issues/1188) for more details.
    
 ### Tasks with Turbo
@@ -68,7 +68,7 @@ Turbo manages tasks across the monorepo, defined in `turbo.json`. Key tasks:
 - **`compact`**:
   - Compiles `.compact` files using the Compact CLI.
   - Run: `pnpm compact` (from within individual packages).
-  - **Note**: Running from root with `pnpm compact`, `pnpm compact:fast`, `pnpm compact:version`, or `pnpm compact:language-version` may cause output repetition issues.
+  - **Note**: Running from root with `pnpm compact`, or `pnpm compact:fast` may cause output repetition issues.
   - Variants:
     - `pnpm compact:fast`: Compiles with `--skip-zk` flag for faster builds.
     - `pnpm compact:fmt`: Formats all `.compact` files using `compact format`.
@@ -90,10 +90,10 @@ Turbo manages tasks across the monorepo, defined in `turbo.json`. Key tasks:
   - Checks TypeScript types without emitting files.
   - Run: `pnpm types`.
 
-- **`fmt`**, **`lint`**, **`lint:fix`**:
-  - `pnpm fmt`: Formats TypeScript/JavaScript code with Biome and `.compact` files with Compact CLI.
-  - `pnpm lint`: Lints code with Biome.
-  - `pnpm lint:fix`: Auto-fixes linting issues with Biome.
+- **`lint`**, **`lint:fix`**, **`lint:ci`**:
+  - `pnpm lint`: Checks formatting and linting of all TypeScript/JavaScript code with Biome, and `.compact` files with Compact CLI.
+  - `pnpm lint:fix`: Auto-fixes formatting and linting issues with Biome for all files, and formats `.compact` files with Compact CLI.
+  - `pnpm lint:ci`: CI-specific check that only checks changed files (compared to `main` branch) for faster CI runs. Doesn't fail on unmatched files.
 
 ### Commit Workflow
 Commits are linted with `commitlint` and staged files are processed with `lint-staged` and Biome.
