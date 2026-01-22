@@ -6,10 +6,10 @@ import {
 } from '@openzeppelin/compact-tools-simulator';
 import {
   type AccessControl_Role,
-  Contract as MockAccessControl,
-  type ZswapCoinPublicKey,
   ledger,
+  Contract as MockAccessControl,
   pureCircuits,
+  type ZswapCoinPublicKey,
 } from '../../../../artifacts/access/test/mocks/contracts/AccessControl.mock/contract/index.js';
 import {
   AccessContractPrivateState,

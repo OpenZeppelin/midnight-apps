@@ -41,7 +41,7 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest watch",
     "types": "tsc -p tsconfig.json --noEmit",
-    "lint": "biome check . && compact format --check",
+    "lint": "biome check .",
     "lint:fix": "biome check . --write",
     "lint:ci": "biome ci . --changed --since=main --no-errors-on-unmatched",
     "clean": "git clean -fXd"

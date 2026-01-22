@@ -57,14 +57,14 @@ module Uint64 {
    */
   export witness sqrtU64Locally(radicand: Uint<64>): Uint<32>;
 
-    /**
-   * @title MAX_UINT8 circuit
-   * @description Returns the maximum value for an 8-bit unsigned integer (2^8 - 1).
-   *
-   * @circuitInfo k=10, rows=128
-   *
-   * @returns {Uint<8>} The value 255 (0xFF).
-   */
+  /**
+  * @title MAX_UINT8 circuit
+  * @description Returns the maximum value for an 8-bit unsigned integer (2^8 - 1).
+  *
+  * @circuitInfo k=10, rows=128
+  *
+  * @returns {Uint<8>} The value 255 (0xFF).
+  */
   export pure circuit MAX_UINT8(): Uint<8> {
     return 255;
   }
@@ -213,25 +213,19 @@ module Uint64 {
     assert(b != 0, "Math: division by zero");
 
     if (a == 0) {
-       return DivResultU64 { quotient: 0 as Uint<64>, remainder: 0 as Uint<64> };
-    } else
-       if (b == 1) {
-          return DivResultU64 { quotient: a, remainder: 0 as Uint<64> };
-       }
-       else
-          if (a == b) {
-             return DivResultU64 { quotient: 1 as Uint<64>, remainder: 0 as Uint<64> };
-          }
-          else
-             if (a < b) {
-                return DivResultU64 { quotient: 0 as Uint<64>, remainder: a };
-             }
-             else {
-                const result = divU64Locally(a, b);
-                assert(result.remainder < b, "Math: remainder error");
-                assert((result.quotient * b + result.remainder) as Uint<64> == a, "Math: division invalid");
-                return result;
-             }
+      return DivResultU64 { quotient: 0 as Uint<64>, remainder: 0 as Uint<64> };
+    } else if (b == 1) {
+      return DivResultU64 { quotient: a, remainder: 0 as Uint<64> };
+    } else if (a == b) {
+      return DivResultU64 { quotient: 1 as Uint<64>, remainder: 0 as Uint<64> };
+    } else if (a < b) {
+      return DivResultU64 { quotient: 0 as Uint<64>, remainder: a };
+    } else {
+      const result = divU64Locally(a, b);
+      assert(result.remainder < b, "Math: remainder error");
+      assert((result.quotient * b + result.remainder) as Uint<64> == a, "Math: division invalid");
+      return result;
+    }
   }
 
   /**

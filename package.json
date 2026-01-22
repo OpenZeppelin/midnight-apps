@@ -7,7 +7,7 @@
   "scripts": {
     "prepare": "is-ci || husky && pnpm --filter @openzeppelin/midnight-apps-logger run build && pnpm --filter @openzeppelin/midnight-apps-compact run build",
     "compact": "turbo run compact --log-prefix=none -- --hierarchical",
-    "compact:fast": "turbo run compact:fast --hierarchical",
+    "compact:fast": "turbo run compact:fast -- --hierarchical",
     "compact:fmt": "turbo run compact:fmt",
     "compact:fmt:fix": "turbo run compact:fmt:fix",
     "build": "turbo run build",
