@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "biome check .",
+    "lint": "biome check . && next lint",
     "lint:fix": "biome check . --write",
     "lint:ci": "biome ci . --changed --since=main --no-errors-on-unmatched",
     "githook:precommit": "lint-staged && pnpm run types"

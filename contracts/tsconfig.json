@@ -1,0 +1,16 @@
+{
+    "extends": "@tsconfig/node24/tsconfig.json",
+    "include": [
+      "src/**/witnesses/**/*.ts"
+, "src/access/test/mocks/witnesses/AccessControl.ts"    ],
+    "exclude": ["src/archive/"],
+    "compilerOptions": {
+      "rootDir": "src",
+      "outDir": "dist",
+      "declaration": true,
+      "allowJs": true,
+      "forceConsistentCasingInFileNames": true,
+      "isolatedModules": true,
+      "resolveJsonModule": true
+    }
+  }

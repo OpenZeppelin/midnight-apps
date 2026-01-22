@@ -1,0 +1,213 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/Bytes32.compact)
+
+pragma language_version >= 0.20.0;
+
+/**
+ * @title Bytes32 module (ARCHIVED)
+ * @notice This module is currently archived and requires maintenance before use.
+ *
+ * @dev ARCHIVAL REASON:
+ * This module depends on Field255 for comparison operations, which has fundamental limitations:
+ * - Bytes<32> can represent values up to 2^256 - 1 (256 bits)
+ * - JubJub scalar field max is ~2^255 (255 bits)
+ * - Field-to-Uint conversion is limited by Compact's max Uint size
+ *
+ * COMPACT UINT LIMITATIONS:
+ * - v0.26.0: Max Uint<254> — Field values >= 2^254 truncated
+ * - v0.27.0: Max Uint<248> (31 bytes) — Field values >= 2^248 truncated
+ *
+ * Comparison operations (lt, lte, gt, gte) that rely on Field255 will produce incorrect
+ * results for Bytes<32> values that exceed the representable range.
+ *
+ * @description Comprehensive utility functions for working with Bytes<32> types.
+ * Includes conversion functions, equality checks, and comparison operations using field conversion.
+ *
+ * @remarks
+ * This module provides a complete set of utilities for 32-byte manipulation and comparison.
+ * Comparison operations convert bytes to field elements and then to unsigned integers for ordering.
+ * All functions are designed to work specifically with 32-byte arrays.
+ *
+ * TODO: Implement secure U256 conversion circuits:
+ * - toU256(): Convert Bytes<32> to U256 (more accurate than converting to Field)
+ * - fromU256(): Convert U256 to Bytes<32>
+ *   These conversions will be supported when casting Bytes<k> to Vector<k, Uint<8>> is released.
+ *   See PR: https://github.com/midnightntwrk/compactc/pull/1090.
+ *   Once this PR's feature is released, arithmetic operations such as add, sub, mul, div,
+ *   and rem will also be supported for Bytes<32> via U256 conversion.
+ *
+ * Supported Mathematical Operations:
+ * - Conversions:
+ *   - toField(): Converts Bytes<32> to a Field using field conversion.
+ *   - toBytes(): Converts a Field to Bytes<32> using upgrade_from_transient.
+ * - Comparisons:
+ *   - eq(): Checks if two Bytes<32> values are equal.
+ *   - lt(): Checks if one Bytes<32> value is less than another.
+ *   - lte(): Checks if one Bytes<32> value is less than or equal to another.
+ *   - gt(): Checks if one Bytes<32> value is greater than another.
+ *   - gte(): Checks if one Bytes<32> value is greater than or equal to another.
+ * - Utility:
+ *   - isZero(): Checks if a Bytes<32> value is zero.
+ */
+module Bytes32 {
+  import CompactStandardLibrary;
+
+  import Field255 prefix Field255_;
+
+  /**
+   * @title fromBytes circuit
+   * @description Converts Bytes<32> to a Field using field conversion.
+   *
+   * @remarks
+   * This function performs a type conversion from bytes to field elements.
+   * The conversion uses the degrade_to_transient built-in function.
+   * Special handling is included for zero bytes to avoid field size overflow.
+   *
+   * @param {Bytes<32>} a - The bytes value to convert to a field element.
+   *
+   * @returns {Field} - The field representation of the bytes.
+   *
+   * @throws {Error} "Bytes32: toField() - inputs exceed the field size" - When the input bytes represent a value that exceeds the field size after conversion.
+   */
+  export circuit fromBytes(a: Bytes<32>): Field {
+    // Inline the isZero logic to avoid invalid context error
+    if (isZero(a)) {
+      return 0 as Field;
+    }
+    const aField = degradeToTransient(a);
+    assert(aField != (0 as Field), "Bytes32: toField() - inputs exceed the field size");
+    return aField;
+  }
+
+  /**
+   * @title toBytes circuit
+   * @description Converts a Field to Bytes<32> using upgrade_from_transient.
+   *
+   * @remarks
+   * This function performs a type conversion from field elements to bytes.
+   * The conversion uses the upgrade_from_transient built-in function.
+   * The output is always 32 bytes regardless of the input field size.
+   *
+   * @param {Field} a - The field value to convert to bytes.
+   *
+   * @returns {Bytes<32>} - The bytes representation of the field (32 bytes).
+   */
+  export circuit toBytes(a: Field): Bytes<32> {
+    return upgradeFromTransient(a);
+  }
+
+  /**
+   * @title eq circuit
+   * @description Compares two Bytes<32> for equality.
+   *
+   * @remarks
+   * This function performs a direct equality comparison between two 32-byte arrays.
+   * Uses the built-in equality operator for byte comparison.
+   *
+   * @param {Bytes<32>} a - First bytes value to compare.
+   * @param {Bytes<32>} b - Second bytes value to compare.
+   *
+   * @returns {Boolean} - True if the bytes are equal, false otherwise.
+   */
+  export circuit eq(a: Bytes<32>, b: Bytes<32>): Boolean {
+    return a == b;
+  }
+
+  /**
+   * @title lt circuit
+   * @description Compares two Bytes<32> for less than using field conversion and uint comparison.
+   *
+   * @remarks
+   * This function converts both byte arrays to field elements, then to unsigned integers,
+   * and compares them to determine lexicographic ordering.
+   * The comparison is consistent and deterministic for any 32-byte arrays.
+   * Includes validation to ensure inputs don't exceed field size.
+   *
+   * @param {Bytes<32>} a - First bytes value to compare.
+   * @param {Bytes<32>} b - Second bytes value to compare.
+   *
+   * @returns {Boolean} - True if a < b (based on uint comparison), false otherwise.
+   *
+   * @throws {Error} "Bytes32: lt() - comparison invalid; one or both of the inputs exceed the field size" - When the field representations of both inputs are equal but their byte representations are not, indicating one or both inputs exceed the field size.
+   */
+  export circuit lt(a: Bytes<32>, b: Bytes<32>): Boolean {
+    const isBytesEqual = eq(a, b);
+    if (isBytesEqual) {
+      return false;
+    }
+
+    const aField = fromBytes(a);
+    const bField = fromBytes(b);
+    const isFieldEqual = aField == bField;
+    if (isFieldEqual) {
+      assert(isBytesEqual && isFieldEqual, "Bytes32: lt() - comparison invalid; one or both of the inputs exceed the field size");
+    }
+    return Field254_lt(aField, bField);
+  }
+
+  /**
+   * @title lte circuit
+   * @description Compares two Bytes<32> for less than or equal using field conversion and uint comparison.
+   *
+   * @remarks
+   * This function combines the less than and equality comparisons.
+   * Returns true if a <= b based on the combined comparison logic.
+   *
+   * @param {Bytes<32>} a - First bytes value to compare.
+   * @param {Bytes<32>} b - Second bytes value to compare.
+   *
+   * @returns {Boolean} - True if a <= b, false otherwise.
+   */
+  export circuit lte(a: Bytes<32>, b: Bytes<32>): Boolean {
+    return lt(a, b) || eq(a, b);
+  }
+
+  /**
+   * @title gt circuit
+   * @description Compares two Bytes<32> for greater than using field conversion and uint comparison.
+   *
+   * @remarks
+   * This function uses the less than comparison with swapped operands.
+   * Returns true if a > b based on the comparison logic.
+   *
+   * @param {Bytes<32>} a - First bytes value to compare.
+   * @param {Bytes<32>} b - Second bytes value to compare.
+   *
+   * @returns {Boolean} - True if a > b, false otherwise.
+   */
+  export circuit gt(a: Bytes<32>, b: Bytes<32>): Boolean {
+    return lt(b, a);
+  }
+
+  /**
+   * @title gte circuit
+   * @description Compares two Bytes<32> for greater than or equal using field conversion and uint comparison.
+   *
+   * @remarks
+   * This function combines the greater than and equality comparisons.
+   * Returns true if a >= b based on the combined comparison logic.
+   *
+   * @param {Bytes<32>} a - First bytes value to compare.
+   * @param {Bytes<32>} b - Second bytes value to compare.
+   *
+   * @returns {Boolean} - True if a >= b, false otherwise.
+   */
+  export circuit gte(a: Bytes<32>, b: Bytes<32>): Boolean {
+    return lt(b, a) || eq(a, b);
+  }
+
+  /**
+   * @title isZero circuit
+   * @description Checks if a Bytes<32> is zero.
+   *
+   * @remarks
+   * This function performs a direct comparison of the bytes with zero.
+   *
+   * @param {Bytes<32>} a - The bytes value to check.
+   *
+   * @returns {Boolean} - True if the bytes are zero, false otherwise.
+   */
+  export circuit isZero(a: Bytes<32>): Boolean {
+    return a == upgradeFromTransient(0 as Field);
+  }
+}

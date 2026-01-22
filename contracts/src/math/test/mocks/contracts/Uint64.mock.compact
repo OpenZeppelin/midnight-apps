@@ -1,0 +1,68 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/test/Uint64.mock.compact)
+
+pragma language_version >= 0.20.0;
+
+import CompactStandardLibrary;
+
+import { DivResultU64 } from "../../../Uint64";
+
+import "../../../Uint64" prefix Uint64_;
+
+export { DivResultU64 };
+
+export circuit add(a: Uint<64>, b: Uint<64>): Uint<128> {
+  return Uint64_add(a, b);
+}
+
+export circuit sub(a: Uint<64>, b: Uint<64>): Uint<64> {
+  return Uint64_sub(a, b);
+}
+
+export circuit mul(a: Uint<64>, b: Uint<64>): Uint<128> {
+  return Uint64_mul(a, b);
+}
+
+export circuit div(a: Uint<64>, b: Uint<64>): Uint<64> {
+  return disclose(Uint64_div(a, b));
+}
+
+export circuit rem(a: Uint<64>, b: Uint<64>): Uint<64> {
+  return disclose(Uint64_rem(a, b));
+}
+
+export circuit divRem(a: Uint<64>, b: Uint<64>): DivResultU64 {
+  return disclose(Uint64_divRem(a, b));
+}
+
+export circuit sqrt(radical: Uint<64>): Uint<32> {
+  return disclose(Uint64_sqrt(radical));
+}
+
+export circuit isMultiple(value: Uint<64>, b: Uint<64>): Boolean {
+  return disclose(Uint64_isMultiple(value, b));
+}
+
+export circuit min(a: Uint<64>, b: Uint<64>): Uint<64> {
+  return Uint64_min(a, b);
+}
+
+export circuit max(a: Uint<64>, b: Uint<64>): Uint<64> {
+  return Uint64_max(a, b);
+}
+
+export pure circuit MAX_UINT8(): Uint<8> {
+  return Uint64_MAX_UINT8();
+}
+
+export pure circuit MAX_UINT16(): Uint<16> {
+  return Uint64_MAX_UINT16();
+}
+
+export pure circuit MAX_UINT32(): Uint<32> {
+  return Uint64_MAX_UINT32();
+}
+
+export pure circuit MAX_UINT64(): Uint<64> {
+  return Uint64_MAX_UINT64();
+}

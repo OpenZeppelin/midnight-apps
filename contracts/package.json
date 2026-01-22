@@ -1,0 +1,67 @@
+{
+  "name": "@openzeppelin/midnight-apps-contracts",
+  "version": "0.0.1-alpha.1",
+  "description": "OpenZeppelin Midnight Apps contracts",
+  "keywords": [
+    "openzeppelin",
+    "midnight-apps",
+    "midnight",
+    "contracts",
+    "security"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenZeppelin/midnight-apps.git"
+  },
+  "license": "MIT",
+  "author": "OpenZeppelin Community <maintainers@openzeppelin.org>",
+  "bugs": {
+    "url": "https://github.com/OpenZeppelin/midnight-apps/issues"
+  },
+  "homepage": "",
+  "type": "module",
+  "config": {
+    "compactVersion": "+0.28.0-rc.0"
+  },
+  "scripts": {
+    "compact": "compact-compiler $npm_package_config_compactVersion --hierarchical",
+    "compact:fast": "compact-compiler $npm_package_config_compactVersion --skip-zk --hierarchical",
+    "compact:access": "compact-compiler $npm_package_config_compactVersion --dir access --hierarchical",
+    "compact:archive": "compact-compiler $npm_package_config_compactVersion --dir archive --hierarchical",
+    "compact:compact-types": "compact-compiler $npm_package_config_compactVersion --dir compact-types --hierarchical",
+    "compact:shielded-token": "compact-compiler $npm_package_config_compactVersion --dir shielded-token --hierarchical",
+    "compact:structs": "compact-compiler $npm_package_config_compactVersion --dir structs --hierarchical",
+    "compact:math": "compact-compiler $npm_package_config_compactVersion --dir math --hierarchical",
+    "compact:fmt": "compact format --check",
+    "compact:fmt:fix": "compact format --write",
+    "build": "compact-builder $npm_package_config_compactVersion --hierarchical",
+    "build:fast": "compact-builder $npm_package_config_compactVersion --skip-zk --hierarchical",
+    "test": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest watch",
+    "types": "tsc -p tsconfig.json --noEmit",
+    "lint": "biome check . && compact format --check",
+    "lint:fix": "biome check . --write",
+    "lint:ci": "biome ci . --changed --since=main --no-errors-on-unmatched",
+    "clean": "git clean -fXd"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@openzeppelin/compact-tools-cli": "file:../compact-tools/packages/cli",
+    "@openzeppelin/compact-tools-simulator": "file:../compact-tools/packages/simulator",
+    "@openzeppelin/midnight-apps-biome-config": "workspace:^",
+    "@tsconfig/node24": "^24.0.3",
+    "@types/node": "24.10.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.14"
+  },
+  "dependencies": {
+    "@midnight-ntwrk/midnight-js-network-id": "^2.1.0",
+    "@midnight-ntwrk/wallet-sdk-address-format": "^2.0.0",
+    "@midnight-ntwrk/zswap": "^4.0.0"
+  }
+}
