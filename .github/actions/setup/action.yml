@@ -7,7 +7,7 @@ inputs:
     required: false
     default: "false"
   github-token:
-    description: "GitHub token for accessing GitHub Package Registry (needs read:packages scope for @midnight-ntwrk)"
+    description: "GitHub token for Compact Compiler setup (not needed for npm registry)"
     required: true
 
 runs:
@@ -91,6 +91,4 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      env:
-        GITHUB_TOKEN: ${{ inputs.github-token }}
       run: pnpm install --frozen-lockfile --prefer-offline
