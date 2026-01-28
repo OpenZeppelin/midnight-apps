@@ -6,10 +6,17 @@ inputs:
     description: "Skip the fast compile step"
     required: false
     default: "false"
+  github-token:
+    description: "GitHub token for Compact Compiler setup (not needed for npm registry)"
+    required: true
 
 runs:
   using: "composite"
   steps:
+    - name: Checkout submodules
+      shell: bash
+      run: git submodule update --init --recursive
+
     - name: Cache turbo build setup
       uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       with:
@@ -32,6 +39,7 @@ runs:
       uses: midnightntwrk/setup-compact-action@4130145456ad3f45934788dd4a65647eb283e658
       with:
         compact-version: "0.26.0"
+        github-token: ${{ github.token }}
 
     - name: Verify Compact Compiler Installation
       if: ${{ inputs.skip-compact != 'true' }}
@@ -43,6 +51,43 @@ runs:
         fi
         echo "✅ Compact CLI is available"
         compact --version || true
+
+    - name: Enable Corepack for Yarn
+      shell: bash
+      run: corepack enable
+
+    - name: Build compact-tools submodule
+      shell: bash
+      run: |
+        echo "📦 Building compact-tools submodule..."
+        cd compact-tools
+        yarn install --immutable
+        yarn build
+        echo "✅ compact-tools built successfully"
+
+    - name: Validate compact-tools artifacts
+      shell: bash
+      run: |
+        REQUIRED_FILES=(
+          "compact-tools/packages/cli/dist/runCompiler.js"
+          "compact-tools/packages/cli/dist/runBuilder.js"
+        )
+        for file in "${REQUIRED_FILES[@]}"; do
+          if [ ! -f "$file" ]; then
+            echo "::error::❌ Missing required file: $file"
+            exit 1
+          fi
+        done
+        echo "✅ compact-tools artifacts validated"
+
+    - name: Build compact-contracts submodule
+      shell: bash
+      run: |
+        echo "📦 Building compact-contracts submodule..."
+        cd compact-contracts
+        yarn install --immutable
+        SKIP_ZK=true yarn compact
+        echo "✅ compact-contracts built successfully"
 
     - name: Install dependencies
       shell: bash

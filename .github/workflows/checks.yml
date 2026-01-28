@@ -27,9 +27,12 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 0
+          submodules: recursive
 
       - name: Setup Environment
         uses: ./.github/actions/setup
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
 
       - name: Lint and Format
         run: pnpm lint:ci
