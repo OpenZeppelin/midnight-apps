@@ -1,0 +1,40 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/test/Bytes32.mock.compact)
+
+pragma language_version >= 0.20.0;
+
+import CompactStandardLibrary;
+
+import "../Bytes32" prefix Bytes32_;
+
+export circuit fromBytes(bytes: Bytes<32>): Field {
+  return Bytes32_fromBytes(bytes);
+}
+
+export circuit toBytes(field: Field): Bytes<32> {
+  return Bytes32_toBytes(field);
+}
+
+export circuit eq(a: Bytes<32>, b: Bytes<32>): Boolean {
+  return Bytes32_eq(a, b);
+}
+
+export circuit lt(a: Bytes<32>, b: Bytes<32>): Boolean {
+  return disclose(Bytes32_lt(a, b));
+}
+
+export circuit lte(a: Bytes<32>, b: Bytes<32>): Boolean {
+  return disclose(Bytes32_lte(a, b));
+}
+
+export circuit gt(a: Bytes<32>, b: Bytes<32>): Boolean {
+  return disclose(Bytes32_gt(a, b));
+}
+
+export circuit gte(a: Bytes<32>, b: Bytes<32>): Boolean {
+  return disclose(Bytes32_gte(a, b));
+}
+
+export circuit isZero(a: Bytes<32>): Boolean {
+  return Bytes32_isZero(a);
+}

@@ -1,0 +1,122 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/test/Uint256.mock.compact)
+
+pragma language_version >= 0.20.0;
+
+import CompactStandardLibrary;
+
+import { DivResultU256 } from "../../../Uint256";
+import { U256 } from "../../../types/TU256";
+import "../../../Uint256" prefix Uint256_;
+
+export circuit MODULUS(): Uint<129> {
+  return Uint256_MODULUS();
+}
+
+export circuit MODULUS_U256(): U256 {
+  return Uint256_MODULUS_U256();
+}
+
+export circuit ZERO_U256(): U256 {
+  return Uint256_ZERO_U256();
+}
+
+export circuit fromU256(a: U256): Uint<254> {
+  return disclose(Uint256_fromU256(a));
+}
+
+export circuit toU256(a: Uint<254>): U256 {
+  return disclose(Uint256_toU256(a));
+}
+
+export circuit eq(a: U256, b: U256): Boolean {
+  return Uint256_eq(a, b);
+}
+
+export circuit lt(a: U256, b: U256): Boolean {
+  return Uint256_lt(a, b);
+}
+
+export circuit lte(a: U256, b: U256): Boolean {
+  return Uint256_lte(a, b);
+}
+
+export circuit gt(a: U256, b: U256): Boolean {
+  return Uint256_gt(a, b);
+}
+
+export circuit gte(a: U256, b: U256): Boolean {
+  return Uint256_gte(a, b);
+}
+
+export circuit add(a: U256, b: U256): U256 {
+  return disclose(Uint256_add(a, b));
+}
+
+export circuit sub(a: U256, b: U256): U256 {
+  return disclose(Uint256_sub(a, b));
+}
+
+export circuit mul(a: U256, b: U256): U256 {
+  return disclose(Uint256_mul(a, b));
+}
+
+export circuit div(a: U256, b: U256): U256 {
+  return disclose(Uint256_div(a, b));
+}
+
+export circuit rem(a: U256, b: U256): U256 {
+  return disclose(Uint256_rem(a, b));
+}
+
+export circuit divRem(a: U256, b: U256): DivResultU256 {
+  return disclose(Uint256_divRem(a, b));
+}
+
+export circuit sqrt(radicand: U256): Uint<128> {
+  return disclose(Uint256_sqrt(radicand));
+}
+
+export circuit min(a: U256, b: U256): U256 {
+  return disclose(Uint256_min(a, b));
+}
+
+export circuit max(a: U256, b: U256): U256 {
+  return disclose(Uint256_max(a, b));
+}
+
+export circuit isZero(a: U256): Boolean {
+  return Uint256_isZero(a);
+}
+
+export circuit isExceedingFieldSize(a: U256): Boolean {
+  return Uint256_isExceedingFieldSize(a);
+}
+
+export circuit isLowestLimbOnly(val: U256, limbValue: Uint<64>): Boolean {
+  return Uint256_isLowestLimbOnly(val, limbValue);
+}
+
+export circuit isSecondLimbOnly(val: U256, limbValue: Uint<64>): Boolean {
+  return Uint256_isSecondLimbOnly(val, limbValue);
+}
+
+export circuit isThirdLimbOnly(val: U256, limbValue: Uint<64>): Boolean {
+  return Uint256_isThirdLimbOnly(val, limbValue);
+}
+
+export circuit isHighestLimbOnly(val: U256, limbValue: Uint<64>): Boolean {
+  return Uint256_isHighestLimbOnly(val, limbValue);
+}
+
+export circuit isMultiple(value: U256, b: U256): Boolean {
+  return disclose(Uint256_isMultiple(value, b));
+}
+
+export pure circuit MAX_UINT254(): U256 {
+  return Uint256_MAX_UINT254();
+}
+
+export pure circuit MAX_U256(): U256 {
+  return Uint256_MAX_U256();
+}

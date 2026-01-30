@@ -10,7 +10,7 @@
       ],
       "outputLogs": "new-only",
       "outputs": [
-        "artifacts/**"
+        "src/artifacts/**"
        ]
     },
     "compact:fast": {
@@ -23,7 +23,7 @@
       ],
       "outputLogs": "new-only",
       "outputs": [
-        "artifacts/**"
+        "src/artifacts/**"
       ]
     },
     "compact:fmt": {
@@ -62,8 +62,7 @@
         ".env"
       ],
       "outputs": [
-        "dist/**",
-        ".next/**"
+        "dist/**"
       ]
     },
     "build:fast": {
