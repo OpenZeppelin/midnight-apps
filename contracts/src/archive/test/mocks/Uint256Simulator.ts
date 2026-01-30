@@ -9,7 +9,7 @@ import type {
 import {
   Contract,
   ledger,
-} from '../../../../artifacts/math/test/Uint256.mock/contract/index.cjs';
+} from '../../../../artifacts/math/test/Uint256.mock/contract/index.js';
 import { Uint256PrivateState, Uint256Witnesses } from './witnesses/Uint256.js';
 
 /**
