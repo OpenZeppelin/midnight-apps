@@ -3,7 +3,7 @@ import type {
   DivResultU128,
   U256,
 } from '../../../artifacts/math/Index/contract/index.d.cts';
-import type { Ledger } from '../../../artifacts/math/test/Bytes32.mock/contract/index.cjs';
+import type { Ledger } from '../../../artifacts/math/test/Bytes32.mock/contract/index.js';
 import type { EmptyState } from '../types/state.js';
 
 /**

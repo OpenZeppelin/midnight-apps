@@ -5,7 +5,7 @@ import type {
   U128,
   U256,
 } from '../../../artifacts/math/Index/contract/index.d.cts';
-import type { Ledger } from '../../../artifacts/math/test/Uint256.mock/contract/index.cjs';
+import type { Ledger } from '../../../artifacts/math/test/Uint256.mock/contract/index.js';
 import type { EmptyState } from '../types/state.js';
 import { sqrtBigint } from '../utils/sqrtBigint.js';
 import type { IUint256Witnesses } from './interfaces.js';

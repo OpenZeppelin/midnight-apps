@@ -12,12 +12,12 @@ import {
 import type {
   DivResultU256,
   U256,
-} from '../../../../artifacts/math/Index/contract/index.cjs';
+} from '../../../../artifacts/math/Index/contract/index.js';
 import {
   Contract,
   type Ledger,
   ledger,
-} from '../../../../artifacts/math/test/Field254.mock/contract/index.cjs';
+} from '../../../../artifacts/math/test/Field254.mock/contract/index.js';
 import {
   Field254PrivateState,
   Field254Witnesses,
