@@ -32,8 +32,6 @@ jobs:
 
       - name: Setup Environment
         uses: ./.github/actions/setup
-        with:
-          github-token: ${{ secrets.GH_TOKEN }}
 
       - name: Build apps
         id: build
