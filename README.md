@@ -52,10 +52,7 @@ cd compact-tools && yarn install && yarn build && cd -
 
 3. **Build the compact-contracts Submodule**:
    ```bash
-   cd compact-contracts
-   yarn install
-   SKIP_ZK=true yarn compact
-   cd ..
+   cd compact-contracts && yarn install && SKIP_ZK=true yarn compact && cd -
    ```
    This compiles the OpenZeppelin Compact contracts library.
 
