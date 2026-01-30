@@ -5,13 +5,11 @@
       "**",
       "!**/CHANGELOG.md",
       "!**/pnpm-lock.yaml",
-      "!**/tsconfig.base.json",
-      "!**/tsconfig*.json",
       "!**/*.compact",
-      "!**/artifacts/**",
+      "!**/artifacts",
       "!**/*.css",
-      "!**/dist/**",
-      "!**/.next/**"
+      "!**/dist",
+      "!**/.next"
     ]
   },
   "formatter": {

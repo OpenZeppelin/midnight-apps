@@ -87,28 +87,6 @@
         ".next/**"
       ]
     },
-    "build:fast": {
-      "dependsOn": [
-        "^build:fast"
-      ],
-      "env": [
-        "COMPACT_HOME",
-        "SKIP_ZK"
-      ],
-      "inputs": [
-        "src/**/*.ts",
-        "src/**/*.tsx",
-        "!src/**/*.test.ts",
-        "!tests/**/*.ts",
-        "tsconfig.json",
-        "tsconfig.build.json",
-        ".env"
-      ],
-      "outputs": [
-        "dist/**",
-        ".next/**"
-      ]
-    },
     "types": {
       "dependsOn": [
         "compact:fast",
