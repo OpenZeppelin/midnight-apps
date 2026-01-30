@@ -46,10 +46,7 @@ compact --version
 
 2. **Build the compact-tools Submodule**:
    ```bash
-   cd compact-tools
-   yarn install
-   yarn build
-   cd ..
+cd compact-tools && yarn install && yarn build && cd -
    ```
    This builds the CLI tools (`compact-compiler`, `compact-builder`) required by the contracts.
 
