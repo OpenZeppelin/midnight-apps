@@ -21,7 +21,7 @@
   "homepage": "",
   "type": "module",
   "config": {
-    "compactVersion": "+0.28.0-rc.0"
+    "compactVersion": "+0.28.0"
   },
   "scripts": {
     "compact": "compact-compiler $npm_package_config_compactVersion --hierarchical",
@@ -60,8 +60,9 @@
     "vitest": "^4.0.14"
   },
   "dependencies": {
-    "@midnight-ntwrk/midnight-js-network-id": "^2.1.0",
-    "@midnight-ntwrk/wallet-sdk-address-format": "^2.0.0",
-    "@midnight-ntwrk/zswap": "^4.0.0"
+    "@midnight-ntwrk/midnight-js-network-id": "3.0.0",
+    "@midnight-ntwrk/wallet-sdk-address-format": "3.0.0",
+    "@midnight-ntwrk/zswap": "4.0.0",
+    "@midnight-ntwrk/compact-runtime": "0.14.0"
   }
 }

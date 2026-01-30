@@ -20,9 +20,6 @@ importers:
       '@commitlint/types':
         specifier: ^19.8.1
         version: 19.8.1
-      '@midnight-ntwrk/compact-runtime':
-        specifier: 0.14.0-rc.0
-        version: 0.14.0-rc.0
       '@tailwindcss/vite':
         specifier: ^4.1.11
         version: 4.1.11(vite@6.3.5(@types/node@24.10.0)(jiti@2.4.2)(lightningcss@1.30.1)(yaml@2.8.0))
@@ -255,14 +252,17 @@ importers:
 
   contracts:
     dependencies:
+      '@midnight-ntwrk/compact-runtime':
+        specifier: 0.14.0
+        version: 0.14.0
       '@midnight-ntwrk/midnight-js-network-id':
-        specifier: ^2.1.0
-        version: 2.1.0
+        specifier: 3.0.0
+        version: 3.0.0
       '@midnight-ntwrk/wallet-sdk-address-format':
-        specifier: ^2.0.0
-        version: 2.0.0(@midnight-ntwrk/zswap@4.0.0)
+        specifier: 3.0.0
+        version: 3.0.0
       '@midnight-ntwrk/zswap':
-        specifier: ^4.0.0
+        specifier: 4.0.0
         version: 4.0.0
     devDependencies:
       '@openzeppelin/compact-tools-cli':
@@ -839,17 +839,26 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
+  '@midnight-ntwrk/compact-runtime@0.14.0':
+    resolution: {integrity: sha512-VfZmfPDedRUPAYIhKAgS5y+KtxOkSSOCS24PAsGMjhMpzJaaWVSd5SajF6HtNZsciL54sqru4EpWvmCAqsbmYQ==}
+
   '@midnight-ntwrk/compact-runtime@0.14.0-rc.0':
-    resolution: {integrity: sha512-YGrEAISerARskWrM9jQYDDdXWHksnZz+wsoeuVeCRlUxclJxVEC0Mm2vfj823FmswBar+WaX6wINwqoRKgTheQ==, tarball: https://npm.pkg.github.com/download/@midnight-ntwrk/compact-runtime/0.14.0-rc.0/49738a4523d1b1e32d231f660a53fcce94b49151}
+    resolution: {integrity: sha512-YGrEAISerARskWrM9jQYDDdXWHksnZz+wsoeuVeCRlUxclJxVEC0Mm2vfj823FmswBar+WaX6wINwqoRKgTheQ==}
 
   '@midnight-ntwrk/dapp-connector-api@4.0.0-beta.2':
     resolution: {integrity: sha512-GLEt1tOZzJR2egK3CCdr+8MQdrg+oMP7EsurAxIL+L3ZahjB3+PObzKFAuXNsk5uO+kfhguWbZl93GVo+oM1tA==, tarball: https://npm.pkg.github.com/download/@midnight-ntwrk/dapp-connector-api/4.0.0-beta.2/7326e85ed27885605f9f4ac224aea59e7a3335d1}
 
+  '@midnight-ntwrk/ledger-v7@7.0.0':
+    resolution: {integrity: sha512-9rch1jU0T9pwt64nR79PhrnrT/mwrS1EKGh4J3q0UT0sBqmylw0c2eREdd26Mq9Kf4FOfAdKxJUaV+IlNh5yUA==}
+
   '@midnight-ntwrk/ledger@6.1.0-alpha.1':
     resolution: {integrity: sha512-AU36sSAMVhKG2tOrqWkZgE/sfUSg+82fRJ6Q2cFOGbwvVpLK1XobUcX6GFWzryoVd0wqbO/ZV0AyShIlhcq1aQ==, tarball: https://npm.pkg.github.com/download/@midnight-ntwrk/ledger/6.1.0-alpha.1/dbe3303618ec9fa67558172d4a4f21bae13513c0}
 
-  '@midnight-ntwrk/midnight-js-network-id@2.1.0':
-    resolution: {integrity: sha512-uYIxvYNbrjCQW4ntJz/kKWZUeoBX4ahYaI9k37GrX02EJRPs7wJ+3iIJstTiL36JUxJUyTkePufL+lFgTadP8A==}
+  '@midnight-ntwrk/midnight-js-network-id@3.0.0':
+    resolution: {integrity: sha512-IaAi14qzUgaPZcsvcIbniY+WUjwcYWVGK5kNNOm/xIPY/agx4DlshPYoRuhxbWdkCNvcOnlpKTw8MUL1y/ccRA==}
+
+  '@midnight-ntwrk/onchain-runtime-v2@2.0.0':
+    resolution: {integrity: sha512-9LfU3xJDI4aWcElE4ZxsGLKKAjj/7+O6nepvqMngojc+YLmlpR29ju4C+/isDbBk/4m/9m9fq89d8qIvX8Y4/Q==}
 
   '@midnight-ntwrk/onchain-runtime-v2@2.0.0-rc.1':
     resolution: {integrity: sha512-qeCSJzCEhMEJI4QZIoWr6fxohklE7vxXgzXCCTLpeaa1AUzCBrMz/FQvFkN+rAAPkrp3XWDeDQdEsEJytrMA3Q==, tarball: https://npm.pkg.github.com/download/@midnight-ntwrk/onchain-runtime-v2/2.0.0-rc.1/1647426c0ad452b87d03657a27609d671cd731de}
@@ -859,10 +868,8 @@ packages:
     peerDependencies:
       rxjs: 7.x
 
-  '@midnight-ntwrk/wallet-sdk-address-format@2.0.0':
-    resolution: {integrity: sha512-S/3uIfXXUcklYocO0UPey+15uI095CFuCyJRYgxnTmkIXrgjOn8IfSHnReHDtE6JKkvdN2EXlYVt4ufRdCMuPA==}
-    peerDependencies:
-      '@midnight-ntwrk/zswap': 4.0.0
+  '@midnight-ntwrk/wallet-sdk-address-format@3.0.0':
+    resolution: {integrity: sha512-h46Dq+vY6Ymbll58tZyHJGd0dJmNE/Ae2PJKslP3Mb8rpDG0HhiGcqYkGvRxH6Tc/MqM0yABgAcQetjcvIe8qA==}
 
   '@midnight-ntwrk/zswap@4.0.0':
     resolution: {integrity: sha512-yKfzp4M/wUkqxUJv1D2SizojYdWYnF3FDeKaxPehLPOFC4BrR9KnLZsNR2Y/occ8a4yFDtQXf7bN1QvK5k7Grw==}
@@ -1942,6 +1949,15 @@ packages:
 
   '@standard-schema/utils@0.3.0':
     resolution: {integrity: sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==}
+
+  '@subsquid/scale-codec@4.0.1':
+    resolution: {integrity: sha512-H3mi5GIvlrvOSJVSYQRNnaiulSDktPF4TwUvquAgN86tN4kokyX8XcEM2Htrm1sVWRtMi7SgYpyVR5Yg5iPKUQ==}
+
+  '@subsquid/util-internal-hex@1.2.2':
+    resolution: {integrity: sha512-E43HVqf23jP5hvtWF9GsiN8luANjnJ1daR2SVTwaIUAYU/uNjv1Bi6tHz2uexlflBhyxAgBDmHgunXZ45wQTIw==}
+
+  '@subsquid/util-internal-json@1.2.3':
+    resolution: {integrity: sha512-H5qW5kG20IzVMpb7GhPbVRxGuACEf1DPIXE1+LNXYxt8t/GX4zQREQWHRvCB3lck+RORLJD3WJbQUtxN5UYB3Q==}
 
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
@@ -4362,6 +4378,12 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
+  '@midnight-ntwrk/compact-runtime@0.14.0':
+    dependencies:
+      '@midnight-ntwrk/onchain-runtime-v2': 2.0.0
+      '@types/object-inspect': 1.13.0
+      object-inspect: 1.13.4
+
   '@midnight-ntwrk/compact-runtime@0.14.0-rc.0':
     dependencies:
       '@midnight-ntwrk/onchain-runtime-v2': 2.0.0-rc.1
@@ -4370,9 +4392,13 @@ snapshots:
 
   '@midnight-ntwrk/dapp-connector-api@4.0.0-beta.2': {}
 
+  '@midnight-ntwrk/ledger-v7@7.0.0': {}
+
   '@midnight-ntwrk/ledger@6.1.0-alpha.1': {}
 
-  '@midnight-ntwrk/midnight-js-network-id@2.1.0': {}
+  '@midnight-ntwrk/midnight-js-network-id@3.0.0': {}
+
+  '@midnight-ntwrk/onchain-runtime-v2@2.0.0': {}
 
   '@midnight-ntwrk/onchain-runtime-v2@2.0.0-rc.1': {}
 
@@ -4381,10 +4407,11 @@ snapshots:
       '@midnight-ntwrk/zswap': 4.0.0
       rxjs: 7.8.2
 
-  '@midnight-ntwrk/wallet-sdk-address-format@2.0.0(@midnight-ntwrk/zswap@4.0.0)':
+  '@midnight-ntwrk/wallet-sdk-address-format@3.0.0':
     dependencies:
-      '@midnight-ntwrk/zswap': 4.0.0
+      '@midnight-ntwrk/ledger-v7': 7.0.0
       '@scure/base': 1.2.6
+      '@subsquid/scale-codec': 4.0.1
 
   '@midnight-ntwrk/zswap@4.0.0': {}
 
@@ -5427,6 +5454,17 @@ snapshots:
   '@standard-schema/spec@1.0.0': {}
 
   '@standard-schema/utils@0.3.0': {}
+
+  '@subsquid/scale-codec@4.0.1':
+    dependencies:
+      '@subsquid/util-internal-hex': 1.2.2
+      '@subsquid/util-internal-json': 1.2.3
+
+  '@subsquid/util-internal-hex@1.2.2': {}
+
+  '@subsquid/util-internal-json@1.2.3':
+    dependencies:
+      '@subsquid/util-internal-hex': 1.2.2
 
   '@swc/helpers@0.5.15':
     dependencies:
