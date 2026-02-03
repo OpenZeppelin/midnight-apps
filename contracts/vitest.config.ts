@@ -7,9 +7,7 @@ export default defineConfig({
     include: ['src/**/*.test.ts'],
     exclude: [
       // Archive tests referencing non-compiled contracts (.compact.archive)
-      'src/archive/test/Bytes32.test.ts',
-      'src/archive/test/Field254.test.ts',
-      'src/archive/test/Uint256.test.ts',
+      'src/archive/test/**',
     ],
     reporters: 'verbose',
   },
