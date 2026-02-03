@@ -48,7 +48,7 @@ module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
     upgradeFromTransient,
     Counter
   } from CompactStandardLibrary;
-  import { isKeyOrAddressZero } from "../../../../compact-contracts/contracts/src/utils/Utils";
+  import { isKeyOrAddressZero } from "./Utils";
 
   // Public state
   export ledger _counter: Counter;
