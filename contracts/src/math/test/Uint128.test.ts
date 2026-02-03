@@ -1273,8 +1273,8 @@ describe('Checked Operations', () => {
   describe('MAX_U128', () => {
     test('should return U128 with max values', () => {
       const result = uint128Simulator.MAX_U128();
-      expect(result.low).toBe(18446744073709551615n);
-      expect(result.high).toBe(18446744073709551615n);
+      expect(result.low).toBe(0xFFFFFFFFFFFFFFFFn);
+      expect(result.high).toBe(0xFFFFFFFFFFFFFFFFn);
     });
   });
 });
