@@ -6,9 +6,6 @@ inputs:
     description: "Skip the fast compile step"
     required: false
     default: "false"
-  github-token:
-    description: "GitHub token for Compact Compiler setup (not needed for npm registry)"
-    required: true
 
 runs:
   using: "composite"
