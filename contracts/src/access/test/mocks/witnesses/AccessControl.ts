@@ -26,10 +26,12 @@ export type AccessContractPrivateState = {
  */
 export const AccessContractPrivateState = {
   /**
-   * @description Generates a new private state with a random secret key and empty roles.
+   * @description Generates a new private state with a secret key and empty roles.
+   * @param secretKey - Optional 32-byte secret key. If not provided, a random key will be generated.
+   * @returns A new AccessContractPrivateState instance.
    */
-  generate: (): AccessContractPrivateState => ({
-    secretKey: getRandomValues(new Uint8Array(32)),
+  generate: (secretKey?: Uint8Array): AccessContractPrivateState => ({
+    secretKey: secretKey ?? getRandomValues(new Uint8Array(32)),
     roles: {},
   }),
 
