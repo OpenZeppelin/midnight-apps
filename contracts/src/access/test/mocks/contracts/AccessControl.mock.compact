@@ -12,8 +12,15 @@ export { AccessControl_hashUserRole,
          AccessControl_roleCommits,
          AccessControl_isInitialized,
          AccessControl_index,
-         AccessControl_Role,
-         ZswapCoinPublicKey };
+         AccessControl_Role};
+
+export {
+  ZswapCoinPublicKey,
+  MerkleTreePath,
+  MerkleTreeDigest,
+  Maybe
+}
+
 
 /**
  * @description Constructs the contract by initializing the AccessControl module with an initial admin.

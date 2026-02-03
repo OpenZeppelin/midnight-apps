@@ -1,6 +1,9 @@
 import { getRandomValues } from 'node:crypto';
 import type {
   AccessControl_Role,
+  Maybe,
+  MerkleTreeDigest,
+  MerkleTreePath,
   Witnesses,
 } from '@src/artifacts/access/test/mocks/contracts/AccessControl.mock/contract/index.js';
 
@@ -58,12 +61,18 @@ export const AccessContractPrivateState = {
 /**
  * @description Default empty Merkle tree path with depth 10, required for Compact's Vector<10, ...> type.
  */
-const emptyMerkleTreePath = {
+const emptyMerkleTreePath: MerkleTreePath<Uint8Array> = {
   leaf: new Uint8Array(32),
-  path: Array.from({ length: 10 }, () => ({
-    sibling: { field: 0n },
-    goes_left: false,
-  })),
+  path: Array.from(
+    { length: 10 },
+    (): {
+      sibling: MerkleTreeDigest;
+      goes_left: boolean;
+    } => ({
+      sibling: { field: 0n },
+      goes_left: false,
+    }),
+  ),
 };
 
 /**
@@ -83,7 +92,10 @@ export const AccessControlWitnesses =
       ];
     },
 
-    wit_getRoleMerklePath(context, userRoleCommit) {
+    wit_getRoleMerklePath(
+      context,
+      userRoleCommit,
+    ): [AccessContractPrivateState, Maybe<MerkleTreePath<Uint8Array>>] {
       const key = Buffer.from(userRoleCommit).toString('hex');
       const roleEntry = context.privateState.roles[key];
 
@@ -97,21 +109,35 @@ export const AccessControlWitnesses =
         ];
       }
 
-      const merklePath = context.ledger.AccessControl_roleCommits.pathForLeaf(
-        roleEntry.index,
-        userRoleCommit,
-      );
+      // Use pathForLeaf for O(1) performance with the tracked index
+      // If the index is wrong, the circuit's checkRoot() validation will catch it
+      try {
+        const merklePath = context.ledger.AccessControl_roleCommits.pathForLeaf(
+          roleEntry.index,
+          userRoleCommit,
+        );
 
-      return [
-        context.privateState,
-        {
-          is_some: true,
-          value: {
-            leaf: merklePath.leaf,
-            path: merklePath.path,
+        return [
+          context.privateState,
+          {
+            is_some: true,
+            value: {
+              leaf: merklePath.leaf,
+              path: merklePath.path,
+            },
           },
-        },
-      ];
+        ];
+      } catch {
+        // If pathForLeaf fails (e.g., state corruption), return None
+        // Circuit validation (checkRoot) ensures security regardless
+        return [
+          context.privateState,
+          {
+            is_some: false,
+            value: emptyMerkleTreePath,
+          },
+        ];
+      }
     },
 
     wit_getSecretKey(context) {
