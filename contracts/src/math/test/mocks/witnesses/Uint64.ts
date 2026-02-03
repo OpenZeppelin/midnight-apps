@@ -1,4 +1,4 @@
-import type { Witnesses } from '../../../../../artifacts/math/test/mocks/contracts/Uint64.mock/contract/index.d.ts';
+import type { Witnesses } from '@src/artifacts/math/test/mocks/contracts/Uint64.mock/contract/index.d.ts';
 import { sqrtBigint } from '../../../utils/sqrtBigint.js';
 
 /**

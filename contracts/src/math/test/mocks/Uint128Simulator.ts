@@ -6,11 +6,11 @@ import type {
   DivResultU128,
   U128,
   U256,
-} from '../../../../artifacts/math/test/mocks/contracts/Uint128.mock/contract/index.js';
+} from '@src/artifacts/math/test/mocks/contracts/Uint128.mock/contract/index.js';
 import {
   Contract,
   ledger,
-} from '../../../../artifacts/math/test/mocks/contracts/Uint128.mock/contract/index.js';
+} from '@src/artifacts/math/test/mocks/contracts/Uint128.mock/contract/index.js';
 import { Uint128PrivateState, Uint128Witnesses } from './witnesses/Uint128.js';
 
 /**

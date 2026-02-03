@@ -1,7 +1,7 @@
 import { encodeCoinPublicKey } from '@midnight-ntwrk/compact-runtime';
 import { sampleCoinPublicKey } from '@midnight-ntwrk/zswap';
+import { AccessControl_Role } from '@src/artifacts/access/test/mocks/contracts/AccessControl.mock/contract/index.js';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { AccessControl_Role } from '../../../artifacts/access/test/mocks/contracts/AccessControl.mock/contract/index.js';
 import { AccessControlSimulator } from './mocks/AccessControlSimulator.js';
 import type { RoleValue } from './mocks/witnesses/AccessControl.js';
 

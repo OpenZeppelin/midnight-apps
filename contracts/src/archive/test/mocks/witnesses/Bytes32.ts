@@ -2,8 +2,8 @@ import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
 import type {
   DivResultU128,
   U256,
-} from '../../../artifacts/math/Index/contract/index.d.cts';
-import type { Ledger } from '../../../artifacts/math/test/Bytes32.mock/contract/index.js';
+} from '@src/artifacts/math/Index/contract/index.d.cts';
+import type { Ledger } from '@src/artifacts/math/test/Bytes32.mock/contract/index.js';
 import type { EmptyState } from '../types/state.js';
 
 /**

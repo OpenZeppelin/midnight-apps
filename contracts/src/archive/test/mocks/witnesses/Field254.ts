@@ -3,8 +3,8 @@ import type {
   DivResultU128,
   DivResultU256,
   U256,
-} from '../../../artifacts/math/Index/contract/index.d.ts';
-import type { Ledger } from '../../../artifacts/math/test/Field254.mock/contract/index.js';
+} from '@src/artifacts/math/Index/contract/index.d.ts';
+import type { Ledger } from '@src/artifacts/math/test/Field254.mock/contract/index.js';
 import type { EmptyState } from '../types/state.js';
 import { sqrtBigint } from '../utils/sqrtBigint.js';
 

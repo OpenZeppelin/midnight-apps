@@ -13,7 +13,7 @@ import {
   Contract,
   type Ledger,
   ledger,
-} from '../../../../artifacts/math/test/Bytes32.mock/contract/index.js';
+} from '@src/artifacts/math/test/Bytes32.mock/contract/index.js';
 import {
   Bytes32PrivateState,
   Bytes32Witnesses,

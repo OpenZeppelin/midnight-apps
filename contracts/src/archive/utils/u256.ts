@@ -1,4 +1,4 @@
-import type { U256 } from '../../../artifacts/math/Index/contract/index.d.ts';
+import type { U256 } from '@src/artifacts/math/Index/contract/index.d.ts';
 import { MAX_UINT64 } from '../../math/utils/consts.js';
 
 /**

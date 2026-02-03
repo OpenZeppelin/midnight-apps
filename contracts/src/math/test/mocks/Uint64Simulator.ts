@@ -2,11 +2,11 @@ import {
   type BaseSimulatorOptions,
   createSimulator,
 } from '@openzeppelin/compact-tools-simulator';
-import type { DivResultU64 } from '../../../../artifacts/math/test/mocks/contracts/Uint64.mock/contract/index.js';
+import type { DivResultU64 } from '@src/artifacts/math/test/mocks/contracts/Uint64.mock/contract/index.js';
 import {
   Contract,
   ledger,
-} from '../../../../artifacts/math/test/mocks/contracts/Uint64.mock/contract/index.js';
+} from '@src/artifacts/math/test/mocks/contracts/Uint64.mock/contract/index.js';
 import { Uint64PrivateState, Uint64Witnesses } from './witnesses/Uint64.js';
 
 /**

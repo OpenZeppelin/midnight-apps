@@ -5,7 +5,7 @@ import {
 import {
   ledger,
   Contract as MockQueue,
-} from '../../../../artifacts/structs/test/mocks/contracts/Queue.mock/contract/index.js';
+} from '@src/artifacts/structs/test/mocks/contracts/Queue.mock/contract/index.js';
 import {
   QueueContractPrivateState,
   QueueWitnesses,

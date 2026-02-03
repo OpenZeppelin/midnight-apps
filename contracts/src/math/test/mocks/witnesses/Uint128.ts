@@ -2,7 +2,7 @@ import type {
   DivResultU128,
   U128,
   Witnesses,
-} from '../../../../../artifacts/math/test/mocks/contracts/Uint128.mock/contract/index.d.ts';
+} from '@src/artifacts/math/test/mocks/contracts/Uint128.mock/contract/index.d.ts';
 import { sqrtBigint } from '../../../utils/sqrtBigint.js';
 
 /**

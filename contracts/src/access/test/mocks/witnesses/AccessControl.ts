@@ -2,7 +2,7 @@ import { getRandomValues } from 'node:crypto';
 import type {
   AccessControl_Role,
   Witnesses,
-} from '../../../../../artifacts/access/test/mocks/contracts/AccessControl.mock/contract/index.js';
+} from '@src/artifacts/access/test/mocks/contracts/AccessControl.mock/contract/index.js';
 
 export type RoleValue = {
   role: AccessControl_Role;

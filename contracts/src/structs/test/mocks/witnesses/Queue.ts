@@ -1,4 +1,4 @@
-import type { Witnesses } from '../../../../../artifacts/structs/test/mocks/contracts/Queue.mock/contract/index.js';
+import type { Witnesses } from '@src/artifacts/structs/test/mocks/contracts/Queue.mock/contract/index.js';
 
 // This is how we type an empty object.
 export type QueueContractPrivateState = Record<string, never>;

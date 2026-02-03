@@ -5,7 +5,7 @@ import {
 import {
   Contract,
   ledger,
-} from '../../../../artifacts/shielded-token/ShieldedFungibleToken/contract/index.js';
+} from '@src/artifacts/shielded-token/ShieldedFungibleToken/contract/index.js';
 import type {
   CoinInfo,
   ContractAddress,

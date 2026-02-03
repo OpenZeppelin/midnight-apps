@@ -5,11 +5,11 @@ import {
 import type {
   DivResultU256,
   U256,
-} from '../../../../artifacts/math/Index/contract/index.js';
+} from '@src/artifacts/math/Index/contract/index.js';
 import {
   Contract,
   ledger,
-} from '../../../../artifacts/math/test/Uint256.mock/contract/index.js';
+} from '@src/artifacts/math/test/Uint256.mock/contract/index.js';
 import { Uint256PrivateState, Uint256Witnesses } from './witnesses/Uint256.js';
 
 /**

@@ -1,8 +1,8 @@
-import { beforeEach, describe, expect, test } from 'vitest';
 import type {
   U128,
   U256,
-} from '../../../artifacts/math/test/mocks/contracts/Uint128.mock/contract/index.d.ts';
+} from '@src/artifacts/math/test/mocks/contracts/Uint128.mock/contract/index.d.ts';
+import { beforeEach, describe, expect, test } from 'vitest';
 import {
   MAX_UINT8,
   MAX_UINT16,
