@@ -2,16 +2,16 @@ import {
   type BaseSimulatorOptions,
   createSimulator,
 } from '@openzeppelin/compact-tools-simulator';
+import type {
+  ContractAddress,
+  Either,
+  ShieldedCoinInfo,
+  ZswapCoinPublicKey,
+} from '@src/artifacts/shielded-token/ShieldedFungibleToken/contract/index.js';
 import {
   Contract,
   ledger,
 } from '@src/artifacts/shielded-token/ShieldedFungibleToken/contract/index.js';
-import type {
-  CoinInfo,
-  ContractAddress,
-  Either,
-  ZswapCoinPublicKey,
-} from '../../../types/tests/StandardLibrary.js';
 import {
   type ShieldedFungibleTokenPrivateState,
   ShieldedFungibleTokenWitnesses,
@@ -68,23 +68,23 @@ export class ShieldedFungibleTokenSimulator extends ShieldedFungibleTokenSimulat
     return this.circuits.impure.totalSupply();
   }
 
-  public type(): Uint8Array {
-    return this.circuits.impure.type();
+  public tokenType(): Uint8Array {
+    return this.circuits.impure.tokenType();
   }
 
   public mint(
     recipient: Either<ZswapCoinPublicKey, ContractAddress>,
     amount: bigint,
-  ): CoinInfo {
+  ): ShieldedCoinInfo {
     return this.circuits.impure.mint(recipient, amount);
   }
 
   public burn(
-    coin: CoinInfo,
+    coin: ShieldedCoinInfo,
     amount: bigint,
   ): {
-    change: { is_some: boolean; value: CoinInfo };
-    sent: CoinInfo;
+    change: { is_some: boolean; value: ShieldedCoinInfo };
+    sent: ShieldedCoinInfo;
   } {
     return this.circuits.impure.burn(coin, amount);
   }

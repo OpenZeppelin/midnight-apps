@@ -8,6 +8,7 @@ import { ShieldedCoinInfo, ShieldedSendResult, ZswapCoinPublicKey, ContractAddre
 import "./openzeppelin/ShieldedERC20" prefix ShieldedFungibleToken_;
 
 export { ShieldedFungibleToken__nonce, ShieldedFungibleToken__domain, };
+export { ShieldedCoinInfo, ShieldedSendResult, ZswapCoinPublicKey, ContractAddress, Either };
 
 constructor(nonce_: Bytes<32>,
             name_: Opaque<"string">,

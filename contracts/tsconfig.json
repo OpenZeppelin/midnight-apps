@@ -1,9 +1,6 @@
 {
   "extends": "@tsconfig/node24/tsconfig.json",
-  "include": [
-    "src/**/witnesses/**/*.ts",
-    "src/access/test/mocks/witnesses/AccessControl.ts"
-  ],
+  "include": ["src/**/*.ts"],
   "exclude": ["src/archive/"],
   "compilerOptions": {
     "rootDir": "src",

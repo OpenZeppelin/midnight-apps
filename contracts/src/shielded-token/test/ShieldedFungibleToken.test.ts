@@ -3,21 +3,21 @@ import {
   rawTokenType,
 } from '@midnight-ntwrk/compact-runtime';
 import {
-  getZswapNetworkId,
-  NetworkId,
+  getNetworkId,
+  type NetworkId,
   setNetworkId,
 } from '@midnight-ntwrk/midnight-js-network-id';
 import {
   MidnightBech32m,
   ShieldedAddress,
 } from '@midnight-ntwrk/wallet-sdk-address-format';
-import { beforeEach, describe, expect, it } from 'vitest';
 import type {
-  CoinInfo,
   ContractAddress,
   Either,
+  ShieldedCoinInfo,
   ZswapCoinPublicKey,
-} from '../../types/tests/StandardLibrary.js';
+} from '@src/artifacts/shielded-token/ShieldedFungibleToken/contract/index.js';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { ShieldedFungibleTokenSimulator } from './mocks/ShieldedFungibleTokenSimulator.js';
 
 const NONCE = new Uint8Array(32).fill(0x01);
@@ -29,7 +29,9 @@ const ADMIN =
 const USER =
   'mn_shield-addr_test16fcl2lpnahvlq8v79tmwwlplhecg3s08axcunwpkezzgk59kf20qxq9jwznuslc496azd0ety7f4y5t5sgw89r6wfdsgars6ufj4zf936sprk8a9';
 
-setNetworkId(NetworkId.TestNet);
+const NETWORK_ID: NetworkId = 'test';
+
+setNetworkId(NETWORK_ID);
 
 // Helper function to create Either for hex addresses
 const createEitherFromHex = (
@@ -37,7 +39,7 @@ const createEitherFromHex = (
 ): Either<ZswapCoinPublicKey, ContractAddress> => {
   const bech32mAddress = MidnightBech32m.parse(hexString);
   const shieldedAddress = ShieldedAddress.codec.decode(
-    getZswapNetworkId(),
+    getNetworkId(),
     bech32mAddress,
   );
   const coinPublicKeyBytes = shieldedAddress.coinPublicKey.data;
@@ -83,7 +85,7 @@ describe('ShieldedFungibleToken', () => {
       const amount = 1000n;
 
       // Check token type is not set before lazy mint
-      const initialType = token.type();
+      const initialType = token.tokenType();
       expect(initialType).toEqual(new Uint8Array(32)); // Should be all zeros
 
       // Perform first mint
@@ -101,14 +103,14 @@ describe('ShieldedFungibleToken', () => {
 
       // Verify minted coin color matches the calculated token type
       expect(coin.color).toEqual(expectedType);
-      expect(token.type()).toEqual(expectedType);
+      expect(token.tokenType()).toEqual(expectedType);
 
       // Second mint should have the same color as the expected type
       const coin2 = token.mint(recipient, 500n);
       expect(coin2.color).toEqual(expectedType);
 
       // Type should remain unchanged after subsequent mints
-      expect(token.type()).toEqual(expectedType);
+      expect(token.tokenType()).toEqual(expectedType);
     });
 
     it('should mint tokens to a recipient', () => {
@@ -207,7 +209,7 @@ describe('ShieldedFungibleToken', () => {
   });
 
   describe('burn functionality', () => {
-    let mintedCoin: CoinInfo;
+    let mintedCoin: ShieldedCoinInfo;
 
     beforeEach(() => {
       // Setup: mint some tokens for burning tests
@@ -260,7 +262,7 @@ describe('ShieldedFungibleToken', () => {
 
     it('should fail when burning a coin with incorrect token type', () => {
       // Create a coin with a different token type (wrong color)
-      const incorrectCoin: CoinInfo = {
+      const incorrectCoin: ShieldedCoinInfo = {
         color: new Uint8Array(32).fill(0xff), // Different color
         nonce: mintedCoin.nonce,
         value: 100n,

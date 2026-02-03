@@ -842,9 +842,6 @@ packages:
   '@midnight-ntwrk/compact-runtime@0.14.0':
     resolution: {integrity: sha512-VfZmfPDedRUPAYIhKAgS5y+KtxOkSSOCS24PAsGMjhMpzJaaWVSd5SajF6HtNZsciL54sqru4EpWvmCAqsbmYQ==}
 
-  '@midnight-ntwrk/compact-runtime@0.14.0-rc.0':
-    resolution: {integrity: sha512-YGrEAISerARskWrM9jQYDDdXWHksnZz+wsoeuVeCRlUxclJxVEC0Mm2vfj823FmswBar+WaX6wINwqoRKgTheQ==}
-
   '@midnight-ntwrk/dapp-connector-api@4.0.0':
     resolution: {integrity: sha512-XiAesY32uPPDYOk6MXquO1lDsUhe7J/CMbMOIfEgjwDgXfkLvvKFMfNz672O1aSJYkqm1I65o2XjPXNnwloQtA==}
 
@@ -856,9 +853,6 @@ packages:
 
   '@midnight-ntwrk/onchain-runtime-v2@2.0.0':
     resolution: {integrity: sha512-9LfU3xJDI4aWcElE4ZxsGLKKAjj/7+O6nepvqMngojc+YLmlpR29ju4C+/isDbBk/4m/9m9fq89d8qIvX8Y4/Q==}
-
-  '@midnight-ntwrk/onchain-runtime-v2@2.0.0-rc.1':
-    resolution: {integrity: sha512-qeCSJzCEhMEJI4QZIoWr6fxohklE7vxXgzXCCTLpeaa1AUzCBrMz/FQvFkN+rAAPkrp3XWDeDQdEsEJytrMA3Q==, tarball: https://npm.pkg.github.com/download/@midnight-ntwrk/onchain-runtime-v2/2.0.0-rc.1/1647426c0ad452b87d03657a27609d671cd731de}
 
   '@midnight-ntwrk/wallet-api@5.0.0':
     resolution: {integrity: sha512-L5Z9+v+ouqTtPLoXpngtBVHZ0SmC3zLrCZbuYnd/ul6p9UbwUQ3AQeqMhclv2jhwFRNYsL0fBOqpD5dvs4SvLQ==}
@@ -4381,12 +4375,6 @@ snapshots:
       '@types/object-inspect': 1.13.0
       object-inspect: 1.13.4
 
-  '@midnight-ntwrk/compact-runtime@0.14.0-rc.0':
-    dependencies:
-      '@midnight-ntwrk/onchain-runtime-v2': 2.0.0-rc.1
-      '@types/object-inspect': 1.13.0
-      object-inspect: 1.13.4
-
   '@midnight-ntwrk/dapp-connector-api@4.0.0': {}
 
   '@midnight-ntwrk/ledger-v7@7.0.0': {}
@@ -4394,8 +4382,6 @@ snapshots:
   '@midnight-ntwrk/midnight-js-network-id@3.0.0': {}
 
   '@midnight-ntwrk/onchain-runtime-v2@2.0.0': {}
-
-  '@midnight-ntwrk/onchain-runtime-v2@2.0.0-rc.1': {}
 
   '@midnight-ntwrk/wallet-api@5.0.0(rxjs@7.8.2)':
     dependencies:
@@ -4456,7 +4442,7 @@ snapshots:
 
   '@openzeppelin/compact-tools-simulator@file:compact-tools/packages/simulator':
     dependencies:
-      '@midnight-ntwrk/compact-runtime': 0.14.0-rc.0
+      '@midnight-ntwrk/compact-runtime': 0.14.0
 
   '@pinojs/redact@0.4.0': {}
 
