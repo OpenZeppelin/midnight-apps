@@ -1263,9 +1263,9 @@ describe('Checked Operations', () => {
   });
 
   describe('MAX_UINT128', () => {
-    test('should return 340282366920938463463374607431768211455', () => {
+    test('should return 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF', () => {
       expect(uint128Simulator.MAX_UINT128()).toBe(
-        340282366920938463463374607431768211455n,
+        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn,
       );
     });
   });
