@@ -38,7 +38,7 @@ compact --version
    git clone --recurse-submodules <repository-url>
    cd midnight-apps
    ```
-   
+
    If you already cloned without submodules, initialize them:
    ```bash
    git submodule update --init --recursive
@@ -77,7 +77,7 @@ cd compact-tools && yarn install && yarn build && cd -
    ```
    - **Note**: Running `pnpm build:contracts`, `pnpm compact`, or `pnpm compact:fast` from the root may cause repetitive output due to Turbo's logging behavior. It's recommended to compile contracts individually from within each package directory.
    - **Feature Request**: A logging output mode flag is being requested to fix Turbo animation log flooding. See [GitHub Issue #1188](https://github.com/midnightntwrk/compactc/issues/1188) for more details.
-   
+
 ### Tasks with Turbo
 Turbo manages tasks across the monorepo, defined in `turbo.json`. Key tasks:
 
@@ -97,7 +97,7 @@ Turbo manages tasks across the monorepo, defined in `turbo.json`. Key tasks:
   - **`build:apps`**
     - Builds apps projects.
     - Run: `pnpm build:apps`.
-    
+
 - **`test`**:
   - Runs tests with Vitest.
   - Run: `pnpm test`.
