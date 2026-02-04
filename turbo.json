@@ -55,14 +55,21 @@
       "inputs": [
         "src/**/*.ts",
         "src/**/*.tsx",
+        "app/**/*.tsx",
+        "app/**/*.ts",
+        "components/**/*.tsx",
+        "lib/**/*.ts",
+        "hooks/**/*.ts",
         "!src/**/*.test.ts",
         "!tests/**/*.ts",
         "tsconfig.json",
         "tsconfig.build.json",
+        "next.config.mjs",
         ".env"
       ],
       "outputs": [
-        "dist/**"
+        "dist/**",
+        ".next/**"
       ]
     },
     "build:fast": {
