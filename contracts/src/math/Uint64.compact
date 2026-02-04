@@ -90,7 +90,7 @@ module Uint64 {
    * @returns {Uint<32>} The value 4,294,967,295 (0xFFFFFFFF).
    */
   export pure circuit MAX_UINT32(): Uint<32> {
-    return 4294967295;
+    return 0xFFFFFFFF;
   }
 
   /**
