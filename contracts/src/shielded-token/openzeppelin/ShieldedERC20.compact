@@ -137,7 +137,7 @@ module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
    * @param {amount} - The value of tokens minted.
    * @return {ShieldedCoinInfo} - The description of the newly created coin.
    */
-  // TODO: if we use Uint<128> we get this compilation error:c
+  // TODO: if we use Uint<128> we get this compilation error:
   // no compatible function named mintToken is in scope at this call
   //   one function is incompatible with the supplied argument types
   //     supplied argument types:
