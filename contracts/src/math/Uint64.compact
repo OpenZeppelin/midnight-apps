@@ -102,7 +102,7 @@ module Uint64 {
    * @returns {Uint<64>} The value 18,446,744,073,709,551,615 (0xFFFFFFFFFFFFFFFF).
    */
   export pure circuit MAX_UINT64(): Uint<64> {
-    return 18446744073709551615;
+    return 0xFFFFFFFFFFFFFFFF;
   }
 
   /**
