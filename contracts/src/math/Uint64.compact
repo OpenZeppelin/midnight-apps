@@ -78,7 +78,7 @@ module Uint64 {
    * @returns {Uint<16>} The value 65,535 (0xFFFF).
    */
   export pure circuit MAX_UINT16(): Uint<16> {
-    return 65535;
+    return 0xFFFF;
   }
 
   /**
