@@ -177,7 +177,7 @@ module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
    * @returns {Boolean} - True if the bytes are zero, false otherwise.
    */
   circuit isZero(a: Bytes<32>): Boolean {
-    return a == upgradeFromTransient(0 as Field);
+    return a == pad(32, '');
   }
 
   /**
