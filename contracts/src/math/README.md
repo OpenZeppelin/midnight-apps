@@ -14,12 +14,28 @@ This package provides mathematical contract operations for the Midnight Network,
 
 ### Module Dependency Diagram
 
-> Arrows read as "depends on". Shared struct types `TU128` and `TU256` are
-> omitted for clarity -- they are used by `Vector32`, `Uint128`, `Uint256`,
-> `Bytes32`, and `Field255`.
+> Arrows point from dependency to dependent (read as "is used by").
+> Shared struct types `TU128` and `TU256` are omitted for clarity.
 
 ```mermaid
-graph BT
+graph TD
+    subgraph "<b>8 / 64-bit</b>"
+        Vector8
+        Bytes8
+        Uint64
+    end
+
+    subgraph "<b>128-bit</b>"
+        Uint128
+    end
+
+    subgraph "<b>256-bit / 32-byte</b>"
+        Vector32
+        Uint256
+        Bytes32
+        Field255
+    end
+
     Vector8 --> Bytes8
     Vector8 --> Uint64
     Uint64 --> Uint128
@@ -29,13 +45,12 @@ graph BT
     Uint256 --> Bytes32
     Uint256 --> Field255
     Bytes32 --> Field255
-    Vector32
 
     style Vector8 fill:#dbeafe,stroke:#3b82f6
-    style Vector32 fill:#dbeafe,stroke:#3b82f6
-    style Bytes8 fill:#fef9c3,stroke:#ca8a04
-    style Uint64 fill:#fef9c3,stroke:#ca8a04
-    style Uint128 fill:#ede9fe,stroke:#7c3aed
+    style Bytes8 fill:#dbeafe,stroke:#3b82f6
+    style Uint64 fill:#dbeafe,stroke:#3b82f6
+    style Uint128 fill:#fef9c3,stroke:#ca8a04
+    style Vector32 fill:#ede9fe,stroke:#7c3aed
     style Uint256 fill:#ede9fe,stroke:#7c3aed
     style Bytes32 fill:#ede9fe,stroke:#7c3aed
     style Field255 fill:#ede9fe,stroke:#7c3aed
