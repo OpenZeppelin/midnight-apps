@@ -1,0 +1,231 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (access/AccessControl.compact)
+
+pragma language_version >= 0.20.0;
+
+/**
+ * @module AccessControl
+ * @description Manages role-based access control using a Merkle tree to store role commitments.
+ * Provides circuits for granting and revoking roles, with Admin-only restrictions.
+ */
+module AccessControl {
+  import CompactStandardLibrary;
+
+  /**
+   * @description Defines the possible roles a user can have in the system.
+   * @enum {number}
+   */
+  export enum Role {
+    Admin,
+    Lp,
+    Trader,
+    None
+  };
+
+  /**
+   * @description Indicates whether the contract has been initialized.
+   * @type {Boolean}
+   */
+  export ledger isInitialized: Boolean;
+
+  /**
+   * @description Merkle tree storing commitments of user-role pairs, with a fixed depth of 10.
+   * @type {MerkleTree<10, Bytes<32>>}
+   */
+  export ledger roleCommits: MerkleTree<10, Bytes<32>>;
+
+  /**
+   * @description A set of nullifiers tracking used user-role pairs to prevent duplicate role assignments.
+   * @type {Set<Bytes<32>>}
+   */
+  export ledger roleNullifiers: Set<Bytes<32>>;
+
+  /**
+   * @description Counter tracking the next available index for inserting into the role tree.
+   * @type {Counter}
+   */
+  export ledger index: Counter;
+
+  /**
+   * @description Witness function to update a user’s role and its index in private state.
+   * @param {Bytes<32>} userRoleCommit - The commitment hash of the user-role pair.
+   * @param {Role} role - The role to set.
+   * @param {Uint<64>} index - The index in the Merkle tree.
+   * @returns {[]} - An empty array indicating success.
+   */
+  export witness wit_updateRole(userRoleCommit: Bytes<32>, role: Role, index: Uint<64>): [];
+
+  /**
+   * @description Witness function to retrieve the Merkle path for a user-role commitment.
+   * @param {Bytes<32>} userRoleCommit - The commitment hash of the user-role pair.
+   * @returns {Maybe<MerkleTreePath<10, Bytes<32>>>} - The path if it exists, otherwise None.
+   */
+  export witness wit_getRoleMerklePath(userRoleCommit: Bytes<32>): Maybe<MerkleTreePath<10,
+                                                                                        Bytes<32>>>;
+
+  /**
+   * @description Witness to provide user’s secret key for nullifier generation.
+   */
+  export witness wit_getSecretKey(): Bytes<32>;
+
+  /**
+   * @description Initializes the AccessControl contract by granting the Admin role to an initial user.
+   * @param {ZswapCoinPublicKey} initialAdmin - The public key of the initial admin.
+   * @returns {[]} - An empty array indicating success.
+   * @throws {RoleError} - If the contract is already initialized.
+   */
+  export circuit initialize(initialAdmin: ZswapCoinPublicKey): [] {
+    assert(!isInitialized, "AccessControl: AccessControl contract is initialized!");
+    isInitialized = true;
+    return _grantRole(initialAdmin, Role.Admin);
+  }
+
+  /**
+   * @description Grants a role to a user, restricted to Admin callers.
+   * @param {ZswapCoinPublicKey} user - The public key of the user to grant the role to.
+   * @param {Role} role - The role to grant (Admin, Lp, Trader, or None).
+   * @returns {[]} - An empty array indicating success.
+   * @throws {RoleError} - If the contract is not initialized, caller is not Admin, or the role tree is full.
+   */
+  export circuit grantRole(user: ZswapCoinPublicKey, role: Role): [] {
+    assert(isInitialized, "AccessControl: Role contract is not initialized yet!");
+    assert(onlyAdmin(), "AccessControl: Caller does not have an Admin role!");
+
+    return _grantRole(user, role);
+  }
+
+  /**
+   * @description Internal helper to grant a role by inserting it into the Merkle tree.
+   * @param {ZswapCoinPublicKey} user - The public key of the user.
+   * @param {Role} role - The role to grant.
+   * @returns {[]} - An empty array indicating success.
+   */
+  circuit _grantRole(user: ZswapCoinPublicKey, role: Role): [] {
+    assert(!roleCommits.isFull(), "AccessControl: Role commitments tree is full!");
+
+    const nullifier = disclose(hashNullifier(user, role));
+    // TODO: Now I have to use disclose(Nullifier) here, would that leak the sk at the end?!
+    assert(!roleNullifiers.member(nullifier), "AccessControl: Role already granted!");
+
+    roleNullifiers.insert(nullifier);
+
+    const userRoleCommit = disclose(hashUserRole(user, role));
+    const currentIndex = index;
+
+    roleCommits.insertIndex(userRoleCommit, currentIndex);
+    wit_updateRole(userRoleCommit, role, currentIndex);
+
+    return index.increment(1);
+  }
+
+  /**
+   * @description Revokes a role from a user, restricted to Admin callers.
+   * @param {ZswapCoinPublicKey} user - The public key of the user to revoke the role from.
+   * @param {Role} role - The role to revoke.
+   * @returns {[]} - An empty array indicating success.
+   * @throws {RoleError} - If the contract is not initialized, caller is not Admin, or user lacks the role.
+   * @todo Implement revocation logic with a queue for index reuse.
+   */
+  circuit revokeRole(user: ZswapCoinPublicKey, role: Role): [] {
+    assert(isInitialized, "AccessControl: Role contract is not initialized yet!");
+    assert(onlyAdmin(), "AccessControl: Caller does not have an Admin role!");
+    assert(hasRole(user, role), "AccessControl: User does not have a role!");
+  }
+
+  /**
+   * @description Internal helper to revoke a role (not implemented).
+   * @param {ZswapCoinPublicKey} user - The public key of the user.
+   * @param {Role} role - The role to revoke.
+   * @returns {[]} - An empty array indicating success.
+   * @todo Implement using a queue to manage freed indices.
+   */
+  circuit _revokeRole(user: ZswapCoinPublicKey, role: Role): [] {
+    const userRoleCommit = hashUserRole(user, role);
+    /// TODO: A Queue is needed.
+  }
+
+  /**
+   * @description Computes a commitment hash for a user and role.
+   * @param {ZswapCoinPublicKey} user - The public key of the user.
+   * @param {Role} role - The role to hash.
+   * @returns {Bytes<32>} - A 32-byte hash of the user-role pair.
+   * @todo Revisit to add salt or randomness for privacy.
+   */
+  export circuit hashUserRole(user: ZswapCoinPublicKey, role: Role): Bytes<32> {
+    // TODO: Revisit to enhance privacy by adding salt or randomness for shielding user identity
+    return persistentHash<Vector<2, Bytes<32>>>([user.bytes, hashRole(role)]);
+  }
+
+  /**
+   * @description Hashes a role enum value.
+   * @param {Role} role - The role to hash.
+   * @returns {Bytes<32>} - A 32-byte hash of the role.
+   */
+  circuit hashRole(role: Role): Bytes<32> {
+    return persistentHash<Vector<1, Role>>([role]);
+  }
+
+  /**
+   * @description Checks if the caller has the Admin role.
+   * @returns {Boolean} - True if the caller is an Admin, false otherwise.
+   */
+  export circuit onlyAdmin(): Boolean {
+    return hasRole(ownPublicKey(), Role.Admin);
+  }
+
+  /**
+   * @description Checks if the caller has the Lp role.
+   * @returns {Boolean} - True if the caller is an Lp, false otherwise.
+   */
+  export circuit onlyLp(): Boolean {
+    return hasRole(ownPublicKey(), Role.Lp);
+  }
+
+  /**
+   * @description Checks if the caller has the Trader role.
+   * @returns {Boolean} - True if the caller is a Trader, false otherwise.
+   * @note Contains a syntax error: missing Role enum reference.
+   */
+  export circuit onlyTrader(): Boolean {
+    return hasRole(ownPublicKey(), Role.Trader); // Fixed syntax error
+  }
+
+  /**
+   * @description Verifies if a user has a specific role.
+   * @param {ZswapCoinPublicKey} user - The public key of the user to check.
+   * @param {Role} role - The role to verify.
+   * @returns {Boolean} - True if the user has the role, false otherwise.
+   * @throws {RoleError} - If the role path or Merkle root is invalid.
+   */
+  circuit hasRole(user: ZswapCoinPublicKey, role: Role): Boolean {
+    const userRoleCommit = hashUserRole(user, role);
+    const userRolePath = disclose(wit_getRoleMerklePath(userRoleCommit));
+    const ind = index;
+
+    assert((userRolePath.is_some &&
+            roleCommits.checkRoot(getPathRoot(userRolePath.value)) &&
+            userRoleCommit == userRolePath.value.leaf), "AccessControl: Unauthorized user!");
+
+    return true;
+  }
+
+  /**
+   * @description Computes a nullifier for a user and role using secret knowledge.
+   */
+  circuit hashNullifier(user: ZswapCoinPublicKey, role: Role): Bytes<32> {
+    const sk = wit_getSecretKey();
+    return persistentHash<Vector<4, Bytes<32>>>(
+             [pad(32, "role-nullifier"), hashRole(role), user.bytes, sk]);
+  }
+
+  // TODO: Should be in a general Compact utils contract for MerkleTree.
+  /**
+   * @description Computes the Merkle tree root from a path.
+   * @param {MerkleTreePath<10, Bytes<32>>} path - The Merkle path to compute the root from.
+   * @returns {MerkleTreeDigest} - The root digest of the Merkle tree.
+   * @todo Move to a utils.compact module for reusability.
+   */
+  circuit getPathRoot(path: MerkleTreePath<10, Bytes<32>>): MerkleTreeDigest {
+    return merkleTreePathRoot<10, Bytes<32>>(path);
+  }
+}

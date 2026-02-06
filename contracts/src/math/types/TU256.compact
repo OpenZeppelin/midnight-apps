@@ -1,0 +1,38 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/types/TU256.compact)
+
+pragma language_version >= 0.20.0;
+
+/**
+ * @title TU256
+ * @dev Type definition module for the U256 struct, representing 256-bit unsigned integers.
+ *
+ * This module exists separately from Uint256 to avoid cyclic dependencies between
+ * Uint128 and Uint256 modules. The U256 type is used as a return type for operations
+ * in Uint128 (like addition and multiplication that may overflow 128 bits), while
+ * U256 itself is composed of two U128 values. By placing the type definition here,
+ * both modules can import the type without creating a circular import chain.
+ *
+ * Import chain:
+ * - TU256 imports U128 from Uint128 (type definition only)
+ * - Uint128 imports U256 from TU256 (for function return types)
+ * - Uint256 imports U256 from TU256 and operations from Uint128
+ */
+module TU256 {
+  import TU128;
+
+  /**
+   * @description A struct representing a 256-bit unsigned integer as two 128-bit parts.
+   * The value is computed as: high * 2^128 + low
+   */
+  export struct U256 {
+    /**
+     * @description The least significant 128 bits (bits 0-127) of the 256-bit number
+     */
+    low: U128,
+    /**
+     * @description The most significant 128 bits (bits 128-255) of the 256-bit number
+     */
+    high: U128
+  }
+}

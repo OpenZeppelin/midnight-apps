@@ -1,0 +1,70 @@
+{
+  "name": "@openzeppelin/midnight-apps-contracts",
+  "version": "0.0.1-alpha.1",
+  "description": "OpenZeppelin Midnight Apps contracts",
+  "keywords": [
+    "openzeppelin",
+    "midnight-apps",
+    "midnight",
+    "contracts",
+    "security"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenZeppelin/midnight-apps.git"
+  },
+  "license": "MIT",
+  "author": "OpenZeppelin Community <maintainers@openzeppelin.org>",
+  "bugs": {
+    "url": "https://github.com/OpenZeppelin/midnight-apps/issues"
+  },
+  "homepage": "",
+  "type": "module",
+  "config": {
+    "compactVersion": "+0.28.0",
+    "artifactsOutDir": "src/artifacts",
+    "artifactsStructure": "--hierarchical"
+  },
+  "scripts": {
+    "compact": "compact-compiler $npm_package_config_compactVersion $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir",
+    "compact:fast": "compact-compiler $npm_package_config_compactVersion --skip-zk $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir",
+    "compact:access": "compact-compiler $npm_package_config_compactVersion --dir access $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir",
+    "compact:archive": "compact-compiler $npm_package_config_compactVersion --dir archive $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir",
+    "compact:compact-types": "compact-compiler $npm_package_config_compactVersion --dir compact-types $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir",
+    "compact:shielded-token": "compact-compiler $npm_package_config_compactVersion --dir shielded-token $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir",
+    "compact:structs": "compact-compiler $npm_package_config_compactVersion --dir structs $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir",
+    "compact:math": "compact-compiler $npm_package_config_compactVersion --dir math $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir",
+    "compact:fmt": "compact format --check",
+    "compact:fmt:fix": "compact format --write",
+    "build": "compact-builder $npm_package_config_compactVersion $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir",
+    "build:fast": "compact-builder $npm_package_config_compactVersion --skip-zk $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir",
+    "test": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest watch",
+    "types": "tsc -p tsconfig.json --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check . --write",
+    "lint:ci": "biome ci . --changed --since=main --no-errors-on-unmatched",
+    "clean": "git clean -fXd"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@openzeppelin/compact-tools-cli": "file:../compact-tools/packages/cli",
+    "@openzeppelin/compact-tools-simulator": "file:../compact-tools/packages/simulator",
+    "@openzeppelin/midnight-apps-biome-config": "workspace:^",
+    "@tsconfig/node24": "^24.0.3",
+    "@types/node": "24.10.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.14"
+  },
+  "dependencies": {
+    "@midnight-ntwrk/midnight-js-network-id": "3.0.0",
+    "@midnight-ntwrk/wallet-sdk-address-format": "3.0.0",
+    "@midnight-ntwrk/zswap": "4.0.0",
+    "@midnight-ntwrk/compact-runtime": "0.14.0"
+  }
+}

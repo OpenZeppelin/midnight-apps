@@ -1,0 +1,413 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/Uint64.compact)
+
+pragma language_version >= 0.20.0;
+
+/**
+ * @title Uint64
+ * @dev A utility module providing mathematical operations for unsigned integers. Most functions operate on
+ * `Uint<64>` values in the range [0, 2^64 - 1], while the `sqrt` function accepts a `Uint<128>` input in the range
+ * [0, 2^128 - 1]. The module supports arithmetic, division, square root, and utility functions with overflow and
+ * underflow checks where applicable.
+ *
+ * Supported Mathematical Operations:
+ * - Arithmetic:
+ *   - add(): Adds two `Uint<64>` numbers, returning a `Uint<128>` result to handle potential overflow.
+ *   - sub(): Subtracts one `Uint<64>` number from another, checking for underflow.
+ *   - mul(): Multiplies two `Uint<64>` numbers, returning a `Uint<128>` result.
+ * - Division:
+ *   - div(): Computes the quotient of dividing one `Uint<64>` number by another.
+ *   - rem(): Computes the remainder of dividing one `Uint<64>` number by another.
+ * - Square Root:
+ *   - sqrt(): Computes the floor of the square root of a `Uint<128>` number using the Newton-Raphson method.
+ * - Utility:
+ *   - isMultiple(): Checks if one `Uint<64>` number is a multiple of another.
+ *   - min(): Returns the smaller of two `Uint<64>` numbers.
+ *   - max(): Returns the larger of two `Uint<64>` numbers.
+ */
+module Uint64 {
+  /**
+   * @dev Struct containing the quotient and remainder from a division operation
+   */
+  export struct DivResultU64 {
+    /**
+     * @dev The quotient result from the division operation
+     */
+    quotient: Uint<64>,
+    /**
+     * @dev The remainder result from the division operation
+     */
+    remainder: Uint<64>
+  }
+
+  /**
+   * @description Computes division of two Uint<64> values locally (off-chain).
+   *
+   * @param a The number to divide.
+   * @param b The number to divide by.
+   * @returns DivResultU64 The quotient and remainder of the division.
+   */
+  export witness divU64Locally(a: Uint<64>, b: Uint<64>): DivResultU64;
+
+  /**
+   * @description Computes the square root of a Uint<64> value locally (off-chain).
+   *
+   * @param radicand The number to compute the square root of.
+   * @returns Uint<32> The square root of radicand.
+   */
+  export witness sqrtU64Locally(radicand: Uint<64>): Uint<32>;
+
+  /**
+  * @title MAX_UINT8 circuit
+  * @description Returns the maximum value for an 8-bit unsigned integer (2^8 - 1).
+  *
+  * @circuitInfo k=10, rows=128
+  *
+  * @returns {Uint<8>} The value 255 (0xFF).
+  */
+  export pure circuit MAX_UINT8(): Uint<8> {
+    return 255;
+  }
+
+  /**
+   * @title MAX_UINT16 circuit
+   * @description Returns the maximum value for a 16-bit unsigned integer (2^16 - 1).
+   *
+   * @circuitInfo k=10, rows=128
+   *
+   * @returns {Uint<16>} The value 65,535 (0xFFFF).
+   */
+  export pure circuit MAX_UINT16(): Uint<16> {
+    return 0xFFFF;
+  }
+
+  /**
+   * @title MAX_UINT32 circuit
+   * @description Returns the maximum value for a 32-bit unsigned integer (2^32 - 1).
+   *
+   * @circuitInfo k=10, rows=128
+   *
+   * @returns {Uint<32>} The value 4,294,967,295 (0xFFFFFFFF).
+   */
+  export pure circuit MAX_UINT32(): Uint<32> {
+    return 0xFFFFFFFF;
+  }
+
+  /**
+   * @title MAX_UINT64 circuit
+   * @description Returns the maximum value for a 64-bit unsigned integer (2^64 - 1).
+   *
+   * @circuitInfo k=10, rows=128
+   *
+   * @returns {Uint<64>} The value 18,446,744,073,709,551,615 (0xFFFFFFFFFFFFFFFF).
+   */
+  export pure circuit MAX_UINT64(): Uint<64> {
+    return 0xFFFFFFFFFFFFFFFF;
+  }
+
+  /**
+   * @title Add circuit
+   * @description Adds two `Uint<64>` numbers, returning a `Uint<128>` result to accommodate potential overflow.
+   *
+   * @remarks
+   * Requirements:
+   * - `a` and `b` must be valid `Uint<64>` values in range [0, 2^64 - 1].
+   *
+   * @circuitInfo k=10, rows=575
+   *
+   * @param {Uint<64>} a - The first unsigned 64-bit integer.
+   * @param {Uint<64>} b - The second unsigned 64-bit integer.
+   *
+   * @returns {Uint<128>} The sum of `a` and `b` as a `Uint<128>` value.
+   */
+  export circuit add(a: Uint<64>, b: Uint<64>): Uint<128> {
+    return a + b;
+  }
+
+  /**
+   * @title Subtract circuit
+   * @description Subtracts `b` from `a`, checking for underflow to ensure the result is non-negative.
+   *
+   * @remarks
+   * Requirements:
+   * - `a` must be greater than or equal to `b` to prevent underflow.
+   * - Both inputs must be valid `Uint<64>` values.
+   *
+   * @circuitInfo k=10, rows=575
+   *
+   * @param {Uint<64>} a - The unsigned 64-bit integer to subtract from (minuend).
+   * @param {Uint<64>} b - The unsigned 64-bit integer to subtract (subtrahend).
+   *
+   * @throws {Error} "Math: subtraction underflow" if `b > a`.
+   *
+   * @returns {Uint<64>} The difference `a - b` as a `Uint<64>` value.
+   */
+  export circuit sub(a: Uint<64>, b: Uint<64>): Uint<64> {
+    assert(a >= b, "Math: subtraction underflow");
+    return a - b;
+  }
+
+  /**
+   * @title Multiply circuit
+   * @description Multiplies two `Uint<64>` values, returning a `Uint<128>` result to handle large products.
+   *
+   * @remarks
+   * Requirements:
+   * - `a` and `b` must be valid `Uint<64>` values.
+   * - Result is returned as `Uint<128>` to handle potential overflow.
+   *
+   * @circuitInfo k=11, rows=1874
+   *
+   * @param {Uint<64>} a - The first unsigned 64-bit integer (multiplicand).
+   * @param {Uint<64>} b - The second unsigned 64-bit integer (multiplier).
+   *
+   * @returns {Uint<128>} The product of `a` and `b` as a `Uint<128>` value.
+   */
+  export circuit mul(a: Uint<64>, b: Uint<64>): Uint<128> {
+    return a * b;
+  }
+
+  /**
+   * @title Internal Division circuit
+   * @description Internal circuit to divide a Uint<64> number by another, returning quotient and remainder.
+   *
+   * Theoretical Description:
+   * This circuit computes the quotient and remainder of dividing a 64-bit unsigned integer a by another b,
+   * both represented as Uint<64> values in [0, 2^64 - 1]. It returns a DivResultU64 struct containing the
+   * quotient and remainder, satisfying a = quotient * b + remainder, where 0 <= remainder < b.
+   *
+   * Mathematical Steps:
+   * 1. Handle Special Cases:
+   *    - If b = 0, throw "Math: division by zero".
+   *    - Else if a = 0, return { quotient: 0, remainder: 0 }.
+   *    - Else if b = 1, return { quotient: a, remainder: 0 }.
+   *    - Else if a = b, return { quotient: 1, remainder: 0 }.
+   *    - Else if a < b, return { quotient: 0, remainder: a }.
+   * 2. Division Computation:
+   *    - Compute result = (quotient, remainder) using divU64Locally, where quotient = floor(a / b)
+   *      and remainder = a mod b.
+   * 3. Verification:
+   *    - Assert remainder < b, ensuring 0 <= remainder < b.
+   *    - Assert quotient * b + remainder = a, ensuring correctness.
+   * 4. Result:
+   *    - Return DivResultU64 { quotient, remainder }.
+   *
+   * @remarks
+   * Requirements:
+   * - `b` must not be zero.
+   * - `remainder` must be less than `b`.
+   * - `quotient * b + remainder` must equal `a`.
+   *
+   * @circuitInfo k=10, rows=277
+   *
+   * @param {Uint<64>} a - The Uint<64> value to divide (dividend).
+   * @param {Uint<64>} b - The Uint<64> value to divide by (divisor).
+   *
+   * @throws {Error} "Math: division by zero" if b is zero.
+   * @throws {Error} "Math: remainder error" if remainder is not less than b.
+   * @throws {Error} "Math: division invalid" if quotient * b + remainder does not equal a.
+   *
+   * @returns {DivResultU64} A struct containing the quotient and remainder as Uint<64> values.
+   */
+  circuit _div(a: Uint<64>, b: Uint<64>): DivResultU64 {
+    assert(b != 0, "Math: division by zero");
+
+    if (a == 0) {
+      return DivResultU64 { quotient: 0 as Uint<64>, remainder: 0 as Uint<64> };
+    } else if (b == 1) {
+      return DivResultU64 { quotient: a, remainder: 0 as Uint<64> };
+    } else if (a == b) {
+      return DivResultU64 { quotient: 1 as Uint<64>, remainder: 0 as Uint<64> };
+    } else if (a < b) {
+      return DivResultU64 { quotient: 0 as Uint<64>, remainder: a };
+    } else {
+      const result = divU64Locally(a, b);
+      assert(result.remainder < b, "Math: remainder error");
+      assert((result.quotient * b + result.remainder) as Uint<64> == a, "Math: division invalid");
+      return result;
+    }
+  }
+
+  /**
+   * @title Division circuit
+   * @description Divides a `Uint<64>` number `a` by `b`, returning the quotient.
+   *
+   * @remarks
+   * Requirements:
+   * - `b` must not be zero.
+   * - Uses internal `_div` circuit for computation.
+   *
+   * @circuitInfo k=10, rows=240
+   *
+   * @param {Uint<64>} a - The unsigned 64-bit integer to divide (dividend).
+   * @param {Uint<64>} b - The unsigned 64-bit integer to divide by (divisor).
+   *
+   * @throws {Error} "Math: division by zero" if `b` is zero.
+   * @throws {Error} "Math: remainder error" if the division result is invalid.
+   * @throws {Error} "Math: division invalid" if the division result is invalid.
+   *
+   * @returns {Uint<64>} The quotient of `a` divided by `b` as a `Uint<64>` value.
+   */
+  export circuit div(a: Uint<64>, b: Uint<64>): Uint<64> {
+    return _div(a, b).quotient;
+  }
+
+  /**
+   * @title Remainder circuit
+   * @description Computes the remainder of dividing a `Uint<64>` number `a` by `b`.
+   *
+   * @remarks
+   * Requirements:
+   * - `b` must not be zero.
+   * - Uses internal `_div` circuit for computation.
+   *
+   * @circuitInfo k=10, rows=240
+   *
+   * @param {Uint<64>} a - The unsigned 64-bit integer to divide (dividend).
+   * @param {Uint<64>} b - The unsigned 64-bit integer to divide by (divisor).
+   *
+   * @throws {Error} "Math: division by zero" if `b` is zero.
+   * @throws {Error} "Math: remainder error" if the division result is invalid.
+   * @throws {Error} "Math: division invalid" if the division result is invalid.
+   *
+   * @returns {Uint<64>} The remainder of `a` divided by `b` as a `Uint<64>` value.
+   */
+  export circuit rem(a: Uint<64>, b: Uint<64>): Uint<64> {
+    return _div(a, b).remainder;
+  }
+
+  /**
+   * @title Division with Remainder circuit
+   * @description Divides a Uint<64> number by another, returning both quotient and remainder.
+   *
+   * @remarks
+   * Requirements:
+   * - `b` must not be zero.
+   * - `remainder` must be less than `b`.
+   * - `quotient * b + remainder` must equal `a`.
+   *
+   * @circuitInfo k=10, rows=277
+   *
+   * @param {Uint<64>} a - The Uint<64> value to divide (dividend).
+   * @param {Uint<64>} b - The Uint<64> value to divide by (divisor).
+   *
+   * @throws {Error} "Math: division by zero" if b is zero.
+   * @throws {Error} "Math: remainder error" if remainder is not less than b.
+   * @throws {Error} "Math: division invalid" if quotient * b + remainder does not equal a.
+   *
+   * @returns {DivResultU64} A struct containing the quotient and remainder as Uint<64> values.
+   */
+  export circuit divRem(a: Uint<64>, b: Uint<64>): DivResultU64 {
+    return _div(a, b);
+  }
+
+  /**
+   * @title Square Root circuit
+   * @description Computes the floor of the square root of a Uint<64> value.
+   *
+   * Theoretical Description:
+   * This circuit calculates the floor of the square root R = floor(sqrt(N)) of a 64-bit unsigned integer
+   * N, provided as a Uint<64> value in [0, 2^64 - 1]. The result is a Uint<32> value R in [0, 2^32 - 1],
+   * such that R^2 <= N < (R + 1)^2. It uses a witness-based approach for the general case and includes
+   * special cases for common inputs to optimize performance.
+   *
+   * Mathematical Steps:
+   * 1. General Case Computation:
+   *    - Compute R = floor(sqrt(N)) using sqrtLocally, where R is in [0, 2^32 - 1].
+   * 2. Root Verification:
+   *    - Compute rootSquare = R * R using mul.
+   *    - Assert rootSquare <= N, ensuring R^2 <= N.
+   * 3. Next Value Verification:
+   *    - Compute next = R + 1, where next is in [1, 2^32].
+   *    - Compute nextSquare = next * next using mul.
+   *    - Assert nextSquare > N, ensuring (R + 1)^2 > N.
+   * 4. Result:
+   *    - Return R as Uint<32>.
+   *
+   * @remarks
+   * Requirements:
+   * - `radicand` must be a valid `Uint<64>` value.
+   * - `rootSquare` must be less than or equal to `radicand`.
+   * - `nextSquare` must be greater than `radicand`.
+   *
+   * @circuitInfo k=10, rows=122
+   *
+   * @param {Uint<64>} radicand - The Uint<64> value to compute the square root of.
+   *
+   * @throws {Error} "Math: sqrt overestimate" If R^2 > radicand.
+   * @throws {Error} "Math: sqrt underestimate" If (R + 1)^2 <= radicand.
+   *
+   * @returns {Uint<32>} The floor of the square root of radicand.
+   */
+  export circuit sqrt(radicand: Uint<64>): Uint<32> {
+    const root = sqrtU64Locally(radicand);
+    const rootSquare = mul(root, root);
+    assert(rootSquare <= radicand, "Math: sqrt overestimate");
+
+    const next = root + 1;
+    const nextSquare = mul(next, next);
+    assert(nextSquare > radicand, "Math: sqrt underestimate");
+
+    return root;
+  }
+
+  /**
+   * @title Is Multiple circuit
+   * @description Checks if a `Uint<64>` number is a multiple of another.
+   *
+   * @remarks
+   * Requirements:
+   * - `b` must not be zero.
+   * - Uses `rem` circuit to check if remainder is zero.
+   *
+   * @circuitInfo k=10, rows=243
+   *
+   * @param {Uint<64>} a - The unsigned 64-bit integer to check.
+   * @param {Uint<64>} b - The unsigned 64-bit integer divisor.
+   *
+   * @throws {Error} "Math: division by zero" if `b` is zero.
+   *
+   * @returns {Boolean} `true` if `a` is a multiple of `b`, `false` otherwise.
+   */
+  export circuit isMultiple(a: Uint<64>, b: Uint<64>): Boolean {
+    return rem(a, b) == 0;
+  }
+
+  /**
+   * @title Min circuit
+   * @description Returns the minimum of two Uint<64> values.
+   *
+   * @remarks
+   * Requirements:
+   * - `a` and `b` must be valid `Uint<64>` values.
+   *
+   * @circuitInfo k=10, rows=128
+   *
+   * @param {Uint<64>} a - The first unsigned 64-bit integer.
+   * @param {Uint<64>} b - The second unsigned 64-bit integer.
+   *
+   * @returns {Uint<64>} The smaller of `a` and `b` as a `Uint<64>` value.
+   */
+  export circuit min(a: Uint<64>, b: Uint<64>): Uint<64> {
+    return a < b ? a : b;
+  }
+
+  /**
+   * @title Max circuit
+   * @description Returns the maximum of two Uint<64> values.
+   *
+   * @remarks
+   * Requirements:
+   * - `a` and `b` must be valid `Uint<64>` values.
+   *
+   * @circuitInfo k=10, rows=128
+   *
+   * @param {Uint<64>} a - The first unsigned 64-bit integer.
+   * @param {Uint<64>} b - The second unsigned 64-bit integer.
+   *
+   * @returns {Uint<64>} The larger of `a` and `b` as a `Uint<64>` value.
+   */
+  export circuit max(a: Uint<64>, b: Uint<64>): Uint<64> {
+    return a > b ? a : b;
+  }
+}

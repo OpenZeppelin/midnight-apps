@@ -1,0 +1,185 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/test/Uint128.mock.compact)
+
+pragma language_version >= 0.20.0;
+
+import CompactStandardLibrary;
+
+import { DivResultU128 } from "../../../Uint128";
+import { U128 } from "../../../types/TU128";
+import { U256 } from "../../../types/TU256";
+import "../../../Uint128" prefix Uint128_;
+
+export { DivResultU128, U128, U256 };
+
+/**
+ * @description A mock contract for testing the MathU128 module's circuits.
+ */
+
+export pure circuit MODULUS(): Uint<128> {
+  return Uint128_MODULUS();
+}
+
+export pure circuit ZERO_U128(): U128 {
+  return Uint128_ZERO_U128();
+}
+
+export circuit toU128(value: Uint<128>): U128 {
+  return disclose(Uint128_toU128(value));
+}
+
+export circuit fromU128(value: U128): Uint<128> {
+  return disclose(Uint128_fromU128(value));
+}
+
+export circuit isZero(value: Uint<128>): Boolean {
+  return Uint128_isZero(value);
+}
+
+export circuit isZeroU128(value: U128): Boolean {
+  return Uint128_isZeroU128(value);
+}
+
+export circuit eq(a: Uint<128>, b: Uint<128>): Boolean {
+  return Uint128_eq(a, b);
+}
+
+export circuit eqU128(a: U128, b: U128): Boolean {
+  return Uint128_eqU128(a, b);
+}
+
+export circuit lt(a: Uint<128>, b: Uint<128>): Boolean {
+  return disclose(Uint128_lt(a, b));
+}
+
+export circuit lte(a: Uint<128>, b: Uint<128>): Boolean {
+  return disclose(Uint128_lte(a, b));
+}
+
+export circuit ltU128(a: U128, b: U128): Boolean {
+  return disclose(Uint128_ltU128(a, b));
+}
+
+export circuit lteU128(a: U128, b: U128): Boolean {
+  return disclose(Uint128_lteU128(a, b));
+}
+
+export circuit gt(a: Uint<128>, b: Uint<128>): Boolean {
+  return disclose(Uint128_gt(a, b));
+}
+
+export circuit gte(a: Uint<128>, b: Uint<128>): Boolean {
+  return disclose(Uint128_gte(a, b));
+}
+
+export circuit gtU128(a: U128, b: U128): Boolean {
+  return disclose(Uint128_gtU128(a, b));
+}
+
+export circuit gteU128(a: U128, b: U128): Boolean {
+  return disclose(Uint128_gteU128(a, b));
+}
+
+export circuit add(a: Uint<128>, b: Uint<128>): U256 {
+  return disclose(Uint128_add(a, b));
+}
+
+export circuit addU128(a: U128, b: U128): U256 {
+  return disclose(Uint128_addU128(a, b));
+}
+
+export circuit addChecked(a: Uint<128>, b: Uint<128>): Uint<128> {
+  return disclose(Uint128_addChecked(a, b));
+}
+
+export circuit addCheckedU128(a: U128, b: U128): Uint<128> {
+  return disclose(Uint128_addCheckedU128(a, b));
+}
+
+export circuit sub(a: Uint<128>, b: Uint<128>): Uint<128> {
+  return disclose(Uint128_sub(a, b));
+}
+
+export circuit subU128(a: U128, b: U128): U128 {
+  return Uint128_subU128(a, b);
+}
+
+export circuit mul(a: Uint<128>, b: Uint<128>): U256 {
+  return disclose(Uint128_mul(a, b));
+}
+
+export circuit mulU128(a: U128, b: U128): U256 {
+  return disclose(Uint128_mulU128(a, b));
+}
+
+export circuit mulChecked(a: Uint<128>, b: Uint<128>): Uint<128> {
+  return disclose(Uint128_mulChecked(a, b));
+}
+
+export circuit mulCheckedU128(a: U128, b: U128): Uint<128> {
+  return disclose(Uint128_mulCheckedU128(a, b));
+}
+
+export circuit div(a: Uint<128>, b: Uint<128>): Uint<128> {
+  return disclose(Uint128_div(a, b));
+}
+
+export circuit divU128(a: U128, b: U128): U128 {
+  return disclose(Uint128_divU128(a, b));
+}
+
+export circuit rem(a: Uint<128>, b: Uint<128>): Uint<128> {
+  return disclose(Uint128_rem(a, b));
+}
+
+export circuit remU128(a: U128, b: U128): U128 {
+  return disclose(Uint128_remU128(a, b));
+}
+
+export circuit divRem(a: Uint<128>, b: Uint<128>): DivResultU128 {
+  return disclose(Uint128_divRem(a, b));
+}
+
+export circuit divRemU128(a: U128, b: U128): DivResultU128 {
+  return disclose(Uint128_divRemU128(a, b));
+}
+
+export circuit sqrt(radicand: Uint<128>): Uint<64> {
+  return disclose(Uint128_sqrt(radicand));
+}
+
+export circuit sqrtU128(radicand: U128): Uint<64> {
+  return disclose(Uint128_sqrtU128(radicand));
+}
+
+export circuit min(a: Uint<128>, b: Uint<128>): Uint<128> {
+  return disclose(Uint128_min(a, b));
+}
+
+export circuit minU128(a: U128, b: U128): U128 {
+  return Uint128_minU128(a, b);
+}
+
+export circuit max(a: Uint<128>, b: Uint<128>): Uint<128> {
+  return disclose(Uint128_max(a, b));
+}
+
+export circuit maxU128(a: U128, b: U128): U128 {
+  return disclose(Uint128_maxU128(a, b));
+}
+
+export circuit isMultiple(value: Uint<128>, b: Uint<128>): Boolean {
+  return disclose(Uint128_isMultiple(value, b));
+}
+
+export circuit isMultipleU128(value: U128, b: U128): Boolean {
+  return disclose(Uint128_isMultipleU128(value, b));
+}
+
+export pure circuit MAX_UINT128(): Uint<128> {
+  return Uint128_MAX_UINT128();
+}
+
+export pure circuit MAX_U128(): U128 {
+  return Uint128_MAX_U128();
+}
