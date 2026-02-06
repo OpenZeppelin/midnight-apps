@@ -1,4 +1,4 @@
-# `@openzeppelin/midnight-apps-contracts`
+# `@openzeppelin/midnight-apps-contracts/math`
 
 A comprehensive mathematical operations library for Midnight Network smart contracts, providing efficient and secure arithmetic operations for various integer types.
 
@@ -11,6 +11,35 @@ This package provides mathematical contract operations for the Midnight Network,
 - **Division operations** with quotient and remainder results
 - **Witness-based computations** for off-chain calculations and circuit verification.
 - **Type-safe interfaces** for all mathematical operations
+
+### Module Dependency Diagram
+
+> Arrows read as "depends on". Shared struct types `TU128` and `TU256` are
+> omitted for clarity -- they are used by `Vector32`, `Uint128`, `Uint256`,
+> `Bytes32`, and `Field255`.
+
+```mermaid
+graph BT
+    Vector8 --> Bytes8
+    Vector8 --> Uint64
+    Uint64 --> Uint128
+    Uint64 --> Uint256
+    Uint128 --> Uint256
+    Uint128 --> Field255
+    Uint256 --> Bytes32
+    Uint256 --> Field255
+    Bytes32 --> Field255
+    Vector32
+
+    style Vector8 fill:#dbeafe,stroke:#3b82f6
+    style Vector32 fill:#dbeafe,stroke:#3b82f6
+    style Bytes8 fill:#fef9c3,stroke:#ca8a04
+    style Uint64 fill:#fef9c3,stroke:#ca8a04
+    style Uint128 fill:#ede9fe,stroke:#7c3aed
+    style Uint256 fill:#ede9fe,stroke:#7c3aed
+    style Bytes32 fill:#ede9fe,stroke:#7c3aed
+    style Field255 fill:#ede9fe,stroke:#7c3aed
+```
 
 ## Features
 
