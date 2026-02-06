@@ -45,15 +45,6 @@ graph TD
     Uint256 --> Bytes32
     Uint256 --> Field255
     Bytes32 --> Field255
-
-    style Vector8 fill:#1e3a5f,stroke:#60a5fa,color:#e0e0e0
-    style Bytes8 fill:#1e3a5f,stroke:#60a5fa,color:#e0e0e0
-    style Uint64 fill:#1e3a5f,stroke:#60a5fa,color:#e0e0e0
-    style Uint128 fill:#4a3728,stroke:#f59e0b,color:#e0e0e0
-    style Vector32 fill:#2e1a47,stroke:#a78bfa,color:#e0e0e0
-    style Uint256 fill:#2e1a47,stroke:#a78bfa,color:#e0e0e0
-    style Bytes32 fill:#2e1a47,stroke:#a78bfa,color:#e0e0e0
-    style Field255 fill:#2e1a47,stroke:#a78bfa,color:#e0e0e0
 ```
 
 ## Features
