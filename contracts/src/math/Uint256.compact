@@ -1,0 +1,264 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/Uint256.compact)
+
+pragma language_version >= 0.20.0;
+
+/**
+ * @title Uint256 module
+ *
+ * @description A utility module providing mathematical operations and conversions for 256-bit
+ * unsigned integers using the U256 struct. The U256 type represents numbers as
+ * `high * 2^128 + low`, where high and low are U128 structs (each containing two Uint<64> limbs).
+ *
+ * @remarks
+ * Supported Operations:
+ * - Comparisons:
+ *   - eq(): Checks if two 256-bit numbers are equal.
+ *   - lt(): Checks if one 256-bit number is less than another.
+ *   - lte(): Checks if one 256-bit number is less than or equal to another.
+ *   - gt(): Checks if one 256-bit number is greater than another.
+ *   - gte(): Checks if one 256-bit number is greater than or equal to another.
+ * - Conversions:
+ *   - toBytes(value): Converts U256 to Bytes<32> (little-endian)
+ *   - toVector(value): Converts U256 to Vector<32, Uint<8>> (little-endian)
+ */
+module Uint256 {
+  import { toVector } from Uint64 prefix Uint64_;
+  import { MAX_U128, eqU128, ltU128, gtU128 } from Uint128 prefix Uint128_;
+
+  // U256 type is imported from the types module to avoid cyclic dependencies
+  // between Uint128 and Uint256 modules. See TU256 module documentation.
+  import "./types/TU128";
+  import "./types/TU256";
+
+  /**
+   * @title ZERO_U256 circuit
+   * @description Returns a U256 struct representing zero.
+   *
+   * @remarks
+   * This circuit returns a U256 struct with all fields set to zero:
+   * {low: {0, 0}, high: {0, 0}}, representing the 256-bit value 0.
+   * No computations are performed, only struct construction.
+   *
+   * @circuitInfo k=10, rows=71
+   *
+   * @returns {U256} A U256 struct representing 0.
+   */
+  export circuit ZERO_U256(): U256 {
+    return U256 { low: U128 { low: 0, high: 0 }, high: U128 { low: 0, high: 0 } };
+  }
+
+  /**
+   * @title MAX_U256 circuit
+   * @description Returns the maximum value for a U256 struct, where both low and high
+   * fields are set to the maximum 128-bit value (2^128 - 1).
+   *
+   * @circuitInfo k=10, rows=72
+   *
+   * @returns {U256} A U256 struct representing 2^256 - 1.
+   */
+  export pure circuit MAX_U256(): U256 {
+    return U256 { low: Uint128_MAX_U128(), high: Uint128_MAX_U128() };
+  }
+
+  /**
+   * @title toVector circuit
+   * @description Converts a U256 to a Vector<32, Uint<8>> using little-endian byte ordering.
+   *
+   * @remarks
+   * This circuit unpacks a 256-bit unsigned integer into a 32-element vector of bytes.
+   * Each 64-bit limb of the U256 is unpacked via `Uint64.toVector`, then the bytes
+   * are assembled into the final vector.
+   *
+   * Limb unpacking order (little-endian):
+   * - low.low   → bytes 0-7   (least significant)
+   * - low.high  → bytes 8-15
+   * - high.low  → bytes 16-23
+   * - high.high → bytes 24-31 (most significant)
+   *
+   * @param {U256} value - The 256-bit value to convert.
+   *
+   * @returns {Vector<32, Uint<8>>} - The 32-element byte vector representation.
+   */
+  export circuit toVector(value: U256): Vector<32, Uint<8>> {
+    // Unpack each limb into 8 bytes
+    const [v0, v1, v2, v3, v4, v5, v6, v7] = Uint64_toVector(value.low.low);
+    const [v8, v9, v10, v11, v12, v13, v14, v15] = Uint64_toVector(value.low.high);
+    const [v16, v17, v18, v19, v20, v21, v22, v23] = Uint64_toVector(value.high.low);
+    const [v24, v25, v26, v27, v28, v29, v30, v31] = Uint64_toVector(value.high.high);
+
+    return [v0,
+            v1,
+            v2,
+            v3,
+            v4,
+            v5,
+            v6,
+            v7,
+            v8,
+            v9,
+            v10,
+            v11,
+            v12,
+            v13,
+            v14,
+            v15,
+            v16,
+            v17,
+            v18,
+            v19,
+            v20,
+            v21,
+            v22,
+            v23,
+            v24,
+            v25,
+            v26,
+            v27,
+            v28,
+            v29,
+            v30,
+            v31];
+  }
+
+  /**
+   * @title toBytes circuit
+   * @description Converts a U256 to a Bytes<32> using little-endian byte ordering.
+   *
+   * @remarks
+   * This circuit converts a 256-bit unsigned integer to a 32-byte array.
+   * The conversion is done by first unpacking the U256 into a vector via
+   * `toVector`, then casting the vector to `Bytes<32>`.
+   *
+   * @param {U256} value - The 256-bit value to convert.
+   *
+   * @returns {Bytes<32>} - The 32-byte array representation.
+   */
+  export circuit toBytes(value: U256): Bytes<32> {
+    const vector = toVector(value);
+    return vector as Bytes<32>;
+  }
+
+  /**
+   * @title eq circuit
+   * @description Compares two U256 values to check if a == b.
+   *
+   * @remarks
+   * This circuit compares two 256-bit numbers A = a.high * 2^128 + a.low and
+   * B = b.high * 2^128 + b.low, where a.high, a.low, b.high, b.low are in [0, 2^128 - 1],
+   * to determine if A == B. It performs a field-wise comparison of the high and low parts,
+   * returning true if A == B, false otherwise. No arithmetic operations are performed,
+   * only comparisons and logical operations (AND).
+   *
+   * The circuit checks if A == B by evaluating:
+   * - A.high == B.high (using Uint128_eqU128).
+   * - A.low == B.low (using Uint128_eqU128).
+   * The result is true only if both conditions hold.
+   *
+   * @circuitInfo k=10, rows=270
+   *
+   * @param {U256} a - The first U256 value.
+   * @param {U256} b - The second U256 value.
+   *
+   * @returns {Boolean} True if a == b, false otherwise.
+   */
+  export circuit eq(a: U256, b: U256): Boolean {
+    return Uint128_eqU128(a.high, b.high) && Uint128_eqU128(a.low, b.low);
+  }
+
+  /**
+   * @title lt circuit
+   * @description Compares two U256 values to check if a < b.
+   *
+   * @remarks
+   * Theoretical Description:
+   * This circuit compares two 256-bit numbers A = a.high * 2^128 + a.low and
+   * B = b.high * 2^128 + b.low, where a.high, a.low, b.high,
+   * b.low are in [0, 2^128 - 1], to determine if A < B. It performs a lexicographical
+   * comparison by checking the high parts first, then the low parts if the high parts are
+   * equal, returning true if A < B, false otherwise. No arithmetic operations are performed,
+   * only comparisons and logical operations (OR, AND).
+   *
+   * @circuitInfo k=10, rows=335
+   *
+   * @param {U256} a - The first U256 value.
+   * @param {U256} b - The second U256 value.
+   *
+   * @returns {Boolean} True if a < b, false otherwise.
+   */
+  export circuit lt(a: U256, b: U256): Boolean {
+    return Uint128_ltU128(a.high, b.high) ||
+           (Uint128_eqU128(a.high, b.high) && Uint128_ltU128(a.low, b.low));
+  }
+
+  /**
+   * @title lte circuit
+   * @description Compares two U256 values to check if a <= b.
+   *
+   * @remarks
+   * Theoretical Description:
+   * This circuit compares two 256-bit numbers A = a.high * 2^128 + a.low and
+   * B = b.high * 2^128 + b.low, where a.high, a.low, b.high, b.low are in [0, 2^128 - 1],
+   * to determine if A <= B. It performs a lexicographical comparison by checking the high
+   * parts first, then the low parts if the high parts are equal, returning true if A <= B,
+   * false otherwise.
+   *
+   * @circuitInfo k=10, rows=350
+   *
+   * @param {U256} a - The first U256 value.
+   * @param {U256} b - The second U256 value.
+   *
+   * @returns {Boolean} True if a <= b, false otherwise.
+   */
+  export circuit lte(a: U256, b: U256): Boolean {
+    return lt(a, b) || eq(a, b);
+  }
+
+  /**
+   * @title gt circuit
+   * @description Compares two U256 values to check if a > b.
+   *
+   * @remarks
+   * Theoretical Description:
+   * This circuit compares two 256-bit numbers A = a.high * 2^128 + a.low and
+   * B = b.high * 2^128 + b.low, where a.high, a.low, b.high,
+   * b.low are in [0, 2^128 - 1], to determine if A > B. It performs a lexicographical
+   * comparison by checking the high parts first, then the low parts if the high parts are
+   * equal, returning true if A > B, false otherwise. No arithmetic operations are performed,
+   * only comparisons and logical operations (OR, AND).
+   *
+   * @circuitInfo k=10, rows=335
+   *
+   * @param {U256} a - The first U256 value.
+   * @param {U256} b - The second U256 value.
+   *
+   * @returns {Boolean} True if a > b, false otherwise.
+   */
+  export circuit gt(a: U256, b: U256): Boolean {
+    return Uint128_gtU128(a.high, b.high) ||
+           (Uint128_eqU128(a.high, b.high) && Uint128_gtU128(a.low, b.low));
+  }
+
+  /**
+   * @title gte circuit
+   * @description Compares two U256 values to check if a >= b.
+   *
+   * @remarks
+   * Theoretical Description:
+   * This circuit compares two 256-bit numbers A = a.high * 2^128 + a.low and
+   * B = b.high * 2^128 + b.low, where a.high, a.low, b.high, b.low are in [0, 2^128 - 1],
+   * to determine if A >= B. It performs a lexicographical comparison by checking the high
+   * parts first, then the low parts if the high parts are equal, returning true if A >= B,
+   * false otherwise.
+   *
+   * @circuitInfo k=10, rows=350
+   *
+   * @param {U256} a - The first U256 value.
+   * @param {U256} b - The second U256 value.
+   *
+   * @returns {Boolean} True if a >= b, false otherwise.
+   */
+  export circuit gte(a: U256, b: U256): Boolean {
+    return gt(a, b) || eq(a, b);
+  }
+}
