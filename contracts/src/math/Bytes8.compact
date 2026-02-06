@@ -1,0 +1,55 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/Bytes8.compact)
+
+pragma language_version >= 0.20.0;
+
+/**
+ * @title Bytes8 module
+ * @description A utility module providing conversions between Bytes<8> and Uint<64>
+ * using little-endian (LE) byte ordering.
+ *
+ * @remarks
+ * Byte ordering convention (little-endian):
+ * - Least significant byte first. Byte 0 is the LSB, byte 7 is the MSB.
+ * - This mirrors the pattern of Bytes32 ↔ U256 conversions.
+ *
+ * Supported circuits:
+ * - toUint64(bytes): Converts Bytes<8> to Uint<64> using little-endian ordering
+ * - toVector(bytes): Converts Bytes<8> to Vector<8, Uint<8>>
+ */
+module Bytes8 {
+  import { toUint64 } from "./Vector8" prefix Vector8_;
+
+  /**
+   * @title toUint64 circuit
+   * @description Converts a Bytes<8> to a Uint<64> using pure arithmetic.
+   *
+   * @remarks
+   * This circuit converts an 8-byte array to a 64-bit unsigned integer
+   * using little-endian byte ordering. The conversion is done by casting
+   * the bytes to a vector and then using Vector8.toUint64.
+   *
+   * @param {Bytes<8>} bytes - The 8-byte array to convert.
+   *
+   * @returns {Uint<64>} - The 64-bit unsigned integer.
+   */
+  export circuit toUint64(bytes: Bytes<8>): Uint<64> {
+    return bytes as Uint<64>;
+  }
+
+  /**
+   * @title toVector circuit
+   * @description Converts a Bytes<8> to a Vector<8, Uint<8>>.
+   *
+   * @remarks
+   * This circuit converts an 8-byte array to a vector of 8 bytes
+   * by casting the bytes to a vector type.
+   *
+   * @param {Bytes<8>} bytes - The 8-byte array to convert.
+   *
+   * @returns {Vector<8, Uint<8>>} - The vector of 8 bytes.
+   */
+  export circuit toVector(bytes: Bytes<8>): Vector<8, Uint<8>> {
+    return bytes as Vector<8, Uint<8>>;
+  }
+}

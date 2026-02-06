@@ -1,6 +1,6 @@
+import { Uint64Simulator } from '@src/math/test/mocks/Uint64Simulator.js';
+import { MAX_UINT32, MAX_UINT64 } from '@src/math/utils/consts.js';
 import { beforeEach, describe, expect, test } from 'vitest';
-import { MAX_UINT32, MAX_UINT64 } from '../utils/consts.js';
-import { Uint64Simulator } from './mocks/Uint64Simulator.js';
 
 let uint64Simulator: Uint64Simulator;
 
@@ -18,8 +18,41 @@ describe('Uint64', () => {
 
     test('should not overflow', () => {
       expect(uint64Simulator.add(MAX_UINT64, MAX_UINT64)).toBe(
-        36893488147419103230n,
+        0x1fffffffffffffffen,
       );
+    });
+  });
+
+  describe('AddChecked', () => {
+    test('should add two small numbers', () => {
+      expect(uint64Simulator.addChecked(5n, 3n)).toBe(8n);
+    });
+
+    test('should add zero', () => {
+      expect(uint64Simulator.addChecked(5n, 0n)).toBe(5n);
+      expect(uint64Simulator.addChecked(0n, 5n)).toBe(5n);
+    });
+
+    test('should add at boundary without overflow', () => {
+      expect(uint64Simulator.addChecked(MAX_UINT64 - 1n, 1n)).toBe(MAX_UINT64);
+      expect(uint64Simulator.addChecked(1n, MAX_UINT64 - 1n)).toBe(MAX_UINT64);
+    });
+
+    test('should fail on overflow', () => {
+      expect(() => uint64Simulator.addChecked(MAX_UINT64, 1n)).toThrowError(
+        'failed assert: Math: addition overflow',
+      );
+    });
+
+    test('should fail on large overflow', () => {
+      expect(() =>
+        uint64Simulator.addChecked(MAX_UINT64, MAX_UINT64),
+      ).toThrowError('failed assert: Math: addition overflow');
+    });
+
+    test('should handle half max values without overflow', () => {
+      const halfMax = MAX_UINT64 / 2n;
+      expect(uint64Simulator.addChecked(halfMax, halfMax)).toBe(halfMax * 2n);
     });
   });
 
@@ -76,6 +109,50 @@ describe('Uint64', () => {
     });
   });
 
+  describe('MulChecked', () => {
+    test('should multiply two small numbers', () => {
+      expect(uint64Simulator.mulChecked(4n, 3n)).toBe(12n);
+    });
+
+    test('should multiply by zero', () => {
+      expect(uint64Simulator.mulChecked(5n, 0n)).toBe(0n);
+      expect(uint64Simulator.mulChecked(0n, 5n)).toBe(0n);
+    });
+
+    test('should multiply by one', () => {
+      expect(uint64Simulator.mulChecked(MAX_UINT64, 1n)).toBe(MAX_UINT64);
+      expect(uint64Simulator.mulChecked(1n, MAX_UINT64)).toBe(MAX_UINT64);
+    });
+
+    test('should multiply at boundary without overflow', () => {
+      // sqrt(MAX_UINT64) ≈ 4294967295, so 4294967295 * 4294967295 should be within range
+      const sqrtMax = MAX_UINT32;
+      expect(uint64Simulator.mulChecked(sqrtMax, sqrtMax)).toBe(
+        sqrtMax * sqrtMax,
+      );
+    });
+
+    test('should fail on overflow', () => {
+      expect(() => uint64Simulator.mulChecked(MAX_UINT64, 2n)).toThrowError(
+        'failed assert: Math: multiplication overflow',
+      );
+    });
+
+    test('should fail on large overflow', () => {
+      expect(() =>
+        uint64Simulator.mulChecked(MAX_UINT64, MAX_UINT64),
+      ).toThrowError('failed assert: Math: multiplication overflow');
+    });
+
+    test('should fail when product exceeds MAX_UINT64', () => {
+      // MAX_UINT32 + 1 = 2^32, and (2^32)^2 = 2^64 which overflows
+      const sqrtMaxPlusOne = MAX_UINT32 + 1n;
+      expect(() =>
+        uint64Simulator.mulChecked(sqrtMaxPlusOne, sqrtMaxPlusOne),
+      ).toThrowError('failed assert: Math: multiplication overflow');
+    });
+  });
+
   describe('div', () => {
     test('should divide small numbers', () => {
       expect(uint64Simulator.div(10n, 3n)).toBe(3n);
@@ -108,7 +185,7 @@ describe('Uint64', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      uint64Simulator.overrideWitness('divU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_divUint64', (context) => [
         context.privateState,
         { quotient: 1n, remainder: 10n },
       ]);
@@ -118,7 +195,7 @@ describe('Uint64', () => {
     });
 
     test('should fail when quotient * b + remainder != a', () => {
-      uint64Simulator.overrideWitness('divU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_divUint64', (context) => [
         context.privateState,
         { quotient: 1n, remainder: 1n },
       ]);
@@ -164,7 +241,7 @@ describe('Uint64', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      uint64Simulator.overrideWitness('divU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_divUint64', (context) => [
         context.privateState,
         { quotient: 1n, remainder: 5n },
       ]);
@@ -174,7 +251,7 @@ describe('Uint64', () => {
     });
 
     test('should fail when quotient * b + remainder != a', () => {
-      uint64Simulator.overrideWitness('divU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_divUint64', (context) => [
         context.privateState,
         { quotient: 0n, remainder: 2n },
       ]);
@@ -234,7 +311,7 @@ describe('Uint64', () => {
     });
 
     test('should fail when remainder >= divisor', () => {
-      uint64Simulator.overrideWitness('divU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_divUint64', (context) => [
         context.privateState,
         { quotient: 1n, remainder: 5n },
       ]);
@@ -244,7 +321,7 @@ describe('Uint64', () => {
     });
 
     test('should fail when quotient * b + remainder != a', () => {
-      uint64Simulator.overrideWitness('divU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_divUint64', (context) => [
         context.privateState,
         { quotient: 2n, remainder: 0n },
       ]);
@@ -254,7 +331,7 @@ describe('Uint64', () => {
     });
 
     test('should fail when remainder >= divisor (duplicate)', () => {
-      uint64Simulator.overrideWitness('divU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_divUint64', (context) => [
         context.privateState,
         { quotient: 1n, remainder: 10n },
       ]);
@@ -317,7 +394,7 @@ describe('Uint64', () => {
     });
 
     test('should fail with overestimated root', () => {
-      uint64Simulator.overrideWitness('sqrtU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_sqrtUint64', (context) => [
         context.privateState,
         5n,
       ]);
@@ -327,7 +404,7 @@ describe('Uint64', () => {
     });
 
     test('should fail with underestimated root', () => {
-      uint64Simulator.overrideWitness('sqrtU64Locally', (context) => [
+      uint64Simulator.overrideWitness('wit_sqrtUint64', (context) => [
         context.privateState,
         3n,
       ]);
@@ -387,25 +464,83 @@ describe('Uint64', () => {
 
   describe('MAX_UINT8', () => {
     test('should return 255', () => {
-      expect(uint64Simulator.MAX_UINT8()).toBe(255n);
+      expect(uint64Simulator.MAX_UINT8()).toBe(0xffn);
     });
   });
 
   describe('MAX_UINT16', () => {
     test('should return 65535', () => {
-      expect(uint64Simulator.MAX_UINT16()).toBe(65535n);
+      expect(uint64Simulator.MAX_UINT16()).toBe(0xffffn);
     });
   });
 
   describe('MAX_UINT32', () => {
     test('should return 4294967295', () => {
-      expect(uint64Simulator.MAX_UINT32()).toBe(4294967295n);
+      expect(uint64Simulator.MAX_UINT32()).toBe(0xffffffffn);
     });
   });
 
   describe('MAX_UINT64', () => {
     test('should return 18446744073709551615', () => {
-      expect(uint64Simulator.MAX_UINT64()).toBe(18446744073709551615n);
+      expect(uint64Simulator.MAX_UINT64()).toBe(0xffffffffffffffffn);
+    });
+  });
+
+  describe('toVector', () => {
+    test('should convert zero to all-zero vector', () => {
+      const vec = uint64Simulator.toVector(0n);
+      expect(vec).toEqual([0n, 0n, 0n, 0n, 0n, 0n, 0n, 0n]);
+    });
+
+    test('should convert small value correctly', () => {
+      const vec = uint64Simulator.toVector(0x01_02_03n);
+      expect(vec[0]).toBe(3n);
+      expect(vec[1]).toBe(2n);
+      expect(vec[2]).toBe(1n);
+      expect(vec.slice(3)).toEqual([0n, 0n, 0n, 0n, 0n]);
+    });
+
+    test('should convert MAX_UINT64 to all-0xFF vector', () => {
+      const vec = uint64Simulator.toVector(MAX_UINT64);
+      expect(vec).toEqual([255n, 255n, 255n, 255n, 255n, 255n, 255n, 255n]);
+    });
+
+    test('should place single byte at each position', () => {
+      expect(uint64Simulator.toVector(1n)[0]).toBe(1n);
+      expect(uint64Simulator.toVector(0x100n)[1]).toBe(1n);
+      expect(uint64Simulator.toVector(0x10000n)[2]).toBe(1n);
+      expect(uint64Simulator.toVector(0x1000000n)[3]).toBe(1n);
+      expect(uint64Simulator.toVector(0x100000000n)[4]).toBe(1n);
+      expect(uint64Simulator.toVector(0x10000000000n)[5]).toBe(1n);
+      expect(uint64Simulator.toVector(0x1000000000000n)[6]).toBe(1n);
+      expect(uint64Simulator.toVector(0x100000000000000n)[7]).toBe(1n);
+    });
+  });
+
+  describe('toBytes', () => {
+    test('should convert zero to zero bytes', () => {
+      const bytes = uint64Simulator.toBytes(0n);
+      expect(bytes).toEqual(new Uint8Array(8).fill(0));
+    });
+
+    test('should convert small value correctly', () => {
+      const bytes = uint64Simulator.toBytes(123n);
+      expect(bytes[0]).toBe(123);
+      expect(bytes.slice(1)).toEqual(new Uint8Array(7).fill(0));
+    });
+
+    test('should convert MAX_UINT64 to all-0xFF bytes', () => {
+      const bytes = uint64Simulator.toBytes(MAX_UINT64);
+      expect(bytes).toEqual(new Uint8Array(8).fill(255));
+    });
+
+    test('should roundtrip with toVector', () => {
+      const value = 0x0123456789abcdefn;
+      const vec = uint64Simulator.toVector(value);
+      const bytes = uint64Simulator.toBytes(value);
+      for (let i = 0; i < 8; i++) {
+        expect(Number(vec[i])).toBe(bytes[i]);
+      }
     });
   });
 });
