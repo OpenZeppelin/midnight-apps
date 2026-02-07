@@ -121,9 +121,8 @@ module Uint128 {
    * @title To U128 circuit
    * @description Converts Uint<128> to U128 struct by splitting into 64-bit parts.
    *
-   * Theoretical Description:
-   * Splits value ∈ [0, 2¹²⁸ - 1] into value = high · 2⁶⁴ + low,
-   * where low, high ∈ [0, 2⁶⁴ - 1].
+   * @remarks
+   * Splits value ∈ [0, 2¹²⁸ - 1] into value = high · 2⁶⁴ + low, where low, high ∈ [0, 2⁶⁴ - 1].
    *
    * Mathematical Steps:
    * 1. Compute low = value mod 2⁶⁴, high = ⌊value / 2⁶⁴⌋
@@ -157,7 +156,7 @@ module Uint128 {
    * @title From U128 circuit
    * @description Converts U128 struct to Uint<128>.
    *
-   * Theoretical Description:
+   * @remarks
    * Reconstructs N = n_h · 2⁶⁴ + n_l, where n_l, n_h ∈ [0, 2⁶⁴ - 1].
    *
    * @circuitInfo k=10, rows=451
@@ -351,12 +350,11 @@ module Uint128 {
    * @title Add circuit
    * @description Adds two U128 values, returning a U256.
    *
-   * Theoretical Description:
+   * @remarks
    * Computes S = a + b for a, b ∈ [0, 2¹²⁸ - 1], returning S ∈ [0, 2¹²⁹ - 2] as U256.
-   *
-   * Mathematical Steps:
    * Let a = a_h · 2⁶⁴ + a_l and b = b_h · 2⁶⁴ + b_l, where a_l, a_h, b_l, b_h ∈ [0, 2⁶⁴ - 1].
    *
+   * Mathematical Steps:
    * 1. Lower 64-bit Addition:
    *    s_l = a_l + b_l ∈ [0, 2⁶⁵ - 2]
    *    result_l = s_l mod 2⁶⁴, carry_0 = ⌊s_l / 2⁶⁴⌋ ∈ {0, 1}
@@ -509,12 +507,11 @@ module Uint128 {
    * @title Subtract U128 circuit
    * @description Subtracts one U128 from another with borrow handling.
    *
-   * Theoretical Description:
+   * @remarks
    * Computes D = a - b for a, b ∈ [0, 2¹²⁸ - 1] where a ≥ b.
-   *
-   * Mathematical Steps:
    * Let a = a_h · 2⁶⁴ + a_l and b = b_h · 2⁶⁴ + b_l.
    *
+   * Mathematical Steps:
    * 1. Underflow Check: Assert a ≥ b
    * 2. Borrow: borrow = 1 if a_l < b_l, else 0
    * 3. High Part: high_diff = a_h - (b_h + borrow)
@@ -548,45 +545,42 @@ module Uint128 {
   }
 
   /**
-    * @title Multiply circuit
-    * @description Multiplies two U128 values, returning the full 256-bit result.
-    *
-    * Theoretical Description:
-    * Computes P = a · b for a, b ∈ [0, 2¹²⁸ - 1], returning P as U256 {low: U128, high: U128}.
-    * Uses schoolbook multiplication with partial products and carry propagation.
-    *
-    * For a = a_h · 2⁶⁴ + a_l and b = b_h · 2⁶⁴ + b_l:
-    *   P = a · b = hh · 2¹²⁸ + (hl + lh) · 2⁶⁴ + ll
-    *
-    * where ll = a_l·b_l, hl = a_h·b_l, lh = a_l·b_h, hh = a_h·b_h.
-    *
-    * Mathematical Steps:
-    *
-    * 1. Partial Products:
-    *    Compute ll, hl, lh, hh where each ≤ (2⁶⁴ - 1)² = 2¹²⁸ - 2⁶⁵ + 1 < 2¹²⁸.
-    *    - ll = a_l · b_l (bits [0, 127])
-    *    - hl = a_h · b_l (bits [64, 191])
-    *    - lh = a_l · b_h (bits [64, 191])
-    *    - hh = a_h · b_h (bits [128, 255])
-    *
-    * 2. Cross Terms Addition:
-    *    S = hl + lh ≤ 2(2¹²⁸ - 2⁶⁵ + 1) < 2¹²⁹ (fits in 129 bits)
-    *    - Add low parts: (hl mod 2⁶⁴) + (lh mod 2⁶⁴) → sum s_0, carry c_0
-    *    - Add high parts: ⌊hl/2⁶⁴⌋ + ⌊lh/2⁶⁴⌋ + c_0 → sum s_1, carry c_1
-    *
-    * 3. Lower Half [0-127]:
-    *    - Bits [0, 63]: ll mod 2⁶⁴
-    *    - Bits [64, 127]: (⌊ll/2⁶⁴⌋ + s_0) mod 2⁶⁴, with carry c_2 to bit 128
-    *
-    * 4. Upper Half [128-255]:
-    *    - Bits [128, 191]: (hh mod 2⁶⁴) + s_1 + c_2 → sum, carry c_3
-    *    - Bits [192, 255]: ⌊hh/2⁶⁴⌋ + c_1 + c_3
-    *
-    * 5. Overflow Check:
-    *    Max product = (2¹²⁸ - 1)² = 2²⁵⁶ - 2¹²⁹ + 1 < 2²⁵⁶
-    *    Assert final high carry = 0
-    *
-    * @circuitInfo k=11, rows=1750
+   * @title Multiply circuit
+   * @description Multiplies two U128 values, returning the full 256-bit result.
+   *
+   * @remarks
+   * Computes P = a · b for a, b ∈ [0, 2¹²⁸ - 1], returning P as U256 {low: U128, high: U128}.
+   * Uses schoolbook multiplication with partial products and carry propagation.
+   * For a = a_h · 2⁶⁴ + a_l and b = b_h · 2⁶⁴ + b_l:
+   * P = a · b = hh · 2¹²⁸ + (hl + lh) · 2⁶⁴ + ll, where ll = a_l·b_l, hl = a_h·b_l,
+   * lh = a_l·b_h, hh = a_h·b_h.
+   *
+   * Mathematical Steps:
+   * 1. Partial Products:
+   *    Compute ll, hl, lh, hh where each ≤ (2⁶⁴ - 1)² = 2¹²⁸ - 2⁶⁵ + 1 < 2¹²⁸.
+   *    - ll = a_l · b_l (bits [0, 127])
+   *    - hl = a_h · b_l (bits [64, 191])
+   *    - lh = a_l · b_h (bits [64, 191])
+   *    - hh = a_h · b_h (bits [128, 255])
+   *
+   * 2. Cross Terms Addition:
+   *    S = hl + lh ≤ 2(2¹²⁸ - 2⁶⁵ + 1) < 2¹²⁹ (fits in 129 bits)
+   *    - Add low parts: (hl mod 2⁶⁴) + (lh mod 2⁶⁴) → sum s_0, carry c_0
+   *    - Add high parts: ⌊hl/2⁶⁴⌋ + ⌊lh/2⁶⁴⌋ + c_0 → sum s_1, carry c_1
+   *
+   * 3. Lower Half [0-127]:
+   *    - Bits [0, 63]: ll mod 2⁶⁴
+   *    - Bits [64, 127]: (⌊ll/2⁶⁴⌋ + s_0) mod 2⁶⁴, with carry c_2 to bit 128
+   *
+   * 4. Upper Half [128-255]:
+   *    - Bits [128, 191]: (hh mod 2⁶⁴) + s_1 + c_2 → sum, carry c_3
+   *    - Bits [192, 255]: ⌊hh/2⁶⁴⌋ + c_1 + c_3
+   *
+   * 5. Overflow Check:
+   *    Max product = (2¹²⁸ - 1)² = 2²⁵⁶ - 2¹²⁹ + 1 < 2²⁵⁶
+   *    Assert final high carry = 0
+   *
+   * @circuitInfo k=11, rows=1750
     *
     * @param {U128} a - The first U128 value to multiply.
     * @param {U128} b - The second U128 value to multiply.
@@ -765,15 +759,11 @@ module Uint128 {
    * @title Division U128 circuit (Optimized)
    * @description Divides a U128 value by another, returning quotient and remainder.
    *
-   * Theoretical Description:
+   * @remarks
    * Computes quotient q and remainder r satisfying a = q·b + r, where 0 ≤ r < b.
-   *
-   * Division Property:
-   * For a, b ∈ [0, 2¹²⁸ - 1] with b > 0, there exist unique q, r ∈ [0, 2¹²⁸ - 1] such that:
-   *   a = q·b + r  and  0 ≤ r < b
-   *
-   * Key Constraint:
-   * Since q·b = a - r < a < 2¹²⁸, the product q·b fits in 128 bits (productU256.high = {0, 0}).
+   * For a, b ∈ [0, 2¹²⁸ - 1] with b > 0, there exist unique q, r ∈ [0, 2¹²⁸ - 1] such that
+   * a = q·b + r and 0 ≤ r < b. Since q·b = a - r < a < 2¹²⁸, the product q·b fits in 128 bits
+   * (productU256.high = {0, 0}).
    *
    * Mathematical Steps:
    * 1. Zero Divisor Check: Verify b ≠ 0
@@ -785,7 +775,7 @@ module Uint128 {
    *    c) Assert a - P.low = r (using subU128 for efficiency)
    * 5. Return DivResultU128 {quotient: q, remainder: r}
    *
-   * @circuitInfo k=12, rows=~900 (estimated, optimized from 2778)
+   * @circuitInfo k=12, rows=~900
    *
    * @param {U128} a - The U128 value to divide (dividend).
    * @param {U128} b - The U128 value to divide by (divisor).
@@ -981,12 +971,11 @@ module Uint128 {
   * @title Floor Square Root U128 circuit (Optimized)
   * @description Computes the floor of the square root of a U128 value.
   *
-  * Theoretical Description:
+  * @remarks
   * This circuit calculates R = ⌊√N⌋ for a 128-bit unsigned integer N, where R ∈ [0, 2⁶⁴ − 1]
   * satisfies R² ≤ N < (R + 1)².
   *
   * Mathematical Steps:
-  *
   * 1. Witness Generation:
   *    Compute R = ⌊√N⌋ off-chain using wit_sqrtU128Locally, where R ∈ [0, 2⁶⁴ - 1].
   *
@@ -1202,13 +1191,12 @@ module Uint128 {
    * @title Is Multiple circuit
    * @description Checks if a U128 value is a multiple of another (a mod b = 0).
    *
-   * Theoretical Description:
+   * @remarks
    * Determines if a is divisible by b with no remainder for a, b ∈ [0, 2¹²⁸ - 1].
    * Returns true if there exists an integer k such that a = k · b.
-   *
-   * Mathematical Steps:
    * Let a = a_h · 2⁶⁴ + a_l and b = b_h · 2⁶⁴ + b_l.
    *
+   * Mathematical Steps:
    * 1. Zero Check: Verify b ≠ 0 (b_h > 0 or b_l > 0)
    * 2. Division: Compute (quotient, remainder) where a = quotient · b + remainder
    * 3. Remainder Check: Verify remainder = 0 (remainder_h = 0 and remainder_l = 0)

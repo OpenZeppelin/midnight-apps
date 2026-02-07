@@ -275,7 +275,7 @@ module Uint64 {
    * @title Internal Division circuit
    * @description Internal circuit to divide a Uint<64> number by another, returning quotient and remainder.
    *
-   * Theoretical Description:
+   * @remarks
    * This circuit computes the quotient and remainder of dividing a 64-bit unsigned integer a by another b,
    * both represented as Uint<64> values in [0, 2^64 - 1]. It returns a DivResultU64 struct containing the
    * quotient and remainder, satisfying a = quotient * b + remainder, where 0 <= remainder < b.
@@ -291,7 +291,6 @@ module Uint64 {
    * 4. Result:
    *    - Return DivResultU64 { quotient, remainder }.
    *
-   * @remarks
    * Requirements:
    * - `b` must not be zero.
    * - `remainder` must be less than `b`.
@@ -392,7 +391,7 @@ module Uint64 {
    * @title Square Root circuit
    * @description Computes the floor of the square root of a Uint<64> value.
    *
-   * Theoretical Description:
+   * @remarks
    * This circuit calculates the floor of the square root R = floor(sqrt(N)) of a 64-bit unsigned integer
    * N, provided as a Uint<64> value in [0, 2^64 - 1]. The result is a Uint<32> value R in [0, 2^32 - 1],
    * such that R^2 <= N < (R + 1)^2. It uses a witness-based approach for the general case and includes
@@ -411,7 +410,6 @@ module Uint64 {
    * 4. Result:
    *    - Return R as Uint<32>.
    *
-   * @remarks
    * Requirements:
    * - `radicand` must be a valid `Uint<64>` value.
    * - `rootSquare` must be less than or equal to `radicand`.
