@@ -1,43 +1,20 @@
-import type { Witnesses } from '@src/artifacts/math/test/mocks/contracts/Uint64.mock/contract/index.d.ts';
-import { sqrtBigint } from '../../../utils/sqrtBigint.js';
+import type { Witnesses } from '@src/artifacts/math/test/mocks/contracts/Uint64.mock/contract/index.js';
+import { wit_divUint64 } from '@src/math/witnesses/wit_divUint64.js';
+import { wit_sqrtUint64 } from '@src/math/witnesses/wit_sqrtUint64.js';
+import { wit_uint64ToVector } from '@src/math/witnesses/wit_uint64ToVector.js';
 
-/**
- * @description Represents the private state of the Uint64 module.
- * @remarks No persistent state is needed beyond what's computed on-demand, so this is minimal.
- */
 export type Uint64PrivateState = Record<string, never>;
 
-/**
- * @description Utility object for managing the private state of the Uint64 module.
- */
-export const Uint64PrivateState = {
-  /**
-   * @description Generates a new private state.
-   * @returns A fresh Uint64PrivateState instance (empty for now).
-   */
-  generate: (): Uint64PrivateState => {
-    return {};
-  },
-};
-
-/**
- * @description Factory function creating witness implementations for Math module operations.
- */
 export const Uint64Witnesses = (): Witnesses<Uint64PrivateState> => ({
-  sqrtU64Locally(context, radicand) {
-    const root = sqrtBigint(radicand);
-    return [context.privateState, root];
+  wit_sqrtUint64(_context, radicand) {
+    return [{}, wit_sqrtUint64(radicand)];
   },
 
-  divU64Locally(context, dividend, divisor) {
-    const quotient = dividend / divisor;
-    const remainder = dividend % divisor;
-    return [
-      context.privateState,
-      {
-        quotient,
-        remainder,
-      },
-    ];
+  wit_divUint64(_context, dividend, divisor) {
+    return [{}, wit_divUint64(dividend, divisor)];
+  },
+
+  wit_uint64ToVector(_context, value) {
+    return [{}, wit_uint64ToVector(value)];
   },
 });
