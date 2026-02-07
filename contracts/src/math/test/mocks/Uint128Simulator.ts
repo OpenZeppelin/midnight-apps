@@ -11,7 +11,10 @@ import {
   Contract,
   ledger,
 } from '@src/artifacts/math/test/mocks/contracts/Uint128.mock/contract/index.js';
-import { Uint128PrivateState, Uint128Witnesses } from './witnesses/Uint128.js';
+import {
+  Uint128PrivateState,
+  Uint128Witnesses,
+} from '@src/math/test/mocks/witnesses/Uint128.js';
 
 /**
  * Base simulator for Uint128 mock contract
@@ -44,67 +47,67 @@ export class Uint128Simulator extends Uint128SimulatorBase {
   }
 
   public MODULUS(): bigint {
-    return this.circuits.pure.MODULUS();
+    return this.circuits.impure.MODULUS();
   }
 
   public ZERO_U128(): U128 {
-    return this.circuits.pure.ZERO_U128();
+    return this.circuits.impure.ZERO_U128();
   }
 
   public toU128(value: bigint): U128 {
     return this.circuits.impure.toU128(value);
   }
 
-  public fromU128(value: U128): bigint {
-    return this.circuits.pure.fromU128(value);
+  public toUint128(value: U128): bigint {
+    return this.circuits.impure.toUint128(value);
   }
 
   public isZero(value: bigint): boolean {
-    return this.circuits.pure.isZero(value);
+    return this.circuits.impure.isZero(value);
   }
 
   public isZeroU128(value: U128): boolean {
-    return this.circuits.pure.isZeroU128(value);
+    return this.circuits.impure.isZeroU128(value);
   }
 
   public eq(a: bigint, b: bigint): boolean {
-    return this.circuits.pure.eq(a, b);
+    return this.circuits.impure.eq(a, b);
   }
 
   public eqU128(a: U128, b: U128): boolean {
-    return this.circuits.pure.eqU128(a, b);
+    return this.circuits.impure.eqU128(a, b);
   }
 
   public lt(a: bigint, b: bigint): boolean {
-    return this.circuits.pure.lt(a, b);
+    return this.circuits.impure.lt(a, b);
   }
 
   public ltU128(a: U128, b: U128): boolean {
-    return this.circuits.pure.ltU128(a, b);
+    return this.circuits.impure.ltU128(a, b);
   }
 
   public lte(a: bigint, b: bigint): boolean {
-    return this.circuits.pure.lte(a, b);
+    return this.circuits.impure.lte(a, b);
   }
 
   public lteU128(a: U128, b: U128): boolean {
-    return this.circuits.pure.lteU128(a, b);
+    return this.circuits.impure.lteU128(a, b);
   }
 
   public gt(a: bigint, b: bigint): boolean {
-    return this.circuits.pure.gt(a, b);
+    return this.circuits.impure.gt(a, b);
   }
 
   public gtU128(a: U128, b: U128): boolean {
-    return this.circuits.pure.gtU128(a, b);
+    return this.circuits.impure.gtU128(a, b);
   }
 
   public gte(a: bigint, b: bigint): boolean {
-    return this.circuits.pure.gte(a, b);
+    return this.circuits.impure.gte(a, b);
   }
 
   public gteU128(a: U128, b: U128): boolean {
-    return this.circuits.pure.gteU128(a, b);
+    return this.circuits.impure.gteU128(a, b);
   }
 
   public add(a: bigint, b: bigint): U256 {
@@ -116,19 +119,19 @@ export class Uint128Simulator extends Uint128SimulatorBase {
   }
 
   public addChecked(a: bigint, b: bigint): bigint {
-    return this.circuits.pure.addChecked(a, b);
+    return this.circuits.impure.addChecked(a, b);
   }
 
   public addCheckedU128(a: U128, b: U128): bigint {
-    return this.circuits.pure.addCheckedU128(a, b);
+    return this.circuits.impure.addCheckedU128(a, b);
   }
 
   public sub(a: bigint, b: bigint): bigint {
-    return this.circuits.pure.sub(a, b);
+    return this.circuits.impure.sub(a, b);
   }
 
   public subU128(a: U128, b: U128): U128 {
-    return this.circuits.pure.subU128(a, b);
+    return this.circuits.impure.subU128(a, b);
   }
 
   public mul(a: bigint, b: bigint): U256 {
@@ -180,19 +183,19 @@ export class Uint128Simulator extends Uint128SimulatorBase {
   }
 
   public min(a: bigint, b: bigint): bigint {
-    return this.circuits.pure.min(a, b);
+    return this.circuits.impure.min(a, b);
   }
 
   public minU128(a: U128, b: U128): U128 {
-    return this.circuits.pure.minU128(a, b);
+    return this.circuits.impure.minU128(a, b);
   }
 
   public max(a: bigint, b: bigint): bigint {
-    return this.circuits.pure.max(a, b);
+    return this.circuits.impure.max(a, b);
   }
 
   public maxU128(a: U128, b: U128): U128 {
-    return this.circuits.pure.maxU128(a, b);
+    return this.circuits.impure.maxU128(a, b);
   }
 
   public isMultiple(value: bigint, divisor: bigint): boolean {
@@ -204,10 +207,10 @@ export class Uint128Simulator extends Uint128SimulatorBase {
   }
 
   public MAX_UINT128(): bigint {
-    return this.circuits.pure.MAX_UINT128();
+    return this.circuits.impure.MAX_UINT128();
   }
 
   public MAX_U128(): U128 {
-    return this.circuits.pure.MAX_U128();
+    return this.circuits.impure.MAX_U128();
   }
 }
