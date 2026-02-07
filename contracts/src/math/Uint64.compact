@@ -73,7 +73,7 @@ module Uint64 {
   * @title MAX_UINT8 circuit
   * @description Returns the maximum value for an 8-bit unsigned integer (2^8 - 1).
   *
-  * @circuitInfo k=10, rows=128
+  * @circuitInfo k=5, rows=25
   *
   * @returns {Uint<8>} The value 255 (0xFF).
   */
@@ -85,7 +85,7 @@ module Uint64 {
    * @title MAX_UINT16 circuit
    * @description Returns the maximum value for a 16-bit unsigned integer (2^16 - 1).
    *
-   * @circuitInfo k=10, rows=128
+   * @circuitInfo k=5, rows=25
    *
    * @returns {Uint<16>} The value 65,535 (0xFFFF).
    */
@@ -97,7 +97,7 @@ module Uint64 {
    * @title MAX_UINT32 circuit
    * @description Returns the maximum value for a 32-bit unsigned integer (2^32 - 1).
    *
-   * @circuitInfo k=10, rows=128
+   * @circuitInfo k=5, rows=25
    *
    * @returns {Uint<32>} The value 4,294,967,295 (0xFFFFFFFF).
    */
@@ -109,7 +109,7 @@ module Uint64 {
    * @title MAX_UINT64 circuit
    * @description Returns the maximum value for a 64-bit unsigned integer (2^64 - 1).
    *
-   * @circuitInfo k=10, rows=128
+   * @circuitInfo k=5, rows=25
    *
    * @returns {Uint<64>} The value 18,446,744,073,709,551,615 (0xFFFFFFFFFFFFFFFF).
    */
@@ -127,6 +127,8 @@ module Uint64 {
    * then verified on-chain by packing the bytes back and checking equality.
    *
    * Uses Vector8.toUint64 for the packing verification.
+   *
+   * @circuitInfo k=9, rows=267
    *
    * @param {Uint<64>} value - The 64-bit value to convert.
    *
@@ -154,6 +156,8 @@ module Uint64 {
    * The conversion is done by first unpacking to a vector via `toVector`,
    * then casting to `Bytes<8>` via `Vector8.toBytes`.
    *
+   * @circuitInfo k=12, rows=2433
+   *
    * @param {Uint<64>} value - The 64-bit value to convert.
    *
    * @throws {Error} "Uint64: toVector verification failed" if witness verification fails.
@@ -173,7 +177,7 @@ module Uint64 {
    * Requirements:
    * - `a` and `b` must be valid `Uint<64>` values in range [0, 2^64 - 1].
    *
-   * @circuitInfo k=10, rows=575
+   * @circuitInfo k=8, rows=177
    *
    * @param {Uint<64>} a - The first unsigned 64-bit integer.
    * @param {Uint<64>} b - The second unsigned 64-bit integer.
@@ -192,6 +196,8 @@ module Uint64 {
    * Requirements:
    * - `a` and `b` must be valid `Uint<64>` values in range [0, 2^64 - 1].
    * - The sum of `a` and `b` must not exceed `MAX_UINT64` (2^64 - 1).
+   *
+   * @circuitInfo k=9, rows=298
    *
    * @param {Uint<64>} a - The first unsigned 64-bit integer.
    * @param {Uint<64>} b - The second unsigned 64-bit integer.
@@ -215,7 +221,7 @@ module Uint64 {
    * - `a` must be greater than or equal to `b` to prevent underflow.
    * - Both inputs must be valid `Uint<64>` values.
    *
-   * @circuitInfo k=10, rows=575
+   * @circuitInfo k=9, rows=212
    *
    * @param {Uint<64>} a - The unsigned 64-bit integer to subtract from (minuend).
    * @param {Uint<64>} b - The unsigned 64-bit integer to subtract (subtrahend).
@@ -238,7 +244,7 @@ module Uint64 {
    * - `a` and `b` must be valid `Uint<64>` values.
    * - Result is returned as `Uint<128>` to handle potential overflow.
    *
-   * @circuitInfo k=11, rows=1874
+   * @circuitInfo k=8, rows=177
    *
    * @param {Uint<64>} a - The first unsigned 64-bit integer (multiplicand).
    * @param {Uint<64>} b - The second unsigned 64-bit integer (multiplier).
@@ -257,6 +263,8 @@ module Uint64 {
    * Requirements:
    * - `a` and `b` must be valid `Uint<64>` values in range [0, 2^64 - 1].
    * - The product of `a` and `b` must not exceed `MAX_UINT64` (2^64 - 1).
+   *
+   * @circuitInfo k=9, rows=298
    *
    * @param {Uint<64>} a - The first unsigned 64-bit integer (multiplicand).
    * @param {Uint<64>} b - The second unsigned 64-bit integer (multiplier).
@@ -323,7 +331,7 @@ module Uint64 {
    * - `b` must not be zero.
    * - Uses internal `_div` circuit for computation.
    *
-   * @circuitInfo k=10, rows=240
+   * @circuitInfo k=9, rows=411
    *
    * @param {Uint<64>} a - The unsigned 64-bit integer to divide (dividend).
    * @param {Uint<64>} b - The unsigned 64-bit integer to divide by (divisor).
@@ -347,7 +355,7 @@ module Uint64 {
    * - `b` must not be zero.
    * - Uses internal `_div` circuit for computation.
    *
-   * @circuitInfo k=10, rows=240
+   * @circuitInfo k=9, rows=411
    *
    * @param {Uint<64>} a - The unsigned 64-bit integer to divide (dividend).
    * @param {Uint<64>} b - The unsigned 64-bit integer to divide by (divisor).
@@ -372,7 +380,7 @@ module Uint64 {
    * - `remainder` must be less than `b`.
    * - `quotient * b + remainder` must equal `a`.
    *
-   * @circuitInfo k=10, rows=277
+   * @circuitInfo k=9, rows=432
    *
    * @param {Uint<64>} a - The Uint<64> value to divide (dividend).
    * @param {Uint<64>} b - The Uint<64> value to divide by (divisor).
@@ -415,7 +423,7 @@ module Uint64 {
    * - `rootSquare` must be less than or equal to `radicand`.
    * - `nextSquare` must be greater than `radicand`.
    *
-   * @circuitInfo k=10, rows=122
+   * @circuitInfo k=9, rows=242
    *
    * @param {Uint<64>} radicand - The Uint<64> value to compute the square root of.
    *
@@ -445,7 +453,7 @@ module Uint64 {
    * - `b` must not be zero.
    * - Uses `rem` circuit to check if remainder is zero.
    *
-   * @circuitInfo k=10, rows=243
+   * @circuitInfo k=9, rows=413
    *
    * @param {Uint<64>} a - The unsigned 64-bit integer to check.
    * @param {Uint<64>} b - The unsigned 64-bit integer divisor.
@@ -466,7 +474,7 @@ module Uint64 {
    * Requirements:
    * - `a` and `b` must be valid `Uint<64>` values.
    *
-   * @circuitInfo k=10, rows=128
+   * @circuitInfo k=9, rows=208
    *
    * @param {Uint<64>} a - The first unsigned 64-bit integer.
    * @param {Uint<64>} b - The second unsigned 64-bit integer.
@@ -485,7 +493,7 @@ module Uint64 {
    * Requirements:
    * - `a` and `b` must be valid `Uint<64>` values.
    *
-   * @circuitInfo k=10, rows=128
+   * @circuitInfo k=9, rows=208
    *
    * @param {Uint<64>} a - The first unsigned 64-bit integer.
    * @param {Uint<64>} b - The second unsigned 64-bit integer.

@@ -29,6 +29,8 @@ module Bytes8 {
    * using little-endian byte ordering. The conversion is done by casting
    * the bytes to a vector and then using Vector8.toUint64.
    *
+   * @circuitInfo k=8, rows=175
+   *
    * @param {Bytes<8>} bytes - The 8-byte array to convert.
    *
    * @returns {Uint<64>} - The 64-bit unsigned integer.
@@ -44,6 +46,8 @@ module Bytes8 {
    * @remarks
    * This circuit converts an 8-byte array to a vector of 8 bytes
    * by casting the bytes to a vector type.
+   *
+   * @circuitInfo k=12, rows=2705
    *
    * @param {Bytes<8>} bytes - The 8-byte array to convert.
    *

@@ -39,6 +39,8 @@ module Vector8 {
    *   b6 * 256^6 = b6 * 281474976710656     (bits 48-55)
    *   b7 * 256^7 = b7 * 72057594037927936   (bits 56-63)
    *
+   * @circuitInfo k=8, rows=193
+   *
    * @param {Vector<8, Uint<8>>} vec - The vector of 8 bytes to convert.
    *
    * @returns {Uint<64>} - The packed 64-bit value.
@@ -67,6 +69,8 @@ module Vector8 {
    * @remarks
    * This circuit converts an 8-element vector of bytes to a 8-byte array
    * using little-endian byte ordering.
+   *
+   * @circuitInfo k=12, rows=2412
    *
    * @param {Vector<8, Uint<8>>} vec - The vector of 8 bytes to convert.
    *

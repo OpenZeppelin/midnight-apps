@@ -70,7 +70,7 @@ module Uint128 {
    * @title Modulus U128 circuit
    * @description A pure circuit that returns the modulus value of U128 (2⁶⁴).
    *
-   * @circuitInfo k=10, rows=451
+   * @circuitInfo k=5, rows=25
    *
    * @returns {Uint<65>} The value 2⁶⁴ (18446744073709551616).
    */
@@ -83,7 +83,7 @@ module Uint128 {
    * @title Zero U128 circuit
    * @description A pure circuit that returns a zero U128 struct.
    *
-   * @circuitInfo k=10, rows=451
+   * @circuitInfo k=6, rows=46
    *
    * @returns {U128} A U128 struct with low and high fields set to 0.
    */
@@ -96,7 +96,7 @@ module Uint128 {
    * @description Returns the maximum value for a U128 struct, where both low and high
    * fields are set to the maximum 64-bit value (2⁶⁴ - 1).
    *
-   * @circuitInfo k=10, rows=128
+   * @circuitInfo k=6, rows=46
    *
    * @returns {U128} A U128 struct representing 2¹²⁸ - 1.
    */
@@ -108,7 +108,7 @@ module Uint128 {
    * @title MAX_UINT128 circuit
    * @description Returns the maximum value for a 128-bit unsigned integer (2¹²⁸ - 1).
    *
-   * @circuitInfo k=10, rows=128
+   * @circuitInfo k=5, rows=25
    *
    * @returns {Uint<128>} The value 340,282,366,920,938,463,463,374,607,431,768,211,455
    * (0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF).
@@ -129,7 +129,7 @@ module Uint128 {
    * 2. Verify high · 2⁶⁴ + low = value
    * 3. Return U128 {low, high}
    *
-   * @circuitInfo k=10, rows=451
+   * @circuitInfo k=9, rows=441
    *
    * @throws {Error} "MathU128: conversion invalid" if verification fails.
    *
@@ -159,7 +159,7 @@ module Uint128 {
    * @remarks
    * Reconstructs N = n_h · 2⁶⁴ + n_l, where n_l, n_h ∈ [0, 2⁶⁴ - 1].
    *
-   * @circuitInfo k=10, rows=451
+   * @circuitInfo k=9, rows=306
    *
    * @param {U128} value - The U128 value to convert.
    *
@@ -175,7 +175,7 @@ module Uint128 {
    * @title Is Zero circuit
    * @description Checks if a Uint<128> value equals zero.
    *
-   * @circuitInfo k=10, rows=451
+   * @circuitInfo k=8, rows=177
    *
    * @param {Uint<128>} a - The Uint<128> value to check.
    *
@@ -189,7 +189,7 @@ module Uint128 {
    * @title Is Zero U128 circuit
    * @description Checks if a U128 value equals zero.
    *
-   * @circuitInfo k=10, rows=451
+   * @circuitInfo k=8, rows=183
    *
    * @param {U128} a - The U128 value to check.
    *
@@ -203,7 +203,7 @@ module Uint128 {
    * @title Equality circuit
    * @description Compares two Uint<128> values for equality.
    *
-   * @circuitInfo k=10, rows=451
+   * @circuitInfo k=9, rows=306
    *
    * @param {Uint<128>} a - The first Uint<128> value.
    * @param {Uint<128>} b - The second Uint<128> value.
@@ -218,7 +218,7 @@ module Uint128 {
    * @title Equality U128 circuit
    * @description Compares two U128 values for equality.
    *
-   * @circuitInfo k=10, rows=451
+   * @circuitInfo k=9, rows=333
    *
    * @param {U128} a - The first U128 value.
    * @param {U128} b - The second U128 value.
@@ -233,7 +233,7 @@ module Uint128 {
    * @title Less Than circuit
    * @description Checks if one Uint<128> value is less than another.
    *
-   * @circuitInfo k=10, rows=451
+   * @circuitInfo k=9, rows=357
    *
    * @param {Uint<128>} a - The first Uint<128> value.
    * @param {Uint<128>} b - The second Uint<128> value.
@@ -248,7 +248,7 @@ module Uint128 {
    * @title Less Than or Equal circuit
    * @description Checks if one Uint<128> value is less than or equal to another.
    *
-   * @circuitInfo k=10, rows=451
+   * @circuitInfo k=9, rows=360
    *
    * @param {Uint<128>} a - The first Uint<128> value.
    * @param {Uint<128>} b - The second Uint<128> value.
@@ -275,7 +275,7 @@ module Uint128 {
    * @title Less Than or Equal U128 circuit
    * @description Checks if one U128 value is less than or equal to another.
    *
-   * @circuitInfo k=10, rows=451
+   * @circuitInfo k=9, rows=400
    *
    * @param {U128} a - The first U128 value.
    * @param {U128} b - The second U128 value.
@@ -290,7 +290,7 @@ module Uint128 {
    * @title Greater Than circuit
    * @description Checks if one Uint<128> value is greater than another.
    *
-   * @circuitInfo k=10, rows=451
+   * @circuitInfo k=9, rows=357
    *
    * @param {Uint<128>} a - The first Uint<128> value.
    * @param {Uint<128>} b - The second Uint<128> value.
@@ -305,7 +305,7 @@ module Uint128 {
    * @title Greater Than or Equal circuit
    * @description Checks if one Uint<128> value is greater than or equal to another.
    *
-   * @circuitInfo k=10, rows=451
+   * @circuitInfo k=9, rows=360
    *
    * @param {Uint<128>} a - The first Uint<128> value.
    * @param {Uint<128>} b - The second Uint<128> value.
@@ -320,7 +320,7 @@ module Uint128 {
    * @title Greater Than U128 circuit
    * @description Checks if one U128 value is greater than another.
    *
-   * @circuitInfo k=10, rows=451
+   * @circuitInfo k=9, rows=392
    *
    * @param {U128} a - The first U128 value.
    * @param {U128} b - The second U128 value.
@@ -335,7 +335,7 @@ module Uint128 {
    * @title Greater Than or Equal U128 circuit
    * @description Checks if one U128 value is greater than or equal to another.
    *
-   * @circuitInfo k=10, rows=451
+   * @circuitInfo k=9, rows=400
    *
    * @param {U128} a - The first U128 value.
    * @param {U128} b - The second U128 value.
@@ -368,7 +368,7 @@ module Uint128 {
    *    S_high = carry_1 (bit 128)
    *    Return U256 {low: S_low, high: {carry_1, 0}}
    *
-   * @circuitInfo k=10, rows=451
+   * @circuitInfo k=10, rows=902
    *
    * @param {U128} a - The first U128 value.
    * @param {U128} b - The second U128 value.
@@ -393,7 +393,7 @@ module Uint128 {
    * @title Add circuit
    * @description Adds two Uint<128> values.
    *
-   * @circuitInfo k=10, rows=451
+   * @circuitInfo k=11, rows=1410
    *
    * @param {Uint<128>} a - The first Uint<128> value.
    * @param {Uint<128>} b - The second Uint<128> value.
@@ -415,7 +415,7 @@ module Uint128 {
    * - `a` and `b` must be valid `U128` structs.
    * - Result is returned as `U256` to handle potential overflow.
    *
-   * @circuitInfo k=10, rows=451
+   * @circuitInfo k=10, rows=992
    *
    * @param {U128} a - The first U128 value.
    * @param {U128} b - The second U128 value.
@@ -435,7 +435,7 @@ module Uint128 {
    * - `a` and `b` must be valid `Uint<128>` values.
    * - Result must not overflow 128 bits.
    *
-   * @circuitInfo k=10, rows=575
+   * @circuitInfo k=11, rows=1500
    *
    * @param {Uint<128>} a - The first Uint<128> value.
    * @param {Uint<128>} b - The second Uint<128> value.
@@ -462,7 +462,7 @@ module Uint128 {
    * - `a` and `b` must be valid `U128` structs.
    * - Result must not overflow 128 bits.
    *
-   * @circuitInfo k=10, rows=451
+   * @circuitInfo k=9, rows=364
    *
    * @param {U128} a - The first U128 value.
    * @param {U128} b - The second U128 value.
@@ -489,7 +489,7 @@ module Uint128 {
    * - `a` must be greater than or equal to `b` to prevent underflow.
    * - Both inputs must be valid `Uint<128>` values.
    *
-   * @circuitInfo k=10, rows=451
+   * @circuitInfo k=10, rows=579
    *
    * @param {Uint<128>} a - The Uint<128> value to subtract from (minuend).
    * @param {Uint<128>} b - The Uint<128> value to subtract (subtrahend).
@@ -518,7 +518,7 @@ module Uint128 {
    * 4. Low Part: low_diff = a_l - b_l (if no borrow), else a_l + 2⁶⁴ - b_l
    * 5. Return U128 {low: low_diff, high: high_diff}
    *
-   * @circuitInfo k=10, rows=451
+   * @circuitInfo k=10, rows=579
    *
    * @throws {Error} "MathU128: subtraction underflow" if a < b.
    *
@@ -580,7 +580,7 @@ module Uint128 {
    *    Max product = (2¹²⁸ - 1)² = 2²⁵⁶ - 2¹²⁹ + 1 < 2²⁵⁶
    *    Assert final high carry = 0
    *
-   * @circuitInfo k=11, rows=1750
+   * @circuitInfo k=12, rows=2769
     *
     * @param {U128} a - The first U128 value to multiply.
     * @param {U128} b - The second U128 value to multiply.
@@ -653,7 +653,7 @@ module Uint128 {
    * - `a` and `b` must be valid `Uint<128>` values.
    * - Result is returned as `U256` to handle full product.
    *
-   * @circuitInfo k=11, rows=1874
+   * @circuitInfo k=12, rows=3277
    *
    * @param {Uint<128>} a - The first Uint<128> value to multiply.
    * @param {Uint<128>} b - The second Uint<128> value to multiply.
@@ -675,7 +675,7 @@ module Uint128 {
    * - `a` and `b` must be valid `U128` structs.
    * - Result is returned as `U256` to handle full product.
    *
-   * @circuitInfo k=11, rows=1750
+   * @circuitInfo k=12, rows=2864
    *
    * @param {U128} a - The first U128 value to multiply.
    * @param {U128} b - The second U128 value to multiply.
@@ -690,7 +690,7 @@ module Uint128 {
    * @title Multiply Checked U128 circuit
    * @description Internal implementation of checked multiplication for U128 values.
    *
-   * @circuitInfo k=11, rows=1752
+   * @circuitInfo k=12, rows=2864
    *
    * @param {U128} a - The first U128 value.
    * @param {U128} b - The second U128 value.
@@ -716,7 +716,7 @@ module Uint128 {
    * - `a` and `b` must be valid `Uint<128>` values.
    * - Result must not overflow 128 bits.
    *
-   * @circuitInfo k=11, rows=1876
+   * @circuitInfo k=12, rows=3372
    *
    * @param {Uint<128>} a - The first Uint<128> value.
    * @param {Uint<128>} b - The second Uint<128> value.
@@ -741,7 +741,7 @@ module Uint128 {
    * - `a` and `b` must be valid `U128` structs.
    * - Result must not overflow 128 bits.
    *
-   * @circuitInfo k=11, rows=1752
+   * @circuitInfo k=12, rows=2864
    *
    * @param {U128} a - The first U128 value.
    * @param {U128} b - The second U128 value.
@@ -775,7 +775,7 @@ module Uint128 {
    *    c) Assert a - P.low = r (using subU128 for efficiency)
    * 5. Return DivResultU128 {quotient: q, remainder: r}
    *
-   * @circuitInfo k=12, rows=~900
+   * @circuitInfo k=12, rows=3333
    *
    * @param {U128} a - The U128 value to divide (dividend).
    * @param {U128} b - The U128 value to divide by (divisor).
@@ -824,7 +824,7 @@ module Uint128 {
    * - `b` must not be zero.
    * - Uses internal `_div` circuit for computation.
    *
-   * @circuitInfo k=12, rows=2778
+   * @circuitInfo k=12, rows=3950
    *
    * @param {Uint<128>} a - The Uint<128> value to divide.
    * @param {Uint<128>} b - The Uint<128> value to divide by.
@@ -851,7 +851,7 @@ module Uint128 {
    * - `b` must not be zero.
    * - Uses internal `_div` circuit for computation.
    *
-   * @circuitInfo k=12, rows=2641
+   * @circuitInfo k=12, rows=3333
    *
    * @param {U128} a - The U128 value to divide.
    * @param {U128} b - The U128 value to divide by.
@@ -875,7 +875,7 @@ module Uint128 {
    * - `b` must not be zero.
    * - Uses internal `_div` circuit for computation.
    *
-   * @circuitInfo k=12, rows=2778
+   * @circuitInfo k=12, rows=3950
    *
    * @param {Uint<128>} a - The Uint<128> value to divide.
    * @param {Uint<128>} b - The Uint<128> value to divide by.
@@ -902,7 +902,7 @@ module Uint128 {
    * - `b` must not be zero.
    * - Uses internal `_div` circuit for computation.
    *
-   * @circuitInfo k=12, rows=2778
+   * @circuitInfo k=12, rows=3333
    *
    * @param {U128} a - The U128 value to divide.
    * @param {U128} b - The U128 value to divide by.
@@ -926,7 +926,7 @@ module Uint128 {
    * - `b` must not be zero.
    * - Uses internal `_div` circuit for computation.
    *
-   * @circuitInfo k=12, rows=2819
+   * @circuitInfo k=12, rows=3863
    *
    * @param {Uint<128>} a - The Uint<128> value to divide.
    * @param {Uint<128>} b - The Uint<128> value to divide by.
@@ -952,7 +952,7 @@ module Uint128 {
    * - `b` must not be zero.
    * - Uses internal `_div` circuit for computation.
    *
-   * @circuitInfo k=12, rows=2695
+   * @circuitInfo k=12, rows=3355
    *
    * @param {U128} a - The U128 value to divide.
    * @param {U128} b - The U128 value to divide by.
@@ -1018,7 +1018,7 @@ module Uint128 {
   * 6. Result:
   *    Return R ∈ [0, 2⁶⁴ - 1].
   *
-  * @circuitInfo k=11, rows=~1100 (estimated, optimized from 1581)
+  * @circuitInfo k=13, rows=4414
   *
   * @param {U128} radicand - The U128 value to compute the square root of.
   *
@@ -1087,7 +1087,7 @@ module Uint128 {
    * - `radicand` must be a valid `Uint<128>` value.
    * - Uses internal `_sqrt` circuit for computation.
    *
-   * @circuitInfo k=12, rows=2778
+   * @circuitInfo k=13, rows=4678
    *
    * @param {Uint<128>} radicand - The Uint<128> value to compute the square root of.
    *
@@ -1112,7 +1112,7 @@ module Uint128 {
    * - `radicand` must be a valid `U128` struct.
    * - Uses internal `_sqrt` circuit for computation.
    *
-   * @circuitInfo k=12, rows=2778
+   * @circuitInfo k=13, rows=4414
    *
    * @param {U128} radicand - The U128 value to compute the square root of.
    *
@@ -1131,7 +1131,7 @@ module Uint128 {
    * @title Min circuit
    * @description Returns the minimum of two Uint<128> values.
    *
-   * @circuitInfo k=12, rows=2759
+   * @circuitInfo k=9, rows=360
    *
    * @param {Uint<128>} a - The first Uint<128> value.
    * @param {Uint<128>} b - The second Uint<128> value.
@@ -1146,7 +1146,7 @@ module Uint128 {
    * @title Min U128 circuit
    * @description Returns the minimum of two U128 values.
    *
-   * @circuitInfo k=12, rows=2759
+   * @circuitInfo k=9, rows=427
    *
    * @param {U128} a - The first U128 value.
    * @param {U128} b - The second U128 value.
@@ -1161,7 +1161,7 @@ module Uint128 {
    * @title Max circuit
    * @description Returns the maximum of two Uint<128> values.
    *
-   * @circuitInfo k=12, rows=2759
+   * @circuitInfo k=9, rows=360
    *
    * @param {Uint<128>} a - The first Uint<128> value.
    * @param {Uint<128>} b - The second Uint<128> value.
@@ -1176,7 +1176,7 @@ module Uint128 {
    * @title Max U128 circuit
    * @description Returns the maximum of two U128 values.
    *
-   * @circuitInfo k=12, rows=2759
+   * @circuitInfo k=9, rows=427
    *
    * @param {U128} a - The first U128 value.
    * @param {U128} b - The second U128 value.
@@ -1202,7 +1202,7 @@ module Uint128 {
    * 3. Remainder Check: Verify remainder = 0 (remainder_h = 0 and remainder_l = 0)
    * 4. Return true if remainder = 0, false otherwise
    *
-   * @circuitInfo k=12, rows=2759
+   * @circuitInfo k=12, rows=3357
    *
    * @param {U128} a - The U128 value to check.
    * @param {U128} b - The U128 value to test against.
@@ -1224,7 +1224,7 @@ module Uint128 {
    * - `b` must not be zero.
    * - Uses internal `_isMultiple` circuit for computation.
    *
-   * @circuitInfo k=12, rows=2759
+   * @circuitInfo k=12, rows=3865
    *
    * @param {Uint<128>} a - The Uint<128> value to check.
    * @param {Uint<128>} b - The Uint<128> b to test against.
@@ -1248,7 +1248,7 @@ module Uint128 {
    * - `b` must not be zero.
    * - Uses internal `_isMultiple` circuit for computation.
    *
-   * @circuitInfo k=12, rows=2635
+   * @circuitInfo k=12, rows=3357
    *
    * @param {U128} a - The U128 value to check.
    * @param {U128} b - The U128 b to test against.
