@@ -19,16 +19,41 @@ pragma language_version >= 0.20.0;
 module LunarswapPair {
     import CompactStandardLibrary;
 
-    import "../openzeppelin/Utils";
-    import { MAX_UINT128 } from "../math/Uint128";
-    import { MAX_UINT64 } from "../math/Uint64";
-    import "../math/Uint128" prefix Uint128_;
+    import { isKeyOrAddressZero, eitherZPK } from "../openzeppelin/Utils" prefix Utils_;
+    import { MAX_UINT128, sub, mulChecked, div, addChecked, sqrt, min } from "../math/Uint128" prefix Uint128_;
+    import { MAX_UINT64 } from "../math/Uint64" prefix Uint64_;
 
-    import "./interfaces/ILunarswapPair";
+    import { getIdentity } from "./LunarswapLibrary" prefix LunarswapLibrary_;
+    import { feeTo } from "./LunarswapFee" prefix LunarswapFee_;
+    import { initialize, initializePairLpToken, getTotalSupply, mint, burn } from "./LunarswapLiquidity" prefix LunarswapLiquidity_;
 
-    import LunarswapLibrary prefix LunarswapLibrary_;
-    import LunarswapFee prefix LunarswapFee_;
-    import LunarswapLiquidity prefix LunarswapLiquidity_;
+   /**
+    * @struct Pair
+    * @description
+    * Represents a Lunarswap trading pair, tracking cumulative price and volume statistics,
+    * as well as the last recorded product of reserves (kLast) for fee calculations.
+    *
+    * @field {Bytes<32>} token0Type - The color (type) of the first token in the pair.
+    * @field {Bytes<32>} token1Type - The color (type) of the second token in the pair.
+    * @field {Bytes<32>} lpTokenType - The color (type) of the LP token in the pair.
+    * @field {Uint<128>} price0VolCumulative - Cumulative sum of (price0 * volume), representing Token 1 per Token 0.
+    * @field {Uint<128>} price1VolCumulative - Cumulative sum of (price1 * volume), representing Token 0 per Token 1.
+    * @field {Uint<128>} volume0Cumulative - Cumulative trading volume of token0.
+    * @field {Uint<128>} volume1Cumulative - Cumulative trading volume of token1.
+    * @field {Uint<128>} kLast - Last recorded value of reserve0 * reserve1, used for protocol fee calculations.
+    */
+    export struct Pair {
+        token0Type: Bytes<32>,
+        token1Type: Bytes<32>,
+        lpTokenType: Bytes<32>,
+        reserve0Id: Bytes<32>,
+        reserve1Id: Bytes<32>,
+        price0VolCumulative: Uint<128>,
+        price1VolCumulative: Uint<128>,
+        volume0Cumulative: Uint<128>,
+        volume1Cumulative: Uint<128>,
+        kLast: Uint<128>,
+    }
 
     /**
      * @title initialize circuit
@@ -43,20 +68,20 @@ module LunarswapPair {
      *
      * @circuitInfo k=11, rows=1200
      *
-     * @param {Bytes<32>} lpTokenNonce      - The nonce for LP token generation.
-     * @param {Opaque<"string">} lpTokenName - The name of the LP token.
-     * @param {Opaque<"string">} lpTokenSymbol - The symbol of the LP token.
-     * @param {Uint<8>} lpTokenDecimals     - The number of decimals for LP tokens.
+     * @param {Bytes<32>} nonce      - The nonce for LP token generation.
+     * @param {Opaque<"string">} name - The name of the LP token.
+     * @param {Opaque<"string">} symbol - The symbol of the LP token.
+     * @param {Uint<8>} decimals     - The number of decimals for LP tokens.
      *
      * @returns [] - No return values.
      */
     export circuit initialize(
-        lpTokenNonce: Bytes<32>,
-        lpTokenName: Opaque<"string">,
-        lpTokenSymbol: Opaque<"string">,
-        lpTokenDecimals: Uint<8>
+        nonce: Bytes<32>,
+        name: Opaque<"string">,
+        symbol: Opaque<"string">,
+        decimals: Uint<8>
     ): [] {
-        return LunarswapLiquidity_initialize(lpTokenNonce, lpTokenName, lpTokenSymbol, lpTokenDecimals);
+        return LunarswapLiquidity_initialize(nonce, name, symbol, decimals);
     }
 
     /**
@@ -189,10 +214,10 @@ module LunarswapPair {
         const balance1 = Uint128_addChecked(reserve1.value, amount1);
 
         const [isFeeOn, kLast] = _mintFee(pairId, reserve0.value, reserve1.value, pair.kLast);
-        // TODO: review the risk of using totalSupply here. Because of the nature of UTXO that 
-        // a user could send the LP tokens to the burn address directly without using the burn function, 
+        // TODO: review the risk of using totalSupply here. Because of the nature of UTXO that
+        // a user could send the LP tokens to the burn address directly without using the burn function,
         // but the totalSupply will not be updated.
-        const totalSupply = LunarswapLiquidity_totalSupply(pairId).value;
+        const totalSupply = LunarswapLiquidity_getTotalSupply(pairId).value;
         if (totalSupply == 0) {
             // liquidity = (√amount0 * amount1) - MINIMUM_LIQUIDITY = Uint<128>
             // TODO: review disclose
@@ -201,7 +226,8 @@ module LunarswapPair {
                 MINIMUM_LIQUIDITY()
             );
             assert(liquidity > 0, "LunarswapPair: mint() - New pair insufficient liquidity minted");
-            assert(liquidity <= MAX_UINT64(), "LunarswapPair: mint() - liquidity exceeds Uint<64> max");
+            // I think the liquidity won't exceed the Uint<64>
+            assert(liquidity <= Uint64_MAX_UINT64(), "LunarswapPair: mint() - liquidity exceeds Uint<64> max");
             // TODO: WARNING! to be revised to prevent from inflation attack.
             // TODO: IMPORTANT! that should be minted to the burn address.
             //LunarswapLiquidity_mint(pairId, burn_address(), MINIMUM_LIQUIDITY());
@@ -231,7 +257,7 @@ module LunarswapPair {
                 disclose(Uint128_div(Uint128_mulChecked(amount1, totalSupply), reserve1.value))
             );
             assert(liquidity > 0, "LunarswapPair: mint() - Existing pair insufficient liquidity minted");
-            assert(liquidity <= MAX_UINT64(), "LunarswapPair: mint() - liquidity exceeds Uint<64> max");
+            assert(liquidity <= Uint64_MAX_UINT64(), "LunarswapPair: mint() - liquidity exceeds Uint<64> max");
             const lpTokens = LunarswapLiquidity_mint(pairId, to, liquidity as Uint<64>);
             const updatedPair = _update(
                 pair,
@@ -273,7 +299,7 @@ module LunarswapPair {
         reserve1: Uint<128>,
         kLast: Uint<128>
     ): [Boolean, Uint<128>] {
-        const isFeeToZero = isKeyOrAddressZero(left<ZswapCoinPublicKey, ContractAddress>(LunarswapFee_feeTo()));
+        const isFeeToZero = Utils_isKeyOrAddressZero(left<ZswapCoinPublicKey, ContractAddress>(LunarswapFee_feeTo()));
         const isFeeOn = isFeeToZero == true ? false : true;
         if (isFeeOn) {
             if (kLast != 0) {
@@ -283,15 +309,15 @@ module LunarswapPair {
                 const rootKLast = disclose(Uint128_sqrt(kLast));
                 if (rootK > rootKLast) {
                     // TODO: review the security of the totalSupply.
-                    const totalSupply = LunarswapLiquidity_totalSupply(pairId).value;
+                    const totalSupply = LunarswapLiquidity_getTotalSupply(pairId).value;
                     const numerator = Uint128_mulChecked(Uint128_sub(rootK, rootKLast), totalSupply);
                     const denominator = Uint128_addChecked(Uint128_mulChecked(rootK, 5), rootKLast);
                     const liquidity = disclose(Uint128_div(numerator, denominator));
                     if (liquidity as Uint<128> > 0) {
                         // Mint Liquidity Tokens for the protocol fee recipient
                         // TODO: Maybe needed to be double checked.
-                        assert(liquidity <= MAX_UINT64(), "LunarswapPair: _mintFee() - liquidity exceeds Uint<64> max");
-                        LunarswapLiquidity_mint(pairId, eitherZPK(LunarswapFee_feeTo()), liquidity as Uint<64>);
+                        assert(liquidity <= Uint64_MAX_UINT64(), "LunarswapPair: _mintFee() - liquidity exceeds Uint<64> max");
+                        LunarswapLiquidity_mint(pairId, Utils_eitherZPK(LunarswapFee_feeTo()), liquidity as Uint<64>);
                     }
                 }
             }
@@ -336,7 +362,7 @@ module LunarswapPair {
         // transferred to the recipient yet.
         const balance0 = reserve0.value;
         const balance1 = reserve1.value;
-        const totalSupply = LunarswapLiquidity_totalSupply(pairId).value;
+        const totalSupply = LunarswapLiquidity_getTotalSupply(pairId).value;
 
         const [isFeeOn, kLast] = _mintFee(pairId, reserve0.value, reserve1.value, pair.kLast);
         // Call the internal _burn circuit and return its result

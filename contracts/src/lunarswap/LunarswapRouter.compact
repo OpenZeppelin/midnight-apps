@@ -20,7 +20,7 @@ module LunarswapRouter {
     import "../openzeppelin/Utils";
     import "../math/Uint128";
 
-    import "./interfaces/ILunarswapPair";
+    import { Pair } from "./LunarswapPair";
 
     import LunarswapLibrary prefix LunarswapLibrary_;
     import LunarswapFactory prefix LunarswapFactory_;
@@ -244,7 +244,7 @@ module LunarswapRouter {
         to: Either<ZswapCoinPublicKey, ContractAddress>,
     ): [Uint<128>, Uint<128>] {
         // TODO: double check the totalSupply is correct.
-        const totalSupply = LunarswapLiquidity_totalSupply(pairId);
+        const totalSupply = LunarswapLiquidity_getTotalSupply(pairId);
 
         assert(totalSupply.value > 0, "LunarswapRouter: removeLiquidity() - totalSupply is zero");
         assert(totalSupply.color == liquidity.color, "LunarswapRouter: removeLiquidity() - mismatched LP token color");

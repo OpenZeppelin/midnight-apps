@@ -45,15 +45,29 @@ import CompactStandardLibrary;
 import { U128 } from "../math/types/TU128";
 import { DivResultU128 } from "../math/Uint128";
 
-import "./interfaces/ILunarswapPair";
-import "./interfaces/ILunarswapFactory";
-import "./interfaces/ILunarswapLiquidity";
+import { pool, reserves } from "./LunarswapFactory";
+import { Pair } from "./LunarswapPair";
+import { totalSupply, name, symbol, decimals, color } from "./LunarswapLiquidity";
 
-import LunarswapRouter prefix LunarswapRouter_;
-import LunarswapLiquidity prefix LunarswapLiquidity_;
-import LunarswapFactory prefix LunarswapFactory_;
-import LunarswapLibrary prefix LunarswapLibrary_;
-import LunarswapPair prefix LunarswapPair_;
+import {
+    initialize,
+    addLiquidity,
+    removeLiquidity,
+    swapExactTokensForTokens,
+    swapTokensForExactTokens,
+} from "./LunarswapRouter" prefix LunarswapRouter_;
+import { getTotalSupply } from "./LunarswapLiquidity" prefix LunarswapLiquidity_;
+import {
+    getPair,
+    getReserves,
+    isIdentityExists,
+    getAllPairLength,
+} from "./LunarswapFactory" prefix LunarswapFactory_;
+import {
+    sortCoinsAndAmounts,
+    sortCoins,
+    getIdentity,
+} from "./LunarswapLibrary" prefix LunarswapLibrary_;
 
 /**
  * @module Types
@@ -74,24 +88,15 @@ export { ShieldedCoinInfo, QualifiedShieldedCoinInfo, Either, ZswapCoinPublicKey
 export { Pair };
 
 /**
- * @ledger pool {Map<Bytes<32>, Pair>}
- * @ledger reserves {Map<Bytes<32>, [ShieldedCoinInfo, ShieldedCoinInfo]>}
- * @ledger lpTotalSupply {Map<Bytes<32>, Uint<128>>}
- * @ledger lpTokenName {Opaque<"string">}
- * @ledger lpTokenSymbol {Opaque<"string">}
- * @ledger lpTokenDecimals {Uint<8>}
- * @ledger lpTokenType {Bytes<32>}
- *
- * These are exported ledger variables for Lunarswap:
- * - `pool`: mapping from pairId to Pair struct
- * - `reserves`: mapping from pairId to a tuple of ShieldedCoinInfo (token0, token1 reserves)
- * - `lpTotalSupply`: mapping from pairId to the total supply of LP tokens
- * - `lpTokenName`: the name of the LP token
- * - `lpTokenSymbol`: the symbol of the LP token
- * - `lpTokenDecimals`: the number of decimals for the LP token
- * - `lpTokenType`: the color/type identifier for the LP token
+ * @ledger {Map<Bytes<32>, Pair>} pool
+ * @ledger {Map<Bytes<32>, QualifiedShieldedCoinInfo>} reserves
+ * @ledger {Map<Bytes<32>, QualifiedShieldedCoinInfo>} totalSupply
+ * @ledger {Opaque<"string">} name
+ * @ledger {Opaque<"string">} symbol
+ * @ledger {Uint<8>} decimals
+ * @ledger {Bytes<32>} color
  */
-export { pool, reserves, lpTotalSupply, lpTokenName, lpTokenSymbol, lpTokenDecimals, lpTokenType };
+export { pool, reserves, totalSupply, name, symbol, decimals, color };
 
 /**
  * @title Lunarswap constructor
@@ -526,5 +531,5 @@ export circuit getSortedCoinsAndAmounts(
  */
 export circuit getLpTokenTotalSupply(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo): QualifiedShieldedCoinInfo {
     const pairId = getPairId(tokenA, tokenB);
-    return LunarswapLiquidity_totalSupply(pairId);
+    return LunarswapLiquidity_getTotalSupply(pairId);
 }

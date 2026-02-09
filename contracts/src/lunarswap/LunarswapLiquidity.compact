@@ -20,11 +20,58 @@ pragma language_version >= 0.20.0;
 module LunarswapLiquidity {
     import CompactStandardLibrary;
 
-    import "../openzeppelin/ShieldedERC20" prefix ShieldedERC20_;
-    import "../math/Uint128" prefix Uint128_;
-    import "../math/Bytes32" prefix Bytes32_;
+    import { mint, burn } from "../openzeppelin/ShieldedERC20" prefix ShieldedERC20_;
+    import { sub } from "../math/Uint128" prefix Uint128_;
+    import { isZero } from "../math/Bytes32" prefix Bytes32_;
 
-    import "./interfaces/ILunarswapLiquidity";
+    /**
+     * @ledger {Counter} _counter
+     * @description Internal counter used for LP token nonce evolution and minting operations.
+     */
+    export ledger _counter: Counter;
+
+    /**
+     * @ledger {Bytes<32>} nonce
+     * @description The global nonce used for LP token generation and uniqueness.
+     */
+    export ledger nonce: Bytes<32>;
+
+    /**
+     * @ledger {Map<Bytes<32>, QualifiedShieldedCoinInfo>} lpTotalSupply
+     * @description Mapping of trading pair hash (pairId) to the total supply and metadata of LP tokens for that pair.
+     * The key is the pair hash (Bytes<32>), and the value is the QualifiedShieldedCoinInfo for the LP token.
+     */
+    export ledger totalSupply: Map<Bytes<32>, QualifiedShieldedCoinInfo>;
+
+    /**
+     * @ledger {Bytes<32>} domain
+     * @description The color of the LP token (Bytes<32>).
+     */
+    export sealed ledger domain: Bytes<32>;
+
+    /**
+     * @ledger {Opaque<"string">} name
+     * @description The name of the LP token (e.g., "Lunarswap LP Token").
+     */
+    export sealed ledger name: Opaque<"string">;
+
+    /**
+     * @ledger {Opaque<"string">} symbol
+     * @description The symbol of the LP token (e.g., "LUNAR-LP").
+     */
+    export sealed ledger symbol: Opaque<"string">;
+
+    /**
+     * @ledger {Uint<8>} decimals
+     * @description The number of decimals used for the LP token (e.g., 18).
+     */
+    export sealed ledger decimals: Uint<8>;
+
+    /**
+     * @ledger {Bytes<32>} color
+     * @description The color of the LP token (Bytes<32>).
+     */
+    export ledger color: Bytes<32>;
 
     /**
      * @title initialize circuit
@@ -47,10 +94,10 @@ module LunarswapLiquidity {
         symbol_: Opaque<"string">,
         decimals_: Uint<8>
     ): [] {
-        lpTokenNonce = disclose(nonce_);
-        lpTokenName = disclose(name_);
-        lpTokenSymbol = disclose(symbol_);
-        lpTokenDecimals = disclose(decimals_);
+        nonce = disclose(nonce_);
+        name = disclose(name_);
+        symbol = disclose(symbol_);
+        decimals = disclose(decimals_);
         return [];
     }
 
@@ -72,13 +119,13 @@ module LunarswapLiquidity {
      * @returns [] - No return values.
      */
     export circuit initializePairLpToken(pairId: Bytes<32>): [] {
-        assert(!lpTotalSupply.member(disclose(pairId)), "LunarswapLiquidity: initializePairLpToken() - Lp token already exists");
-        lpTotalSupply.insert(pairId, default<QualifiedShieldedCoinInfo>);
+        assert(!totalSupply.member(disclose(pairId)), "LunarswapLiquidity: initializePairLpToken() - Lp token already exists");
+        totalSupply.insert(pairId, default<QualifiedShieldedCoinInfo>);
         return [];
     }
 
     /**
-     * @title totalSupply circuit
+     * @title getTotalSupply circuit
      * @description Returns the total supply of LP tokens for a specific pair.
      *
      * @remarks
@@ -94,9 +141,9 @@ module LunarswapLiquidity {
      *
      * @returns {Uint<128>} - The total supply of LP tokens for the pair.
      */
-    export circuit totalSupply(pairId: Bytes<32>): QualifiedShieldedCoinInfo {
-        assert(lpTotalSupply.member(disclose(pairId)), "LunarswapLiquidity: totalSupply() - Lp token not found");
-        return lpTotalSupply.lookup(disclose(pairId));
+    export circuit getTotalSupply(pairId: Bytes<32>): QualifiedShieldedCoinInfo {
+        assert(totalSupply.member(disclose(pairId)), "LunarswapLiquidity: totalSupply() - Lp token not found");
+        return totalSupply.lookup(disclose(pairId));
     }
 
     /**
@@ -124,12 +171,12 @@ module LunarswapLiquidity {
         amount: Uint<64>
     ): ShieldedCoinInfo {
         _counter.increment(1);
-        const newNonce = evolveNonce(_counter, lpTokenNonce);
+        const newNonce = evolveNonce(_counter, nonce);
         // pairId is used as domainSep in mintShieldedToken
         const ret = mintShieldedToken(pairId, amount, newNonce, disclose(recipient));
 
-        if (Bytes32_isZero(lpTokenType)) {
-            lpTokenType = ret.color;
+        if (Bytes32_isZero(color)) {
+            color = ret.color;
         }
 
         // const newTotalSupply = QualifiedShieldedCoinInfo {
@@ -138,7 +185,7 @@ module LunarswapLiquidity {
         //     value: Uint128_addChecked(lpTotalSupply.lookup(pairId).value, amount),
         //     mt_index: lpTotalSupply.lookup(pairId).mt_index,
         // };
-        lpTotalSupply.insertCoin(pairId, ret, disclose(recipient));
+        totalSupply.insertCoin(pairId, ret, disclose(recipient));
 
         return ret;
     }
@@ -170,7 +217,7 @@ module LunarswapLiquidity {
         coin: ShieldedCoinInfo,
         amount: Uint<128>
     ): ShieldedSendResult {
-        assert(lpTotalSupply.member(disclose(pairId)), "LunarswapLiquidity: totalSupply() - Lp token not found");
+        assert(totalSupply.member(disclose(pairId)), "LunarswapLiquidity: totalSupply() - Lp token not found");
         assert(coin.value >= amount, "LunarswapLiquidity: burn() - Insufficient coin value");
 
         receiveShielded(disclose(coin));
@@ -178,9 +225,9 @@ module LunarswapLiquidity {
         const newTotalSupply = ShieldedCoinInfo {
             nonce: coin.nonce,
             color: coin.color,
-            value: Uint128_sub(lpTotalSupply.lookup(disclose(pairId)).value, amount),
+            value: Uint128_sub(totalSupply.lookup(disclose(pairId)).value, amount),
         };
-        lpTotalSupply.insertCoin(disclose(pairId), disclose(newTotalSupply), shieldedBurnAddress());
+        totalSupply.insertCoin(disclose(pairId), disclose(newTotalSupply), shieldedBurnAddress());
 
         const ret = disclose(sendImmediateShielded(disclose(coin), shieldedBurnAddress(), disclose(amount)));
         if (ret.change.is_some) {

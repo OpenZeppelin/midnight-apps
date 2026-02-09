@@ -20,8 +20,8 @@ pragma language_version >= 0.20.0;
 module LunarswapLibrary {
     import CompactStandardLibrary;
 
-    import "../math/Uint128" prefix Uint128_;
-    import "../math/Bytes32" prefix Bytes32_;
+    import { sub, addChecked, div, mulChecked } from "../math/Uint128" prefix Uint128_;
+    import { lt } from "../math/Bytes32" prefix Bytes32_;
 
     /**
      * @struct SplitCoinResult

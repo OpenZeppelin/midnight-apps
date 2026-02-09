@@ -19,10 +19,18 @@ pragma language_version >= 0.20.0;
 module LunarswapFee {
     import CompactStandardLibrary;
 
-    import "../openzeppelin/Utils";
+    import { callerZPK } from "../openzeppelin/Utils" prefix Utils_;
 
-    // TODO: those are not a shielded address.
+    /**
+     * @ledger {ZswapCoinPublicKey} _feeTo
+     * @description The current protocol fee recipient address (unshielded).
+     */
     export ledger _feeTo: ZswapCoinPublicKey;
+
+    /**
+     * @ledger {ZswapCoinPublicKey} _feeToSetter
+     * @description The address with privilege to set the protocol fee recipient (unshielded).
+     */
     export ledger _feeToSetter: ZswapCoinPublicKey;
 
     /**
@@ -97,7 +105,7 @@ module LunarswapFee {
     // TODO: what is the difference between Admin and feeToSetter.
     export circuit setFeeTo(feeTo_: ZswapCoinPublicKey): [] {
         // TODO: add access control.
-        assert(callerZPK() == _feeToSetter, "LunarswapFee: setFeeTo() - forbidden");
+        assert(Utils_callerZPK() == _feeToSetter, "LunarswapFee: setFeeTo() - forbidden");
         _feeTo = feeTo_;
         return [];
     }
@@ -123,7 +131,7 @@ module LunarswapFee {
      */
     export circuit setFeeToSetter(feeToSetter_: ZswapCoinPublicKey): [] {
         // TODO: add access control.
-        assert(callerZPK() == _feeToSetter, "LunarswapFee: setFeeToSetter() - forbidden");
+        assert(Utils_callerZPK() == _feeToSetter, "LunarswapFee: setFeeToSetter() - forbidden");
         _feeToSetter = feeToSetter_;
         return [];
     }

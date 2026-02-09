@@ -20,8 +20,7 @@ module LunarswapFactory {
 
     import "../openzeppelin/Utils" prefix Utils_;
 
-    import { Pair } from "./types/TPair";
-    import "./interfaces/ILunarswapFactory";
+    import { Pair } from "./LunarswapPair";
 
     import LunarswapPair prefix LunarswapPair_;
     import LunarswapLibrary prefix LunarswapLibrary_;
