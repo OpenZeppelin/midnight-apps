@@ -3,12 +3,12 @@ pragma language_version >= 0.20.0;
 /**
  * @title LunarswapFactory
  * @description Factory contract for creating and managing trading pairs in the Lunarswap protocol.
- * 
+ *
  * @remarks
  * The LunarswapFactory is responsible for the creation, storage, and management of all trading pairs
  * in the protocol. It implements a factory pattern where each unique token pair has a corresponding
  * pair contract that handles the actual trading logic and liquidity management.
- * 
+ *
  * Key Features:
  * - Pair creation and initialization
  * - Pair storage and retrieval
@@ -18,18 +18,18 @@ pragma language_version >= 0.20.0;
 module LunarswapFactory {
     import CompactStandardLibrary;
 
-    import "./openzeppelin/Utils" prefix Utils_;
+    import "../openzeppelin/Utils" prefix Utils_;
 
     import "./interfaces/ILunarswapPair";
     import "./interfaces/ILunarswapFactory";
 
-    import LunarswapPair prefix LunarswapPair_;  
+    import LunarswapPair prefix LunarswapPair_;
     import LunarswapLibrary prefix LunarswapLibrary_;
 
     /**
      * @title initialize circuit
      * @description Initializes the Lunarswap factory with LP token configuration.
-     * 
+     *
      * @remarks
      * This circuit sets up the initial configuration for LP tokens including name,
      * symbol, decimals, and nonce. It should only be called once during contract deployment.
@@ -55,7 +55,7 @@ module LunarswapFactory {
     /**
      * @title getAllPairLength circuit
      * @description Returns the total number of trading pairs in the factory.
-     * 
+     *
      * @remarks
      * This circuit provides a count of all registered trading pairs stored in the liquidity pool.
      *
@@ -66,11 +66,11 @@ module LunarswapFactory {
     export circuit getAllPairLength(): Uint<64> {
         return pool.size();
     }
-    
+
     /**
      * @title isIdentityExists circuit
      * @description Checks if a trading pair exists for the given pairId hash.
-     * 
+     *
      * @remarks
      * This circuit verifies whether a pair with the specified pairId hash exists
      * in the liquidity pool.
@@ -83,12 +83,12 @@ module LunarswapFactory {
      */
     export circuit isIdentityExists(pairId: Bytes<32>): Boolean {
         return pool.member(pairId);
-    } 
+    }
 
     /**
      * @title getPair circuit
      * @description Retrieves the pair information for a given pairId hash.
-     * 
+     *
      * @remarks
      * This circuit returns the complete pair data including reserves and metadata.
      * The pair must exist for this circuit to succeed.
@@ -102,14 +102,14 @@ module LunarswapFactory {
      * @returns {Pair} - The pair information including reserves and metadata.
      */
     export circuit getPair(pairId: Bytes<32>): Pair {
-        assert (isIdentityExists(pairId)) "LunarswapFactory: getPair() - Pair does not exist";
+        assert(isIdentityExists(pairId), "LunarswapFactory: getPair() - Pair does not exist");
         return pool.lookup(pairId);
     }
 
     /**
      * @title getReserves circuit
      * @description Returns the current reserves for a trading pair.
-     * 
+     *
      * @remarks
      * This circuit retrieves the reserves for a pair identified by its pairId hash
      * and token information. The reserves are returned in the order of token0 and token1.
@@ -122,12 +122,12 @@ module LunarswapFactory {
      *
      * @throws {Error} "LunarswapFactory: getPair() - Pair does not exist" if the pair doesn't exist.
      *
-     * @returns {[QualifiedCoinInfo, QualifiedCoinInfo]} - The reserves for token0 and token1 respectively.
+     * @returns {[QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo]} - The reserves for token0 and token1 respectively.
      */
-    export circuit getReserves(pairId: Bytes<32>, reserve0Id: Bytes<32>, reserve1Id: Bytes<32>): [QualifiedCoinInfo, QualifiedCoinInfo] {
-        assert (isIdentityExists(pairId)) "LunarswapFactory: getReserves() - Pair does not exist";
-        assert (reserves.member(reserve0Id)) "LunarswapFactory: getReserves() - Reserve0 does not exist";
-        assert (reserves.member(reserve1Id)) "LunarswapFactory: getReserves() - Reserve1 does not exist";
+    export circuit getReserves(pairId: Bytes<32>, reserve0Id: Bytes<32>, reserve1Id: Bytes<32>): [QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo] {
+        assert(isIdentityExists(pairId), "LunarswapFactory: getReserves() - Pair does not exist");
+        assert(reserves.member(reserve0Id), "LunarswapFactory: getReserves() - Reserve0 does not exist");
+        assert(reserves.member(reserve1Id), "LunarswapFactory: getReserves() - Reserve1 does not exist");
         const reserve0 = reserves.lookup(reserve0Id);
         const reserve1 = reserves.lookup(reserve1Id);
         return [reserve0, reserve1];
@@ -135,29 +135,29 @@ module LunarswapFactory {
 
     /**
      * @title addReserves circuit
-     * @description Adds the reserves for a given pair pairId with new token0 and token1 CoinInfo.
+     * @description Adds the reserves for a given pair pairId with new token0 and token1 ShieldedCoinInfo.
      *
      * @param {Bytes<32>} reserve0Id - The type of the first reserve.
      * @param {Bytes<32>} reserve1Id - The type of the second reserve.
-     * @param {CoinInfo} token0    - The first token's CoinInfo.
-     * @param {CoinInfo} token1    - The second token's CoinInfo.
+     * @param {ShieldedCoinInfo} token0    - The first token's ShieldedCoinInfo.
+     * @param {ShieldedCoinInfo} token1    - The second token's ShieldedCoinInfo.
      *
      * @returns [] - No return values.
      */
-    export circuit addReserves(reserve0Id: Bytes<32>, reserve1Id: Bytes<32>, token0: CoinInfo, token1: CoinInfo): [] {
+    export circuit addReserves(reserve0Id: Bytes<32>, reserve1Id: Bytes<32>, token0: ShieldedCoinInfo, token1: ShieldedCoinInfo): [] {
         // This condition is a must because when initially depositing liquidity, the reserves are undefined.
         if (!reserves.member(reserve0Id) && !reserves.member(reserve1Id)) {
-            reserves.insert_coin(reserve0Id, token0, right<ZswapCoinPublicKey, ContractAddress>(kernel.self()));
-            reserves.insert_coin(reserve1Id, token1, right<ZswapCoinPublicKey, ContractAddress>(kernel.self()));
+            reserves.insertCoin(reserve0Id, token0, right<ZswapCoinPublicKey, ContractAddress>(kernel.self()));
+            reserves.insertCoin(reserve1Id, token1, right<ZswapCoinPublicKey, ContractAddress>(kernel.self()));
             return [];
         }
 
         if (reserves.lookup(reserve0Id).value == 0) {
-            reserves.insert_coin(reserve0Id, token0, right<ZswapCoinPublicKey, ContractAddress>(kernel.self()));
+            reserves.insertCoin(reserve0Id, token0, right<ZswapCoinPublicKey, ContractAddress>(kernel.self()));
         } else {
-            reserves.insert_coin(
+            reserves.insertCoin(
                 reserve0Id,
-                merge_coin_immediate(
+                mergeCoinImmediate(
                     reserves.lookup(reserve0Id),
                     token0
                 ),
@@ -166,11 +166,11 @@ module LunarswapFactory {
         }
 
         if (reserves.lookup(reserve1Id).value == 0) {
-            reserves.insert_coin(reserve1Id, token1, right<ZswapCoinPublicKey, ContractAddress>(kernel.self()));
+            reserves.insertCoin(reserve1Id, token1, right<ZswapCoinPublicKey, ContractAddress>(kernel.self()));
         } else {
-            reserves.insert_coin(
+            reserves.insertCoin(
                 reserve1Id,
-                merge_coin_immediate(
+                mergeCoinImmediate(
                     reserves.lookup(reserve1Id),
                     token1
                 ),
@@ -182,7 +182,7 @@ module LunarswapFactory {
 
     /**
      * @title removeReserves circuit
-     * @description Removes the reserves for a given pair pairId with new token0 and token1 CoinInfo.
+     * @description Removes the reserves for a given pair pairId with new token0 and token1 ShieldedCoinInfo.
      *
      * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
      * @param {Bytes<32>} reserve1Id - The type of the first reserve.
@@ -191,7 +191,7 @@ module LunarswapFactory {
      * @param {Uint<128>} amount1 - The amount of token1 to remove.
      * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The recipient of the removed tokens.
      *
-     * @returns {[CoinInfo, CoinInfo]} - The amounts of token0 and token1 sent to the recipient.
+     * @returns {[ShieldedCoinInfo, ShieldedCoinInfo]} - The amounts of token0 and token1 sent to the recipient.
      */
     export circuit removeReserves(
         pairId: Bytes<32>,
@@ -200,19 +200,19 @@ module LunarswapFactory {
         amount0: Uint<128>,
         amount1: Uint<128>,
         to: Either<ZswapCoinPublicKey, ContractAddress>
-    ): [CoinInfo, CoinInfo] {
+    ): [ShieldedCoinInfo, ShieldedCoinInfo] {
         const [reserve0, reserve1] = getReserves(pairId, reserve0Id, reserve1Id);
-        const sendResults0 = send(reserve0, to, amount0);
-        const sendResults1 = send(reserve1, to, amount1);
+        const sendResults0 = sendShielded(reserve0, to, amount0);
+        const sendResults1 = sendShielded(reserve1, to, amount1);
         if(sendResults0.change.is_some) {
-            reserves.insert_coin(
+            reserves.insertCoin(
                 reserve0Id,
                 sendResults0.change.value,
                 right<ZswapCoinPublicKey, ContractAddress>(kernel.self())
             );
         }
         if(sendResults1.change.is_some) {
-            reserves.insert_coin(
+            reserves.insertCoin(
                 reserve1Id,
                 sendResults1.change.value,
                 right<ZswapCoinPublicKey, ContractAddress>(kernel.self())
@@ -231,25 +231,25 @@ module LunarswapFactory {
      * `tokenOut` if its value is greater than zero.
      *
      * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
-     * @param {CoinInfo} tokenIn   - The input token information (to add to reserves).
-     * @param {CoinInfo} tokenOut  - The output token information (to remove from reserves).
+     * @param {ShieldedCoinInfo} tokenIn   - The input token information (to add to reserves).
+     * @param {ShieldedCoinInfo} tokenOut  - The output token information (to remove from reserves).
      *
      * @returns [] - No return values.
      */
     export circuit swapReserves(
-        pairId: Bytes<32>, 
-        tokenIn: CoinInfo, 
-        tokenOut: CoinInfo,
+        pairId: Bytes<32>,
+        tokenIn: ShieldedCoinInfo,
+        tokenOut: ShieldedCoinInfo,
         to: Either<ZswapCoinPublicKey, ContractAddress>
     ): [] {
         const reserveInType = LunarswapLibrary_getIdentity(pairId, tokenIn.color, false);
         const reserveOutType = LunarswapLibrary_getIdentity(pairId, tokenOut.color, false);
         const [reserveIn, reserveOut] = getReserves(pairId, reserveInType, reserveOutType);
-        
+
         if (tokenIn.value > 0) {
-            reserves.insert_coin(
+            reserves.insertCoin(
                 reserveInType,
-                merge_coin_immediate(
+                mergeCoinImmediate(
                     reserves.lookup(reserveInType),
                     tokenIn
                 ),
@@ -258,25 +258,25 @@ module LunarswapFactory {
         }
 
         if (tokenOut.value > 0) {
-            const sendResults = send(reserveOut, to, tokenOut.value);
+            const sendResults = sendShielded(reserveOut, to, tokenOut.value);
             if (sendResults.change.is_some) {
-                reserves.insert_coin(
-                    reserveOutType, 
+                reserves.insertCoin(
+                    reserveOutType,
                     sendResults.change.value,
                     right<ZswapCoinPublicKey, ContractAddress>(kernel.self())
                 );
             }
         }
 
-        assert (tokenIn.value > 0 || tokenOut.value > 0) "LunarswapFactory: swapReserves() - Invalid token";
-        
+        assert(tokenIn.value > 0 || tokenOut.value > 0, "LunarswapFactory: swapReserves() - Invalid token");
+
         return [];
     }
-    
+
     /**
      * @title createPair circuit
      * @description Creates a new trading pair for the given tokens.
-     * 
+     *
      * @remarks
      * This circuit initializes a new trading pair with zero reserves and stores it
      * in the liquidity pool. The pair is identified by a unique hash generated from
@@ -289,26 +289,26 @@ module LunarswapFactory {
      * @circuitInfo k=11, rows=1500
      *
      * @param {Bytes<32>} pairId - The unique pairId hash for the new pair.
-     * @param {CoinInfo} token0    - The first token in the pair.
-     * @param {CoinInfo} token1    - The second token in the pair.
+     * @param {ShieldedCoinInfo} token0    - The first token in the pair.
+     * @param {ShieldedCoinInfo} token1    - The second token in the pair.
      *
      * @throws {Error} "LunarswapFactory: Invalid token color" if either token color is zero.
      *
      * @returns {Pair} - The created pair.
      */
-    export circuit createPair(pairId: Bytes<32>, token0: CoinInfo, token1: CoinInfo): Pair {
+    export circuit createPair(pairId: Bytes<32>, token0: ShieldedCoinInfo, token1: ShieldedCoinInfo): Pair {
         // TODO: I am not sure if the Coin.Color can be set to zero.
         // TODO: UPDATE that assert is paused because the tDust token is zero address color.
         // assert (!Utils_isKeyOrAddressZero(right<ZswapCoinPublicKey, ContractAddress>( ContractAddress { bytes: token0.color }))) "LunarswapFactory: Invalid token color";
-        const pair = LunarswapPair_initializePair(pairId, token0, token1); 
+        const pair = LunarswapPair_initializePair(pairId, token0, token1);
         pool.insert(pairId, pair);
         return pair;
-    } 
+    }
 
     /**
      * @title updatePair circuit
      * @description Updates an existing trading pair with new data.
-     * 
+     *
      * @remarks
      * This circuit updates the pair data in the liquidity pool. The pair must already
      * exist for this operation to succeed.
@@ -326,15 +326,15 @@ module LunarswapFactory {
      * @returns {Pair} - The updated pair data.
      */
     export circuit updatePair(pairId: Bytes<32>, pair: Pair): Pair {
-        assert (isIdentityExists(pairId)) "LunarswapFactory: updatePair() - Pair does not exist";
-        pool.insert(pairId, disclose(pair));
+        assert(isIdentityExists(pairId), "LunarswapFactory: updatePair() - Pair does not exist");
+        pool.insert(disclose(pairId), disclose(pair));
         return pair;
     }
 
     /**
      * @title removePair circuit
      * @description Removes a trading pair from the liquidity pool.
-     * 
+     *
      * @remarks
      * This circuit removes a pair from the liquidity pool based on the pair's
      * token information. The pair must exist for this operation to succeed.
@@ -352,7 +352,7 @@ module LunarswapFactory {
      */
     export circuit removePair(pair: Pair): [] {
         const pairId = LunarswapLibrary_getIdentity(pair.token0Type, pair.token1Type, true);
-        assert (isIdentityExists(pairId)) "LunarswapFactory: removePair() - Pair does not exist";
+        assert(isIdentityExists(pairId), "LunarswapFactory: removePair() - Pair does not exist");
         return pool.remove(pairId);
     }
 }

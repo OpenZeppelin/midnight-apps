@@ -5,7 +5,7 @@ pragma language_version >= 0.20.0;
 
 import { ShieldedCoinInfo, ShieldedSendResult, ZswapCoinPublicKey, ContractAddress, Either } from CompactStandardLibrary;
 
-import "./openzeppelin/ShieldedERC20" prefix ShieldedFungibleToken_;
+import "../openzeppelin/ShieldedERC20" prefix ShieldedFungibleToken_;
 
 export { ShieldedFungibleToken__nonce, ShieldedFungibleToken__domain, };
 export { ShieldedCoinInfo, ShieldedSendResult, ZswapCoinPublicKey, ContractAddress, Either };
@@ -34,8 +34,8 @@ export circuit totalSupply(): Uint<128> {
   return ShieldedFungibleToken_totalSupply();
 }
 
-export circuit tokenType(): Bytes<32> {
-  return ShieldedFungibleToken_tokenType();
+export circuit color(): Bytes<32> {
+  return ShieldedFungibleToken_color();
 }
 
 export circuit mint(recipient: Either<ZswapCoinPublicKey, ContractAddress>, amount: Uint<64>): ShieldedCoinInfo {

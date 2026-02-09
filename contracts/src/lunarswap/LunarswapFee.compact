@@ -3,12 +3,12 @@ pragma language_version >= 0.20.0;
 /**
  * @title LunarswapFee
  * @description Fee management system for the Lunarswap protocol, handling protocol fee collection and distribution.
- * 
+ *
  * @remarks
  * The LunarswapFee module manages the protocol's fee system, allowing for sustainable protocol development
  * and maintenance. It implements a flexible fee collection mechanism that can be enabled or disabled by
  * authorized administrators, with fees distributed to designated recipients.
- * 
+ *
  * Key Features:
  * - Protocol fee enablement/disablement
  * - Fee recipient management
@@ -19,7 +19,7 @@ pragma language_version >= 0.20.0;
 module LunarswapFee {
     import CompactStandardLibrary;
 
-    import "./openzeppelin/Utils";
+    import "../openzeppelin/Utils";
 
     // TODO: those are not a shielded address.
     export ledger _feeTo: ZswapCoinPublicKey;
@@ -28,7 +28,7 @@ module LunarswapFee {
     /**
      * @title initialize circuit
      * @description Initializes the fee management system with the fee setter address.
-     * 
+     *
      * @remarks
      * This circuit sets up the initial fee configuration by setting the fee setter
      * address. The fee setter has the authority to change fee recipients and transfer
@@ -47,7 +47,7 @@ module LunarswapFee {
     /**
      * @title feeTo circuit
      * @description Returns the current fee recipient address.
-     * 
+     *
      * @remarks
      * This circuit retrieves the address that receives protocol fees from trading pairs.
      *
@@ -62,7 +62,7 @@ module LunarswapFee {
     /**
      * @title feeToSetter circuit
      * @description Returns the address that can set the fee recipient.
-     * 
+     *
      * @remarks
      * This circuit retrieves the address that has the authority to change the fee
      * recipient and transfer fee setter privileges.
@@ -78,7 +78,7 @@ module LunarswapFee {
     /**
      * @title setFeeTo circuit
      * @description Sets the fee recipient address.
-     * 
+     *
      * @remarks
      * This circuit allows the fee setter to change the address that receives
      * protocol fees from trading pairs.
@@ -94,18 +94,18 @@ module LunarswapFee {
      *
      * @returns [] - No return values.
      */
-    // TODO: what is the difference between Admin and feeToSetter. 
+    // TODO: what is the difference between Admin and feeToSetter.
     export circuit setFeeTo(feeTo_: ZswapCoinPublicKey): [] {
         // TODO: add access control.
-        assert (msgSender() == _feeToSetter) "LunarswapFee: setFeeTo() - forbidden";
+        assert(callerZPK() == _feeToSetter, "LunarswapFee: setFeeTo() - forbidden");
         _feeTo = feeTo_;
         return [];
     }
-    
+
     /**
      * @title setFeeToSetter circuit
      * @description Transfers fee setter privileges to a new address.
-     * 
+     *
      * @remarks
      * This circuit allows the current fee setter to transfer their privileges to
      * another address. This is a one-way operation that cannot be undone.
@@ -123,8 +123,8 @@ module LunarswapFee {
      */
     export circuit setFeeToSetter(feeToSetter_: ZswapCoinPublicKey): [] {
         // TODO: add access control.
-        assert (msgSender() == _feeToSetter) "LunarswapFee: setFeeToSetter() - forbidden";
+        assert(callerZPK() == _feeToSetter, "LunarswapFee: setFeeToSetter() - forbidden");
         _feeToSetter = feeToSetter_;
         return [];
-    }  
+    }
 }
