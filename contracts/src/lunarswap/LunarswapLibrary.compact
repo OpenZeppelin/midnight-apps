@@ -23,12 +23,27 @@ module LunarswapLibrary {
     import "../math/Uint128" prefix Uint128_;
     import "../math/Bytes32" prefix Bytes32_;
 
-    // Struct for split coin result
+    /**
+     * @struct SplitCoinResult
+     * @description
+     * Struct returned from the splitCoin circuit representing the result of splitting a ShieldedCoinInfo.
+     *
+     * @field {ShieldedCoinInfo} used      - The portion of the coin with the specified used amount.
+     * @field {ShieldedCoinInfo} remainder - The portion of the coin with the remaining amount.
+     */
     export struct SplitCoinResult {
         used: ShieldedCoinInfo,
         remainder: ShieldedCoinInfo
     }
 
+    /**
+     * @struct SplitQualifiedCoinResult
+     * @description
+     * Struct returned from the splitQualifiedCoin circuit representing the result of splitting a QualifiedShieldedCoinInfo.
+     *
+     * @field {QualifiedShieldedCoinInfo} used      - The portion of the qualified coin with the specified used amount.
+     * @field {QualifiedShieldedCoinInfo} remainder - The portion of the qualified coin with the remaining amount.
+     */
     export struct SplitQualifiedCoinResult {
         used: QualifiedShieldedCoinInfo,
         remainder: QualifiedShieldedCoinInfo

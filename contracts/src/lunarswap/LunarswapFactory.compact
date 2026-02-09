@@ -20,11 +20,32 @@ module LunarswapFactory {
 
     import "../openzeppelin/Utils" prefix Utils_;
 
-    import "./interfaces/ILunarswapPair";
+    import { Pair } from "./types/TPair";
     import "./interfaces/ILunarswapFactory";
 
     import LunarswapPair prefix LunarswapPair_;
     import LunarswapLibrary prefix LunarswapLibrary_;
+
+    /**
+     * @title pool ledger
+     * @description Stores all trading pairs in the factory, mapping a unique pair pairId (Bytes<32>)
+     *              to its corresponding Pair struct. This ledger enables efficient lookup and management
+     *              of all created pairs within the Lunarswap protocol.
+     *
+     * @type {Map<Bytes<32>, Pair>}
+     */
+    export ledger pool: Map<Bytes<32>, Pair>;
+
+    /**
+     * @title reserves ledger
+     * @description Maintains the reserves for each trading pair. It maps a unique pair pairId (Bytes<32>)
+     *              to a nested map of token color (Bytes<32>) to its QualifiedShieldedCoinInfo. This structure allows
+     *              for tracking and updating the reserves of each token within every pair.
+     *
+     * @type {Map<reserveType, QualifiedShieldedCoinInfo>}
+     * @type {Map<Bytes<32>, QualifiedShieldedCoinInfo>}
+     */
+    export ledger reserves: Map<Bytes<32>, QualifiedShieldedCoinInfo>;
 
     /**
      * @title initialize circuit
