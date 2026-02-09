@@ -1,0 +1,33 @@
+pragma language_version >= 0.20.0;
+
+module ILunarswapFactory {
+    import CompactStandardLibrary;
+    
+    import "./ILunarswapPair.compact";
+
+    export struct SortedCoins {
+        token0: CoinInfo,
+        token1: CoinInfo
+    }
+
+    /**
+     * @title pool ledger
+     * @description Stores all trading pairs in the factory, mapping a unique pair pairId (Bytes<32>)
+     *              to its corresponding Pair struct. This ledger enables efficient lookup and management
+     *              of all created pairs within the Lunarswap protocol.
+     *
+     * @type {Map<Bytes<32>, Pair>}
+     */
+    export ledger pool: Map<Bytes<32>, Pair>;
+
+    /**
+     * @title reserves ledger
+     * @description Maintains the reserves for each trading pair. It maps a unique pair pairId (Bytes<32>)
+     *              to a nested map of token color (Bytes<32>) to its QualifiedCoinInfo. This structure allows
+     *              for tracking and updating the reserves of each token within every pair.
+     *
+     * @type {Map<reserveType, QualifiedCoinInfo>}
+     * @type {Map<Bytes<32>, QualifiedCoinInfo>}
+     */
+    export ledger reserves: Map<Bytes<32>, QualifiedCoinInfo>;
+}

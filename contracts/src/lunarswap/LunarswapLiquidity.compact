@@ -1,0 +1,192 @@
+pragma language_version >= 0.15.0;
+
+/**
+ * @title LunarswapLiquidity
+ * @description Liquidity Provider (LP) token management system for the Lunarswap protocol.
+ * 
+ * @remarks
+ * The LunarswapLiquidity module manages the creation, minting, burning, and tracking of liquidity
+ * provider tokens. These tokens represent a user's share of liquidity in a trading pair and
+ * entitle holders to a portion of trading fees and the underlying assets.
+ * 
+ * Key Features:
+ * - LP token minting for liquidity providers
+ * - LP token burning for liquidity removal
+ * - Total supply tracking per trading pair
+ * - Token metadata management (name, symbol, decimals)
+ * - Nonce-based token generation
+ * - UTXO-based token model
+ */
+module LunarswapLiquidity {
+    import CompactStandardLibrary;
+
+    import "./openzeppelin/ShieldedERC20" prefix ShieldedERC20_;
+    import "../math/Uint128" prefix Uint128_;
+    import "../math/Bytes32" prefix Bytes32_;
+
+    import "./interfaces/ILunarswapLiquidity";
+
+    /**
+     * @title initialize circuit
+     * @description Initializes the LP token system with basic configuration.
+     * 
+     * @remarks
+     * This circuit sets up the initial configuration for LP tokens including name,
+     * symbol, decimals, and nonce. It should only be called once during contract deployment.
+     *
+     * @param {Bytes<32>} nonce_      - The nonce for LP token generation.
+     * @param {Opaque<"string">} name_ - The name of the LP token.
+     * @param {Opaque<"string">} symbol_ - The symbol of the LP token.
+     * @param {Uint<8>} decimals_     - The number of decimals for LP tokens.
+     *
+     * @returns [] - No return values.
+     */
+    export circuit initialize(
+        nonce_: Bytes<32>,
+        name_: Opaque<"string">,
+        symbol_: Opaque<"string">,
+        decimals_: Uint<8>
+    ): [] {
+        lpTokenNonce = nonce_;
+        lpTokenName = name_;
+        lpTokenSymbol = symbol_;
+        lpTokenDecimals = decimals_;
+        return [];
+    }
+
+    /**
+     * @title initializePairLpToken circuit
+     * @description Initializes LP token tracking for a new trading pair.
+     * 
+     * @remarks
+     * This circuit sets up the total supply tracking for a new trading pair by
+     * initializing the supply to zero in the total supply map.
+     *
+     * Requirements:
+     * - The pair pairId must not already have LP tokens initialized
+     *
+     * @param {Bytes<32>} pairId - The unique pairId hash of the trading pair.
+     *
+     * @throws {Error} "LunarswapLiquidity: initializePairLpToken() - Lp token already exists" if LP tokens already exist for this pair.
+     *
+     * @returns [] - No return values.
+     */
+    export circuit initializePairLpToken(pairId: Bytes<32>): [] {
+        assert (!lpTotalSupply.member(pairId)) "LunarswapLiquidity: initializePairLpToken() - Lp token already exists";
+        lpTotalSupply.insert(pairId, default<QualifiedCoinInfo>);
+        return [];
+    }
+
+    /**
+     * @title totalSupply circuit
+     * @description Returns the total supply of LP tokens for a specific pair.
+     * 
+     * @remarks
+     * This circuit retrieves the total supply of liquidity provider tokens for a given
+     * trading pair pairId.
+     *
+     * Requirements:
+     * - The pair pairId must have LP tokens initialized
+     *
+     * @param {Bytes<32>} pairId - The unique pairId hash of the trading pair.
+     *
+     * @throws {Error} "LunarswapLiquidity: totalSupply() - Lp token not found" if LP tokens don't exist for this pair.
+     *
+     * @returns {Uint<128>} - The total supply of LP tokens for the pair.
+     */
+    export circuit totalSupply(pairId: Bytes<32>): QualifiedCoinInfo {
+        assert (lpTotalSupply.member(pairId)) "LunarswapLiquidity: totalSupply() - Lp token not found";
+        return lpTotalSupply.lookup(pairId);
+    }
+
+    /**
+     * @title mint circuit
+     * @description Mints new LP tokens and sends them to the specified recipient.
+     * 
+     * @remarks
+     * This circuit creates new LP tokens for a trading pair and sends them to the
+     * specified recipient. It also updates the total supply for the pair.
+     *
+     * Requirements:
+     * - The pair pairId must have LP tokens initialized
+     * - The amount must be greater than zero
+     *
+     * @param {Bytes<32>} pairId - The unique pairId hash of the trading pair.
+     * @param {Either<ZswapCoinPublicKey, ContractAddress>} recipient - The recipient of the minted LP tokens.
+     * @param {Uint<128>} amount - The amount of LP tokens to mint.
+     *
+     * @returns {CoinInfo} - The minted LP token coin.
+     */
+    export circuit mint(
+        pairId: Bytes<32>,
+        recipient: Either<ZswapCoinPublicKey, ContractAddress>,
+        amount: Uint<128>
+    ): CoinInfo {
+        _counter.increment(1);
+        const newNonce = evolve_nonce(_counter, lpTokenNonce);
+        // pairId is dealed as a domainSep in the mint_token circuit
+        const ret = mint_token(pairId, amount, newNonce, recipient);
+
+        if (Bytes32_isZero(lpTokenType)) {
+            lpTokenType = ret.color;
+        }
+        
+        const newTotalSupply = QualifiedCoinInfo {
+            nonce: ret.nonce,
+            color: ret.color,
+            value: Uint128_addChecked(lpTotalSupply.lookup(pairId).value, amount),
+            mt_index: lpTotalSupply.lookup(pairId).mt_index,
+        };
+        lpTotalSupply.insert(pairId, newTotalSupply);
+        
+        return ret;
+    }
+
+    /**
+     * @title burn circuit
+     * @description Burns LP tokens and returns the underlying assets.
+     * 
+     * @remarks
+     * This circuit burns LP tokens by receiving them and updating the total supply.
+     * The burned tokens are sent to the burn address, and any change is returned
+     * to the contract's own address.
+     *
+     * Requirements:
+     * - The coin value must be sufficient for the burn amount
+     * - The pair pairId must have LP tokens initialized
+     *
+     * @param {Bytes<32>} pairId - The unique pairId hash of the trading pair.
+     * @param {CoinInfo} coin - The LP token coin to burn.
+     * @param {Uint<128>} amount - The amount of LP tokens to burn.
+     *
+     * @throws {Error} "LunarswapLiquidity: burn() - Insufficient coin value" if coin value is less than burn amount.
+     * @throws {Error} "LunarswapLiquidity: totalSupply() - Lp token not found" if LP tokens don't exist for this pair.
+     *
+     * @returns {SendResult} - The result of the burn operation including any change.
+     */
+    export circuit burn(
+        pairId: Bytes<32>, 
+        coin: CoinInfo, 
+        amount: Uint<128>
+    ): SendResult {
+        assert lpTotalSupply.member(pairId) "LunarswapLiquidity: totalSupply() - Lp token not found";
+        assert coin.value >= amount "LunarswapLiquidity: burn() - Insufficient coin value";
+
+        receive(coin);
+        
+        const newTotalSupply = QualifiedCoinInfo {
+            nonce: coin.nonce,
+            color: coin.color,
+            value: Uint128_sub(lpTotalSupply.lookup(pairId).value, amount),
+            mt_index: lpTotalSupply.lookup(pairId).mt_index, // TODO: needs review
+        };
+        lpTotalSupply.insert(pairId, newTotalSupply);
+        
+        const ret = send_immediate(coin, burn_address(), amount);
+        if (ret.change.is_some) {
+            const tmpAddr = left<ZswapCoinPublicKey, ContractAddress>(own_public_key());
+            send_immediate(ret.change.value, tmpAddr, ret.change.value.value);
+        }
+        return ret;
+    }
+}

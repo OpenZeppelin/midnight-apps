@@ -1,0 +1,130 @@
+pragma language_version >= 0.20.0;
+
+/**
+ * @title LunarswapFee
+ * @description Fee management system for the Lunarswap protocol, handling protocol fee collection and distribution.
+ * 
+ * @remarks
+ * The LunarswapFee module manages the protocol's fee system, allowing for sustainable protocol development
+ * and maintenance. It implements a flexible fee collection mechanism that can be enabled or disabled by
+ * authorized administrators, with fees distributed to designated recipients.
+ * 
+ * Key Features:
+ * - Protocol fee enablement/disablement
+ * - Fee recipient management
+ * - Fee setter privilege transfer
+ * - Access control for administrative functions
+ * - Flexible fee distribution system
+ */
+module LunarswapFee {
+    import CompactStandardLibrary;
+
+    import "./openzeppelin/Utils";
+
+    // TODO: those are not a shielded address.
+    export ledger _feeTo: ZswapCoinPublicKey;
+    export ledger _feeToSetter: ZswapCoinPublicKey;
+
+    /**
+     * @title initialize circuit
+     * @description Initializes the fee management system with the fee setter address.
+     * 
+     * @remarks
+     * This circuit sets up the initial fee configuration by setting the fee setter
+     * address. The fee setter has the authority to change fee recipients and transfer
+     * fee setter privileges.
+     *
+     * @circuitInfo k=11, rows=500
+     *
+     * @param {ZswapCoinPublicKey} feeToSetter_ - The address that can set protocol fees.
+     *
+     * @returns [] - No return values.
+     */
+    export circuit initialize(feeToSetter_: ZswapCoinPublicKey): [] {
+        _feeToSetter = feeToSetter_;
+    }
+
+    /**
+     * @title feeTo circuit
+     * @description Returns the current fee recipient address.
+     * 
+     * @remarks
+     * This circuit retrieves the address that receives protocol fees from trading pairs.
+     *
+     * @circuitInfo k=11, rows=200
+     *
+     * @returns {ZswapCoinPublicKey} - The current fee recipient address.
+     */
+    export circuit feeTo(): ZswapCoinPublicKey {
+        return _feeTo;
+    }
+
+    /**
+     * @title feeToSetter circuit
+     * @description Returns the address that can set the fee recipient.
+     * 
+     * @remarks
+     * This circuit retrieves the address that has the authority to change the fee
+     * recipient and transfer fee setter privileges.
+     *
+     * @circuitInfo k=11, rows=200
+     *
+     * @returns {ZswapCoinPublicKey} - The current fee setter address.
+     */
+    export circuit feeToSetter(): ZswapCoinPublicKey {
+        return _feeToSetter;
+    }
+
+    /**
+     * @title setFeeTo circuit
+     * @description Sets the fee recipient address.
+     * 
+     * @remarks
+     * This circuit allows the fee setter to change the address that receives
+     * protocol fees from trading pairs.
+     *
+     * Requirements:
+     * - The caller must be the current fee setter
+     *
+     * @circuitInfo k=11, rows=600
+     *
+     * @param {ZswapCoinPublicKey} feeTo_ - The new fee recipient address.
+     *
+     * @throws {Error} "LunarswapFactory: forbidden" if the caller is not the fee setter.
+     *
+     * @returns [] - No return values.
+     */
+    // TODO: what is the difference between Admin and feeToSetter. 
+    export circuit setFeeTo(feeTo_: ZswapCoinPublicKey): [] {
+        // TODO: add access control.
+        assert (msgSender() == _feeToSetter) "LunarswapFee: setFeeTo() - forbidden";
+        _feeTo = feeTo_;
+        return [];
+    }
+    
+    /**
+     * @title setFeeToSetter circuit
+     * @description Transfers fee setter privileges to a new address.
+     * 
+     * @remarks
+     * This circuit allows the current fee setter to transfer their privileges to
+     * another address. This is a one-way operation that cannot be undone.
+     *
+     * Requirements:
+     * - The caller must be the current fee setter
+     *
+     * @circuitInfo k=11, rows=600
+     *
+     * @param {ZswapCoinPublicKey} feeToSetter_ - The new fee setter address.
+     *
+     * @throws {Error} "LunarswapFactory: forbidden" if the caller is not the fee setter.
+     *
+     * @returns [] - No return values.
+     */
+    export circuit setFeeToSetter(feeToSetter_: ZswapCoinPublicKey): [] {
+        // TODO: add access control.
+        assert (msgSender() == _feeToSetter) "LunarswapFee: setFeeToSetter() - forbidden";
+        _feeToSetter = feeToSetter_;
+        return [];
+    }  
+}
