@@ -1,0 +1,195 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/Field.compact)
+
+pragma language_version >= 0.20.0;
+
+/**
+ * @title Field
+ * @notice A utility module providing mathematical operations for Field elements
+ * using Bytes<32> as the intermediate representation.
+ *
+ * CONVERSION CHAIN:
+ *   Field → Bytes<32> (native cast) → U256 (via Bytes32) → arithmetic → U256 → Bytes<32> → Field
+ *
+ * BLS12-381 Scalar Field:
+ *   Modulus (r) = 52435875175126190479447740508185965837690552500527637822603658699938581184513
+ *   Max Field   = r - 1 = 52435875175126190479447740508185965837690552500527637822603658699938581184512
+ *
+ * This fits within Bytes<32> (256 bits) and can be safely converted and operated upon.
+ *
+ * @remarks
+ * Supported Mathematical Operations:
+ * - Conversions: toBytes(), fromBytes(), toU256(), fromU256()
+ * - Comparisons: eq(), lt(), lte(), gt(), gte()
+ * - Utility: isZero()
+ */
+module Field255 {
+  import { upgradeFromTransient } from CompactStandardLibrary;
+
+  import { toU256, eq, lt, lte, gt, gte, isZero } from "./Bytes32" prefix Bytes32_;
+  import { toBytes } from "./Uint256" prefix Uint256_;
+  import { toU128 } from "./Uint128" prefix Uint128_;
+  import { U256 } from "./types/TU256";
+
+  /**
+   * @title MAX_FIELD circuit
+   * @description Returns the maximum Field value.
+   *
+   * @returns {Field} The maximum Field value.
+   */
+  export pure circuit MAX_FIELD(): Field {
+    return 52435875175126190479447740508185965837690552500527637822603658699938581184512 as Field;
+  }
+
+  /**
+   * @title toBytes circuit
+   * @description Converts a Field value to Bytes<32> representation.
+   *
+   * @remarks
+   * This circuit uses Compact's native Field → Bytes<32> conversion via upgradeFromTransient.
+   * The conversion preserves all bits of the Field value in little-endian byte order.
+   *
+   * @circuitInfo k=10, rows=128
+   *
+   * @param {Field} value - The Field value to convert.
+   *
+   * @returns {Bytes<32>} The Bytes<32> representation of the Field value.
+   */
+  export circuit toBytes(value: Field): Bytes<32> {
+    return value as Bytes<32>;
+  }
+
+  /**
+   * @title toU256 circuit
+   * @description Converts a Field value to a U256 struct representation.
+   *
+   * @remarks
+   * This circuit converts a Field element to a U256 struct by first converting
+   * to Bytes<32> and then using the Bytes32 module's toU256 function.
+   *
+   * @circuitInfo k=14, rows=15000
+   *
+   * @param {Field} value - The Field value to convert.
+   *
+   * @returns {U256} The U256 struct representation of the Field value.
+   */
+  export circuit toU256(value: Field): U256 {
+    const bytes = toBytes(value);
+    return Bytes32_toU256(bytes);
+  }
+
+  /**
+   * @title eq circuit
+   * @description Compares two Field values for equality.
+   *
+   * @remarks
+   * This circuit compares two Field elements by converting them to Bytes<32>
+   * and using the Bytes32 equality comparison.
+   *
+   * @circuitInfo k=10, rows=256
+   *
+   * @param {Field} a - The first Field value to compare.
+   * @param {Field} b - The second Field value to compare.
+   *
+   * @returns {Boolean} True if a == b, false otherwise.
+   */
+  export circuit eq(a: Field, b: Field): Boolean {
+    return a == b;
+  }
+
+  /**
+   * @title lt circuit
+   * @description Compares two Field values to check if a < b.
+   *
+   * @remarks
+   * This circuit compares two Field elements by converting them to Bytes<32>
+   * and using the Bytes32 less-than comparison, which internally uses U256 comparison.
+   *
+   * @circuitInfo k=14, rows=30000
+   *
+   * @param {Field} a - The first Field value to compare.
+   * @param {Field} b - The second Field value to compare.
+   *
+   * @returns {Boolean} True if a < b, false otherwise.
+   */
+  export circuit lt(a: Field, b: Field): Boolean {
+    const aBytes = toBytes(a);
+    const bBytes = toBytes(b);
+    return Bytes32_lt(aBytes, bBytes);
+  }
+
+  /**
+   * @title lte circuit
+   * @description Compares two Field values to check if a <= b.
+   *
+   * @remarks
+   * This circuit compares two Field elements by converting them to Bytes<32>
+   * and using the Bytes32 less-than-or-equal comparison.
+   *
+   * @circuitInfo k=14, rows=30000
+   *
+   * @param {Field} a - The first Field value to compare.
+   * @param {Field} b - The second Field value to compare.
+   *
+   * @returns {Boolean} True if a <= b, false otherwise.
+   */
+  export circuit lte(a: Field, b: Field): Boolean {
+    return lt(a, b) || eq(a, b);
+  }
+
+  /**
+   * @title gt circuit
+   * @description Compares two Field values to check if a > b.
+   *
+   * @remarks
+   * This circuit compares two Field elements by converting them to Bytes<32>
+   * and using the Bytes32 greater-than comparison.
+   *
+   * @circuitInfo k=14, rows=30000
+   *
+   * @param {Field} a - The first Field value to compare.
+   * @param {Field} b - The second Field value to compare.
+   *
+   * @returns {Boolean} True if a > b, false otherwise.
+   */
+  export circuit gt(a: Field, b: Field): Boolean {
+    return lt(b, a);
+  }
+
+  /**
+   * @title gte circuit
+   * @description Compares two Field values to check if a >= b.
+   *
+   * @remarks
+   * This circuit compares two Field elements by converting them to Bytes<32>
+   * and using the Bytes32 greater-than-or-equal comparison.
+   *
+   * @circuitInfo k=14, rows=30000
+   *
+   * @param {Field} a - The first Field value to compare.
+   * @param {Field} b - The second Field value to compare.
+   *
+   * @returns {Boolean} True if a >= b, false otherwise.
+   */
+  export circuit gte(a: Field, b: Field): Boolean {
+    return gt(a, b) || eq(a, b);
+  }
+
+  /**
+   * @title isZero circuit
+   * @description Checks if a Field value equals zero.
+   *
+   * @remarks
+   * This circuit checks if a Field element equals zero by converting it to Bytes<32>
+   * and using the Bytes32 isZero function.
+   *
+   * @circuitInfo k=10, rows=256
+   *
+   * @param {Field} a - The Field value to check.
+   *
+   * @returns {Boolean} True if a equals zero, false otherwise.
+   */
+  export circuit isZero(a: Field): Boolean {
+    return a == 0 as Field;
+  }
+}

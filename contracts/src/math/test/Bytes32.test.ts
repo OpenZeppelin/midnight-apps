@@ -1,10 +1,37 @@
+import type { U256 } from '@src/artifacts/math/test/mocks/contracts/Bytes32.mock/contract/index.js';
+import { Bytes32Simulator } from '@src/math/test/mocks/Bytes32Simulator.js';
+import {
+  MAX_UINT64,
+  MAX_UINT128,
+  MAX_UINT256,
+} from '@src/math/utils/consts.js';
 import { beforeEach, describe, expect, test } from 'vitest';
-import { Bytes32Simulator } from './mocks/Bytes32Simulator.js';
 
 let bytes32Simulator: Bytes32Simulator;
 
 const setup = () => {
   bytes32Simulator = new Bytes32Simulator();
+};
+
+// Helper to convert U256 to bigint
+const fromU256 = (value: U256): bigint => {
+  return (
+    (value.high.high << 192n) +
+    (value.high.low << 128n) +
+    (value.low.high << 64n) +
+    value.low.low
+  );
+};
+
+// Helper to convert bigint to little-endian Uint8Array
+const bigintToBytesLE = (value: bigint): Uint8Array => {
+  const bytes = new Uint8Array(32);
+  let remaining = value;
+  for (let i = 0; i < 32; i++) {
+    bytes[i] = Number(remaining & 0xffn);
+    remaining >>= 8n;
+  }
+  return bytes;
 };
 
 // Helper function to create test bytes from decimal bigint
@@ -42,187 +69,223 @@ const createOverflowBytes = (): Uint8Array => {
   return createBytes(2n ** 254n);
 };
 
-/**
- * TODO: Fix in a separate PR
- *
- * These tests are skipped because Bytes32.compact depends on Field255 which is archived
- * due to Compact Uint limitations:
- * - v0.26.0: Max Uint<254> — Field values >= 2^254 truncated
- * - v0.27.0: Max Uint<248> (31 bytes) — Field values >= 2^248 truncated
- *
- * The JubJub scalar field requires 255 bits, but Compact cannot represent values >= 2^248.
- * See Field255.compact.archive and Bytes32.compact.archive for full details.
- */
-describe.skip('Bytes32', () => {
+describe('Bytes32', () => {
   beforeEach(setup);
 
-  describe('Type Conversion Functions', () => {
-    describe('fromBytes', () => {
-      test('should convert bytes to field', () => {
-        const bytes = createBytes(1n);
-        const field = bytes32Simulator.fromBytes(bytes);
-        expect(typeof field).toBe('bigint');
-        expect(field).toBeGreaterThanOrEqual(0n);
-      });
-
-      test('should convert zero bytes to zero field', () => {
-        const bytes = new Uint8Array(32);
-        const field = bytes32Simulator.fromBytes(bytes);
-        expect(field).toBe(0n);
-      });
-
-      test('should convert large bytes to field', () => {
-        const bytes = createBytes(2n ** 256n - 1n);
-        const field = bytes32Simulator.fromBytes(bytes);
-        expect(field).toBeGreaterThan(0n);
-      });
-
-      test('should handle bytes with mixed values', () => {
-        const bytes = createBytes(1234567890123456789012345678901234567890n);
-        const field = bytes32Simulator.fromBytes(bytes);
-        expect(field).toBeGreaterThan(0n);
-      });
-
-      test('should handle maximum field value bytes', () => {
-        const bytes = createMaxFieldBytes();
-        const field = bytes32Simulator.fromBytes(bytes);
-        expect(typeof field).toBe('bigint');
-        expect(field).toBeGreaterThan(0n);
-        // Field should be within 254-bit range
-        expect(field).toBeLessThan(2n ** 254n);
-      });
-
-      test('should handle bytes with only first byte set', () => {
-        const bytes = createPatternBytes(0xff, 0);
-        const field = bytes32Simulator.fromBytes(bytes);
-        expect(typeof field).toBe('bigint');
-        expect(field).toBeGreaterThan(0n);
-      });
-
-      test('should handle bytes just above field size', () => {
-        const bytes = createOverflowBytes();
-        expect(() => bytes32Simulator.fromBytes(bytes)).toThrow(
-          'Bytes32: toField() - inputs exceed the field size',
-        );
-      });
-
-      test('should handle bytes with only last byte set to 0xF', () => {
-        const bytes = createPatternBytes(0xf, 31);
-        expect(() => bytes32Simulator.fromBytes(bytes)).toThrow(
-          'Bytes32: toField() - inputs exceed the field size',
-        );
-      });
-
-      test('should handle bytes with only last byte set to 0x01', () => {
-        const bytes = createPatternBytes(0x01, 31);
-        expect(() => bytes32Simulator.fromBytes(bytes)).toThrow(
-          'Bytes32: toField() - inputs exceed the field size',
-        );
-      });
-
-      test('should handle bytes with only last byte set to 0x00', () => {
-        const bytes = createPatternBytes(0x00, 31);
-        const field = bytes32Simulator.fromBytes(bytes);
-        expect(typeof field).toBe('bigint');
-        // When the last byte is set to 0x00, all bytes are zero,
-        // so fromBytes returns 0
-        expect(field).toBe(0n);
-      });
-
-      test('should handle bytes with alternating pattern', () => {
-        const bytes = new Uint8Array(32);
-        for (let i = 0; i < 32; i++) {
-          bytes[i] = i % 2 === 0 ? 0xff : 0x00;
-        }
-        const field = bytes32Simulator.fromBytes(bytes);
-        expect(typeof field).toBe('bigint');
-        expect(field).toBeGreaterThan(0n);
-      });
+  describe('toU256 (little-endian)', () => {
+    test('should convert zero bytes to zero U256', () => {
+      const bytes = new Uint8Array(32).fill(0);
+      const result = bytes32Simulator.toU256(bytes);
+      expect(fromU256(result)).toBe(0n);
     });
 
-    describe('toBytes', () => {
-      test('should convert field to bytes', () => {
-        const field = 1n;
-        const bytes = bytes32Simulator.toBytes(field);
-        expect(bytes).toBeInstanceOf(Uint8Array);
-        expect(bytes.length).toBe(32);
-      });
+    test('should convert single byte value', () => {
+      const bytes = new Uint8Array(32).fill(0);
+      bytes[0] = 123;
+      const result = bytes32Simulator.toU256(bytes);
+      expect(result.low.low).toBe(123n);
+      expect(result.low.high).toBe(0n);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(0n);
+    });
 
-      test('should convert zero field to zero bytes', () => {
-        const field = 0n;
-        const bytes = bytes32Simulator.toBytes(field);
-        expect(bytes).toBeInstanceOf(Uint8Array);
-        expect(bytes.length).toBe(32);
-        // Check that all bytes are zero
-        for (let i = 0; i < 32; i++) {
-          expect(bytes[i]).toBe(0);
-        }
-      });
+    test('should convert max byte value at position 0', () => {
+      const bytes = new Uint8Array(32).fill(0);
+      bytes[0] = 255;
+      const result = bytes32Simulator.toU256(bytes);
+      expect(result.low.low).toBe(255n);
+    });
 
-      test('should convert large field to bytes', () => {
-        const field = 123456789n;
-        const bytes = bytes32Simulator.toBytes(field);
-        expect(bytes).toBeInstanceOf(Uint8Array);
-        expect(bytes.length).toBe(32);
-      });
+    test('should convert max U256 bytes', () => {
+      const bytes = new Uint8Array(32).fill(255);
+      const result = bytes32Simulator.toU256(bytes);
+      expect(fromU256(result)).toBe(MAX_UINT256);
+    });
 
-      test('should convert maximum field value to bytes', () => {
-        const maxField = 2n ** 254n - 1n;
-        const bytes = bytes32Simulator.toBytes(maxField);
-        expect(bytes).toBeInstanceOf(Uint8Array);
-        expect(bytes.length).toBe(32);
-      });
+    test('should handle value at 2^64 boundary (second limb)', () => {
+      const bytes = new Uint8Array(32).fill(0);
+      bytes[8] = 1; // Position 8 = 2^64
+      const result = bytes32Simulator.toU256(bytes);
+      expect(result.low.low).toBe(0n);
+      expect(result.low.high).toBe(1n);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(0n);
+      expect(fromU256(result)).toBe(2n ** 64n);
+    });
 
-      test('should handle field values near maximum', () => {
-        const nearMaxField = 2n ** 254n - 1000n;
-        const bytes = bytes32Simulator.toBytes(nearMaxField);
-        expect(bytes).toBeInstanceOf(Uint8Array);
-        expect(bytes.length).toBe(32);
-      });
+    test('should handle value at 2^128 boundary (third limb)', () => {
+      const bytes = new Uint8Array(32).fill(0);
+      bytes[16] = 1; // Position 16 = 2^128
+      const result = bytes32Simulator.toU256(bytes);
+      expect(result.low.low).toBe(0n);
+      expect(result.low.high).toBe(0n);
+      expect(result.high.low).toBe(1n);
+      expect(result.high.high).toBe(0n);
+      expect(fromU256(result)).toBe(2n ** 128n);
+    });
 
-      test('should round-trip conversion work for small values', () => {
-        const originalBytes = createBytes(1n);
-        const field = bytes32Simulator.fromBytes(originalBytes);
-        const convertedBytes = bytes32Simulator.toBytes(field);
-        expect(convertedBytes).toBeInstanceOf(Uint8Array);
-        expect(convertedBytes.length).toBe(32);
-      });
+    test('should handle value at 2^192 boundary (fourth limb)', () => {
+      const bytes = new Uint8Array(32).fill(0);
+      bytes[24] = 1; // Position 24 = 2^192
+      const result = bytes32Simulator.toU256(bytes);
+      expect(result.low.low).toBe(0n);
+      expect(result.low.high).toBe(0n);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(1n);
+      expect(fromU256(result)).toBe(2n ** 192n);
+    });
 
-      test('should round-trip conversion work for maximum field value', () => {
-        const maxField = 2n ** 254n - 1n;
-        const bytes = bytes32Simulator.toBytes(maxField);
-        const field = bytes32Simulator.fromBytes(bytes);
-        expect(typeof field).toBe('bigint');
-        expect(field).toBeGreaterThan(0n);
-      });
+    test('should handle multi-byte value within first limb', () => {
+      const bytes = new Uint8Array(32).fill(0);
+      bytes[0] = 0xff;
+      bytes[1] = 0xff; // 0xFFFF = 65535
+      const result = bytes32Simulator.toU256(bytes);
+      expect(result.low.low).toBe(65535n);
+    });
 
-      test('should handle small field values', () => {
-        const smallField = 1n;
-        const bytes = bytes32Simulator.toBytes(smallField);
-        expect(bytes).toBeInstanceOf(Uint8Array);
-        expect(bytes.length).toBe(32);
-      });
+    test('should handle value spanning limb boundary', () => {
+      const bytes = new Uint8Array(32).fill(0);
+      bytes[7] = 0xff; // End of first limb
+      bytes[8] = 0x01; // Start of second limb
+      const result = bytes32Simulator.toU256(bytes);
+      expect(result.low.low).toBe(0xff00000000000000n);
+      expect(result.low.high).toBe(1n);
+    });
 
-      test('should handle medium field values', () => {
-        const mediumField = 1000000n;
-        const bytes = bytes32Simulator.toBytes(mediumField);
-        expect(bytes).toBeInstanceOf(Uint8Array);
-        expect(bytes.length).toBe(32);
-      });
+    test('should correctly convert arbitrary value', () => {
+      const value = 123456789012345678901234567890n;
+      const bytes = bigintToBytesLE(value);
+      const result = bytes32Simulator.toU256(bytes);
+      expect(fromU256(result)).toBe(value);
+    });
 
-      test('should handle large field values', () => {
-        const largeField = 2n ** 128n - 1n;
-        const bytes = bytes32Simulator.toBytes(largeField);
-        expect(bytes).toBeInstanceOf(Uint8Array);
-        expect(bytes.length).toBe(32);
-      });
+    test('should correctly convert MAX_UINT64', () => {
+      const bytes = bigintToBytesLE(MAX_UINT64);
+      const result = bytes32Simulator.toU256(bytes);
+      expect(result.low.low).toBe(MAX_UINT64);
+      expect(result.low.high).toBe(0n);
+    });
 
-      test('should handle field values at field boundary', () => {
-        const boundaryField = 2n ** 254n;
-        const bytes = bytes32Simulator.toBytes(boundaryField);
-        expect(bytes).toBeInstanceOf(Uint8Array);
-        expect(bytes.length).toBe(32);
-      });
+    test('should correctly convert MAX_UINT128', () => {
+      const bytes = bigintToBytesLE(MAX_UINT128);
+      const result = bytes32Simulator.toU256(bytes);
+      expect(result.low.low).toBe(MAX_UINT64);
+      expect(result.low.high).toBe(MAX_UINT64);
+      expect(result.high.low).toBe(0n);
+      expect(result.high.high).toBe(0n);
+    });
+
+    test('should handle all limbs non-zero', () => {
+      const bytes = new Uint8Array(32);
+      bytes[0] = 1; // low.low
+      bytes[8] = 2; // low.high
+      bytes[16] = 3; // high.low
+      bytes[24] = 4; // high.high
+      const result = bytes32Simulator.toU256(bytes);
+      expect(result.low.low).toBe(1n);
+      expect(result.low.high).toBe(2n);
+      expect(result.high.low).toBe(3n);
+      expect(result.high.high).toBe(4n);
+    });
+
+    test('should convert small values correctly', () => {
+      const values = [1n, 127n, 255n, 256n, 1000n];
+      for (const value of values) {
+        const bytes = bigintToBytesLE(value);
+        const result = bytes32Simulator.toU256(bytes);
+        expect(fromU256(result)).toBe(value);
+      }
+    });
+
+    test('should convert limb boundary values correctly', () => {
+      const values = [
+        MAX_UINT64,
+        MAX_UINT64 + 1n,
+        MAX_UINT128,
+        MAX_UINT128 + 1n,
+        2n ** 192n,
+        2n ** 192n - 1n,
+      ];
+      for (const value of values) {
+        const bytes = bigintToBytesLE(value);
+        const result = bytes32Simulator.toU256(bytes);
+        expect(fromU256(result)).toBe(value);
+      }
+    });
+
+    test('should convert large values correctly', () => {
+      const values = [
+        2n ** 200n + 2n ** 100n + 1n,
+        MAX_UINT256 - 1n,
+        MAX_UINT256,
+      ];
+      for (const value of values) {
+        const bytes = bigintToBytesLE(value);
+        const result = bytes32Simulator.toU256(bytes);
+        expect(fromU256(result)).toBe(value);
+      }
+    });
+
+    test('should convert powers of 2 correctly', () => {
+      for (let i = 0; i < 256; i += 32) {
+        const value = 2n ** BigInt(i);
+        const bytes = bigintToBytesLE(value);
+        const result = bytes32Simulator.toU256(bytes);
+        expect(fromU256(result)).toBe(value);
+      }
+    });
+  });
+
+  describe('toVector', () => {
+    test('should convert zero bytes to zero vector', () => {
+      const bytes = new Uint8Array(32).fill(0);
+      const result = bytes32Simulator.toVector(bytes);
+      expect(result).toHaveLength(32);
+      expect(result.every((b) => b === 0n)).toBe(true);
+    });
+
+    test('should convert single byte to vector', () => {
+      const bytes = new Uint8Array(32).fill(0);
+      bytes[0] = 123;
+      const result = bytes32Simulator.toVector(bytes);
+      expect(result).toHaveLength(32);
+      expect(result[0]).toBe(123n);
+      expect(result.slice(1).every((b) => b === 0n)).toBe(true);
+    });
+
+    test('should convert max bytes to all-0xFF vector', () => {
+      const bytes = new Uint8Array(32).fill(255);
+      const result = bytes32Simulator.toVector(bytes);
+      expect(result).toHaveLength(32);
+      expect(result.every((b) => b === 255n)).toBe(true);
+    });
+
+    test('should roundtrip with toU256', () => {
+      const value = 123456789012345678901234567890n;
+      const bytes = bigintToBytesLE(value);
+      const vec = bytes32Simulator.toVector(bytes);
+      const reconstructed = new Uint8Array(vec.map((b) => Number(b)));
+      expect(reconstructed).toEqual(bytes);
+      const u256 = bytes32Simulator.toU256(reconstructed);
+      expect(fromU256(u256)).toBe(value);
+    });
+  });
+
+  describe('isZero', () => {
+    test('should return true for zero bytes', () => {
+      const bytes = new Uint8Array(32).fill(0);
+      expect(bytes32Simulator.isZero(bytes)).toBe(true);
+    });
+
+    test('should return false for non-zero bytes', () => {
+      const bytes = createBytes(1234567890123456789012345678901234567890n);
+      expect(bytes32Simulator.isZero(bytes)).toBe(false);
+    });
+
+    test('should return false when single bit is set', () => {
+      const bytes = new Uint8Array(32).fill(0);
+      bytes[0] = 1;
+      expect(bytes32Simulator.isZero(bytes)).toBe(false);
     });
   });
 
@@ -425,35 +488,29 @@ describe.skip('Bytes32', () => {
           name: 'maxFieldBytes vs max256Bit',
           a: createMaxFieldBytes(),
           b: createBytes(2n ** 256n - 1n),
-          expected: null,
-          shouldThrow: true,
-          errorMessage:
-            'Bytes32: lt() - comparison invalid; one or both of the inputs exceed the field size',
+          expected: true, // 2^254 - 1 < 2^256 - 1
+          shouldThrow: false,
         },
         {
           name: 'max256Bit vs maxFieldBytes',
           a: createBytes(2n ** 256n - 1n),
           b: createMaxFieldBytes(),
-          expected: null,
-          shouldThrow: true,
-          errorMessage:
-            'Bytes32: lt() - comparison invalid; one or both of the inputs exceed the field size',
+          expected: false, // 2^256 - 1 > 2^254 - 1
+          shouldThrow: false,
         },
         {
           name: 'overflowBytes vs max256Bit',
           a: createOverflowBytes(),
           b: createBytes(2n ** 256n - 1n),
-          expected: null,
-          shouldThrow: true,
-          errorMessage: 'Bytes32: toField() - inputs exceed the field size',
+          expected: true, // 2^254 < 2^256 - 1
+          shouldThrow: false,
         },
         {
           name: 'max256Bit vs overflowBytes',
           a: createBytes(2n ** 256n - 1n),
           b: createOverflowBytes(),
-          expected: null,
-          shouldThrow: true,
-          errorMessage: 'Bytes32: toField() - inputs exceed the field size',
+          expected: false, // 2^256 - 1 > 2^254
+          shouldThrow: false,
         },
         {
           name: 'max256Bit vs itself',
@@ -468,16 +525,10 @@ describe.skip('Bytes32', () => {
         a,
         b,
         expected,
-        shouldThrow,
-        errorMessage,
       }) => {
-        if (shouldThrow) {
-          expect(() => bytes32Simulator.lt(a, b)).toThrow(errorMessage);
-        } else {
-          expect(() => bytes32Simulator.lt(a, b)).not.toThrow();
-          expect(bytes32Simulator.lt(a, b)).toBe(expected);
-          expect(typeof bytes32Simulator.lt(a, b)).toBe('boolean');
-        }
+        expect(() => bytes32Simulator.lt(a, b)).not.toThrow();
+        expect(bytes32Simulator.lt(a, b)).toBe(expected);
+        expect(typeof bytes32Simulator.lt(a, b)).toBe('boolean');
       });
     });
   });
@@ -560,8 +611,7 @@ describe.skip('Bytes32', () => {
         const bytes32 = new Uint8Array(32);
         bytes32.fill(0xff);
 
-        expect(() => bytes32Simulator.fromBytes(bytes32)).not.toThrow();
-        expect(() => bytes32Simulator.toBytes(1n)).not.toThrow();
+        expect(() => bytes32Simulator.toU256(bytes32)).not.toThrow();
         expect(() => bytes32Simulator.eq(bytes32, bytes32)).not.toThrow();
         expect(() => bytes32Simulator.lt(bytes32, bytes32)).not.toThrow();
         expect(() => bytes32Simulator.lte(bytes32, bytes32)).not.toThrow();
@@ -582,9 +632,9 @@ describe.skip('Bytes32', () => {
 
         for (const boundary of boundaries) {
           expect(() => {
-            const bytes = bytes32Simulator.toBytes(boundary);
-            expect(bytes).toBeInstanceOf(Uint8Array);
-            expect(bytes.length).toBe(32);
+            const bytes = bigintToBytesLE(boundary);
+            const result = bytes32Simulator.toU256(bytes);
+            expect(fromU256(result)).toBe(boundary);
           }).not.toThrow();
         }
       });
