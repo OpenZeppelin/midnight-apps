@@ -40,6 +40,41 @@ export class Uint64Simulator extends Uint64SimulatorBase {
     super([], options);
   }
 
+  public MAX_UINT8(): bigint {
+    return this.circuits.impure.MAX_UINT8();
+  }
+
+  public MAX_UINT16(): bigint {
+    return this.circuits.impure.MAX_UINT16();
+  }
+
+  public MAX_UINT32(): bigint {
+    return this.circuits.impure.MAX_UINT32();
+  }
+
+  public MAX_UINT64(): bigint {
+    return this.circuits.impure.MAX_UINT64();
+  }
+
+  public toVector(
+    value: bigint,
+  ): [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint] {
+    return this.circuits.impure.toVector(value) as [
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+    ];
+  }
+
+  public toBytes(value: bigint): Uint8Array {
+    return this.circuits.impure.toBytes(value);
+  }
+
   public add(a: bigint, b: bigint): bigint {
     return this.circuits.impure.add(a, b);
   }
@@ -86,40 +121,5 @@ export class Uint64Simulator extends Uint64SimulatorBase {
 
   public max(a: bigint, b: bigint): bigint {
     return this.circuits.impure.max(a, b);
-  }
-
-  public MAX_UINT8(): bigint {
-    return this.circuits.impure.MAX_UINT8();
-  }
-
-  public MAX_UINT16(): bigint {
-    return this.circuits.impure.MAX_UINT16();
-  }
-
-  public MAX_UINT32(): bigint {
-    return this.circuits.impure.MAX_UINT32();
-  }
-
-  public MAX_UINT64(): bigint {
-    return this.circuits.impure.MAX_UINT64();
-  }
-
-  public toVector(
-    value: bigint,
-  ): [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint] {
-    return this.circuits.impure.toVector(value) as [
-      bigint,
-      bigint,
-      bigint,
-      bigint,
-      bigint,
-      bigint,
-      bigint,
-      bigint,
-    ];
-  }
-
-  public toBytes(value: bigint): Uint8Array {
-    return this.circuits.impure.toBytes(value);
   }
 }

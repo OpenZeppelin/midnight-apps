@@ -7,15 +7,15 @@ import CompactStandardLibrary;
 
 import "../../../Vector8" prefix Vector8_;
 
-// Helper for test suite: toggling this variable activates circuit metadata reporting.
-ledger _isCircuitInfoExposed: Boolean;
+// Helper for test suite: hardcoded to true in every circuit to enable circuit metadata reporting.
+ledger toImpure: Boolean;
 
 export circuit toUint64(vec: Vector<8, Uint<8>>): Uint<64> {
-  _isCircuitInfoExposed = true;
+  toImpure = true;
   return Vector8_toUint64(vec);
 }
 
 export circuit toBytes(vec: Vector<8, Uint<8>>): Bytes<8> {
-  _isCircuitInfoExposed = true;
+  toImpure = true;
   return Vector8_toBytes(vec);
 }

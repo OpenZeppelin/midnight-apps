@@ -54,6 +54,14 @@ export class Uint128Simulator extends Uint128SimulatorBase {
     return this.circuits.impure.ZERO_U128();
   }
 
+  public MAX_U128(): U128 {
+    return this.circuits.impure.MAX_U128();
+  }
+
+  public MAX_UINT128(): bigint {
+    return this.circuits.impure.MAX_UINT128();
+  }
+
   public toU128(value: bigint): U128 {
     return this.circuits.impure.toU128(value);
   }
@@ -82,12 +90,12 @@ export class Uint128Simulator extends Uint128SimulatorBase {
     return this.circuits.impure.lt(a, b);
   }
 
-  public ltU128(a: U128, b: U128): boolean {
-    return this.circuits.impure.ltU128(a, b);
-  }
-
   public lte(a: bigint, b: bigint): boolean {
     return this.circuits.impure.lte(a, b);
+  }
+
+  public ltU128(a: U128, b: U128): boolean {
+    return this.circuits.impure.ltU128(a, b);
   }
 
   public lteU128(a: U128, b: U128): boolean {
@@ -204,13 +212,5 @@ export class Uint128Simulator extends Uint128SimulatorBase {
 
   public isMultipleU128(value: U128, divisor: U128): boolean {
     return this.circuits.impure.isMultipleU128(value, divisor);
-  }
-
-  public MAX_UINT128(): bigint {
-    return this.circuits.impure.MAX_UINT128();
-  }
-
-  public MAX_U128(): U128 {
-    return this.circuits.impure.MAX_U128();
   }
 }

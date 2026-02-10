@@ -11,15 +11,95 @@ const setup = () => {
 describe('Uint64', () => {
   beforeEach(setup);
 
+  describe('MAX_UINT8', () => {
+    test('should return 255', () => {
+      expect(uint64Simulator.MAX_UINT8()).toBe(0xffn);
+    });
+  });
+
+  describe('MAX_UINT16', () => {
+    test('should return 65535', () => {
+      expect(uint64Simulator.MAX_UINT16()).toBe(0xffffn);
+    });
+  });
+
+  describe('MAX_UINT32', () => {
+    test('should return 4294967295', () => {
+      expect(uint64Simulator.MAX_UINT32()).toBe(0xffffffffn);
+    });
+  });
+
+  describe('MAX_UINT64', () => {
+    test('should return 18446744073709551615', () => {
+      expect(uint64Simulator.MAX_UINT64()).toBe(0xffffffffffffffffn);
+    });
+  });
+
+  describe('toVector', () => {
+    test('should convert zero to all-zero vector', () => {
+      const vec = uint64Simulator.toVector(0n);
+      expect(vec).toEqual([0n, 0n, 0n, 0n, 0n, 0n, 0n, 0n]);
+    });
+
+    test('should convert small value correctly', () => {
+      const vec = uint64Simulator.toVector(0x01_02_03n);
+      expect(vec[0]).toBe(3n);
+      expect(vec[1]).toBe(2n);
+      expect(vec[2]).toBe(1n);
+      expect(vec.slice(3)).toEqual([0n, 0n, 0n, 0n, 0n]);
+    });
+
+    test('should convert MAX_UINT64 to all-0xFF vector', () => {
+      const vec = uint64Simulator.toVector(MAX_UINT64);
+      expect(vec).toEqual([255n, 255n, 255n, 255n, 255n, 255n, 255n, 255n]);
+    });
+
+    test('should place single byte at each position', () => {
+      expect(uint64Simulator.toVector(1n)[0]).toBe(1n);
+      expect(uint64Simulator.toVector(0x100n)[1]).toBe(1n);
+      expect(uint64Simulator.toVector(0x10000n)[2]).toBe(1n);
+      expect(uint64Simulator.toVector(0x1000000n)[3]).toBe(1n);
+      expect(uint64Simulator.toVector(0x100000000n)[4]).toBe(1n);
+      expect(uint64Simulator.toVector(0x10000000000n)[5]).toBe(1n);
+      expect(uint64Simulator.toVector(0x1000000000000n)[6]).toBe(1n);
+      expect(uint64Simulator.toVector(0x100000000000000n)[7]).toBe(1n);
+    });
+  });
+
+  describe('toBytes', () => {
+    test('should convert zero to zero bytes', () => {
+      const bytes = uint64Simulator.toBytes(0n);
+      expect(bytes).toEqual(new Uint8Array(8).fill(0));
+    });
+
+    test('should convert small value correctly', () => {
+      const bytes = uint64Simulator.toBytes(123n);
+      expect(bytes[0]).toBe(123);
+      expect(bytes.slice(1)).toEqual(new Uint8Array(7).fill(0));
+    });
+
+    test('should convert MAX_UINT64 to all-0xFF bytes', () => {
+      const bytes = uint64Simulator.toBytes(MAX_UINT64);
+      expect(bytes).toEqual(new Uint8Array(8).fill(255));
+    });
+
+    test('should roundtrip with toVector', () => {
+      const value = 0x0123456789abcdefn;
+      const vec = uint64Simulator.toVector(value);
+      const bytes = uint64Simulator.toBytes(value);
+      for (let i = 0; i < 8; i++) {
+        expect(Number(vec[i])).toBe(bytes[i]);
+      }
+    });
+  });
+
   describe('Add', () => {
     test('should add two numbers', () => {
       expect(uint64Simulator.add(5n, 3n)).toBe(8n);
     });
 
     test('should not overflow', () => {
-      expect(uint64Simulator.add(MAX_UINT64, MAX_UINT64)).toBe(
-        0x1fffffffffffffffen,
-      );
+      expect(uint64Simulator.add(MAX_UINT64, MAX_UINT64)).toBe(MAX_UINT64 * 2n);
     });
   });
 
@@ -459,88 +539,6 @@ describe('Uint64', () => {
 
     test('should handle max Uint<64> and smaller value', () => {
       expect(uint64Simulator.max(MAX_UINT64, 1n)).toBe(MAX_UINT64);
-    });
-  });
-
-  describe('MAX_UINT8', () => {
-    test('should return 255', () => {
-      expect(uint64Simulator.MAX_UINT8()).toBe(0xffn);
-    });
-  });
-
-  describe('MAX_UINT16', () => {
-    test('should return 65535', () => {
-      expect(uint64Simulator.MAX_UINT16()).toBe(0xffffn);
-    });
-  });
-
-  describe('MAX_UINT32', () => {
-    test('should return 4294967295', () => {
-      expect(uint64Simulator.MAX_UINT32()).toBe(0xffffffffn);
-    });
-  });
-
-  describe('MAX_UINT64', () => {
-    test('should return 18446744073709551615', () => {
-      expect(uint64Simulator.MAX_UINT64()).toBe(0xffffffffffffffffn);
-    });
-  });
-
-  describe('toVector', () => {
-    test('should convert zero to all-zero vector', () => {
-      const vec = uint64Simulator.toVector(0n);
-      expect(vec).toEqual([0n, 0n, 0n, 0n, 0n, 0n, 0n, 0n]);
-    });
-
-    test('should convert small value correctly', () => {
-      const vec = uint64Simulator.toVector(0x01_02_03n);
-      expect(vec[0]).toBe(3n);
-      expect(vec[1]).toBe(2n);
-      expect(vec[2]).toBe(1n);
-      expect(vec.slice(3)).toEqual([0n, 0n, 0n, 0n, 0n]);
-    });
-
-    test('should convert MAX_UINT64 to all-0xFF vector', () => {
-      const vec = uint64Simulator.toVector(MAX_UINT64);
-      expect(vec).toEqual([255n, 255n, 255n, 255n, 255n, 255n, 255n, 255n]);
-    });
-
-    test('should place single byte at each position', () => {
-      expect(uint64Simulator.toVector(1n)[0]).toBe(1n);
-      expect(uint64Simulator.toVector(0x100n)[1]).toBe(1n);
-      expect(uint64Simulator.toVector(0x10000n)[2]).toBe(1n);
-      expect(uint64Simulator.toVector(0x1000000n)[3]).toBe(1n);
-      expect(uint64Simulator.toVector(0x100000000n)[4]).toBe(1n);
-      expect(uint64Simulator.toVector(0x10000000000n)[5]).toBe(1n);
-      expect(uint64Simulator.toVector(0x1000000000000n)[6]).toBe(1n);
-      expect(uint64Simulator.toVector(0x100000000000000n)[7]).toBe(1n);
-    });
-  });
-
-  describe('toBytes', () => {
-    test('should convert zero to zero bytes', () => {
-      const bytes = uint64Simulator.toBytes(0n);
-      expect(bytes).toEqual(new Uint8Array(8).fill(0));
-    });
-
-    test('should convert small value correctly', () => {
-      const bytes = uint64Simulator.toBytes(123n);
-      expect(bytes[0]).toBe(123);
-      expect(bytes.slice(1)).toEqual(new Uint8Array(7).fill(0));
-    });
-
-    test('should convert MAX_UINT64 to all-0xFF bytes', () => {
-      const bytes = uint64Simulator.toBytes(MAX_UINT64);
-      expect(bytes).toEqual(new Uint8Array(8).fill(0xff));
-    });
-
-    test('should roundtrip with toVector', () => {
-      const value = 0x0123456789abcdefn;
-      const vec = uint64Simulator.toVector(value);
-      const bytes = uint64Simulator.toBytes(value);
-      for (let i = 0; i < 8; i++) {
-        expect(Number(vec[i])).toBe(bytes[i]);
-      }
     });
   });
 });

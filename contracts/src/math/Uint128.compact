@@ -23,8 +23,8 @@ module Uint128 {
 
   // U128 and U256 types are imported from dedicated type modules to avoid
   // cyclic dependencies between Uint128 and Uint256. See TU128/TU256 documentation.
-  import "./types/TU128";
-  import "./types/TU256";
+  import { U128 } from "./types/TU128";
+  import { U256 } from "./types/TU256";
 
   /**
    * @description A struct representing the result of a division operation on U128 values.
@@ -72,11 +72,11 @@ module Uint128 {
    *
    * @circuitInfo k=5, rows=25
    *
-   * @returns {Uint<65>} The value 2⁶⁴ (18446744073709551616).
+   * @returns {Uint<65>} The value 2⁶⁴ (0x10000000000000000).
    */
   export pure circuit MODULUS(): Uint<65> {
     // pow() is not supported yet, so we hardcode this value.
-    return 18446744073709551616; // 2⁶⁴
+    return 0x10000000000000000; // 2⁶⁴
   }
 
   /**

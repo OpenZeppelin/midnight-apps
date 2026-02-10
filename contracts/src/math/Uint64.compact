@@ -184,7 +184,7 @@ module Uint64 {
    *
    * @returns {Uint<128>} The sum of `a` and `b` as a `Uint<128>` value.
    */
-  export circuit add(a: Uint<64>, b: Uint<64>): Uint<128> {
+  export pure circuit add(a: Uint<64>, b: Uint<64>): Uint<128> {
     return a + b;
   }
 
@@ -206,7 +206,7 @@ module Uint64 {
    *
    * @returns {Uint<64>} The sum of `a` and `b` as a `Uint<64>` value.
    */
-  export circuit addChecked(a: Uint<64>, b: Uint<64>): Uint<64> {
+  export pure circuit addChecked(a: Uint<64>, b: Uint<64>): Uint<64> {
     const sum: Uint<128> = a + b;
     assert(sum <= MAX_UINT64(), "Math: addition overflow");
     return sum as Uint<64>;
@@ -230,7 +230,7 @@ module Uint64 {
    *
    * @returns {Uint<64>} The difference `a - b` as a `Uint<64>` value.
    */
-  export circuit sub(a: Uint<64>, b: Uint<64>): Uint<64> {
+  export pure circuit sub(a: Uint<64>, b: Uint<64>): Uint<64> {
     assert(a >= b, "Math: subtraction underflow");
     return a - b;
   }
@@ -251,7 +251,7 @@ module Uint64 {
    *
    * @returns {Uint<128>} The product of `a` and `b` as a `Uint<128>` value.
    */
-  export circuit mul(a: Uint<64>, b: Uint<64>): Uint<128> {
+  export pure circuit mul(a: Uint<64>, b: Uint<64>): Uint<128> {
     return a * b;
   }
 
@@ -273,7 +273,7 @@ module Uint64 {
    *
    * @returns {Uint<64>} The product of `a` and `b` as a `Uint<64>` value.
    */
-  export circuit mulChecked(a: Uint<64>, b: Uint<64>): Uint<64> {
+  export pure circuit mulChecked(a: Uint<64>, b: Uint<64>): Uint<64> {
     const product: Uint<128> = a * b;
     assert(product <= MAX_UINT64(), "Math: multiplication overflow");
     return product as Uint<64>;
@@ -481,7 +481,7 @@ module Uint64 {
    *
    * @returns {Uint<64>} The smaller of `a` and `b` as a `Uint<64>` value.
    */
-  export circuit min(a: Uint<64>, b: Uint<64>): Uint<64> {
+  export pure circuit min(a: Uint<64>, b: Uint<64>): Uint<64> {
     return a < b ? a : b;
   }
 
@@ -500,7 +500,7 @@ module Uint64 {
    *
    * @returns {Uint<64>} The larger of `a` and `b` as a `Uint<64>` value.
    */
-  export circuit max(a: Uint<64>, b: Uint<64>): Uint<64> {
+  export pure circuit max(a: Uint<64>, b: Uint<64>): Uint<64> {
     return a > b ? a : b;
   }
 }
