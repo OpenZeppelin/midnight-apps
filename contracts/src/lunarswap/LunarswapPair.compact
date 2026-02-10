@@ -17,641 +17,647 @@ pragma language_version >= 0.20.0;
  * - Trading volume and price cumulative tracking
  */
 module LunarswapPair {
-    import CompactStandardLibrary;
+  import CompactStandardLibrary;
 
-    import { isKeyOrAddressZero, eitherZPK } from "../openzeppelin/Utils" prefix Utils_;
-    import { MAX_UINT128, sub, mulChecked, div, addChecked, sqrt, min } from "../math/Uint128" prefix Uint128_;
-    import { MAX_UINT64 } from "../math/Uint64" prefix Uint64_;
+  import { isKeyOrAddressZero, eitherZPK } from "../openzeppelin/Utils" prefix Utils_;
+  import
+    { MAX_UINT128, sub, mulChecked, div, addChecked, sqrt, min }
+    from "../math/Uint128"
+      prefix Uint128_;
+  import { MAX_UINT64 } from "../math/Uint64" prefix Uint64_;
 
-    import { getIdentity } from "./LunarswapLibrary" prefix LunarswapLibrary_;
-    import { feeTo } from "./LunarswapFee" prefix LunarswapFee_;
-    import { initialize, initializePairLpToken, getTotalSupply, mint, burn } from "./LunarswapLiquidity" prefix LunarswapLiquidity_;
+  import { getIdentity } from "./LunarswapLibrary" prefix LunarswapLibrary_;
+  import { feeTo } from "./LunarswapFee" prefix LunarswapFee_;
+  import
+    { initialize, initializePairLpToken, getTotalSupply, mint, burn }
+    from "./LunarswapLiquidity"
+      prefix LunarswapLiquidity_;
 
-   /**
-    * @struct Pair
-    * @description
-    * Represents a Lunarswap trading pair, tracking cumulative price and volume statistics,
-    * as well as the last recorded product of reserves (kLast) for fee calculations.
-    *
-    * @field {Bytes<32>} token0Type - The color (type) of the first token in the pair.
-    * @field {Bytes<32>} token1Type - The color (type) of the second token in the pair.
-    * @field {Bytes<32>} lpTokenType - The color (type) of the LP token in the pair.
-    * @field {Uint<128>} price0VolCumulative - Cumulative sum of (price0 * volume), representing Token 1 per Token 0.
-    * @field {Uint<128>} price1VolCumulative - Cumulative sum of (price1 * volume), representing Token 0 per Token 1.
-    * @field {Uint<128>} volume0Cumulative - Cumulative trading volume of token0.
-    * @field {Uint<128>} volume1Cumulative - Cumulative trading volume of token1.
-    * @field {Uint<128>} kLast - Last recorded value of reserve0 * reserve1, used for protocol fee calculations.
-    */
-    export struct Pair {
-        token0Type: Bytes<32>,
-        token1Type: Bytes<32>,
-        lpTokenType: Bytes<32>,
-        reserve0Id: Bytes<32>,
-        reserve1Id: Bytes<32>,
-        price0VolCumulative: Uint<128>,
-        price1VolCumulative: Uint<128>,
-        volume0Cumulative: Uint<128>,
-        volume1Cumulative: Uint<128>,
-        kLast: Uint<128>,
-    }
+  /**
+   * @struct Pair
+   * @description
+   * Represents a Lunarswap trading pair, tracking cumulative price and volume statistics,
+   * as well as the last recorded product of reserves (kLast) for fee calculations.
+   *
+   * @field {Bytes<32>} token0Type - The color (type) of the first token in the pair.
+   * @field {Bytes<32>} token1Type - The color (type) of the second token in the pair.
+   * @field {Bytes<32>} lpTokenType - The color (type) of the LP token in the pair.
+   * @field {Uint<128>} price0VolCumulative - Cumulative sum of (price0 * volume), representing Token 1 per Token 0.
+   * @field {Uint<128>} price1VolCumulative - Cumulative sum of (price1 * volume), representing Token 0 per Token 1.
+   * @field {Uint<128>} volume0Cumulative - Cumulative trading volume of token0.
+   * @field {Uint<128>} volume1Cumulative - Cumulative trading volume of token1.
+   * @field {Uint<128>} kLast - Last recorded value of reserve0 * reserve1, used for protocol fee calculations.
+   */
+  export struct Pair {
+    token0Type: Bytes<32>,
+    token1Type: Bytes<32>,
+    lpTokenType: Bytes<32>,
+    reserve0Id: Bytes<32>,
+    reserve1Id: Bytes<32>,
+    price0VolCumulative: Uint<128>,
+    price1VolCumulative: Uint<128>,
+    volume0Cumulative: Uint<128>,
+    volume1Cumulative: Uint<128>,
+    kLast: Uint<128>,
+  }
 
-    /**
-     * @title initialize circuit
-     * @description Initializes the Lunarswap pair system with LP token configuration.
-     *
-     * @remarks
-     * This circuit sets up the initial configuration for LP tokens including name,
-     * symbol, decimals, and nonce. It should only be called once during contract deployment.
-     *
-     * TODO: access control needed.
-     * TODO: use initialize contract to prevent double initialize.
-     *
-     * @circuitInfo k=11, rows=1200
-     *
-     * @param {Bytes<32>} nonce      - The nonce for LP token generation.
-     * @param {Opaque<"string">} name - The name of the LP token.
-     * @param {Opaque<"string">} symbol - The symbol of the LP token.
-     * @param {Uint<8>} decimals     - The number of decimals for LP tokens.
-     *
-     * @returns [] - No return values.
-     */
-    export circuit initialize(
-        nonce: Bytes<32>,
-        name: Opaque<"string">,
-        symbol: Opaque<"string">,
-        decimals: Uint<8>
-    ): [] {
-        return LunarswapLiquidity_initialize(nonce, name, symbol, decimals);
-    }
+  /**
+   * @title initialize circuit
+   * @description Initializes the Lunarswap pair system with LP token configuration.
+   *
+   * @remarks
+   * This circuit sets up the initial configuration for LP tokens including name,
+   * symbol, decimals, and nonce. It should only be called once during contract deployment.
+   *
+   * TODO: access control needed.
+   * TODO: use initialize contract to prevent double initialize.
+   *
+   * @circuitInfo k=11, rows=1200
+   *
+   * @param {Bytes<32>} nonce      - The nonce for LP token generation.
+   * @param {Opaque<"string">} name - The name of the LP token.
+   * @param {Opaque<"string">} symbol - The symbol of the LP token.
+   * @param {Uint<8>} decimals     - The number of decimals for LP tokens.
+   *
+   * @returns [] - No return values.
+   */
+  export circuit initialize(
+                   nonce: Bytes<32>,
+                   name: Opaque<"string">,
+                   symbol: Opaque<"string">,
+                   decimals: Uint<8>
+                   ): [] {
+    return LunarswapLiquidity_initialize(nonce, name, symbol, decimals);
+  }
 
-    /**
-     * @title MINIMUM_LIQUIDITY circuit
-     * @description Returns the minimum liquidity that is always locked in the pool to prevent share inflation attacks.
-     *
-     * @remarks
-     * This circuit defines the minimum amount of LP tokens (liquidity) that must be permanently locked in every new trading pair.
-     *
-     * This mechanism directly mitigates the "share inflation attack" (see [OpenZeppelin: Inflation Attack](https://docs.openzeppelin.com/contracts/4.x/erc4626#inflation-attack))
-     * as originally described in the [Uniswap v2 Whitepaper, Section 5.2](https://app.uniswap.org/whitepaper.pdf#subsection.5.2).
-     * See also the Uniswap v2 code implementation: [UniswapV2Pair.sol#L77-L87](https://github.com/Uniswap/v2-core/blob/master/contracts/UniswapV2Pair.sol#L77-L87).
-     *
-     * **Attack Prevention Mechanism:**
-     * By locking a small, nonzero amount of LP shares, the cost of manipulating the pool's share value is
-     * dramatically increased. This makes it economically infeasible for an attacker to inflate the value of
-     * a single share by donating assets to the pool, as the minimum liquidity is
-     * forever unclaimable and must be "burned" to the zero address.
-     *
-     * **Decimal System Adaptation:**
-     * The original Uniswap v2 implementation uses 1000 for Ethereum's 18-decimal system, representing
-     * 1e-15 of a single LP token (1000 / 1e18 = 1e-15). For Midnight's 6-decimal system, we use 1,
-     * which represents 1e-6 of a single LP token (1 / 1e6 = 1e-6).
-     *
-     * **Value Selection Rationale:**
-     * The value 1 is chosen because:
-     * 1. It maintains the same proportional security as Uniswap v2 (very small fraction of total supply)
-     * 2. It's negligible for honest liquidity providers (0.0001% of a token)
-     * 3. It's large enough to make share inflation attacks prohibitively expensive
-     * 4. It's appropriate for Midnight's token precision and economic scale
-     *
-     * **Cross-Platform Equivalence:**
-     * - Ethereum (18 decimals): 1000 represents 1e-15 of a token
-     * - Midnight (6 decimals): 1 represents 1e-6 of a token
-     * Both values serve the same security purpose while being appropriately scaled for their respective ecosystems.
-     *
-     * @circuitInfo k=11, rows=100
-     *
-     * @returns {Uint<16>} - The minimum liquidity amount (1), permanently locked to mitigate share inflation attacks.
-     */
-    circuit MINIMUM_LIQUIDITY(): Uint<16> {
-        return 1;
-    }
+  /**
+   * @title MINIMUM_LIQUIDITY circuit
+   * @description Returns the minimum liquidity that is always locked in the pool to prevent share inflation attacks.
+   *
+   * @remarks
+   * This circuit defines the minimum amount of LP tokens (liquidity) that must be permanently locked in every new trading pair.
+   *
+   * This mechanism directly mitigates the "share inflation attack" (see [OpenZeppelin: Inflation Attack](https://docs.openzeppelin.com/contracts/4.x/erc4626#inflation-attack))
+   * as originally described in the [Uniswap v2 Whitepaper, Section 5.2](https://app.uniswap.org/whitepaper.pdf#subsection.5.2).
+   * See also the Uniswap v2 code implementation: [UniswapV2Pair.sol#L77-L87](https://github.com/Uniswap/v2-core/blob/master/contracts/UniswapV2Pair.sol#L77-L87).
+   *
+   * **Attack Prevention Mechanism:**
+   * By locking a small, nonzero amount of LP shares, the cost of manipulating the pool's share value is
+   * dramatically increased. This makes it economically infeasible for an attacker to inflate the value of
+   * a single share by donating assets to the pool, as the minimum liquidity is
+   * forever unclaimable and must be "burned" to the zero address.
+   *
+   * **Decimal System Adaptation:**
+   * The original Uniswap v2 implementation uses 1000 for Ethereum's 18-decimal system, representing
+   * 1e-15 of a single LP token (1000 / 1e18 = 1e-15). For Midnight's 6-decimal system, we use 1,
+   * which represents 1e-6 of a single LP token (1 / 1e6 = 1e-6).
+   *
+   * **Value Selection Rationale:**
+   * The value 1 is chosen because:
+   * 1. It maintains the same proportional security as Uniswap v2 (very small fraction of total supply)
+   * 2. It's negligible for honest liquidity providers (0.0001% of a token)
+   * 3. It's large enough to make share inflation attacks prohibitively expensive
+   * 4. It's appropriate for Midnight's token precision and economic scale
+   *
+   * **Cross-Platform Equivalence:**
+   * - Ethereum (18 decimals): 1000 represents 1e-15 of a token
+   * - Midnight (6 decimals): 1 represents 1e-6 of a token
+   * Both values serve the same security purpose while being appropriately scaled for their respective ecosystems.
+   *
+   * @circuitInfo k=11, rows=100
+   *
+   * @returns {Uint<16>} - The minimum liquidity amount (1), permanently locked to mitigate share inflation attacks.
+   */
+  circuit MINIMUM_LIQUIDITY(): Uint<16> {
+    return 1;
+  }
 
-    /**
-     * @title initializePair circuit
-     * @description Initializes a new trading pair with zero reserves.
-     *
-     * @remarks
-     * This circuit creates a new trading pair structure with zero reserves and
-     * initializes the LP token tracking for the pair. The pair is ready to accept
-     * the first liquidity provision.
-     *
-     * @circuitInfo k=11, rows=1000
-     *
-     * @param {Bytes<32>} pairId - The unique pairId hash for the new pair.
-     * @param {ShieldedCoinInfo} token0 - The first token in the pair.
-     * @param {ShieldedCoinInfo} token1 - The second token in the pair.
-     *
-     * @returns {Pair} - The initialized pair with zero reserves and metadata.
-     */
-    export circuit initializePair(pairId: Bytes<32>, token0: ShieldedCoinInfo, token1: ShieldedCoinInfo): Pair {
-        LunarswapLiquidity_initializePairLpToken(pairId);
-        const reserve0Id = LunarswapLibrary_getIdentity(pairId, token0.color, false);
-        const reserve1Id = LunarswapLibrary_getIdentity(pairId, token1.color, false);
+  /**
+   * @title initializePair circuit
+   * @description Initializes a new trading pair with zero reserves.
+   *
+   * @remarks
+   * This circuit creates a new trading pair structure with zero reserves and
+   * initializes the LP token tracking for the pair. The pair is ready to accept
+   * the first liquidity provision.
+   *
+   * @circuitInfo k=11, rows=1000
+   *
+   * @param {Bytes<32>} pairId - The unique pairId hash for the new pair.
+   * @param {ShieldedCoinInfo} token0 - The first token in the pair.
+   * @param {ShieldedCoinInfo} token1 - The second token in the pair.
+   *
+   * @returns {Pair} - The initialized pair with zero reserves and metadata.
+   */
+  export circuit initializePair(
+                   pairId: Bytes<32>,
+                   token0: ShieldedCoinInfo,
+                   token1: ShieldedCoinInfo
+                   ): Pair {
+    LunarswapLiquidity_initializePairLpToken(pairId);
+    const reserve0Id = LunarswapLibrary_getIdentity(pairId, token0.color, false);
+    const reserve1Id = LunarswapLibrary_getIdentity(pairId, token1.color, false);
 
-        return Pair {
-            token0Type: token0.color,
-            token1Type: token1.color,
-            // TODO: calculate the expected lpTokenType
-            lpTokenType: default<Bytes<32>>,
-            reserve0Id: reserve0Id,
-            reserve1Id: reserve1Id,
-            price0VolCumulative: default<Uint<128>>,
-            price1VolCumulative: default<Uint<128>>,
-            volume0Cumulative: default<Uint<128>>,
-            volume1Cumulative: default<Uint<128>>,
-            kLast: default<Uint<128>>,
-        };
-    }
+    return Pair { token0Type: token0.color,
+                  token1Type: token1.color,
+                  // TODO: calculate the expected lpTokenType
+                  lpTokenType: default<Bytes<32>>,
+                  reserve0Id: reserve0Id,
+                  reserve1Id: reserve1Id,
+                  price0VolCumulative: default<Uint<128>>,
+                  price1VolCumulative: default<Uint<128>>,
+                  volume0Cumulative: default<Uint<128>>,
+                  volume1Cumulative: default<Uint<128>>,
+                  kLast: default<Uint<128>>, };
+  }
 
-    /**
-     * @title mint circuit
-     * @description Mints LP tokens for liquidity providers and updates the pair state.
-     *
-     * @remarks
-     * This circuit handles the minting of LP tokens when liquidity is added to a pair.
-     * For the first liquidity provision, it calculates liquidity based on the geometric
-     * mean of the amounts. For subsequent provisions, it calculates liquidity based on
-     * the minimum ratio of the provided amounts to existing reserves.
-     *
-     * @security
-     * WARNING: This circuit is known to have a vulnerability to inflation attacks if the minimum liquidity
-     * is not properly locked or if users can bypass the intended minting logic. Care must be taken to ensure
-     * that the minimum liquidity is permanently locked and cannot be withdrawn, and that all minting flows
-     * are strictly enforced.
-     *
-     * Requirements:
-     * - The calculated liquidity must be greater than zero
-     * - The liquidity must not overflow MAX_UINT128
-     *
-     * @circuitInfo k=11, rows=3000
-     *
-     * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The recipient of the LP tokens.
-     * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
-     * @param {Pair} pair - The current pair state.
-     * @param {Uint<128>} amount0 - The amount of token0 being added.
-     * @param {Uint<128>} amount1 - The amount of token1 being added.
-     * @param {QualifiedShieldedCoinInfo} reserve0 - The current reserve of token0.
-     * @param {QualifiedShieldedCoinInfo} reserve1 - The current reserve of token1.
-     * @param {ShieldedCoinInfo} token0 - The first token being added.
-     * @param {ShieldedCoinInfo} token1 - The second token being added.
-     *
-     * @throws {Error} "LunarswapPair: Insufficient liquidity minted" if calculated liquidity is zero.
-     * @throws {Error} "Lunarswap: liquidity overflows MAX_U128 supported size in ERC20" if liquidity overflows.
-     *
-     * @returns {[Pair, Uint<128>]} - The updated pair, liquidity minted.
-     */
-    export circuit mint(
-        pairId: Bytes<32>,
-        pair: Pair,
-        amount0: Uint<128>,
-        amount1: Uint<128>,
-        reserve0: QualifiedShieldedCoinInfo,
-        reserve1: QualifiedShieldedCoinInfo,
-        to: Either<ZswapCoinPublicKey, ContractAddress>
-    ): [Pair, Uint<128>] {
-        // We use addChecked here because the max amount in ShieldedCoinInfo is Uint<128>
-        const balance0 = Uint128_addChecked(reserve0.value, amount0);
-        const balance1 = Uint128_addChecked(reserve1.value, amount1);
+  /**
+   * @title mint circuit
+   * @description Mints LP tokens for liquidity providers and updates the pair state.
+   *
+   * @remarks
+   * This circuit handles the minting of LP tokens when liquidity is added to a pair.
+   * For the first liquidity provision, it calculates liquidity based on the geometric
+   * mean of the amounts. For subsequent provisions, it calculates liquidity based on
+   * the minimum ratio of the provided amounts to existing reserves.
+   *
+   * @security
+   * WARNING: This circuit is known to have a vulnerability to inflation attacks if the minimum liquidity
+   * is not properly locked or if users can bypass the intended minting logic. Care must be taken to ensure
+   * that the minimum liquidity is permanently locked and cannot be withdrawn, and that all minting flows
+   * are strictly enforced.
+   *
+   * Requirements:
+   * - The calculated liquidity must be greater than zero
+   * - The liquidity must not overflow MAX_UINT128
+   *
+   * @circuitInfo k=11, rows=3000
+   *
+   * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The recipient of the LP tokens.
+   * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
+   * @param {Pair} pair - The current pair state.
+   * @param {Uint<128>} amount0 - The amount of token0 being added.
+   * @param {Uint<128>} amount1 - The amount of token1 being added.
+   * @param {QualifiedShieldedCoinInfo} reserve0 - The current reserve of token0.
+   * @param {QualifiedShieldedCoinInfo} reserve1 - The current reserve of token1.
+   * @param {ShieldedCoinInfo} token0 - The first token being added.
+   * @param {ShieldedCoinInfo} token1 - The second token being added.
+   *
+   * @throws {Error} "LunarswapPair: Insufficient liquidity minted" if calculated liquidity is zero.
+   * @throws {Error} "Lunarswap: liquidity overflows MAX_U128 supported size in ERC20" if liquidity overflows.
+   *
+   * @returns {[Pair, Uint<128>]} - The updated pair, liquidity minted.
+   */
+  export circuit mint(pairId: Bytes<32>,
+                      pair: Pair,
+                      amount0: Uint<128>,
+                      amount1: Uint<128>,
+                      reserve0: QualifiedShieldedCoinInfo,
+                      reserve1: QualifiedShieldedCoinInfo,
+                      to: Either<ZswapCoinPublicKey, ContractAddress>
+                      ): [Pair, Uint<128>] {
+    // We use addChecked here because the max amount in ShieldedCoinInfo is Uint<128>
+    const balance0 = Uint128_addChecked(reserve0.value, amount0);
+    const balance1 = Uint128_addChecked(reserve1.value, amount1);
 
-        const [isFeeOn, kLast] = _mintFee(pairId, reserve0.value, reserve1.value, pair.kLast);
-        // TODO: review the risk of using totalSupply here. Because of the nature of UTXO that
-        // a user could send the LP tokens to the burn address directly without using the burn function,
-        // but the totalSupply will not be updated.
-        const totalSupply = LunarswapLiquidity_getTotalSupply(pairId).value;
-        if (totalSupply == 0) {
-            // liquidity = (√amount0 * amount1) - MINIMUM_LIQUIDITY = Uint<128>
-            // TODO: review disclose
-            const liquidity = Uint128_sub(
+    const [isFeeOn, kLast] = _mintFee(pairId, reserve0.value, reserve1.value, pair.kLast);
+    // TODO: review the risk of using totalSupply here. Because of the nature of UTXO that
+    // a user could send the LP tokens to the burn address directly without using the burn function,
+    // but the totalSupply will not be updated.
+    const totalSupply = LunarswapLiquidity_getTotalSupply(pairId).value;
+    if (totalSupply == 0) {
+      // liquidity = (√amount0 * amount1) - MINIMUM_LIQUIDITY = Uint<128>
+      // TODO: review disclose
+      const liquidity =
+              Uint128_sub(
                 disclose(Uint128_sqrt(Uint128_mulChecked(amount0, amount1))),
                 MINIMUM_LIQUIDITY()
-            );
-            assert(liquidity > 0, "LunarswapPair: mint() - New pair insufficient liquidity minted");
-            // I think the liquidity won't exceed the Uint<64>
-            assert(liquidity <= Uint64_MAX_UINT64(), "LunarswapPair: mint() - liquidity exceeds Uint<64> max");
-            // TODO: WARNING! to be revised to prevent from inflation attack.
-            // TODO: IMPORTANT! that should be minted to the burn address.
-            //LunarswapLiquidity_mint(pairId, burn_address(), MINIMUM_LIQUIDITY());
-            const lpTokens = LunarswapLiquidity_mint(pairId, to, liquidity as Uint<64>);
-            // Send the minimum liquidity to the contract address itself to lock the minimum liquidity
-            // send_immediate(minLiquidityCoinInfo, burn_address(), MINIMUM_LIQUIDITY());
+                );
+      assert(liquidity > 0, "LunarswapPair: mint() - New pair insufficient liquidity minted");
+      // I think the liquidity won't exceed the Uint<64>
+      assert(liquidity <= Uint64_MAX_UINT64(),
+             "LunarswapPair: mint() - liquidity exceeds Uint<64> max"
+             );
+      // TODO: WARNING! to be revised to prevent from inflation attack.
+      // TODO: IMPORTANT! that should be minted to the burn address.
+      //LunarswapLiquidity_mint(pairId, burn_address(), MINIMUM_LIQUIDITY());
+      const lpTokens = LunarswapLiquidity_mint(pairId, to, liquidity as Uint<64>);
+      // Send the minimum liquidity to the contract address itself to lock the minimum liquidity
+      // send_immediate(minLiquidityCoinInfo, burn_address(), MINIMUM_LIQUIDITY());
 
-            const updatedPair = _update(
-                pair,
-                lpTokens.color,
-                isFeeOn,
-                amount0,
-                amount1,
-                balance0,
-                balance1,
-                reserve0,
-                reserve1,
-                kLast
-            );
-            return [updatedPair, liquidity];
-        } else {
-            // TODO: In case of using Uint<128> for reserves that results a conflict with
-            // the ERC20 Compact standard, since the result here is Uint<256> while the max min tokens are Uint<128>
-            // liquidity = ((amount0 * totalSupply / reserve0) ∧ ((amount1 * totalSupply) / reserve1)
-            const liquidity = Uint128_min(
+      const updatedPair =
+              _update(pair,
+                      lpTokens.color,
+                      isFeeOn,
+                      amount0,
+                      amount1,
+                      balance0,
+                      balance1,
+                      reserve0,
+                      reserve1,
+                      kLast
+                      );
+      return [updatedPair, liquidity];
+    } else {
+      // TODO: In case of using Uint<128> for reserves that results a conflict with
+      // the ERC20 Compact standard, since the result here is Uint<256> while the max min tokens are Uint<128>
+      // liquidity = ((amount0 * totalSupply / reserve0) ∧ ((amount1 * totalSupply) / reserve1)
+      const liquidity =
+              Uint128_min(
                 disclose(Uint128_div(Uint128_mulChecked(amount0, totalSupply), reserve0.value)),
                 disclose(Uint128_div(Uint128_mulChecked(amount1, totalSupply), reserve1.value))
-            );
-            assert(liquidity > 0, "LunarswapPair: mint() - Existing pair insufficient liquidity minted");
-            assert(liquidity <= Uint64_MAX_UINT64(), "LunarswapPair: mint() - liquidity exceeds Uint<64> max");
-            const lpTokens = LunarswapLiquidity_mint(pairId, to, liquidity as Uint<64>);
-            const updatedPair = _update(
-                pair,
-                lpTokens.color,
-                isFeeOn,
-                amount0,
-                amount1,
-                balance0,
-                balance1,
-                reserve0,
-                reserve1,
-                kLast
-            );
-            return [updatedPair, liquidity];
+                );
+      assert(liquidity > 0, "LunarswapPair: mint() - Existing pair insufficient liquidity minted");
+      assert(liquidity <= Uint64_MAX_UINT64(),
+             "LunarswapPair: mint() - liquidity exceeds Uint<64> max"
+             );
+      const lpTokens = LunarswapLiquidity_mint(pairId, to, liquidity as Uint<64>);
+      const updatedPair =
+              _update(pair,
+                      lpTokens.color,
+                      isFeeOn,
+                      amount0,
+                      amount1,
+                      balance0,
+                      balance1,
+                      reserve0,
+                      reserve1,
+                      kLast
+                      );
+      return [updatedPair, liquidity];
+    }
+  }
+
+  /**
+   * @title _mintFee circuit
+   * @description Calculates and mints protocol fees if enabled.
+   *
+   * @remarks
+   * This internal circuit calculates protocol fees based on the growth in the
+   * constant product (k) since the last fee mint. If fees are enabled and the
+   * current k is greater than kLast, it mints new LP tokens to the fee recipient.
+   *
+   * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
+   * @param {Uint<128>} reserve0 - The current reserve of token0.
+   * @param {Uint<128>} reserve1 - The current reserve of token1.
+   * @param {Uint<128>} kLast - The k value from the last fee calculation.
+   *
+   * @throws {Error} "Lunarswap: liquidity overflows MAX_U128 supported size in ERC20" if calculated liquidity overflows.
+   *
+   * @returns {[Boolean, Uint<128>]} - Whether fees are enabled and the updated kLast value.
+   */
+  circuit _mintFee(
+            pairId: Bytes<32>,
+            reserve0: Uint<128>,
+            reserve1: Uint<128>,
+            kLast: Uint<128>
+            ): [Boolean, Uint<128>] {
+    const isFeeToZero =
+            Utils_isKeyOrAddressZero(
+              left<ZswapCoinPublicKey, ContractAddress>(LunarswapFee_feeTo())
+              );
+    const isFeeOn = isFeeToZero == true ? false : true;
+    if (isFeeOn) {
+      if (kLast != 0) {
+        // TODO: review disclose
+        const rootK = disclose(Uint128_sqrt(Uint128_mulChecked(reserve0, reserve1)));
+        // TODO: review disclose
+        const rootKLast = disclose(Uint128_sqrt(kLast));
+        if (rootK > rootKLast) {
+          // TODO: review the security of the totalSupply.
+          const totalSupply = LunarswapLiquidity_getTotalSupply(pairId).value;
+          const numerator = Uint128_mulChecked(Uint128_sub(rootK, rootKLast), totalSupply);
+          const denominator = Uint128_addChecked(Uint128_mulChecked(rootK, 5), rootKLast);
+          const liquidity = disclose(Uint128_div(numerator, denominator));
+          if (liquidity as Uint<128> > 0) {
+            // Mint Liquidity Tokens for the protocol fee recipient
+            // TODO: Maybe needed to be double checked.
+            assert(liquidity <= Uint64_MAX_UINT64(),
+                   "LunarswapPair: _mintFee() - liquidity exceeds Uint<64> max"
+                   );
+            LunarswapLiquidity_mint(
+              pairId,
+              Utils_eitherZPK(LunarswapFee_feeTo()),
+              liquidity as Uint<64>
+              );
+          }
         }
+      }
+      return [isFeeOn, kLast];
+    } else {
+      return [false, 0];
     }
+  }
 
-    /**
-     * @title _mintFee circuit
-     * @description Calculates and mints protocol fees if enabled.
-     *
-     * @remarks
-     * This internal circuit calculates protocol fees based on the growth in the
-     * constant product (k) since the last fee mint. If fees are enabled and the
-     * current k is greater than kLast, it mints new LP tokens to the fee recipient.
-     *
-     * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
-     * @param {Uint<128>} reserve0 - The current reserve of token0.
-     * @param {Uint<128>} reserve1 - The current reserve of token1.
-     * @param {Uint<128>} kLast - The k value from the last fee calculation.
-     *
-     * @throws {Error} "Lunarswap: liquidity overflows MAX_U128 supported size in ERC20" if calculated liquidity overflows.
-     *
-     * @returns {[Boolean, Uint<128>]} - Whether fees are enabled and the updated kLast value.
-     */
-    circuit _mintFee(
-        pairId: Bytes<32>,
-        reserve0: Uint<128>,
-        reserve1: Uint<128>,
-        kLast: Uint<128>
-    ): [Boolean, Uint<128>] {
-        const isFeeToZero = Utils_isKeyOrAddressZero(left<ZswapCoinPublicKey, ContractAddress>(LunarswapFee_feeTo()));
-        const isFeeOn = isFeeToZero == true ? false : true;
-        if (isFeeOn) {
-            if (kLast != 0) {
-                // TODO: review disclose
-                const rootK = disclose(Uint128_sqrt(Uint128_mulChecked(reserve0, reserve1)));
-                // TODO: review disclose
-                const rootKLast = disclose(Uint128_sqrt(kLast));
-                if (rootK > rootKLast) {
-                    // TODO: review the security of the totalSupply.
-                    const totalSupply = LunarswapLiquidity_getTotalSupply(pairId).value;
-                    const numerator = Uint128_mulChecked(Uint128_sub(rootK, rootKLast), totalSupply);
-                    const denominator = Uint128_addChecked(Uint128_mulChecked(rootK, 5), rootKLast);
-                    const liquidity = disclose(Uint128_div(numerator, denominator));
-                    if (liquidity as Uint<128> > 0) {
-                        // Mint Liquidity Tokens for the protocol fee recipient
-                        // TODO: Maybe needed to be double checked.
-                        assert(liquidity <= Uint64_MAX_UINT64(), "LunarswapPair: _mintFee() - liquidity exceeds Uint<64> max");
-                        LunarswapLiquidity_mint(pairId, Utils_eitherZPK(LunarswapFee_feeTo()), liquidity as Uint<64>);
-                    }
-                }
-            }
-            return [isFeeOn, kLast];
-        } else {
-            return [false, 0];
-        }
+  /**
+   * @title burn circuit
+   * @description Burns LP tokens and distributes the underlying tokens to the liquidity provider.
+   *
+   * @remarks
+   * This circuit handles the burning of LP tokens when liquidity is removed from a pair.
+   *
+   * @circuitInfo k=11, rows=2000
+   *
+   * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
+   * @param {Pair} pair - The current pair state.
+   * @param {Bytes<32>} token0Type - The first token in the pair.
+   * @param {Bytes<32>} token1Type - The second token in the pair.
+   * @param {QualifiedShieldedCoinInfo} reserve0 - The current reserve of token0.
+   * @param {QualifiedShieldedCoinInfo} reserve1 - The current reserve of token1.
+   * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The recipient of the burned tokens.
+   *
+   * @returns {[Pair, Uint<128>, Uint<128>]} - The updated pair, token0, token1.
+   */
+  export circuit burn(pairId: Bytes<32>,
+                      pair: Pair,
+                      liquidity: ShieldedCoinInfo,
+                      token0Type: Bytes<32>,
+                      token1Type: Bytes<32>,
+                      reserve0: QualifiedShieldedCoinInfo,
+                      reserve1: QualifiedShieldedCoinInfo,
+                      to: Either<ZswapCoinPublicKey, ContractAddress>
+                      ): [Pair, Uint<128>, Uint<128>] {
+    // Trying to keep with Uniswap's implementation, Originally you would check the balanceOf
+    // function for each token contract of that address. But here we don't have the token contract,
+    // so we use the reserves as the balance because the tokens in the reserves are not
+    // transferred to the recipient yet.
+    const balance0 = reserve0.value;
+    const balance1 = reserve1.value;
+    const totalSupply = LunarswapLiquidity_getTotalSupply(pairId).value;
+
+    const [isFeeOn, kLast] = _mintFee(pairId, reserve0.value, reserve1.value, pair.kLast);
+    // Call the internal _burn circuit and return its result
+    return _burn(pairId,
+                 pair,
+                 token0Type,
+                 token1Type,
+                 balance0,
+                 balance1,
+                 reserve0,
+                 reserve1,
+                 liquidity,
+                 totalSupply,
+                 isFeeOn,
+                 kLast,
+                 to
+                 );
+  }
+
+  /**
+   * @title _burn circuit
+   * @description Internal circuit that handles the common burn logic for liquidity removal.
+   *
+   * @remarks
+   * This internal circuit consolidates the common logic for burning LP tokens and
+   * distributing the underlying tokens to the liquidity provider. It calculates
+   * the amounts to return, burns the LP tokens, and sends the tokens to the recipient.
+   *
+   * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
+   * @param {Pair} pair - The current pair state.
+   * @param {Bytes<32>} token0Type - The first token in the pair.
+   * @param {Bytes<32>} token1Type - The second token in the pair.
+   * @param {Uint<128>} balance0 - The balance of token0.
+   * @param {Uint<128>} balance1 - The balance of token1.
+   * @param {QualifiedShieldedCoinInfo} reserve0 - The current reserve of token0.
+   * @param {QualifiedShieldedCoinInfo} reserve1 - The current reserve of token1.
+   * @param {ShieldedCoinInfo} liquidity - The liquidity amount to burn.
+   * @param {Uint<128>} totalSupply - The total supply of LP tokens.
+   * @param {Boolean} isFeeOn - Whether protocol fees are enabled.
+   * @param {Uint<128>} kLast - The k value from the last fee calculation.
+   * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The recipient of the burned tokens.
+   *
+   * @throws {Error} "LunarswapPair: burn() - Insufficient liquidity burned" if calculated amounts are zero.
+   *
+   * @returns {[Uint<128>, Uint<128>]} - The amounts of token0 and token1 returned.
+   */
+  circuit _burn(pairId: Bytes<32>,
+                pair: Pair,
+                token0Type: Bytes<32>,
+                token1Type: Bytes<32>,
+                balance0: Uint<128>,
+                balance1: Uint<128>,
+                reserve0: QualifiedShieldedCoinInfo,
+                reserve1: QualifiedShieldedCoinInfo,
+                liquidity: ShieldedCoinInfo,
+                totalSupply: Uint<128>,
+                isFeeOn: Boolean,
+                kLast: Uint<128>,
+                to: Either<ZswapCoinPublicKey, ContractAddress>
+                ): [Pair, Uint<128>, Uint<128>] {
+    // Early validation: Calculate expected amounts and validate reserves
+    const amount0 = disclose(Uint128_div(Uint128_mulChecked(liquidity.value, balance0), totalSupply));
+    const amount1 = disclose(Uint128_div(Uint128_mulChecked(liquidity.value, balance1), totalSupply));
+
+    // Validate that calculated amounts are positive
+    assert(amount0 > 0 && amount1 > 0, "LunarswapPair: _burn() - Insufficient liquidity burned");
+
+    // Early validation: Check if reserves are sufficient for the calculated amounts
+    assert(reserve0.value >= amount0, "LunarswapPair: _burn() - Insufficient reserves for token0");
+    assert(reserve1.value >= amount1, "LunarswapPair: _burn() - Insufficient reserves for token1");
+
+    LunarswapLiquidity_burn(pairId, liquidity, liquidity.value);
+
+    {
+      const balance0 = Uint128_sub(reserve0.value, amount0);
+      const balance1 = Uint128_sub(reserve1.value, amount1);
+
+      const updatedPair =
+              _update(pair,
+                      pair.lpTokenType,
+                      isFeeOn,
+                      amount0,
+                      amount1,
+                      balance0,
+                      balance1,
+                      reserve0,
+                      reserve1,
+                      kLast
+                      );
+      return [updatedPair, amount0, amount1];
     }
+  }
 
-    /**
-     * @title burn circuit
-     * @description Burns LP tokens and distributes the underlying tokens to the liquidity provider.
-     *
-     * @remarks
-     * This circuit handles the burning of LP tokens when liquidity is removed from a pair.
-     *
-     * @circuitInfo k=11, rows=2000
-     *
-     * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
-     * @param {Pair} pair - The current pair state.
-     * @param {Bytes<32>} token0Type - The first token in the pair.
-     * @param {Bytes<32>} token1Type - The second token in the pair.
-     * @param {QualifiedShieldedCoinInfo} reserve0 - The current reserve of token0.
-     * @param {QualifiedShieldedCoinInfo} reserve1 - The current reserve of token1.
-     * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The recipient of the burned tokens.
-     *
-     * @returns {[Pair, Uint<128>, Uint<128>]} - The updated pair, token0, token1.
-     */
-    export circuit burn(
-        pairId: Bytes<32>,
-        pair: Pair,
-        liquidity: ShieldedCoinInfo,
-        token0Type: Bytes<32>,
-        token1Type: Bytes<32>,
-        reserve0: QualifiedShieldedCoinInfo,
-        reserve1: QualifiedShieldedCoinInfo,
-        to: Either<ZswapCoinPublicKey, ContractAddress>
-    ): [Pair, Uint<128>, Uint<128>] {
-        // Trying to keep with Uniswap's implementation, Originally you would check the balanceOf
-        // function for each token contract of that address. But here we don't have the token contract,
-        // so we use the reserves as the balance because the tokens in the reserves are not
-        // transferred to the recipient yet.
-        const balance0 = reserve0.value;
-        const balance1 = reserve1.value;
-        const totalSupply = LunarswapLiquidity_getTotalSupply(pairId).value;
+  /**
+   * @title swap circuit
+   * @description Executes a token swap on the Lunarswap pair, transferring output tokens to the recipient and updating reserves.
+   *
+   * @remarks
+   * This circuit handles the core swap logic for a trading pair. It validates the output amounts,
+   * ensures sufficient liquidity, sends the output tokens to the recipient, calculates the input amounts,
+   * applies the swap fee, and checks the invariant (k) to prevent manipulation. The pair state is updated
+   * and returned.
+   *
+   * Requirements:
+   * - At least one of `amount0Out` or `amount1Out` must be greater than zero.
+   * - The reserves must be sufficient for the requested output amounts.
+   * - The input amount must be positive.
+   * - The product of the adjusted balances must be at least as large as the product of the reserves (k-invariant).
+   *
+   * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
+   * @param {Pair} pair - The current pair state.
+   * @param {Uint<128>} balance0 - The new balance of token0 after the swap.
+   * @param {Uint<128>} balance1 - The new balance of token1 after the swap.
+   * @param {Uint<128>} amount0Out - The amount of token0 to send to the recipient.
+   * @param {Uint<128>} amount1Out - The amount of token1 to send to the recipient.
+   * @param {QualifiedShieldedCoinInfo} reserve0 - The current reserve of token0.
+   * @param {QualifiedShieldedCoinInfo} reserve1 - The current reserve of token1.
+   * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The recipient of the output tokens.
+   *
+   * @returns {Pair} - The updated pair state after the swap.
+   *
+   * @throws {Error} "LunarswapPair: swap() - Insufficient output amount" if both output amounts are zero.
+   * @throws {Error} "LunarswapPair: swap() - Insufficient liquidity" if reserves are insufficient for the output.
+   * @throws {Error} "LunarswapPair: swap() - Insufficient input amount" if the input is not positive.
+   * @throws {Error} "LunarswapPair: swap() - k" if the product invariant is violated.
+   */
+  // TODO: support flash swap that requires contracts to contracts calls.
+  export circuit swap(pairId: Bytes<32>,
+                      pair: Pair,
+                      balance0: Uint<128>,
+                      balance1: Uint<128>,
+                      amount0Out: Uint<128>,
+                      amount1Out: Uint<128>,
+                      reserve0: QualifiedShieldedCoinInfo,
+                      reserve1: QualifiedShieldedCoinInfo,
+                      to: Either<ZswapCoinPublicKey, ContractAddress>,
+                      ): Pair {
+    assert(amount0Out > 0 || amount1Out > 0, "LunarswapPair: swap() - Insufficient output amount");
+    assert(amount0Out < reserve0.value && amount1Out < reserve1.value,
+           "LunarswapPair: swap() - Insufficient liquidity"
+           );
 
-        const [isFeeOn, kLast] = _mintFee(pairId, reserve0.value, reserve1.value, pair.kLast);
-        // Call the internal _burn circuit and return its result
-        return _burn(
-            pairId,
-            pair,
-            token0Type,
-            token1Type,
-            balance0,
-            balance1,
-            reserve0,
-            reserve1,
-            liquidity,
-            totalSupply,
-            isFeeOn,
-            kLast,
-            to
-        );
+    const updatedBalance0 = amount0Out > 0 ? Uint128_sub(balance0, amount0Out) : balance0;
+    const updatedBalance1 = amount1Out > 0 ? Uint128_sub(balance1, amount1Out) : balance1;
+
+    const amount0In =
+            updatedBalance0 > Uint128_sub(reserve0.value, amount0Out)
+              ? Uint128_sub(updatedBalance0, Uint128_sub(reserve0.value, amount0Out))
+              : 0;
+    const amount1In =
+            updatedBalance1 > Uint128_sub(reserve1.value, amount1Out)
+              ? Uint128_sub(updatedBalance1, Uint128_sub(reserve1.value, amount1Out))
+              : 0;
+
+    assert(amount0In > 0 || amount1In > 0, "LunarswapPair: swap() - Insufficient input amount");
+
+    const balance0Adjusted =
+            Uint128_sub(Uint128_mulChecked(updatedBalance0, 1000), Uint128_mulChecked(amount0In, 3));
+    const balance1Adjusted =
+            Uint128_sub(Uint128_mulChecked(updatedBalance1, 1000), Uint128_mulChecked(amount1In, 3));
+
+    assert(Uint128_mulChecked(balance0Adjusted, balance1Adjusted) >=
+           Uint128_mulChecked(
+             Uint128_mulChecked(reserve0.value, reserve1.value),
+             1000000 // 1000 ** 2
+             ),
+           "LunarswapPair: swap() - k"
+           );
+
+    const updatedPair =
+            _update(pair,
+                    pair.lpTokenType,
+                    false,
+                    amount0In,
+                    amount1In,
+                    updatedBalance0,
+                    updatedBalance1,
+                    reserve0,
+                    reserve1,
+                    pair.kLast
+                    );
+    return updatedPair;
+  }
+
+  /**
+   * @title _update circuit
+   * @description Updates the pair state with new balances, metadata, and cumulative statistics.
+   *
+   * @remarks
+   * This internal circuit combines the functionality of _updatePairPrice and _updatePair
+   * to provide a single interface for updating pair state. It updates cumulative price
+   * and volume data, then creates a new pair state with the updated values.
+   *
+   * @param {Pair} pair           - The current pair state.
+   * @param {Boolean} isFeeOn     - Whether protocol fees are enabled.
+   * @param {ShieldedCoinInfo} token0 - The first token being added.
+   * @param {ShieldedCoinInfo} token1 - The second token being added.
+   * @param {Uint<128>} liquidity  - The new liquidity amount.
+   * @param {Uint<128>} balance0   - The new balance of token0.
+   * @param {Uint<128>} balance1   - The new balance of token1.
+   * @param {QualifiedShieldedCoinInfo} reserve0   - The current reserve of token0.
+   * @param {QualifiedShieldedCoinInfo} reserve1   - The current reserve of token1.
+   * @param {Uint<128>} kLast      - The k value from the last fee calculation.
+   *
+   * @returns {Pair} - The updated pair state.
+   */
+  circuit _update(pair: Pair,
+                  lpTokenType: Bytes<32>,
+                  isFeeOn: Boolean,
+                  amount0In: Uint<128>,
+                  amount1In: Uint<128>,
+                  balance0: Uint<128>,
+                  balance1: Uint<128>,
+                  reserve0: QualifiedShieldedCoinInfo,
+                  reserve1: QualifiedShieldedCoinInfo,
+                  kLast: Uint<128>,
+                  ): Pair {
+    const [price0VolCumulative, price1VolCumulative, volume0Cumulative, volume1Cumulative] =
+            _updatePairPrice(pair, reserve0, reserve1, amount0In, amount1In);
+    const updatedKLast = isFeeOn ? Uint128_mulChecked(balance0, balance1) : 0;
+    return Pair { token0Type: pair.token0Type,
+                  token1Type: pair.token1Type,
+                  lpTokenType: lpTokenType,
+                  reserve0Id: pair.reserve0Id,
+                  reserve1Id: pair.reserve1Id,
+                  price0VolCumulative: price0VolCumulative,
+                  price1VolCumulative: price1VolCumulative,
+                  volume0Cumulative: volume0Cumulative,
+                  volume1Cumulative: volume1Cumulative,
+                  kLast: updatedKLast, };
+  }
+
+  /**
+   * @title _updatePairPrice circuit
+   * @description Updates cumulative price and volume data for the pair.
+   *
+   * @remarks
+   * This internal circuit updates the cumulative price and volume statistics
+   * for the trading pair using VWAP (Volume Weighted Average Price).
+   * These values are used for price oracle functionality and tracking trading activity.
+   *
+   * @param {Pair} pair         - The current pair state.
+   * @param {QualifiedShieldedCoinInfo} reserve0 - The current reserve of token0.
+   * @param {QualifiedShieldedCoinInfo} reserve1 - The current reserve of token1.
+   * @param {Uint<128>} amount0In - The amount of token0 being traded in.
+   * @param {Uint<128>} amount1In - The amount of token1 being traded in.
+   *
+   * @returns {[Uint<128>, Uint<128>, Uint<128>, Uint<128>]} - Updated cumulativalus [price0VolCumulative, price1VolCumulative, volume0Cumulative, volume1Cumulative].
+   */
+  circuit _updatePairPrice(
+            pair: Pair,
+            reserve0: QualifiedShieldedCoinInfo,
+            reserve1: QualifiedShieldedCoinInfo,
+            amount0In: Uint<128>,
+            amount1In: Uint<128>,
+            ): [Uint<128>, Uint<128>, Uint<128>, Uint<128>] {
+    if (reserve0.value != 0 && reserve1.value != 0) {
+      const price0 = disclose(Uint128_div(reserve1.value, reserve0.value));
+      const price1 = disclose(Uint128_div(reserve0.value, reserve1.value));
+
+      const price0VolCumulative =
+              Uint128_addChecked(pair.price0VolCumulative, Uint128_mulChecked(price0, amount0In));
+      const price1VolCumulative =
+              Uint128_addChecked(pair.price1VolCumulative, Uint128_mulChecked(price1, amount1In));
+
+      const volume0Cumulative = Uint128_addChecked(pair.volume0Cumulative, amount0In);
+      const volume1Cumulative = Uint128_addChecked(pair.volume1Cumulative, amount1In);
+
+      return [price0VolCumulative, price1VolCumulative, volume0Cumulative, volume1Cumulative];
+    } else {
+      return [pair.price0VolCumulative,
+              pair.price1VolCumulative,
+              pair.volume0Cumulative,
+              pair.volume1Cumulative];
     }
-
-    /**
-     * @title _burn circuit
-     * @description Internal circuit that handles the common burn logic for liquidity removal.
-     *
-     * @remarks
-     * This internal circuit consolidates the common logic for burning LP tokens and
-     * distributing the underlying tokens to the liquidity provider. It calculates
-     * the amounts to return, burns the LP tokens, and sends the tokens to the recipient.
-     *
-     * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
-     * @param {Pair} pair - The current pair state.
-     * @param {Bytes<32>} token0Type - The first token in the pair.
-     * @param {Bytes<32>} token1Type - The second token in the pair.
-     * @param {Uint<128>} balance0 - The balance of token0.
-     * @param {Uint<128>} balance1 - The balance of token1.
-     * @param {QualifiedShieldedCoinInfo} reserve0 - The current reserve of token0.
-     * @param {QualifiedShieldedCoinInfo} reserve1 - The current reserve of token1.
-     * @param {ShieldedCoinInfo} liquidity - The liquidity amount to burn.
-     * @param {Uint<128>} totalSupply - The total supply of LP tokens.
-     * @param {Boolean} isFeeOn - Whether protocol fees are enabled.
-     * @param {Uint<128>} kLast - The k value from the last fee calculation.
-     * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The recipient of the burned tokens.
-     *
-     * @throws {Error} "LunarswapPair: burn() - Insufficient liquidity burned" if calculated amounts are zero.
-     *
-     * @returns {[Uint<128>, Uint<128>]} - The amounts of token0 and token1 returned.
-     */
-    circuit _burn(
-        pairId: Bytes<32>,
-        pair: Pair,
-        token0Type: Bytes<32>,
-        token1Type: Bytes<32>,
-        balance0: Uint<128>,
-        balance1: Uint<128>,
-        reserve0: QualifiedShieldedCoinInfo,
-        reserve1: QualifiedShieldedCoinInfo,
-        liquidity: ShieldedCoinInfo,
-        totalSupply: Uint<128>,
-        isFeeOn: Boolean,
-        kLast: Uint<128>,
-        to: Either<ZswapCoinPublicKey, ContractAddress>
-    ): [Pair, Uint<128>, Uint<128>] {
-        // Early validation: Calculate expected amounts and validate reserves
-        const amount0 = disclose(
-            Uint128_div(
-                Uint128_mulChecked(
-                    liquidity.value,
-                    balance0
-                ),
-                totalSupply
-            )
-        );
-        const amount1 = disclose(
-            Uint128_div(
-                Uint128_mulChecked(
-                    liquidity.value,
-                    balance1
-                ),
-                totalSupply
-            )
-        );
-
-        // Validate that calculated amounts are positive
-        assert(amount0 > 0 && amount1 > 0, "LunarswapPair: _burn() - Insufficient liquidity burned");
-
-        // Early validation: Check if reserves are sufficient for the calculated amounts
-        assert(reserve0.value >= amount0, "LunarswapPair: _burn() - Insufficient reserves for token0");
-        assert(reserve1.value >= amount1, "LunarswapPair: _burn() - Insufficient reserves for token1");
-
-        LunarswapLiquidity_burn(pairId, liquidity, liquidity.value);
-
-        {
-            const balance0 = Uint128_sub(reserve0.value, amount0);
-            const balance1 = Uint128_sub(reserve1.value, amount1);
-
-            const updatedPair = _update(
-                pair,
-                pair.lpTokenType,
-                isFeeOn,
-                amount0,
-                amount1,
-                balance0,
-                balance1,
-                reserve0,
-                reserve1,
-                kLast
-            );
-            return [updatedPair, amount0, amount1];
-        }
-    }
-
-    /**
-     * @title swap circuit
-     * @description Executes a token swap on the Lunarswap pair, transferring output tokens to the recipient and updating reserves.
-     *
-     * @remarks
-     * This circuit handles the core swap logic for a trading pair. It validates the output amounts,
-     * ensures sufficient liquidity, sends the output tokens to the recipient, calculates the input amounts,
-     * applies the swap fee, and checks the invariant (k) to prevent manipulation. The pair state is updated
-     * and returned.
-     *
-     * Requirements:
-     * - At least one of `amount0Out` or `amount1Out` must be greater than zero.
-     * - The reserves must be sufficient for the requested output amounts.
-     * - The input amount must be positive.
-     * - The product of the adjusted balances must be at least as large as the product of the reserves (k-invariant).
-     *
-     * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
-     * @param {Pair} pair - The current pair state.
-     * @param {Uint<128>} balance0 - The new balance of token0 after the swap.
-     * @param {Uint<128>} balance1 - The new balance of token1 after the swap.
-     * @param {Uint<128>} amount0Out - The amount of token0 to send to the recipient.
-     * @param {Uint<128>} amount1Out - The amount of token1 to send to the recipient.
-     * @param {QualifiedShieldedCoinInfo} reserve0 - The current reserve of token0.
-     * @param {QualifiedShieldedCoinInfo} reserve1 - The current reserve of token1.
-     * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The recipient of the output tokens.
-     *
-     * @returns {Pair} - The updated pair state after the swap.
-     *
-     * @throws {Error} "LunarswapPair: swap() - Insufficient output amount" if both output amounts are zero.
-     * @throws {Error} "LunarswapPair: swap() - Insufficient liquidity" if reserves are insufficient for the output.
-     * @throws {Error} "LunarswapPair: swap() - Insufficient input amount" if the input is not positive.
-     * @throws {Error} "LunarswapPair: swap() - k" if the product invariant is violated.
-     */
-    // TODO: support flash swap that requires contracts to contracts calls.
-    export circuit swap(
-        pairId: Bytes<32>,
-        pair: Pair,
-        balance0: Uint<128>,
-        balance1: Uint<128>,
-        amount0Out: Uint<128>,
-        amount1Out: Uint<128>,
-        reserve0: QualifiedShieldedCoinInfo,
-        reserve1: QualifiedShieldedCoinInfo,
-        to: Either<ZswapCoinPublicKey, ContractAddress>,
-    ): Pair {
-        assert(amount0Out > 0 || amount1Out > 0, "LunarswapPair: swap() - Insufficient output amount");
-        assert(amount0Out < reserve0.value && amount1Out < reserve1.value, "LunarswapPair: swap() - Insufficient liquidity");
-
-        const updatedBalance0 = amount0Out > 0 ? Uint128_sub(balance0, amount0Out) : balance0;
-        const updatedBalance1 = amount1Out > 0 ? Uint128_sub(balance1, amount1Out) : balance1;
-
-        const amount0In = updatedBalance0 > Uint128_sub(reserve0.value, amount0Out) ? Uint128_sub(updatedBalance0, Uint128_sub(reserve0.value, amount0Out)) : 0;
-        const amount1In = updatedBalance1 > Uint128_sub(reserve1.value, amount1Out) ? Uint128_sub(updatedBalance1, Uint128_sub(reserve1.value, amount1Out)) : 0;
-
-        assert(amount0In > 0 || amount1In > 0, "LunarswapPair: swap() - Insufficient input amount");
-
-        const balance0Adjusted = Uint128_sub(Uint128_mulChecked(updatedBalance0, 1000), Uint128_mulChecked(amount0In, 3));
-        const balance1Adjusted = Uint128_sub(Uint128_mulChecked(updatedBalance1, 1000), Uint128_mulChecked(amount1In, 3));
-
-        assert(
-            Uint128_mulChecked(balance0Adjusted, balance1Adjusted)
-                >=
-            Uint128_mulChecked(
-                Uint128_mulChecked(reserve0.value, reserve1.value),
-                1000000 // 1000 ** 2
-            ),
-            "LunarswapPair: swap() - k"
-        );
-
-        const updatedPair = _update(
-            pair,
-            pair.lpTokenType,
-            false,
-            amount0In,
-            amount1In,
-            updatedBalance0,
-            updatedBalance1,
-            reserve0,
-            reserve1,
-            pair.kLast
-        );
-        return updatedPair;
-    }
-
-    /**
-     * @title _update circuit
-     * @description Updates the pair state with new balances, metadata, and cumulative statistics.
-     *
-     * @remarks
-     * This internal circuit combines the functionality of _updatePairPrice and _updatePair
-     * to provide a single interface for updating pair state. It updates cumulative price
-     * and volume data, then creates a new pair state with the updated values.
-     *
-     * @param {Pair} pair           - The current pair state.
-     * @param {Boolean} isFeeOn     - Whether protocol fees are enabled.
-     * @param {ShieldedCoinInfo} token0 - The first token being added.
-     * @param {ShieldedCoinInfo} token1 - The second token being added.
-     * @param {Uint<128>} liquidity  - The new liquidity amount.
-     * @param {Uint<128>} balance0   - The new balance of token0.
-     * @param {Uint<128>} balance1   - The new balance of token1.
-     * @param {QualifiedShieldedCoinInfo} reserve0   - The current reserve of token0.
-     * @param {QualifiedShieldedCoinInfo} reserve1   - The current reserve of token1.
-     * @param {Uint<128>} kLast      - The k value from the last fee calculation.
-     *
-     * @returns {Pair} - The updated pair state.
-     */
-    circuit _update(
-        pair: Pair,
-        lpTokenType: Bytes<32>,
-        isFeeOn: Boolean,
-        amount0In: Uint<128>,
-        amount1In: Uint<128>,
-        balance0: Uint<128>,
-        balance1: Uint<128>,
-        reserve0: QualifiedShieldedCoinInfo,
-        reserve1: QualifiedShieldedCoinInfo,
-        kLast: Uint<128>,
-    ): Pair {
-        const [price0VolCumulative, price1VolCumulative, volume0Cumulative, volume1Cumulative] =
-            _updatePairPrice(
-                pair,
-                reserve0,
-                reserve1,
-                amount0In,
-                amount1In
-            );
-        const updatedKLast = isFeeOn ? Uint128_mulChecked(balance0, balance1) : 0;
-        return Pair {
-            token0Type: pair.token0Type,
-            token1Type: pair.token1Type,
-            lpTokenType: lpTokenType,
-            reserve0Id: pair.reserve0Id,
-            reserve1Id: pair.reserve1Id,
-            price0VolCumulative: price0VolCumulative,
-            price1VolCumulative: price1VolCumulative,
-            volume0Cumulative: volume0Cumulative,
-            volume1Cumulative: volume1Cumulative,
-            kLast: updatedKLast,
-        };
-    }
-
-    /**
-     * @title _updatePairPrice circuit
-     * @description Updates cumulative price and volume data for the pair.
-     *
-     * @remarks
-     * This internal circuit updates the cumulative price and volume statistics
-     * for the trading pair using VWAP (Volume Weighted Average Price).
-     * These values are used for price oracle functionality and tracking trading activity.
-     *
-     * @param {Pair} pair         - The current pair state.
-     * @param {QualifiedShieldedCoinInfo} reserve0 - The current reserve of token0.
-     * @param {QualifiedShieldedCoinInfo} reserve1 - The current reserve of token1.
-     * @param {Uint<128>} amount0In - The amount of token0 being traded in.
-     * @param {Uint<128>} amount1In - The amount of token1 being traded in.
-     *
-     * @returns {[Uint<128>, Uint<128>, Uint<128>, Uint<128>]} - Updated cumulativalus [price0VolCumulative, price1VolCumulative, volume0Cumulative, volume1Cumulative].
-     */
-    circuit _updatePairPrice(
-        pair: Pair,
-        reserve0: QualifiedShieldedCoinInfo,
-        reserve1: QualifiedShieldedCoinInfo,
-        amount0In: Uint<128>,
-        amount1In: Uint<128>,
-    ): [Uint<128>, Uint<128>, Uint<128>, Uint<128>] {
-        if (reserve0.value != 0 && reserve1.value != 0) {
-            const price0 = disclose(Uint128_div(reserve1.value, reserve0.value));
-            const price1 = disclose(Uint128_div(reserve0.value, reserve1.value));
-
-            const price0VolCumulative = Uint128_addChecked(pair.price0VolCumulative, Uint128_mulChecked(price0, amount0In));
-            const price1VolCumulative = Uint128_addChecked(pair.price1VolCumulative, Uint128_mulChecked(price1, amount1In));
-
-            const volume0Cumulative = Uint128_addChecked(pair.volume0Cumulative, amount0In);
-            const volume1Cumulative = Uint128_addChecked(pair.volume1Cumulative, amount1In);
-
-            return [price0VolCumulative, price1VolCumulative, volume0Cumulative, volume1Cumulative];
-        } else {
-            return [pair.price0VolCumulative, pair.price1VolCumulative, pair.volume0Cumulative, pair.volume1Cumulative];
-        }
-    }
+  }
 }

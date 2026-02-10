@@ -536,11 +536,11 @@ module Uint128 {
     const highDiff = a.high - highWithBorrow;
 
     if (borrow == 0) {
-       const lowDiff = a.low - b.low;
-       return U128 { low: lowDiff, high: highDiff };
+      const lowDiff = a.low - b.low;
+      return U128 { low: lowDiff, high: highDiff };
     } else {
-       const lowDiff = a.low + MODULUS() - b.low;
-       return U128 { low: lowDiff as Uint<64>, high: highDiff };
+      const lowDiff = a.low + MODULUS() - b.low;
+      return U128 { low: lowDiff as Uint<64>, high: highDiff };
     }
   }
 

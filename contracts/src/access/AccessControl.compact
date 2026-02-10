@@ -60,8 +60,9 @@ module AccessControl {
    * @param {Bytes<32>} userRoleCommit - The commitment hash of the user-role pair.
    * @returns {Maybe<MerkleTreePath<10, Bytes<32>>>} - The path if it exists, otherwise None.
    */
-  export witness wit_getRoleMerklePath(userRoleCommit: Bytes<32>): Maybe<MerkleTreePath<10,
-                                                                                        Bytes<32>>>;
+  export witness wit_getRoleMerklePath(
+                   userRoleCommit: Bytes<32>
+                   ): Maybe<MerkleTreePath<10, Bytes<32>>>;
 
   /**
    * @description Witness to provide user’s secret key for nullifier generation.
@@ -204,7 +205,9 @@ module AccessControl {
 
     assert((userRolePath.is_some &&
             roleCommits.checkRoot(getPathRoot(userRolePath.value)) &&
-            userRoleCommit == userRolePath.value.leaf), "AccessControl: Unauthorized user!");
+            userRoleCommit == userRolePath.value.leaf),
+           "AccessControl: Unauthorized user!"
+           );
 
     return true;
   }
@@ -215,7 +218,8 @@ module AccessControl {
   circuit hashNullifier(user: ZswapCoinPublicKey, role: Role): Bytes<32> {
     const sk = wit_getSecretKey();
     return persistentHash<Vector<4, Bytes<32>>>(
-             [pad(32, "role-nullifier"), hashRole(role), user.bytes, sk]);
+             [pad(32, "role-nullifier"), hashRole(role), user.bytes, sk]
+             );
   }
 
   // TODO: Should be in a general Compact utils contract for MerkleTree.

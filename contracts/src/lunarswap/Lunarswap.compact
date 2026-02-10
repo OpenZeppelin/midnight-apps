@@ -43,31 +43,28 @@ pragma language_version >= 0.20.0;
 import CompactStandardLibrary;
 
 import { U128 } from "../math/types/TU128";
+
 import { DivResultU128 } from "../math/Uint128";
 
 import { pool, reserves } from "./LunarswapFactory";
+
 import { Pair } from "./LunarswapPair";
+
 import { totalSupply, name, symbol, decimals, color } from "./LunarswapLiquidity";
 
-import {
-    initialize,
-    addLiquidity,
-    removeLiquidity,
-    swapExactTokensForTokens,
-    swapTokensForExactTokens,
-} from "./LunarswapRouter" prefix LunarswapRouter_;
+import
+  { initialize, addLiquidity, removeLiquidity, swapExactTokensForTokens, swapTokensForExactTokens, }
+  from "./LunarswapRouter"
+    prefix LunarswapRouter_;
+
 import { getTotalSupply } from "./LunarswapLiquidity" prefix LunarswapLiquidity_;
-import {
-    getPair,
-    getReserves,
-    isIdentityExists,
-    getAllPairLength,
-} from "./LunarswapFactory" prefix LunarswapFactory_;
-import {
-    sortCoinsAndAmounts,
-    sortCoins,
-    getIdentity,
-} from "./LunarswapLibrary" prefix LunarswapLibrary_;
+
+import
+  { getPair, getReserves, isIdentityExists, getAllPairLength, }
+  from "./LunarswapFactory"
+    prefix LunarswapFactory_;
+
+import { sortByColor, getIdentity, } from "./LunarswapLibrary" prefix LunarswapLibrary_;
 
 /**
  * @module Types
@@ -84,7 +81,9 @@ import {
  * - `Pair`: Structure representing a Lunarswap trading pair and its metadata.
  */
 export { U128, DivResultU128 };
+
 export { ShieldedCoinInfo, QualifiedShieldedCoinInfo, Either, ZswapCoinPublicKey, ContractAddress };
+
 export { Pair };
 
 /**
@@ -117,21 +116,20 @@ export { pool, reserves, totalSupply, name, symbol, decimals, color };
  *
  * @returns [] - No return values.
  */
-constructor(
-    lpTokenName: Opaque<"string">,
-    lpTokenSymbol: Opaque<"string">,
-    lpTokenNonce: Bytes<32>,
-    lpTokenDecimals: Uint<8>,
-) {
-    // TODO: that would be easier to use for now for testing purposes
-    const feeToSetter = ownPublicKey();
-    return LunarswapRouter_initialize(
-        lpTokenNonce,
-        lpTokenName,
-        lpTokenSymbol,
-        lpTokenDecimals,
-        feeToSetter
-    );
+constructor(lpTokenName: Opaque<"string">,
+            lpTokenSymbol: Opaque<"string">,
+            lpTokenNonce: Bytes<32>,
+            lpTokenDecimals: Uint<8>,
+            ) {
+  // TODO: that would be easier to use for now for testing purposes
+  const feeToSetter = ownPublicKey();
+  return LunarswapRouter_initialize(
+           lpTokenNonce,
+           lpTokenName,
+           lpTokenSymbol,
+           lpTokenDecimals,
+           feeToSetter
+           );
 }
 
 /**
@@ -164,25 +162,18 @@ constructor(
  * @returns {Uint<128>} - The amount of liquidity minted.
  */
 export circuit addLiquidity(
-    tokenA: ShieldedCoinInfo,
-    tokenB: ShieldedCoinInfo,
-    amountAMin: Uint<128>,
-    amountBMin: Uint<128>,
-    to: Either<ZswapCoinPublicKey, ContractAddress>,
-): Uint<128> {
-    assert(tokenA.color != tokenB.color, "Lunarswap: addLiquidity() - Identical addresses");
-    const [token0, token1, amount0Min, amount1Min] = disclose(LunarswapLibrary_sortCoinsAndAmounts(tokenA, tokenB, amountAMin, amountBMin));
-    const pairId = LunarswapLibrary_getIdentity(token0.color, token1.color, true);
-    return disclose(
-        LunarswapRouter_addLiquidity(
-            pairId,
-            token0,
-            token1,
-            amount0Min,
-            amount1Min,
-            to
-        )
-    );
+                 tokenA: ShieldedCoinInfo,
+                 tokenB: ShieldedCoinInfo,
+                 amountAMin: Uint<128>,
+                 amountBMin: Uint<128>,
+                 to: Either<ZswapCoinPublicKey, ContractAddress>,
+                 ): Uint<128> {
+  assert(tokenA.color != tokenB.color, "Lunarswap: addLiquidity() - Identical addresses");
+  const [token0, token1] = disclose(LunarswapLibrary_sortByColor<ShieldedCoinInfo>(tokenA, tokenB));
+  const amount0Min = token0.color == tokenA.color ? amountAMin : amountBMin;
+  const amount1Min = token0.color == tokenA.color ? amountBMin : amountAMin;
+  const pairId = LunarswapLibrary_getIdentity(token0.color, token1.color, true);
+  return disclose(LunarswapRouter_addLiquidity(pairId, token0, token1, amount0Min, amount1Min, to));
 }
 
 /**
@@ -210,45 +201,49 @@ export circuit addLiquidity(
  * @returns [Uint<128>, Uint<128>] - The amounts of tokenA and tokenB removed.
  */
 export circuit removeLiquidity(
-    tokenA: ShieldedCoinInfo,
-    tokenB: ShieldedCoinInfo,
-    liquidity: ShieldedCoinInfo,
-    amountAMin: Uint<128>,
-    amountBMin: Uint<128>,
-    to: Either<ZswapCoinPublicKey, ContractAddress>,
-): [Uint<128>, Uint<128>] {
-    assert(tokenA.color != tokenB.color, "Lunarswap: removeLiquidity() - Identical addresses");
-    const [token0, token1, amount0Min, amount1Min] = disclose(LunarswapLibrary_sortCoinsAndAmounts(tokenA, tokenB, amountAMin, amountBMin));
-    const pairId = LunarswapLibrary_getIdentity(token0.color, token1.color, true);
-    const pair = LunarswapFactory_getPair(pairId);
-    const [reserve0, reserve1] = LunarswapFactory_getReserves(pairId, pair.reserve0Id, pair.reserve1Id);
+                 tokenA: ShieldedCoinInfo,
+                 tokenB: ShieldedCoinInfo,
+                 liquidity: ShieldedCoinInfo,
+                 amountAMin: Uint<128>,
+                 amountBMin: Uint<128>,
+                 to: Either<ZswapCoinPublicKey, ContractAddress>,
+                 ): [Uint<128>, Uint<128>] {
+  assert(tokenA.color != tokenB.color, "Lunarswap: removeLiquidity() - Identical addresses");
+  const [token0, token1] = disclose(LunarswapLibrary_sortByColor<ShieldedCoinInfo>(tokenA, tokenB));
+  const amount0Min = token0.color == tokenA.color ? amountAMin : amountBMin;
+  const amount1Min = token0.color == tokenA.color ? amountBMin : amountAMin;
+  const pairId = LunarswapLibrary_getIdentity(token0.color, token1.color, true);
+  const pair = LunarswapFactory_getPair(pairId);
+  const [reserve0, reserve1] =
+          LunarswapFactory_getReserves(pairId, pair.reserve0Id, pair.reserve1Id);
 
-    assert(pair.token0Type == token0.color, "Lunarswap: removeLiquidity() - mismatched token0 color");
-    assert(pair.token1Type == token1.color, "Lunarswap: removeLiquidity() - mismatched token1 color");
-    assert(pair.lpTokenType == liquidity.color, "Lunarswap: removeLiquidity() - mismatched LP token color");
-    const [amount0, amount1] = disclose(
-        LunarswapRouter_removeLiquidity(
-            pairId,
-            pair,
-            token0,
-            token1,
-            reserve0,
-            reserve1,
-            liquidity,
-            amount0Min,
-            amount1Min,
-            to
-        )
-    );
+  assert(pair.token0Type == token0.color, "Lunarswap: removeLiquidity() - mismatched token0 color");
+  assert(pair.token1Type == token1.color, "Lunarswap: removeLiquidity() - mismatched token1 color");
+  assert(pair.lpTokenType == liquidity.color,
+         "Lunarswap: removeLiquidity() - mismatched LP token color"
+         );
+  const [amount0, amount1] =
+          disclose(LunarswapRouter_removeLiquidity(
+                     pairId,
+                     pair,
+                     token0,
+                     token1,
+                     reserve0,
+                     reserve1,
+                     liquidity,
+                     amount0Min,
+                     amount1Min,
+                     to
+                     ));
 
-    // Convert amounts back to original A/B order for assertions using ternary operations
-    const amountA = (tokenA.color == token0.color) ? amount0 : amount1;
-    const amountB = (tokenA.color == token0.color) ? amount1 : amount0;
+  // Convert amounts back to original A/B order for assertions using ternary operations
+  const amountA = (tokenA.color == token0.color) ? amount0 : amount1;
+  const amountB = (tokenA.color == token0.color) ? amount1 : amount0;
 
-    assert(amountA >= amountAMin, "LunarswapRouter: removeLiquidity() - Insufficient A amount");
-    assert(amountB >= amountBMin, "LunarswapRouter: removeLiquidity() - Insufficient B amount");
+  assert(amountA >= amountAMin, "LunarswapRouter: removeLiquidity() - Insufficient A amount");
+  assert(amountB >= amountBMin, "LunarswapRouter: removeLiquidity() - Insufficient B amount");
 
-    return [amountA, amountB];
+  return [amountA, amountB];
 }
 
 /**
@@ -271,28 +266,32 @@ export circuit removeLiquidity(
  * @returns {Uint<128>} - The amount of input tokens used.
  */
 export circuit swapExactTokensForTokens(
-    tokenIn: ShieldedCoinInfo,
-    tokenOut: ShieldedCoinInfo,
-    amountIn: Uint<128>,
-    amountOutMin: Uint<128>,
-    to: Either<ZswapCoinPublicKey, ContractAddress>,
-): Uint<128> {
-    assert(tokenIn.color != tokenOut.color, "Lunarswap: swapExactTokensForTokens() - Identical addresses");
-    const [token0, token1] = disclose(LunarswapLibrary_sortCoins(tokenIn, tokenOut));
-    const pairId = LunarswapLibrary_getIdentity(token0.color, token1.color, true);
-    const pair = LunarswapFactory_getPair(pairId);
-    const [reserve0, reserve1] = LunarswapFactory_getReserves(pairId, pair.reserve0Id, pair.reserve1Id);
-    return LunarswapRouter_swapExactTokensForTokens(
-        pairId,
-        pair,
-        tokenIn,
-        tokenOut,
-        amountIn,
-        amountOutMin,
-        reserve0,
-        reserve1,
-        to
-    );
+                 tokenIn: ShieldedCoinInfo,
+                 tokenOut: ShieldedCoinInfo,
+                 amountIn: Uint<128>,
+                 amountOutMin: Uint<128>,
+                 to: Either<ZswapCoinPublicKey, ContractAddress>,
+                 ): Uint<128> {
+  assert(tokenIn.color != tokenOut.color,
+         "Lunarswap: swapExactTokensForTokens() - Identical addresses"
+         );
+  const [token0, token1] =
+          disclose(LunarswapLibrary_sortByColor<ShieldedCoinInfo>(tokenIn, tokenOut));
+  const pairId = LunarswapLibrary_getIdentity(token0.color, token1.color, true);
+  const pair = LunarswapFactory_getPair(pairId);
+  const [reserve0, reserve1] =
+          LunarswapFactory_getReserves(pairId, pair.reserve0Id, pair.reserve1Id);
+  return LunarswapRouter_swapExactTokensForTokens(
+           pairId,
+           pair,
+           tokenIn,
+           tokenOut,
+           amountIn,
+           amountOutMin,
+           reserve0,
+           reserve1,
+           to
+           );
 }
 
 /**
@@ -315,28 +314,32 @@ export circuit swapExactTokensForTokens(
  * @returns {Uint<128>} - The amount of input tokens used.
  */
 export circuit swapTokensForExactTokens(
-    tokenIn: ShieldedCoinInfo,
-    tokenOut: ShieldedCoinInfo,
-    amountOut: Uint<128>,
-    amountInMax: Uint<128>,
-    to: Either<ZswapCoinPublicKey, ContractAddress>,
-): Uint<128> {
-    assert(tokenIn.color != tokenOut.color, "Lunarswap: swapTokensForExactTokens() - Identical addresses");
-    const [token0, token1] = disclose(LunarswapLibrary_sortCoins(tokenIn, tokenOut));
-    const pairId = LunarswapLibrary_getIdentity(token0.color, token1.color, true);
-    const pair = LunarswapFactory_getPair(pairId);
-    const [reserve0, reserve1] = LunarswapFactory_getReserves(pairId, pair.reserve0Id, pair.reserve1Id);
-    return disclose(LunarswapRouter_swapTokensForExactTokens(
-        pairId,
-        pair,
-        tokenIn,
-        tokenOut,
-        amountOut,
-        amountInMax,
-        reserve0,
-        reserve1,
-        to
-    ));
+                 tokenIn: ShieldedCoinInfo,
+                 tokenOut: ShieldedCoinInfo,
+                 amountOut: Uint<128>,
+                 amountInMax: Uint<128>,
+                 to: Either<ZswapCoinPublicKey, ContractAddress>,
+                 ): Uint<128> {
+  assert(tokenIn.color != tokenOut.color,
+         "Lunarswap: swapTokensForExactTokens() - Identical addresses"
+         );
+  const [token0, token1] =
+          disclose(LunarswapLibrary_sortByColor<ShieldedCoinInfo>(tokenIn, tokenOut));
+  const pairId = LunarswapLibrary_getIdentity(token0.color, token1.color, true);
+  const pair = LunarswapFactory_getPair(pairId);
+  const [reserve0, reserve1] =
+          LunarswapFactory_getReserves(pairId, pair.reserve0Id, pair.reserve1Id);
+  return disclose(LunarswapRouter_swapTokensForExactTokens(
+                    pairId,
+                    pair,
+                    tokenIn,
+                    tokenOut,
+                    amountOut,
+                    amountInMax,
+                    reserve0,
+                    reserve1,
+                    to
+                    ));
 }
 
 /**
@@ -355,9 +358,9 @@ export circuit swapTokensForExactTokens(
  * @returns {Boolean} - True if the pair exists, false otherwise.
  */
 export circuit isPairExists(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo): Boolean {
-    const [token0, token1] = disclose(LunarswapLibrary_sortCoins(tokenA, tokenB));
-    const pairId = LunarswapLibrary_getIdentity(token0.color, token1.color, true);
-    return LunarswapFactory_isIdentityExists(pairId);
+  const [token0, token1] = disclose(LunarswapLibrary_sortByColor<ShieldedCoinInfo>(tokenA, tokenB));
+  const pairId = LunarswapLibrary_getIdentity(token0.color, token1.color, true);
+  return LunarswapFactory_isIdentityExists(pairId);
 }
 
 /**
@@ -372,7 +375,7 @@ export circuit isPairExists(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo):
  * @returns {Uint<64>} - The total number of trading pairs.
  */
 export circuit getAllPairLength(): Uint<64> {
-    return LunarswapFactory_getAllPairLength();
+  return LunarswapFactory_getAllPairLength();
 }
 
 /**
@@ -393,9 +396,9 @@ export circuit getAllPairLength(): Uint<64> {
  * @returns {Pair} - The pair information including reserves and metadata.
  */
 export circuit getPair(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo): Pair {
-    const [token0, token1] = disclose(LunarswapLibrary_sortCoins(tokenA, tokenB));
-    const pairId = LunarswapLibrary_getIdentity(token0.color, token1.color, true);
-    return LunarswapFactory_getPair(pairId);
+  const [token0, token1] = disclose(LunarswapLibrary_sortByColor<ShieldedCoinInfo>(tokenA, tokenB));
+  const pairId = LunarswapLibrary_getIdentity(token0.color, token1.color, true);
+  return LunarswapFactory_getPair(pairId);
 }
 
 /**
@@ -415,16 +418,20 @@ export circuit getPair(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo): Pair
  *
  * @returns {[QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo]} - The reserves for tokenA and tokenB respectively.
  */
-export circuit getPairReserves(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo): [QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo] {
-    const [token0, token1] = disclose(LunarswapLibrary_sortCoins(tokenA, tokenB));
-    const pairId = LunarswapLibrary_getIdentity(token0.color, token1.color, true);
-    const pair = LunarswapFactory_getPair(pairId);
-    const [reserve0, reserve1] = LunarswapFactory_getReserves(pairId, pair.reserve0Id, pair.reserve1Id);
-    if (tokenA.color == token0.color) {
-        return [reserve0, reserve1];
-    } else {
-        return [reserve1, reserve0];
-    }
+export circuit getPairReserves(
+                 tokenA: ShieldedCoinInfo,
+                 tokenB: ShieldedCoinInfo
+                 ): [QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo] {
+  const [token0, token1] = disclose(LunarswapLibrary_sortByColor<ShieldedCoinInfo>(tokenA, tokenB));
+  const pairId = LunarswapLibrary_getIdentity(token0.color, token1.color, true);
+  const pair = LunarswapFactory_getPair(pairId);
+  const [reserve0, reserve1] =
+          LunarswapFactory_getReserves(pairId, pair.reserve0Id, pair.reserve1Id);
+  if (tokenA.color == token0.color) {
+    return [reserve0, reserve1];
+  } else {
+    return [reserve1, reserve0];
+  }
 }
 
 /**
@@ -443,8 +450,8 @@ export circuit getPairReserves(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInf
  * @returns {Bytes<32>} - The unique pairId hash for the pair.
  */
 export circuit getPairId(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo): Bytes<32> {
-    const [token0, token1] = disclose(LunarswapLibrary_sortCoins(tokenA, tokenB));
-    return LunarswapLibrary_getIdentity(token0.color, token1.color, true);
+  const [token0, token1] = disclose(LunarswapLibrary_sortByColor<ShieldedCoinInfo>(tokenA, tokenB));
+  return LunarswapLibrary_getIdentity(token0.color, token1.color, true);
 }
 
 /**
@@ -464,7 +471,7 @@ export circuit getPairId(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo): By
  * @returns {Bytes<32>} - The unique reserve pairId for the given token in the pair.
  */
 export circuit getReserveId(pairId: Bytes<32>, tokenAType: Bytes<32>): Bytes<32> {
-    return LunarswapLibrary_getIdentity(pairId, tokenAType, false);
+  return LunarswapLibrary_getIdentity(pairId, tokenAType, false);
 }
 
 /**
@@ -482,8 +489,11 @@ export circuit getReserveId(pairId: Bytes<32>, tokenAType: Bytes<32>): Bytes<32>
  *
  * @returns {[ShieldedCoinInfo, ShieldedCoinInfo]} - The sorted tokens, with the lower color first.
  */
-export circuit getSortedCoins(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo): [ShieldedCoinInfo, ShieldedCoinInfo] {
-    return disclose(LunarswapLibrary_sortCoins(tokenA, tokenB));
+export circuit getSortedCoins(
+                 tokenA: ShieldedCoinInfo,
+                 tokenB: ShieldedCoinInfo
+                 ): [ShieldedCoinInfo, ShieldedCoinInfo] {
+  return disclose(LunarswapLibrary_sortByColor<ShieldedCoinInfo>(tokenA, tokenB));
 }
 
 /**
@@ -505,12 +515,15 @@ export circuit getSortedCoins(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo
  * @returns {[ShieldedCoinInfo, ShieldedCoinInfo, Uint<128>, Uint<128>]} - The sorted tokens and their corresponding minimum amounts.
  */
 export circuit getSortedCoinsAndAmounts(
-    tokenA: ShieldedCoinInfo,
-    tokenB: ShieldedCoinInfo,
-    amountAMin: Uint<128>,
-    amountBMin: Uint<128>
-): [ShieldedCoinInfo, ShieldedCoinInfo, Uint<128>, Uint<128>] {
-    return disclose(LunarswapLibrary_sortCoinsAndAmounts(tokenA, tokenB, amountAMin, amountBMin));
+                 tokenA: ShieldedCoinInfo,
+                 tokenB: ShieldedCoinInfo,
+                 amountAMin: Uint<128>,
+                 amountBMin: Uint<128>
+                 ): [ShieldedCoinInfo, ShieldedCoinInfo, Uint<128>, Uint<128>] {
+  const [token0, token1] = disclose(LunarswapLibrary_sortByColor<ShieldedCoinInfo>(tokenA, tokenB));
+  const amount0 = token0.color == tokenA.color ? amountAMin : amountBMin;
+  const amount1 = token0.color == tokenA.color ? amountBMin : amountAMin;
+  return [token0, token1, amount0, amount1];
 }
 
 /**
@@ -529,7 +542,10 @@ export circuit getSortedCoinsAndAmounts(
  *
  * @returns {QualifiedShieldedCoinInfo} - The total supply of LP tokens for the pair.
  */
-export circuit getLpTokenTotalSupply(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo): QualifiedShieldedCoinInfo {
-    const pairId = getPairId(tokenA, tokenB);
-    return LunarswapLiquidity_getTotalSupply(pairId);
+export circuit getLpTokenTotalSupply(
+                 tokenA: ShieldedCoinInfo,
+                 tokenB: ShieldedCoinInfo
+                 ): QualifiedShieldedCoinInfo {
+  const pairId = getPairId(tokenA, tokenB);
+  return LunarswapLiquidity_getTotalSupply(pairId);
 }

@@ -12,11 +12,13 @@ module Utils {
    * @param {keyOrAddress} - The target value to check, either a ZswapCoinPublicKey or a ContractAddress.
    * @return {Boolean} - Returns true if `keyOrAddress` is zero.
    */
-  export pure circuit isKeyOrAddressZero(keyOrAddress: Either<ZswapCoinPublicKey, ContractAddress>): Boolean {
+  export pure circuit isKeyOrAddressZero(
+                        keyOrAddress: Either<ZswapCoinPublicKey, ContractAddress>
+                        ): Boolean {
     if (keyOrAddress.is_left) {
-       return keyOrAddress == eitherZeroZPK();
+      return keyOrAddress == eitherZeroZPK();
     } else {
-       return keyOrAddress == eitherZeroContractAddress();
+      return keyOrAddress == eitherZeroContractAddress();
     }
   }
 
