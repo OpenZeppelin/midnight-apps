@@ -576,9 +576,9 @@ module Uint128 {
    *    - Bits [128, 191]: (hh mod 2⁶⁴) + s_1 + c_2 → sum, carry c_3
    *    - Bits [192, 255]: ⌊hh/2⁶⁴⌋ + c_1 + c_3
    *
-   * 5. Overflow Check:
+   * 5. Result Bounds:
    *    Max product = (2¹²⁸ - 1)² = 2²⁵⁶ - 2¹²⁹ + 1 < 2²⁵⁶
-   *    Assert final high carry = 0
+   *    The final high carry is always 0 (result always fits in 256 bits).
    *
    * @circuitInfo k=12, rows=2766
     *
@@ -975,8 +975,7 @@ module Uint128 {
   * 2. Lower Bound Verification (R² ≤ N):
   *    - Represent R as U128: R_u128 = {low: R, high: 0}
   *    - Compute S = R² using multiplication circuit
-  *    - Since R ≤ 2⁶⁴ - 1, we have S < 2¹²⁸, thus S fits in U128
-  *    - Verify S.high = 0 (sanity check, should always pass)
+  *    - Since R ≤ 2⁶⁴ - 1, we have S < 2¹²⁸, thus S fits in U128 (S.high = 0)
   *    - Verify S.low ≤ N (ensures R is not an overestimate)
   *
   * 3. Upper Bound Verification ((R+1)² > N):
