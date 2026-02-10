@@ -4,6 +4,7 @@ import {
   computeAmountOutMin,
   SLIPPAGE_TOLERANCE,
 } from '@openzeppelin-midnight-apps/lunarswap-sdk';
+import type { ShieldedCoinInfo } from '@src/artifacts/lunarswap/Lunarswap/contract/index.js';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { LunarswapSimulator } from './mocks/LunarswapSimulator.js';
 import { ShieldedFungibleTokenSimulator } from './mocks/ShieldedFungibleTokenSimulator.js';
@@ -40,8 +41,8 @@ describe('swap', () => {
   });
 
   describe('swapExactTokensForTokens', () => {
-    let usdcCoin: CoinInfo;
-    let nightCoin: CoinInfo;
+    let usdcCoin: ShieldedCoinInfo;
+    let nightCoin: ShieldedCoinInfo;
 
     beforeEach(() => {
       // Setup initial liquidity
@@ -419,8 +420,8 @@ describe('swap', () => {
   });
 
   describe('swapTokensForExactTokens', () => {
-    let usdcCoin: CoinInfo;
-    let nightCoin: CoinInfo;
+    let usdcCoin: ShieldedCoinInfo;
+    let nightCoin: ShieldedCoinInfo;
 
     beforeEach(() => {
       // Setup initial liquidity
@@ -956,8 +957,8 @@ describe('swap', () => {
   });
 
   describe('Cross-Function Tests', () => {
-    let usdcCoin: CoinInfo;
-    let nightCoin: CoinInfo;
+    let usdcCoin: ShieldedCoinInfo;
+    let nightCoin: ShieldedCoinInfo;
 
     beforeEach(() => {
       // Setup initial liquidity

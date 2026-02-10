@@ -2,15 +2,13 @@ import {
   type BaseSimulatorOptions,
   createSimulator,
 } from '@openzeppelin/compact-tools-simulator';
-import type {
-  CoinInfo,
-  ContractAddress,
-  Either,
-  ZswapCoinPublicKey,
-} from '@openzeppelin-midnight-apps/compact-std';
 import {
   Contract,
+  type ContractAddress,
+  type Either,
   ledger,
+  type ShieldedCoinInfo,
+  type ZswapCoinPublicKey,
 } from '@src/artifacts/shielded-token/ShieldedFungibleToken/contract/index.js';
 import {
   ShieldedFungibleTokenPrivateState,
@@ -53,34 +51,34 @@ export class ShieldedFungibleTokenSimulator extends ShieldedFungibleTokenSimulat
   }
 
   public name(): string {
-    return this.circuits.pure.name();
+    return this.circuits.impure.name();
   }
 
   public symbol(): string {
-    return this.circuits.pure.symbol();
+    return this.circuits.impure.symbol();
   }
 
   public decimals(): bigint {
-    return this.circuits.pure.decimals();
+    return this.circuits.impure.decimals();
   }
 
   public totalSupply(): bigint {
-    return this.circuits.pure.totalSupply();
+    return this.circuits.impure.totalSupply();
   }
 
   public mint(
     recipient: Either<ZswapCoinPublicKey, ContractAddress>,
     amount: bigint,
-  ): CoinInfo {
+  ): ShieldedCoinInfo {
     return this.circuits.impure.mint(recipient, amount);
   }
 
   public burn(
-    coin: CoinInfo,
+    coin: ShieldedCoinInfo,
     amount: bigint,
   ): {
-    change: { is_some: boolean; value: CoinInfo };
-    sent: CoinInfo;
+    change: { is_some: boolean; value: ShieldedCoinInfo };
+    sent: ShieldedCoinInfo;
   } {
     return this.circuits.impure.burn(coin, amount);
   }
