@@ -68,8 +68,8 @@ export class ShieldedFungibleTokenSimulator extends ShieldedFungibleTokenSimulat
     return this.circuits.impure.totalSupply();
   }
 
-  public tokenType(): Uint8Array {
-    return this.circuits.impure.tokenType();
+  public color(): Uint8Array {
+    return this.circuits.impure.color();
   }
 
   public mint(

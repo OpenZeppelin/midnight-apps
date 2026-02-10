@@ -10,7 +10,9 @@ import { LunarswapSimulator } from './mocks/LunarswapSimulator.js';
 import { ShieldedFungibleTokenSimulator } from './mocks/ShieldedFungibleTokenSimulator.js';
 
 const NONCE = new Uint8Array(32).fill(0x44);
-const DOMAIN = new Uint8Array(32).fill(0x44);
+const DOMAIN_USDC = new Uint8Array(32).fill(0x01);
+const DOMAIN_NIGHT = new Uint8Array(32).fill(0x02);
+const DOMAIN_FOO = new Uint8Array(32).fill(0x04);
 const LP_USER =
   'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456';
 const USER_2 =
@@ -33,9 +35,19 @@ describe('swap', () => {
 
   beforeEach(() => {
     lunarswap = new LunarswapSimulator('Lunarswap LP', 'LP', NONCE, 18n);
-    usdc = new ShieldedFungibleTokenSimulator(NONCE, 'USDC', 'USDC', NONCE);
-    night = new ShieldedFungibleTokenSimulator(NONCE, 'Night', 'NIGHT', DOMAIN);
-    foo = new ShieldedFungibleTokenSimulator(NONCE, 'Foo', 'FOO', DOMAIN);
+    usdc = new ShieldedFungibleTokenSimulator(
+      NONCE,
+      'USDC',
+      'USDC',
+      DOMAIN_USDC,
+    );
+    night = new ShieldedFungibleTokenSimulator(
+      NONCE,
+      'Night',
+      'NIGHT',
+      DOMAIN_NIGHT,
+    );
+    foo = new ShieldedFungibleTokenSimulator(NONCE, 'Foo', 'FOO', DOMAIN_FOO);
     recipient = createEitherFromHex(LP_USER);
     user2Recipient = createEitherFromHex(USER_2);
   });
@@ -199,13 +211,13 @@ describe('swap', () => {
           NONCE,
           'USDC',
           'USDC',
-          NONCE,
+          DOMAIN_USDC,
         );
         const localNight = new ShieldedFungibleTokenSimulator(
           NONCE,
           'Night',
           'NIGHT',
-          DOMAIN,
+          DOMAIN_NIGHT,
         );
         const localRecipient = createEitherFromHex(LP_USER);
         const equalUsdc = localUsdc.mint(localRecipient, 5000n);
@@ -616,13 +628,13 @@ describe('swap', () => {
           NONCE,
           'USDC',
           'USDC',
-          NONCE,
+          DOMAIN_USDC,
         );
         const localNight = new ShieldedFungibleTokenSimulator(
           NONCE,
           'Night',
           'NIGHT',
-          DOMAIN,
+          DOMAIN_NIGHT,
         );
         const localRecipient = createEitherFromHex(LP_USER);
         const equalUsdc = localUsdc.mint(localRecipient, 5000n);
@@ -727,13 +739,13 @@ describe('swap', () => {
           NONCE,
           'USDC',
           'USDC',
-          NONCE,
+          DOMAIN_USDC,
         );
         const localNight = new ShieldedFungibleTokenSimulator(
           NONCE,
           'Night',
           'NIGHT',
-          DOMAIN,
+          DOMAIN_NIGHT,
         );
         const localRecipient = createEitherFromHex(LP_USER);
         const equalUsdc = localUsdc.mint(localRecipient, 5000n);

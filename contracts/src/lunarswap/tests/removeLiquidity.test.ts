@@ -9,7 +9,9 @@ import { LunarswapSimulator } from './mocks/LunarswapSimulator.js';
 import { ShieldedFungibleTokenSimulator } from './mocks/ShieldedFungibleTokenSimulator.js';
 
 const NONCE = new Uint8Array(32).fill(0x44);
-const DOMAIN = new Uint8Array(32).fill(0x44);
+const DOMAIN_USDC = new Uint8Array(32).fill(0x01);
+const DOMAIN_NIGHT = new Uint8Array(32).fill(0x02);
+const DOMAIN_DUST = new Uint8Array(32).fill(0x03);
 
 // Static addresses like in access control test
 const LP_USER =
@@ -33,9 +35,24 @@ describe('removeLiquidity', () => {
     // Deploy Lunarswap with admin
     lunarswap = new LunarswapSimulator('Lunarswap LP', 'LP', NONCE, 18n);
     // Deploy tokens with admin
-    usdc = new ShieldedFungibleTokenSimulator(NONCE, 'USDC', 'USDC', NONCE);
-    night = new ShieldedFungibleTokenSimulator(NONCE, 'Night', 'NIGHT', DOMAIN);
-    dust = new ShieldedFungibleTokenSimulator(NONCE, 'Dust', 'DUST', DOMAIN);
+    usdc = new ShieldedFungibleTokenSimulator(
+      NONCE,
+      'USDC',
+      'USDC',
+      DOMAIN_USDC,
+    );
+    night = new ShieldedFungibleTokenSimulator(
+      NONCE,
+      'Night',
+      'NIGHT',
+      DOMAIN_NIGHT,
+    );
+    dust = new ShieldedFungibleTokenSimulator(
+      NONCE,
+      'Dust',
+      'DUST',
+      DOMAIN_DUST,
+    );
   };
 
   beforeEach(setup);
