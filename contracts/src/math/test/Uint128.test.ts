@@ -37,6 +37,18 @@ describe('Uint128', () => {
     expect(result).toEqual({ low: 0n, high: 0n });
   });
 
+  test('MAX_U128', () => {
+    const result = uint128Simulator.MAX_U128();
+    expect(result.low).toBe(0xffffffffffffffffn);
+    expect(result.high).toBe(0xffffffffffffffffn);
+  });
+
+  test('MAX_UINT128', () => {
+    expect(uint128Simulator.MAX_UINT128()).toBe(
+      0xffffffffffffffffffffffffffffffffn,
+    );
+  });
+
   describe('toU128', () => {
     test('should convert small Uint<128> to U128', () => {
       const value = 123n;
@@ -125,42 +137,6 @@ describe('Uint128', () => {
     });
   });
 
-  describe('lte', () => {
-    test('should compare small numbers', () => {
-      expect(uint128Simulator.lte(5n, 10n)).toBe(true);
-      expect(uint128Simulator.lte(10n, 5n)).toBe(false);
-      expect(uint128Simulator.lte(5n, 5n)).toBe(true);
-    });
-
-    test('should compare max Uint<128>', () => {
-      expect(uint128Simulator.lte(MAX_UINT128, MAX_UINT128)).toBe(true);
-      expect(uint128Simulator.lte(MAX_UINT128 - 1n, MAX_UINT128)).toBe(true);
-    });
-
-    test('should handle zero', () => {
-      expect(uint128Simulator.lte(0n, 1n)).toBe(true);
-      expect(uint128Simulator.lte(0n, 0n)).toBe(true);
-    });
-  });
-
-  describe('lteU128', () => {
-    test('should compare small U128 numbers', () => {
-      expect(uint128Simulator.lteU128(u128(5n), u128(10n))).toBe(true);
-      expect(uint128Simulator.lteU128(u128(10n), u128(5n))).toBe(false);
-      expect(uint128Simulator.lteU128(u128(5n), u128(5n))).toBe(true);
-    });
-
-    test('should compare U128 with high parts', () => {
-      expect(
-        uint128Simulator.lteU128(u128(MAX_UINT128 - 1n), u128(MAX_UINT128)),
-      ).toBe(true);
-    });
-
-    test('should return true for equal U128 numbers', () => {
-      expect(uint128Simulator.lteU128(u128(5n), u128(5n))).toBe(true);
-    });
-  });
-
   describe('lt', () => {
     test('should compare small numbers', () => {
       expect(uint128Simulator.lt(5n, 10n)).toBe(true);
@@ -179,6 +155,24 @@ describe('Uint128', () => {
     });
   });
 
+  describe('lte', () => {
+    test('should compare small numbers', () => {
+      expect(uint128Simulator.lte(5n, 10n)).toBe(true);
+      expect(uint128Simulator.lte(10n, 5n)).toBe(false);
+      expect(uint128Simulator.lte(5n, 5n)).toBe(true);
+    });
+
+    test('should compare max Uint<128>', () => {
+      expect(uint128Simulator.lte(MAX_UINT128, MAX_UINT128)).toBe(true);
+      expect(uint128Simulator.lte(MAX_UINT128 - 1n, MAX_UINT128)).toBe(true);
+    });
+
+    test('should handle zero', () => {
+      expect(uint128Simulator.lte(0n, 1n)).toBe(true);
+      expect(uint128Simulator.lte(0n, 0n)).toBe(true);
+    });
+  });
+
   describe('ltU128', () => {
     test('should compare small U128 numbers', () => {
       expect(uint128Simulator.ltU128(u128(5n), u128(10n))).toBe(true);
@@ -194,6 +188,24 @@ describe('Uint128', () => {
 
     test('should return false for equal U128 numbers', () => {
       expect(uint128Simulator.ltU128(u128(5n), u128(5n))).toBe(false);
+    });
+  });
+
+  describe('lteU128', () => {
+    test('should compare small U128 numbers', () => {
+      expect(uint128Simulator.lteU128(u128(5n), u128(10n))).toBe(true);
+      expect(uint128Simulator.lteU128(u128(10n), u128(5n))).toBe(false);
+      expect(uint128Simulator.lteU128(u128(5n), u128(5n))).toBe(true);
+    });
+
+    test('should compare U128 with high parts', () => {
+      expect(
+        uint128Simulator.lteU128(u128(MAX_UINT128 - 1n), u128(MAX_UINT128)),
+      ).toBe(true);
+    });
+
+    test('should return true for equal U128 numbers', () => {
+      expect(uint128Simulator.lteU128(u128(5n), u128(5n))).toBe(true);
     });
   });
 
@@ -642,22 +654,6 @@ describe('Uint128', () => {
       expect(() => uint128Simulator.mulCheckedU128(a, b)).toThrow(
         'failed assert: MathU128: multiplication overflow',
       );
-    });
-  });
-
-  describe('MAX_UINT128', () => {
-    test('should return 340282366920938463463374607431768211455', () => {
-      expect(uint128Simulator.MAX_UINT128()).toBe(
-        0xffffffffffffffffffffffffffffffffn,
-      );
-    });
-  });
-
-  describe('MAX_U128', () => {
-    test('should return U128 with max values', () => {
-      const result = uint128Simulator.MAX_U128();
-      expect(result.low).toBe(0xffffffffffffffffn);
-      expect(result.high).toBe(0xffffffffffffffffn);
     });
   });
 
