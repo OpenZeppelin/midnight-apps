@@ -531,7 +531,7 @@ describe('Uint64', () => {
 
     test('should convert MAX_UINT64 to all-0xFF bytes', () => {
       const bytes = uint64Simulator.toBytes(MAX_UINT64);
-      expect(bytes).toEqual(new Uint8Array(8).fill(255));
+      expect(bytes).toEqual(new Uint8Array(8).fill(0xff));
     });
 
     test('should roundtrip with toVector', () => {
