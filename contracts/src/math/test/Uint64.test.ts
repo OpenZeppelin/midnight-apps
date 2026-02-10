@@ -83,7 +83,7 @@ describe('Uint64', () => {
       expect(bytes).toEqual(new Uint8Array(8).fill(255));
     });
 
-    test('should roundtrip with toVector', () => {
+    test('should match outputs between toVector and toBytes', () => {
       const value = 0x0123456789abcdefn;
       const vec = uint64Simulator.toVector(value);
       const bytes = uint64Simulator.toBytes(value);
