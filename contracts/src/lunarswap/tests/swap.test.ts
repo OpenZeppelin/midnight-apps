@@ -1,13 +1,12 @@
 import { encodeCoinPublicKey } from '@midnight-ntwrk/compact-runtime';
-import type { CoinInfo } from '@openzeppelin-midnight-apps/compact-std';
 import {
   calculateAddLiquidityAmounts,
   computeAmountOutMin,
   SLIPPAGE_TOLERANCE,
 } from '@openzeppelin-midnight-apps/lunarswap-sdk';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { LunarswapSimulator } from './LunarswapSimulator';
-import { ShieldedFungibleTokenSimulator } from './ShieldedFungibleTokenSimulator';
+import { LunarswapSimulator } from './mocks/LunarswapSimulator.js';
+import { ShieldedFungibleTokenSimulator } from './mocks/ShieldedFungibleTokenSimulator.js';
 
 const NONCE = new Uint8Array(32).fill(0x44);
 const DOMAIN = new Uint8Array(32).fill(0x44);

@@ -1,5 +1,4 @@
-import type { Ledger } from '../artifacts/ShieldedFungibleToken/contract/index.cjs';
-import type { IShieldedFungibleTokenWitnesses } from './interfaces';
+import type { Witnesses } from '@src/artifacts/shielded-token/ShieldedFungibleToken/contract/index.js';
 
 /**
  * @description Represents the private state of the ShieldedFungibleToken module.
@@ -22,13 +21,10 @@ export const ShieldedFungibleTokenPrivateState = {
 
 /**
  * @description Factory function creating witness implementations for ShieldedFungibleToken module operations.
- * @returns An object implementing the IShieldedFungibleTokenWitnesses interface for ShieldedFungibleTokenPrivateState.
+ * @returns An object implementing the Witnesses interface for ShieldedFungibleTokenPrivateState.
  */
 export const ShieldedFungibleTokenWitnesses =
-  (): IShieldedFungibleTokenWitnesses<
-    Ledger,
-    ShieldedFungibleTokenPrivateState
-  > => ({
+  (): Witnesses<ShieldedFungibleTokenPrivateState> => ({
     // Currently no custom witnesses are needed for ShieldedFungibleToken
     // All operations are handled by the underlying ShieldedERC20 module
   });

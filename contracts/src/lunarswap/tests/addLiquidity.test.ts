@@ -1,19 +1,11 @@
-import {
-  getZswapNetworkId,
-  NetworkId,
-  setNetworkId,
-} from '@midnight-ntwrk/midnight-js-network-id';
-import {
-  MidnightBech32m,
-  ShieldedCoinPublicKey,
-} from '@midnight-ntwrk/wallet-sdk-address-format';
+import { encodeCoinPublicKey } from '@midnight-ntwrk/compact-runtime';
 import {
   calculateAddLiquidityAmounts,
   SLIPPAGE_TOLERANCE,
 } from '@openzeppelin-midnight-apps/lunarswap-sdk';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { LunarswapSimulator } from './LunarswapSimulator';
-import { ShieldedFungibleTokenSimulator } from './ShieldedFungibleTokenSimulator';
+import { LunarswapSimulator } from './mocks/LunarswapSimulator.js';
+import { ShieldedFungibleTokenSimulator } from './mocks/ShieldedFungibleTokenSimulator.js';
 
 const NONCE = new Uint8Array(32).fill(0x44);
 const DOMAIN = new Uint8Array(32).fill(0x44);
@@ -26,19 +18,11 @@ const LP_USER =
   'mn_shield-cpk_test1v3xew9zdxkn48c76e6yzcqw69y44vzscu7dp4mlmvalakpdtjfaq7zczq3';
 
 // Helper function to create Either for hex addresses
-const createEitherFromHex = (hexString: string) => {
-  setNetworkId(NetworkId.TestNet);
-  const bech32mCoinPublicKey = MidnightBech32m.parse(hexString);
-  const coinPublicKey = ShieldedCoinPublicKey.codec.decode(
-    getZswapNetworkId(),
-    bech32mCoinPublicKey,
-  );
-  return {
-    is_left: true,
-    left: { bytes: coinPublicKey.data },
-    right: { bytes: new Uint8Array(32) },
-  };
-};
+const createEitherFromHex = (hexString: string) => ({
+  is_left: true,
+  left: { bytes: encodeCoinPublicKey(hexString) },
+  right: { bytes: new Uint8Array(32) },
+});
 
 // TODO: allow and test fees
 describe('addLiquidity', () => {

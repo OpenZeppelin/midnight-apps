@@ -1,13 +1,7 @@
 import {
-  type CircuitContext,
-  type ContractState,
-  constructorContext,
-  QueryContext,
-} from '@midnight-ntwrk/compact-runtime';
-import {
-  sampleCoinPublicKey,
-  sampleContractAddress,
-} from '@midnight-ntwrk/zswap';
+  type BaseSimulatorOptions,
+  createSimulator,
+} from '@openzeppelin/compact-tools-simulator';
 import type {
   CoinInfo,
   ContractAddress,
@@ -16,103 +10,69 @@ import type {
 } from '@openzeppelin-midnight-apps/compact-std';
 import {
   Contract,
-  type Ledger,
   ledger,
-} from '../artifacts/ShieldedFungibleToken/contract/index.cjs';
-import type { IContractSimulator } from '../types/test';
+} from '@src/artifacts/shielded-token/ShieldedFungibleToken/contract/index.js';
 import {
   ShieldedFungibleTokenPrivateState,
   ShieldedFungibleTokenWitnesses,
-} from '../witnesses/ShieldedFungibleToken';
+} from './witnesses/ShieldedFungibleToken.js';
 
-export class ShieldedFungibleTokenSimulator
-  implements IContractSimulator<ShieldedFungibleTokenPrivateState, Ledger>
-{
-  readonly contract: Contract<ShieldedFungibleTokenPrivateState>;
-  readonly contractAddress: string;
-  readonly sender = sampleCoinPublicKey();
-  circuitContext: CircuitContext<ShieldedFungibleTokenPrivateState>;
+/**
+ * Base simulator for ShieldedFungibleToken contract
+ */
+const ShieldedFungibleTokenSimulatorBase = createSimulator<
+  ShieldedFungibleTokenPrivateState,
+  ReturnType<typeof ledger>,
+  ReturnType<typeof ShieldedFungibleTokenWitnesses>,
+  Contract<ShieldedFungibleTokenPrivateState>,
+  readonly [Uint8Array, string, string, Uint8Array]
+>({
+  contractFactory: (witnesses) =>
+    new Contract<ShieldedFungibleTokenPrivateState>(witnesses),
+  defaultPrivateState: () => ShieldedFungibleTokenPrivateState.generate(),
+  contractArgs: (nonce, name, symbol, domain) => [nonce, name, symbol, domain],
+  ledgerExtractor: (state) => ledger(state),
+  witnessesFactory: () => ShieldedFungibleTokenWitnesses(),
+});
 
+/**
+ * @description A simulator implementation for testing ShieldedFungibleToken operations.
+ */
+export class ShieldedFungibleTokenSimulator extends ShieldedFungibleTokenSimulatorBase {
   constructor(
     nonce: Uint8Array,
     name: string,
     symbol: string,
     domain: Uint8Array,
-    sender = sampleCoinPublicKey(),
+    options: BaseSimulatorOptions<
+      ShieldedFungibleTokenPrivateState,
+      ReturnType<typeof ShieldedFungibleTokenWitnesses>
+    > = {},
   ) {
-    this.contract = new Contract<ShieldedFungibleTokenPrivateState>(
-      ShieldedFungibleTokenWitnesses(),
-    );
-    const {
-      currentPrivateState,
-      currentContractState,
-      currentZswapLocalState,
-    } = this.contract.initialState(
-      constructorContext(ShieldedFungibleTokenPrivateState.generate(), sender),
-      nonce,
-      name,
-      symbol,
-      domain,
-    );
-    this.circuitContext = {
-      currentPrivateState,
-      currentZswapLocalState,
-      originalState: currentContractState,
-      transactionContext: new QueryContext(
-        currentContractState.data,
-        sampleContractAddress(),
-      ),
-    };
-    this.contractAddress = this.circuitContext.transactionContext.address;
-  }
-
-  public getCurrentPublicState(): Ledger {
-    return ledger(this.circuitContext.transactionContext.state);
-  }
-
-  public getCurrentPrivateState(): ShieldedFungibleTokenPrivateState {
-    return this.circuitContext.currentPrivateState;
-  }
-
-  public getCurrentContractState(): ContractState {
-    return this.circuitContext.originalState;
+    super([nonce, name, symbol, domain], options);
   }
 
   public name(): string {
-    const result = this.contract.circuits.name(this.circuitContext);
-    this.circuitContext = result.context;
-    return result.result;
+    return this.circuits.pure.name();
   }
 
   public symbol(): string {
-    const result = this.contract.circuits.symbol(this.circuitContext);
-    this.circuitContext = result.context;
-    return result.result;
+    return this.circuits.pure.symbol();
   }
 
   public decimals(): bigint {
-    const result = this.contract.circuits.decimals(this.circuitContext);
-    this.circuitContext = result.context;
-    return result.result;
+    return this.circuits.pure.decimals();
   }
 
   public totalSupply(): bigint {
-    const result = this.contract.circuits.totalSupply(this.circuitContext);
-    this.circuitContext = result.context;
-    return result.result;
+    return this.circuits.pure.totalSupply();
   }
 
   public mint(
     recipient: Either<ZswapCoinPublicKey, ContractAddress>,
     amount: bigint,
   ): CoinInfo {
-    const result = this.contract.circuits.mint(
-      this.circuitContext,
-      recipient,
-      amount,
-    );
-    this.circuitContext = result.context;
-    return result.result;
+    return this.circuits.impure.mint(recipient, amount);
   }
 
   public burn(
@@ -122,12 +82,6 @@ export class ShieldedFungibleTokenSimulator
     change: { is_some: boolean; value: CoinInfo };
     sent: CoinInfo;
   } {
-    const result = this.contract.circuits.burn(
-      this.circuitContext,
-      coin,
-      amount,
-    );
-    this.circuitContext = result.context;
-    return result.result;
+    return this.circuits.impure.burn(coin, amount);
   }
 }
