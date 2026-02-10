@@ -792,8 +792,7 @@ module Uint128 {
     // Step 4: Verify remainder bounds (0 ≤ r < b)
     assert(ltU128(result.remainder, b), "MathU128: remainder error");
 
-    // Step 5: Verify correctness (q*b + r = a)
-    // Optimized: Check a - q*b = r instead of q*b + r = a
+    // Step 5: Verify correctness (a - q*b = r)
 
     // Compute q * b
     const productU256 = _mul(result.quotient, b);
