@@ -85,7 +85,7 @@ describe('ShieldedFungibleToken', () => {
       const amount = 1000n;
 
       // Check token type is not set before lazy mint
-      const initialType = token.tokenType();
+      const initialType = token.color();
       expect(initialType).toEqual(new Uint8Array(32)); // Should be all zeros
 
       // Perform first mint
@@ -103,14 +103,14 @@ describe('ShieldedFungibleToken', () => {
 
       // Verify minted coin color matches the calculated token type
       expect(coin.color).toEqual(expectedType);
-      expect(token.tokenType()).toEqual(expectedType);
+      expect(token.color()).toEqual(expectedType);
 
       // Second mint should have the same color as the expected type
       const coin2 = token.mint(recipient, 500n);
       expect(coin2.color).toEqual(expectedType);
 
       // Type should remain unchanged after subsequent mints
-      expect(token.tokenType()).toEqual(expectedType);
+      expect(token.color()).toEqual(expectedType);
     });
 
     it('should mint tokens to a recipient', () => {
