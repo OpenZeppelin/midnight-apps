@@ -126,7 +126,7 @@ module Uint64 {
    * using little-endian byte ordering. The unpacking is performed off-chain via a witness,
    * then verified on-chain by packing the bytes back and checking equality.
    *
-   * Uses Vector8.toUint64 for the packing verification.
+   * Uses `Vector8_toUint64` for the packing verification.
    *
    * @circuitInfo k=9, rows=267
    *
