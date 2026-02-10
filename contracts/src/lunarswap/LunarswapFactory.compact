@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (lunarswap-v1/LunarswapFactory.compact)
 pragma language_version >= 0.20.0;
 
 /**
@@ -16,8 +18,18 @@ pragma language_version >= 0.20.0;
  * - Deterministic pair identification through token sorting
  */
 module LunarswapFactory {
-  import CompactStandardLibrary;
-
+  import
+    { ShieldedCoinInfo,
+      QualifiedShieldedCoinInfo,
+      ZswapCoinPublicKey,
+      ContractAddress,
+      Either,
+      right,
+      sendShielded,
+      kernel,
+      mergeCoinImmediate,
+      Map }
+    from CompactStandardLibrary;
   import { isKeyOrAddressZero } from "../openzeppelin/Utils" prefix Utils_;
 
   import { Pair } from LunarswapPair;
@@ -53,7 +65,6 @@ module LunarswapFactory {
    * This circuit sets up the initial configuration for LP tokens including name,
    * symbol, decimals, and nonce. It should only be called once during contract deployment.
    *
-   * @circuitInfo k=11, rows=1200
    *
    * @param {Bytes<32>} lpTokenNonce      - The nonce for LP token generation.
    * @param {Opaque<"string">} lpTokenName - The name of the LP token.
@@ -78,7 +89,7 @@ module LunarswapFactory {
    * @remarks
    * This circuit provides a count of all registered trading pairs stored in the liquidity pool.
    *
-   * @circuitInfo k=11, rows=300
+   * @circuitInfo k=6, rows=26
    *
    * @returns {Uint<64>} - The total number of trading pairs.
    */
@@ -94,7 +105,7 @@ module LunarswapFactory {
    * This circuit verifies whether a pair with the specified pairId hash exists
    * in the liquidity pool.
    *
-   * @circuitInfo k=11, rows=400
+   * @circuitInfo k=9, rows=305
    *
    * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
    *
@@ -112,7 +123,7 @@ module LunarswapFactory {
    * This circuit returns the complete pair data including reserves and metadata.
    * The pair must exist for this circuit to succeed.
    *
-   * @circuitInfo k=11, rows=600
+   * @circuitInfo k=9, rows=475
    *
    * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
    *
@@ -133,7 +144,7 @@ module LunarswapFactory {
    * This circuit retrieves the reserves for a pair identified by its pairId hash
    * and token information. The reserves are returned in the order of token0 and token1.
    *
-   * @circuitInfo k=11, rows=800
+   * @circuitInfo k=10, rows=1010
    *
    * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
    * @param {Bytes<32>} reserve0Id - The id of the first reserve.
@@ -163,6 +174,8 @@ module LunarswapFactory {
   /**
    * @title addReserves circuit
    * @description Adds the reserves for a given pair pairId with new token0 and token1 ShieldedCoinInfo.
+   *
+   * @circuitInfo k=17, rows=74372
    *
    * @param {Bytes<32>} reserve0Id - The type of the first reserve.
    * @param {Bytes<32>} reserve1Id - The type of the second reserve.
@@ -226,6 +239,8 @@ module LunarswapFactory {
    * @title removeReserves circuit
    * @description Removes the reserves for a given pair pairId with new token0 and token1 ShieldedCoinInfo.
    *
+   * @circuitInfo k=16, rows=50487
+   *
    * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
    * @param {Bytes<32>} reserve1Id - The type of the first reserve.
    * @param {Bytes<32>} reserve1Id - The type of the second reserve.
@@ -271,6 +286,8 @@ module LunarswapFactory {
    * This circuit allows updating the reserves for a pair by either adding to the reserve
    * of `tokenIn` if its value is greater than zero, or sending out from the reserve of
    * `tokenOut` if its value is greater than zero.
+   *
+   * @circuitInfo k=16, rows=58791
    *
    * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
    * @param {ShieldedCoinInfo} tokenIn   - The input token information (to add to reserves).
@@ -329,7 +346,7 @@ module LunarswapFactory {
    * - The token colors must be valid (non-zero)
    * - The pair must not already exist
    *
-   * @circuitInfo k=11, rows=1500
+   * @circuitInfo k=14, rows=9693
    *
    * @param {Bytes<32>} pairId - The unique pairId hash for the new pair.
    * @param {ShieldedCoinInfo} token0    - The first token in the pair.
@@ -363,7 +380,7 @@ module LunarswapFactory {
    * Requirements:
    * - The pair must already exist in the liquidity pool
    *
-   * @circuitInfo k=11, rows=1000
+   * @circuitInfo k=12, rows=2558
    *
    * @param {Pair} pair     - The updated pair data.
    * @param {Bytes<32>} pairId          - The unique pairId hash of the pair.
@@ -389,7 +406,7 @@ module LunarswapFactory {
    * Requirements:
    * - The pair must exist in the liquidity pool
    *
-   * @circuitInfo k=11, rows=800
+   * @circuitInfo k=13, rows=6023
    *
    * @param {Pair} pair - The pair to remove.
    *

@@ -17,6 +17,10 @@ import type {
   ZswapCoinPublicKey,
 } from '@openzeppelin-midnight-apps/compact-std';
 import {
+  LunarswapPrivateState,
+  LunarswapWitnesses,
+} from '../../witnesses/Lunarswap.js';
+import {
   Contract,
   type Ledger,
   ledger,
@@ -24,10 +28,6 @@ import {
   type QualifiedCoinInfo,
 } from '../artifacts/Lunarswap/contract/index.cjs';
 import type { IContractSimulator } from '../types/test';
-import {
-  LunarswapPrivateState,
-  LunarswapWitnesses,
-} from '../witnesses/Lunarswap';
 
 export class LunarswapSimulator
   implements IContractSimulator<LunarswapPrivateState, Ledger>

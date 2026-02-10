@@ -16,7 +16,7 @@ pragma language_version >= 0.20.0;
  * - Price calculation and quoting (quote, getAmountOut, getAmountIn)
  */
 module LunarswapLibrary {
-  import CompactStandardLibrary;
+  import { persistentHash, evolveNonce } from CompactStandardLibrary;
 
   import { sub, addChecked, div, mulChecked } from "../math/Uint128" prefix Uint128_;
   import { lt } from "../math/Bytes32" prefix Bytes32_;
@@ -45,7 +45,7 @@ module LunarswapLibrary {
    * Requirements:
    * - The amount to split must not exceed the coin's value
    *
-   * @circuitInfo k=11, rows=1000
+   * @circuitInfo k=11, rows=1900
    *
    * @param {T} coin    - The coin to split (must have value, nonce fields).
    * @param {Uint<128>} amount - The amount to extract from the coin.
@@ -74,6 +74,8 @@ module LunarswapLibrary {
    * Requirements:
    * - a and b must have different colors
    *
+   * @circuitInfo k=15, rows=22200
+   *
    * @param {T} a - The first value to sort.
    * @param {T} b - The second value to sort.
    *
@@ -83,8 +85,8 @@ module LunarswapLibrary {
    */
   export circuit sortByColor<T>(a: T, b: T): [T, T] {
     assert(a.color != b.color, "LunarswapLibrary: sortByColor() - Identical colors");
-    const first = Bytes32_lt(a.color, b.color) ? a : b;
-    const second = Bytes32_lt(a.color, b.color) ? b : a;
+    const first = Bytes32_lt(a.color, b.color) ? disclose(a) : disclose(b);
+    const second = first == a ? b : a;
     return [first, second];
   }
 
@@ -97,7 +99,7 @@ module LunarswapLibrary {
    * by combining a constant prefix with the sorted token colors. This ensures consistent
    * pair identification across the protocol.
    *
-   * @circuitInfo k=11, rows=800
+   * @circuitInfo k=13, rows=4527
    *
    * @param {Bytes<32>} type0    - The color of the first token (sorted).
    * @param {Bytes<32>} type1    - The color of the second token (sorted).
@@ -122,7 +124,7 @@ module LunarswapLibrary {
    * - The input amount must be greater than zero
    * - Both reserves must be greater than zero
    *
-   * @circuitInfo k=11, rows=1000
+   * @circuitInfo k=13, rows=7299
    *
    * @param {Uint<128>} amount0  - The input amount of token0.
    * @param {Uint<128>} reserve0 - The current reserve of token0.
@@ -151,7 +153,7 @@ module LunarswapLibrary {
    *   denominator = reserveIn * 1000 + amountInWithFee
    *   amountOut = numerator / denominator
    *
-   * @circuitInfo k=11, rows=1000
+   * @circuitInfo k=14, rows=14631
    *
    * @param {Uint<128>} amountIn  - The input amount of token0.
    * @param {Uint<128>} reserveIn - The current reserve of token0.
@@ -189,7 +191,7 @@ module LunarswapLibrary {
    *   denominator = reserveOut * amountOutWithFee - 997
    *   amountIn = numerator / denominator + 1
    *
-   * @circuitInfo k=11, rows=1000
+   * @circuitInfo k=14, rows=14659
    *
    * @param {Uint<128>} amountOut  - The output amount of token1.
    * @param {Uint<128>} reserveIn - The current reserve of token0.

@@ -15,18 +15,39 @@ pragma language_version >= 0.20.0;
  * - Pair creation for new token combinations
  */
 module LunarswapRouter {
-  import CompactStandardLibrary;
+  import
+    { ShieldedCoinInfo,
+      QualifiedShieldedCoinInfo,
+      ZswapCoinPublicKey,
+      ContractAddress,
+      Either,
+      left,
+      sendImmediateShielded,
+      receiveShielded }
+    from CompactStandardLibrary;
+  import { isKeyOrAddressZero, eitherZPK } from "../openzeppelin/Utils" prefix Utils_;
 
-  import "../openzeppelin/Utils";
-  import "../math/Uint128";
-
+  import { addChecked } from "../math/Uint128" prefix Uint128_;
   import { Pair } from "./LunarswapPair";
-
-  import LunarswapLibrary prefix LunarswapLibrary_;
-  import LunarswapFactory prefix LunarswapFactory_;
-  import LunarswapPair prefix LunarswapPair_;
-  import LunarswapFee prefix LunarswapFee_;
-  import LunarswapLiquidity prefix LunarswapLiquidity_;
+  import
+    { sortByColor, getIdentity, quote, getAmountOut, getAmountIn, splitByValue }
+    from "./LunarswapLibrary"
+      prefix LunarswapLibrary_;
+  import
+    { initialize,
+      isIdentityExists,
+      createPair,
+      getPair,
+      getReserves,
+      addReserves,
+      removeReserves,
+      swapReserves,
+      updatePair }
+    from "./LunarswapFactory"
+      prefix LunarswapFactory_;
+  import { mint, burn, swap } from "./LunarswapPair" prefix LunarswapPair_;
+  import { initialize } from "./LunarswapFee" prefix LunarswapFee_;
+  import { getTotalSupply } from "./LunarswapLiquidity" prefix LunarswapLiquidity_;
 
   /**
    * @title initialize circuit
@@ -76,7 +97,7 @@ module LunarswapRouter {
    * - The pair must exist or be created during this operation
    * - The calculated amounts must meet minimum requirements
    *
-   * @circuitInfo k=11, rows=4000
+   * @circuitInfo k=19, rows=280789
    *
    * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
    * @param {ShieldedCoinInfo} token0    - The first token to add liquidity for.
@@ -232,7 +253,7 @@ module LunarswapRouter {
    * adds them to the liquidity pot, burns them, and distributes the underlying tokens to the
    * liquidity provider.
    *
-   * @circuitInfo k=11, rows=4000
+   * @circuitInfo k=18, rows=162893
    *
    * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
    * @param {Pair} pair - The current pair state.
@@ -303,7 +324,7 @@ module LunarswapRouter {
    * calculates the exact amount of output tokens, and returns the amount of input tokens
    * used.
    *
-   * @circuitInfo k=11, rows=4000
+   * @circuitInfo k=18, rows=160631
    *
    * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
    * @param {Pair} pair - The current pair state.
@@ -346,8 +367,8 @@ module LunarswapRouter {
     // Calculate intermediate balances (after input is received but before output is sent)
     const [balance0, balance1] =
             isToken0
-              ? [addChecked(reserve0.value, splitTokenIn.used.value), reserve1.value]
-              : [reserve0.value, addChecked(reserve1.value, splitTokenIn.used.value)];
+              ? [Uint128_addChecked(reserve0.value, splitTokenIn.used.value), reserve1.value]
+              : [reserve0.value, Uint128_addChecked(reserve1.value, splitTokenIn.used.value)];
 
     const [amount0Out, amount1Out] =
             isToken0 ? [0 as Uint<128>, amountOut] : [amountOut, 0 as Uint<128>];
@@ -395,7 +416,7 @@ module LunarswapRouter {
    * calculates the exact amount of input tokens, and returns the amount of output tokens
    * received.
    *
-   * @circuitInfo k=11, rows=4000
+   * @circuitInfo k=18, rows=160680
    *
    * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
    * @param {Pair} pair - The current pair state.
@@ -440,8 +461,8 @@ module LunarswapRouter {
     // Calculate intermediate balances (after input is received but before output is sent)
     const [balance0, balance1] =
             isToken0
-              ? [addChecked(reserve0.value, splitTokenIn.used.value), reserve1.value]
-              : [reserve0.value, addChecked(reserve1.value, splitTokenIn.used.value)];
+              ? [Uint128_addChecked(reserve0.value, splitTokenIn.used.value), reserve1.value]
+              : [reserve0.value, Uint128_addChecked(reserve1.value, splitTokenIn.used.value)];
 
     const [amount0Out, amount1Out] =
             isToken0 ? [0 as Uint<128>, amountOut] : [amountOut, 0 as Uint<128>];

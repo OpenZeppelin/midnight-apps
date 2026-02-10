@@ -17,21 +17,21 @@ pragma language_version >= 0.20.0;
  * - Flexible fee distribution system
  */
 module LunarswapFee {
-  import CompactStandardLibrary;
+  import { ZswapCoinPublicKey } from CompactStandardLibrary;
 
   import { callerZPK } from "../openzeppelin/Utils" prefix Utils_;
 
   /**
-   * @ledger {ZswapCoinPublicKey} _feeTo
+   * @ledger {ZswapCoinPublicKey} feeTo
    * @description The current protocol fee recipient address (unshielded).
    */
-  export ledger _feeTo: ZswapCoinPublicKey;
+  export ledger feeTo: ZswapCoinPublicKey;
 
   /**
-   * @ledger {ZswapCoinPublicKey} _feeToSetter
+   * @ledger {ZswapCoinPublicKey} feeToSetter
    * @description The address with privilege to set the protocol fee recipient (unshielded).
    */
-  export ledger _feeToSetter: ZswapCoinPublicKey;
+  export ledger feeToSetter: ZswapCoinPublicKey;
 
   /**
    * @title initialize circuit
@@ -49,38 +49,39 @@ module LunarswapFee {
    * @returns [] - No return values.
    */
   export circuit initialize(feeToSetter_: ZswapCoinPublicKey): [] {
-    _feeToSetter = feeToSetter_;
+    feeToSetter = disclose(feeToSetter_);
   }
 
   /**
-   * @title feeTo circuit
-   * @description Returns the current fee recipient address.
+   * @title getFeeTo circuit
+   * @description Returns the current protocol fee recipient address.
    *
    * @remarks
-   * This circuit retrieves the address that receives protocol fees from trading pairs.
+   * This circuit provides read-only access to the current fee recipient address.
+   * Returns zero address if no fee recipient has been set.
    *
-   * @circuitInfo k=11, rows=200
+   * @circuitInfo k=5, rows=48
    *
    * @returns {ZswapCoinPublicKey} - The current fee recipient address.
    */
-  export circuit feeTo(): ZswapCoinPublicKey {
-    return _feeTo;
+  export circuit getFeeTo(): ZswapCoinPublicKey {
+    return feeTo;
   }
 
   /**
-   * @title feeToSetter circuit
-   * @description Returns the address that can set the fee recipient.
+   * @title getFeeToSetter circuit
+   * @description Returns the current fee setter address.
    *
    * @remarks
-   * This circuit retrieves the address that has the authority to change the fee
-   * recipient and transfer fee setter privileges.
+   * This circuit provides read-only access to the address that has permission
+   * to set the fee recipient and transfer fee setter privileges.
    *
-   * @circuitInfo k=11, rows=200
+   * @circuitInfo k=5, rows=48
    *
    * @returns {ZswapCoinPublicKey} - The current fee setter address.
    */
-  export circuit feeToSetter(): ZswapCoinPublicKey {
-    return _feeToSetter;
+  export circuit getFeeToSetter(): ZswapCoinPublicKey {
+    return feeToSetter;
   }
 
   /**
@@ -94,7 +95,7 @@ module LunarswapFee {
    * Requirements:
    * - The caller must be the current fee setter
    *
-   * @circuitInfo k=11, rows=600
+   * @circuitInfo k=10, rows=571
    *
    * @param {ZswapCoinPublicKey} feeTo_ - The new fee recipient address.
    *
@@ -105,8 +106,8 @@ module LunarswapFee {
   // TODO: what is the difference between Admin and feeToSetter.
   export circuit setFeeTo(feeTo_: ZswapCoinPublicKey): [] {
     // TODO: add access control.
-    assert(Utils_callerZPK() == _feeToSetter, "LunarswapFee: setFeeTo() - forbidden");
-    _feeTo = feeTo_;
+    assert(Utils_callerZPK() == feeToSetter, "LunarswapFee: setFeeTo() - forbidden");
+    feeTo = disclose(feeTo_);
     return [];
   }
 
@@ -121,7 +122,7 @@ module LunarswapFee {
    * Requirements:
    * - The caller must be the current fee setter
    *
-   * @circuitInfo k=11, rows=600
+   * @circuitInfo k=10, rows=571
    *
    * @param {ZswapCoinPublicKey} feeToSetter_ - The new fee setter address.
    *
@@ -130,9 +131,8 @@ module LunarswapFee {
    * @returns [] - No return values.
    */
   export circuit setFeeToSetter(feeToSetter_: ZswapCoinPublicKey): [] {
-    // TODO: add access control.
-    assert(Utils_callerZPK() == _feeToSetter, "LunarswapFee: setFeeToSetter() - forbidden");
-    _feeToSetter = feeToSetter_;
+    assert(Utils_callerZPK() == feeToSetter, "LunarswapFee: setFeeToSetter() - forbidden");
+    feeToSetter = disclose(feeToSetter_);
     return [];
   }
 }

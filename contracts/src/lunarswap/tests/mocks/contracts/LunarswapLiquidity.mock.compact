@@ -1,0 +1,47 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (lunarswap/test/LunarswapLiquidity.mock.compact)
+
+pragma language_version >= 0.20.0;
+
+import CompactStandardLibrary;
+
+import "../../../LunarswapLiquidity" prefix LunarswapLiquidity_;
+
+// Helper for test suite: toggling this variable activates circuit metadata reporting.
+// Only increases circuit size by 3 rows per exposed circuit.
+ledger toImpure: Boolean;
+
+constructor(nonce_: Bytes<32>,
+            name_: Opaque<"string">,
+            symbol_: Opaque<"string">,
+            decimals_: Uint<8>
+            ) {
+  toImpure = true;
+  return LunarswapLiquidity_initialize(nonce_, name_, symbol_, decimals_);
+}
+
+export circuit initializePairLpToken(pairId: Bytes<32>): [] {
+  toImpure = true;
+  return LunarswapLiquidity_initializePairLpToken(disclose(pairId));
+}
+
+export circuit getTotalSupply(pairId: Bytes<32>): QualifiedShieldedCoinInfo {
+  toImpure = true;
+  return LunarswapLiquidity_getTotalSupply(pairId);
+}
+
+export circuit mint(pairId: Bytes<32>,
+                    recipient: Either<ZswapCoinPublicKey, ContractAddress>,
+                    amount: Uint<64>
+                    ): ShieldedCoinInfo {
+  toImpure = true;
+  return LunarswapLiquidity_mint(disclose(pairId), recipient, disclose(amount));
+}
+
+export circuit burn(pairId: Bytes<32>,
+                    coin: ShieldedCoinInfo,
+                    amount: Uint<128>
+                    ): ShieldedSendResult {
+  toImpure = true;
+  return LunarswapLiquidity_burn(pairId, coin, amount);
+}
