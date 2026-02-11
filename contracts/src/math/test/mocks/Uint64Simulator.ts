@@ -2,12 +2,33 @@ import {
   type BaseSimulatorOptions,
   createSimulator,
 } from '@openzeppelin/compact-tools-simulator';
-import type { DivResultU64 } from '@src/artifacts/math/test/mocks/contracts/Uint64.mock/contract/index.js';
+import type {
+  DivResultU64,
+  Witnesses,
+} from '@src/artifacts/math/test/mocks/contracts/Uint64.mock/contract/index.js';
 import {
   Contract,
   ledger,
 } from '@src/artifacts/math/test/mocks/contracts/Uint64.mock/contract/index.js';
-import { Uint64PrivateState, Uint64Witnesses } from './witnesses/Uint64.js';
+import { wit_divUint64 } from '@src/math/witnesses/wit_divUint64.js';
+import { wit_sqrtUint64 } from '@src/math/witnesses/wit_sqrtUint64.js';
+import { wit_uint64ToVector } from '@src/math/witnesses/wit_uint64ToVector.js';
+
+export type Uint64PrivateState = Record<string, never>;
+
+export const Uint64Witnesses = (): Witnesses<Uint64PrivateState> => ({
+  wit_sqrtUint64(_context, radicand) {
+    return [{}, wit_sqrtUint64(radicand)];
+  },
+
+  wit_divUint64(_context, dividend, divisor) {
+    return [{}, wit_divUint64(dividend, divisor)];
+  },
+
+  wit_uint64ToVector(_context, value) {
+    return [{}, wit_uint64ToVector(value)];
+  },
+});
 
 /**
  * Base simulator for Uint64 mock contract
@@ -20,7 +41,7 @@ const Uint64SimulatorBase = createSimulator<
   readonly []
 >({
   contractFactory: (witnesses) => new Contract<Uint64PrivateState>(witnesses),
-  defaultPrivateState: () => Uint64PrivateState.generate(),
+  defaultPrivateState: () => ({}),
   contractArgs: () => [],
   ledgerExtractor: (state) => ledger(state),
   witnessesFactory: () => Uint64Witnesses(),
@@ -39,16 +60,59 @@ export class Uint64Simulator extends Uint64SimulatorBase {
     super([], options);
   }
 
+  public MAX_UINT8(): bigint {
+    return this.circuits.impure.MAX_UINT8();
+  }
+
+  public MAX_UINT16(): bigint {
+    return this.circuits.impure.MAX_UINT16();
+  }
+
+  public MAX_UINT32(): bigint {
+    return this.circuits.impure.MAX_UINT32();
+  }
+
+  public MAX_UINT64(): bigint {
+    return this.circuits.impure.MAX_UINT64();
+  }
+
+  public toVector(
+    value: bigint,
+  ): [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint] {
+    return this.circuits.impure.toVector(value) as [
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+    ];
+  }
+
+  public toBytes(value: bigint): Uint8Array {
+    return this.circuits.impure.toBytes(value);
+  }
+
   public add(a: bigint, b: bigint): bigint {
-    return this.circuits.pure.add(a, b);
+    return this.circuits.impure.add(a, b);
+  }
+
+  public addChecked(a: bigint, b: bigint): bigint {
+    return this.circuits.impure.addChecked(a, b);
   }
 
   public sub(a: bigint, b: bigint): bigint {
-    return this.circuits.pure.sub(a, b);
+    return this.circuits.impure.sub(a, b);
   }
 
   public mul(a: bigint, b: bigint): bigint {
-    return this.circuits.pure.mul(a, b);
+    return this.circuits.impure.mul(a, b);
+  }
+
+  public mulChecked(a: bigint, b: bigint): bigint {
+    return this.circuits.impure.mulChecked(a, b);
   }
 
   public div(a: bigint, b: bigint): bigint {
@@ -72,26 +136,10 @@ export class Uint64Simulator extends Uint64SimulatorBase {
   }
 
   public min(a: bigint, b: bigint): bigint {
-    return this.circuits.pure.min(a, b);
+    return this.circuits.impure.min(a, b);
   }
 
   public max(a: bigint, b: bigint): bigint {
-    return this.circuits.pure.max(a, b);
-  }
-
-  public MAX_UINT8(): bigint {
-    return this.circuits.pure.MAX_UINT8();
-  }
-
-  public MAX_UINT16(): bigint {
-    return this.circuits.pure.MAX_UINT16();
-  }
-
-  public MAX_UINT32(): bigint {
-    return this.circuits.pure.MAX_UINT32();
-  }
-
-  public MAX_UINT64(): bigint {
-    return this.circuits.pure.MAX_UINT64();
+    return this.circuits.impure.max(a, b);
   }
 }
