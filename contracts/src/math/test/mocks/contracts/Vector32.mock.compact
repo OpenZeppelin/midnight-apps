@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/test/Vector32.mock.compact)
+
+pragma language_version >= 0.20.0;
+
+import CompactStandardLibrary;
+
+import { U256 } from "../../../types/TU256";
+
+import "../../../Vector32" prefix Vector32_;
+
+export { U256 };
+
+// Helper for test suite: toggling this variable activates circuit metadata reporting.
+ledger _isCircuitInfoExposed: Boolean;
+
+export circuit toU256(vec: Vector<32, Uint<8>>): U256 {
+  _isCircuitInfoExposed = true;
+  return disclose(Vector32_toU256(vec));
+}
+
+export circuit toBytes(vec: Vector<32, Uint<8>>): Bytes<32> {
+  _isCircuitInfoExposed = true;
+  return Vector32_toBytes(vec);
+}
