@@ -35,7 +35,7 @@
     "compact:structs": "compact-compiler $npm_package_config_compactVersion --dir structs $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir",
     "compact:math": "compact-compiler $npm_package_config_compactVersion --dir math $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir",
     "compact:fmt": "compact format --check",
-    "compact:fmt:fix": "compact format --write",
+    "compact:fmt:fix": "compact format",
     "build": "compact-builder $npm_package_config_compactVersion $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir",
     "build:fast": "compact-builder $npm_package_config_compactVersion --skip-zk $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir",
     "test": "vitest run",
