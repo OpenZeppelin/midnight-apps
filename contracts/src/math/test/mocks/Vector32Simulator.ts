@@ -2,13 +2,16 @@ import {
   type BaseSimulatorOptions,
   createSimulator,
 } from '@openzeppelin/compact-tools-simulator';
+import type { Witnesses } from '@src/artifacts/math/test/mocks/contracts/Vector32.mock/contract/index.js';
 import {
   Contract,
   ledger,
   type U256,
 } from '@src/artifacts/math/test/mocks/contracts/Vector32.mock/contract/index.js';
-import type { Vector32PrivateState } from '@src/math/test/mocks/witnesses/Vector32.js';
-import { Vector32Witnesses } from '@src/math/test/mocks/witnesses/Vector32.js';
+
+export type Vector32PrivateState = Record<string, never>;
+
+export const Vector32Witnesses = (): Witnesses<Vector32PrivateState> => ({});
 
 /**
  * Base simulator for Vector32 mock contract
