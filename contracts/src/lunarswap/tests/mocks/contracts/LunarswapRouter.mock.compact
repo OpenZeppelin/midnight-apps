@@ -7,125 +7,51 @@ import CompactStandardLibrary;
 
 import "../../../LunarswapRouter" prefix LunarswapRouter_;
 
-import { Pair } from "../../../LunarswapPair";
-
 // Helper for test suite: toggling this variable activates circuit metadata reporting.
 // Only increases circuit size by 3 rows per exposed circuit.
 ledger toImpure: Boolean;
 
-constructor(lpTokenNonce: Bytes<32>,
-            lpTokenName: Opaque<"string">,
-            lpTokenSymbol: Opaque<"string">,
-            lpTokenDecimals: Uint<8>,
-            feeToSetter_: ZswapCoinPublicKey
-            ) {
-  toImpure = true;
-  return LunarswapRouter_initialize(
-           lpTokenNonce,
-           lpTokenName,
-           lpTokenSymbol,
-           lpTokenDecimals,
-           feeToSetter_
-           );
-}
-
 export circuit addLiquidity(
-                 pairId: Bytes<32>,
-                 token0: ShieldedCoinInfo,
-                 token1: ShieldedCoinInfo,
-                 amount0Min: Uint<128>,
-                 amount1Min: Uint<128>,
-                 to: Either<ZswapCoinPublicKey, ContractAddress>
+                 tokenA: ShieldedCoinInfo,
+                 tokenB: ShieldedCoinInfo,
+                 amountAMin: Uint<128>,
+                 amountBMin: Uint<128>,
+                 to: Either<ZswapCoinPublicKey, ContractAddress>,
                  ): Uint<128> {
   toImpure = true;
-  const result = LunarswapRouter_addLiquidity(
-                   disclose(pairId),
-                   disclose(token0),
-                   disclose(token1),
-                   disclose(amount0Min),
-                   disclose(amount1Min),
-                   disclose(to)
-                   );
-  return disclose(result);
+  return LunarswapRouter_addLiquidity(tokenA, tokenB, amountAMin, amountBMin, to);
 }
 
 export circuit removeLiquidity(
-                 pairId: Bytes<32>,
-                 pair: Pair,
-                 token0: ShieldedCoinInfo,
-                 token1: ShieldedCoinInfo,
-                 reserve0: QualifiedShieldedCoinInfo,
-                 reserve1: QualifiedShieldedCoinInfo,
+                 tokenA: ShieldedCoinInfo,
+                 tokenB: ShieldedCoinInfo,
                  liquidity: ShieldedCoinInfo,
-                 amount0Min: Uint<128>,
-                 amount1Min: Uint<128>,
-                 to: Either<ZswapCoinPublicKey, ContractAddress>
+                 amountAMin: Uint<128>,
+                 amountBMin: Uint<128>,
+                 to: Either<ZswapCoinPublicKey, ContractAddress>,
                  ): [Uint<128>, Uint<128>] {
   toImpure = true;
-  const [result0, result1] =
-          LunarswapRouter_removeLiquidity(
-            disclose(pairId),
-            disclose(pair),
-            disclose(token0),
-            disclose(token1),
-            disclose(reserve0),
-            disclose(reserve1),
-            disclose(liquidity),
-            disclose(amount0Min),
-            disclose(amount1Min),
-            disclose(to)
-            );
-  return [disclose(result0), disclose(result1)];
+  return LunarswapRouter_removeLiquidity(tokenA, tokenB, liquidity, amountAMin, amountBMin, to);
 }
 
 export circuit swapExactTokensForTokens(
-                 pairId: Bytes<32>,
-                 pair: Pair,
                  tokenIn: ShieldedCoinInfo,
                  tokenOut: ShieldedCoinInfo,
                  amountIn: Uint<128>,
                  amountOutMin: Uint<128>,
-                 reserve0: QualifiedShieldedCoinInfo,
-                 reserve1: QualifiedShieldedCoinInfo,
                  to: Either<ZswapCoinPublicKey, ContractAddress>
                  ): Uint<128> {
   toImpure = true;
-  const result = LunarswapRouter_swapExactTokensForTokens(
-                   disclose(pairId),
-                   disclose(pair),
-                   disclose(tokenIn),
-                   disclose(tokenOut),
-                   disclose(amountIn),
-                   disclose(amountOutMin),
-                   disclose(reserve0),
-                   disclose(reserve1),
-                   disclose(to)
-                   );
-  return disclose(result);
+  return LunarswapRouter_swapExactTokensForTokens(tokenIn, tokenOut, amountIn, amountOutMin, to);
 }
 
 export circuit swapTokensForExactTokens(
-                 pairId: Bytes<32>,
-                 pair: Pair,
                  tokenIn: ShieldedCoinInfo,
                  tokenOut: ShieldedCoinInfo,
                  amountOut: Uint<128>,
                  amountInMax: Uint<128>,
-                 reserve0: QualifiedShieldedCoinInfo,
-                 reserve1: QualifiedShieldedCoinInfo,
                  to: Either<ZswapCoinPublicKey, ContractAddress>
                  ): Uint<128> {
   toImpure = true;
-  const result = LunarswapRouter_swapTokensForExactTokens(
-                   disclose(pairId),
-                   disclose(pair),
-                   disclose(tokenIn),
-                   disclose(tokenOut),
-                   disclose(amountOut),
-                   disclose(amountInMax),
-                   disclose(reserve0),
-                   disclose(reserve1),
-                   disclose(to)
-                   );
-  return disclose(result);
+  return LunarswapRouter_swapTokensForExactTokens(tokenIn, tokenOut, amountOut, amountInMax, to);
 }

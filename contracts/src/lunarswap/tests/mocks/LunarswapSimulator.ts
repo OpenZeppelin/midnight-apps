@@ -30,11 +30,11 @@ const LunarswapSimulatorBase = createSimulator<
   contractFactory: (witnesses) =>
     new Contract<LunarswapPrivateState>(witnesses),
   defaultPrivateState: () => LunarswapPrivateState.generate(),
-  contractArgs: (lpName, lpSymbol, lpNonce, lpDecimals) => [
-    lpName,
-    lpSymbol,
-    lpNonce,
-    lpDecimals,
+  contractArgs: (name, symbol, nonce, decimals) => [
+    name,
+    symbol,
+    nonce,
+    decimals,
   ],
   ledgerExtractor: (state) => ledger(state),
   witnessesFactory: () => LunarswapWitnesses(),
@@ -45,16 +45,16 @@ const LunarswapSimulatorBase = createSimulator<
  */
 export class LunarswapSimulator extends LunarswapSimulatorBase {
   constructor(
-    lpName: string,
-    lpSymbol: string,
-    lpNonce: Uint8Array,
-    lpDecimals: bigint,
+    name: string,
+    symbol: string,
+    nonce: Uint8Array,
+    decimals: bigint,
     options: BaseSimulatorOptions<
       LunarswapPrivateState,
       ReturnType<typeof LunarswapWitnesses>
     > = {},
   ) {
-    super([lpName, lpSymbol, lpNonce, lpDecimals], options);
+    super([name, symbol, nonce, decimals], options);
   }
 
   public addLiquidity(
@@ -152,15 +152,18 @@ export class LunarswapSimulator extends LunarswapSimulatorBase {
     return this.circuits.impure.getPairId(tokenA, tokenB);
   }
 
-  public getReserveId(pairId: Uint8Array, tokenAType: Uint8Array): Uint8Array {
-    return this.circuits.pure.getReserveId(pairId, tokenAType);
+  public getReserveId(
+    tokenA: ShieldedCoinInfo,
+    tokenB: ShieldedCoinInfo,
+  ): Uint8Array {
+    return this.circuits.pure.getIdentity(tokenA, tokenB, false);
   }
 
   public getSortedCoins(
     tokenA: ShieldedCoinInfo,
     tokenB: ShieldedCoinInfo,
   ): [ShieldedCoinInfo, ShieldedCoinInfo] {
-    return this.circuits.impure.getSortedCoins(tokenA, tokenB);
+    return this.circuits.impure.sortCoinByColor(tokenA, tokenB);
   }
 
   public getSortedCoinsAndAmounts(
@@ -169,18 +172,21 @@ export class LunarswapSimulator extends LunarswapSimulatorBase {
     amountAMin: bigint,
     amountBMin: bigint,
   ): [ShieldedCoinInfo, ShieldedCoinInfo, bigint, bigint] {
-    return this.circuits.impure.getSortedCoinsAndAmounts(
+    const [sortedTokenA, sortedTokenB] = this.circuits.impure.sortCoinByColor(
       tokenA,
       tokenB,
-      amountAMin,
-      amountBMin,
     );
+    const amount0Min =
+      sortedTokenA.color === tokenA.color ? amountAMin : amountBMin;
+    const amount1Min =
+      sortedTokenA.color === tokenA.color ? amountBMin : amountAMin;
+    return [sortedTokenA, sortedTokenB, amount0Min, amount1Min];
   }
 
-  public getLpTokenTotalSupply(
+  public getTotalSupply(
     tokenA: ShieldedCoinInfo,
     tokenB: ShieldedCoinInfo,
   ): QualifiedShieldedCoinInfo {
-    return this.circuits.impure.getLpTokenTotalSupply(tokenA, tokenB);
+    return this.circuits.impure.getTotalSupply(tokenA, tokenB);
   }
 }

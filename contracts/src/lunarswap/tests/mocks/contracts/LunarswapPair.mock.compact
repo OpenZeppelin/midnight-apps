@@ -11,11 +11,6 @@ import "../../../LunarswapPair" prefix LunarswapPair_;
 // Only increases circuit size by 3 rows per exposed circuit.
 ledger toImpure: Boolean;
 
-constructor(nonce: Bytes<32>, name: Opaque<"string">, symbol: Opaque<"string">, decimals: Uint<8>) {
-  toImpure = true;
-  return LunarswapPair_initialize(nonce, name, symbol, decimals);
-}
-
 export circuit initializePair(
                  pairId: Bytes<32>,
                  token0: ShieldedCoinInfo,

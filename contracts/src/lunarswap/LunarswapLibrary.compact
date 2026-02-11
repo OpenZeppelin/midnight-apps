@@ -19,7 +19,7 @@ pragma language_version >= 0.20.0;
  * - Price calculation and quoting (quote, getAmountOut, getAmountIn)
  */
 module LunarswapLibrary {
-  import { persistentHash, evolveNonce } from CompactStandardLibrary;
+  import { persistentHash, evolveNonce, ShieldedCoinInfo, QualifiedShieldedCoinInfo } from CompactStandardLibrary;
 
   import { sub, addChecked, div, mulChecked } from "../math/Uint128" prefix Uint128_;
   import { lt } from "../math/Bytes32" prefix Bytes32_;
@@ -89,8 +89,48 @@ module LunarswapLibrary {
   export circuit sortByColor<T>(a: T, b: T): [T, T] {
     assert(a.color != b.color, "LunarswapLibrary: sortByColor() - Identical colors");
     const first = Bytes32_lt(a.color, b.color) ? a : b;
-    const second = first == a ? b : a;
+    const second = Bytes32_lt(b.color, a.color) ? b : a;
     return [first, second];
+  }
+
+  /**
+   * @title sortCoinByColor circuit
+   * @description Sorts a coin by its `color: Bytes<32>` field.
+   *
+   * @remarks
+   * Works with ShieldedCoinInfo.
+   *
+   * @circuitInfo k=15, rows=22200
+   *
+   * @param {ShieldedCoinInfo} coin - The first coin to sort.
+   * @param {ShieldedCoinInfo} coin2 - The second coin to sort.
+   *
+   * @throws {Error} "LunarswapLibrary: sortCoinByColor() - Identical colors" if colors match.
+   *
+   * @returns {[ShieldedCoinInfo, ShieldedCoinInfo]} - The sorted pair [smaller, larger] by color.
+   */
+  export circuit sortCoinByColor(coin: ShieldedCoinInfo, coin2: ShieldedCoinInfo): [ShieldedCoinInfo, ShieldedCoinInfo] {
+    return disclose(sortByColor<ShieldedCoinInfo>(disclose(coin), disclose(coin2)));
+  }
+
+  /**
+   * @title sortQualifiedCoinByColor circuit
+   * @description Sorts a qualified coin by its `color: Bytes<32>` field.
+   *
+   * @remarks
+   * Works with QualifiedShieldedCoinInfo.
+   *
+   * @circuitInfo k=15, rows=22200
+   *
+   * @param {QualifiedShieldedCoinInfo} coin - The qualified coin to sort.
+   * @param {QualifiedShieldedCoinInfo} coin2 - The second qualified coin to sort.
+   *
+   * @throws {Error} "LunarswapLibrary: sortQualifiedCoinByColor() - Identical colors" if colors match.
+   *
+   * @returns {[QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo]} - The sorted pair [smaller, larger] by color.
+   */
+  export circuit sortQualifiedCoinByColor(coin: QualifiedShieldedCoinInfo, coin2: QualifiedShieldedCoinInfo): [QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo] {
+    return disclose(sortByColor<QualifiedShieldedCoinInfo>(disclose(coin), disclose(coin)));
   }
 
   /**

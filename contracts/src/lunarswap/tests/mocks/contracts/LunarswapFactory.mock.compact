@@ -15,13 +15,9 @@ export { Pair };
 // Only increases circuit size by 3 rows per exposed circuit.
 ledger toImpure: Boolean;
 
-constructor(lpTokenNonce: Bytes<32>,
-            lpTokenName: Opaque<"string">,
-            lpTokenSymbol: Opaque<"string">,
-            lpTokenDecimals: Uint<8>
-            ) {
+export circuit getPairId(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo): Bytes<32> {
   toImpure = true;
-  return LunarswapFactory_initialize(lpTokenNonce, lpTokenName, lpTokenSymbol, lpTokenDecimals);
+  return LunarswapFactory_getPairId(tokenA, tokenB);
 }
 
 export circuit getAllPairLength(): Uint<64> {
@@ -29,9 +25,9 @@ export circuit getAllPairLength(): Uint<64> {
   return LunarswapFactory_getAllPairLength();
 }
 
-export circuit isIdentityExists(pairId: Bytes<32>): Boolean {
+export circuit isPairExists(pairId: Bytes<32>): Boolean {
   toImpure = true;
-  return LunarswapFactory_isIdentityExists(pairId);
+  return LunarswapFactory_isPairExists(pairId);
 }
 
 export circuit getPair(pairId: Bytes<32>): Pair {

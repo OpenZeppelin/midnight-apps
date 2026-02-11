@@ -40,7 +40,7 @@ module LunarswapLiquidity {
     from CompactStandardLibrary;
 
   import { mint, burn } from "../openzeppelin/ShieldedERC20" prefix ShieldedERC20_;
-  import { sub } from "../math/Uint128" prefix Uint128_;
+  import { sub, addChecked } from "../math/Uint128" prefix Uint128_;
   import { isZero } from "../math/Bytes32" prefix Bytes32_;
 
   /**
@@ -207,7 +207,15 @@ module LunarswapLiquidity {
       color = ret.color;
     }
 
-    totalSupply.insertCoin(pairId, ret, disclose(recipient));
+
+    const newTotalSupply = QualifiedShieldedCoinInfo {
+            nonce: ret.nonce,
+            color: ret.color,
+            value: Uint128_addChecked(totalSupply.lookup(disclose(pairId)).value, amount),
+            mt_index: totalSupply.lookup(disclose(pairId)).mt_index,
+        };
+    totalSupply.insert(disclose(pairId), disclose(newTotalSupply));
+    //totalSupply.insertCoin(pairId, ret, disclose(recipient));
 
     return ret;
   }
@@ -247,14 +255,22 @@ module LunarswapLiquidity {
 
     receiveShielded(disclose(coin));
 
-    const newTotalSupply =
-            ShieldedCoinInfo { nonce: coin.nonce,
-                               color: coin.color,
-                               value: Uint128_sub(
-                                        totalSupply.lookup(disclose(pairId)).value,
-                                        amount
-                                        ), };
-    totalSupply.insertCoin(disclose(pairId), disclose(newTotalSupply), shieldedBurnAddress());
+    // const newTotalSupply =
+    //         ShieldedCoinInfo { nonce: coin.nonce,
+    //                            color: coin.color,
+    //                            value: Uint128_sub(
+    //                                     totalSupply.lookup(disclose(pairId)).value,
+    //                                     amount
+    //                                     ), };
+    const newTotalSupply = QualifiedShieldedCoinInfo {
+            nonce: coin.nonce,
+            color: coin.color,
+            value: Uint128_sub(totalSupply.lookup(disclose(pairId)).value, amount),
+            mt_index: totalSupply.lookup(disclose(pairId)).mt_index, // TODO: needs review
+        };
+    totalSupply.insert(disclose(pairId), disclose(newTotalSupply));
+
+    //totalSupply.insertCoin(disclose(pairId), disclose(newTotalSupply), shieldedBurnAddress());
 
     const ret = disclose(sendImmediateShielded(
                            disclose(coin),

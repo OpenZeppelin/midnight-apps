@@ -11,7 +11,7 @@ import { LunarswapSimulator } from './mocks/LunarswapSimulator.js';
 const NONCE = new Uint8Array(32).fill(0x44);
 const DOMAIN_USDC = new Uint8Array(32).fill(0x01);
 const DOMAIN_NIGHT = new Uint8Array(32).fill(0x02);
-const DOMAIN_DUST = new Uint8Array(32).fill(0x03);
+const DOMAIN_MOON = new Uint8Array(32).fill(0x03);
 const DOMAIN_FOO = new Uint8Array(32).fill(0x04);
 
 // Static addresses like in access control test
@@ -29,7 +29,7 @@ describe('Lunarswap', () => {
   let lunarswap: LunarswapSimulator;
   let usdc: ShieldedFungibleTokenSimulator;
   let night: ShieldedFungibleTokenSimulator;
-  let dust: ShieldedFungibleTokenSimulator;
+  let moon: ShieldedFungibleTokenSimulator;
   let foo: ShieldedFungibleTokenSimulator;
 
   const setup = () => {
@@ -48,11 +48,11 @@ describe('Lunarswap', () => {
       'NIGHT',
       DOMAIN_NIGHT,
     );
-    dust = new ShieldedFungibleTokenSimulator(
+    moon = new ShieldedFungibleTokenSimulator(
       NONCE,
       'Dust',
-      'DUST',
-      DOMAIN_DUST,
+      'MOON',
+      DOMAIN_MOON,
     );
     foo = new ShieldedFungibleTokenSimulator(NONCE, 'Foo', 'FOO', DOMAIN_FOO);
   };
@@ -115,38 +115,38 @@ describe('Lunarswap', () => {
       );
       expect(lunarswap.getAllPairLength()).toBe(1n);
 
-      // Create USDC/DUST pair
+      // Create USDC/MOON pair
       const usdcCoin2 = usdc.mint(createEitherFromHex(LP_USER), 20000n);
-      const dustCoin1 = dust.mint(createEitherFromHex(LP_USER), 10000n);
+      const moonCoin1 = moon.mint(createEitherFromHex(LP_USER), 10000n);
       const result2 = calculateAddLiquidityAmounts(
         20000n, // desired USDC
-        10000n, // desired DUST
+        10000n, // desired MOON
         0n, // reserve USDC
-        0n, // reserve DUST
+        0n, // reserve MOON
         SLIPPAGE_TOLERANCE.LOW, // 0.5% slippage
       );
       lunarswap.addLiquidity(
         usdcCoin2,
-        dustCoin1,
+        moonCoin1,
         result2.amountAMin,
         result2.amountBMin,
         createEitherFromHex(LP_USER),
       );
       expect(lunarswap.getAllPairLength()).toBe(2n);
 
-      // Create NIGHT/DUST pair
+      // Create NIGHT/MOON pair
       const nightCoin2 = night.mint(createEitherFromHex(LP_USER), 8000n);
-      const dustCoin2 = dust.mint(createEitherFromHex(LP_USER), 12000n);
+      const moonCoin2 = moon.mint(createEitherFromHex(LP_USER), 12000n);
       const result3 = calculateAddLiquidityAmounts(
         8000n, // desired NIGHT
-        12000n, // desired DUST
+        12000n, // desired MOON
         0n, // reserve NIGHT
-        0n, // reserve DUST
+        0n, // reserve MOON
         SLIPPAGE_TOLERANCE.LOW, // 0.5% slippage
       );
       lunarswap.addLiquidity(
         nightCoin2,
-        dustCoin2,
+        moonCoin2,
         result3.amountAMin,
         result3.amountBMin,
         createEitherFromHex(LP_USER),
@@ -191,18 +191,18 @@ describe('Lunarswap', () => {
       );
       expect(lunarswap.getAllPairLength()).toBe(5n);
 
-      // Create DUST/FOO pair
-      const dustCoin3 = dust.mint(createEitherFromHex(LP_USER), 5000n);
+      // Create MOON/FOO pair
+      const moonCoin3 = moon.mint(createEitherFromHex(LP_USER), 5000n);
       const fooCoin3 = foo.mint(createEitherFromHex(LP_USER), 5000n);
       const result6 = calculateAddLiquidityAmounts(
-        5000n, // desired DUST
+        5000n, // desired MOON
         5000n, // desired FOO
-        0n, // reserve DUST
+        0n, // reserve MOON
         0n, // reserve FOO
         SLIPPAGE_TOLERANCE.LOW, // 0.5% slippage
       );
       lunarswap.addLiquidity(
-        dustCoin3,
+        moonCoin3,
         fooCoin3,
         result6.amountAMin,
         result6.amountBMin,
@@ -272,79 +272,75 @@ describe('Lunarswap', () => {
       expect(reserveNIGHT.value).toBe(5000n);
     });
 
-    it('should retrieve USDC/DUST pair from ledger after creation', () => {
+    it('should retrieve USDC/MOON pair from ledger after creation', () => {
       const usdcCoin = usdc.mint(createEitherFromHex(LP_USER), 20000n);
-      const dustCoin = dust.mint(createEitherFromHex(LP_USER), 10000n);
+      const moonCoin = moon.mint(createEitherFromHex(LP_USER), 10000n);
       const recipient = createEitherFromHex(LP_USER);
 
       const result = calculateAddLiquidityAmounts(
         20000n, // desired USDC
-        10000n, // desired DUST
+        10000n, // desired MOON
         0n, // reserve USDC
-        0n, // reserve DUST
+        0n, // reserve MOON
         SLIPPAGE_TOLERANCE.LOW, // 0.5% slippage
       );
       lunarswap.addLiquidity(
         usdcCoin,
-        dustCoin,
+        moonCoin,
         result.amountAMin,
         result.amountBMin,
         recipient,
       );
 
       // Use getPairId to get the correct order for getIdentity
-      const pair = lunarswap.getPair(usdcCoin, dustCoin);
+      const pair = lunarswap.getPair(usdcCoin, moonCoin);
 
       expect(pair).toBeDefined();
 
       // Use getPairId to determine expected token order
       const [reserveUSDC, reserveDUST] = lunarswap.getPairReserves(
         usdcCoin,
-        dustCoin,
+        moonCoin,
       );
       expect(reserveUSDC.value).toBe(20000n);
       expect(reserveDUST.value).toBe(10000n);
-      expect(lunarswap.getLpTokenTotalSupply(usdcCoin, dustCoin).value).toBe(
-        14142n,
-      );
+      expect(lunarswap.getTotalSupply(usdcCoin, moonCoin).value).toBe(14142n);
       expect(pair.kLast).toBe(0n);
     });
 
-    it('should retrieve NIGHT/DUST pair from ledger after creation', () => {
+    it('should retrieve NIGHT/MOON pair from ledger after creation', () => {
       const nightCoin = night.mint(createEitherFromHex(LP_USER), 8000n);
-      const dustCoin = dust.mint(createEitherFromHex(LP_USER), 12000n);
+      const moonCoin = moon.mint(createEitherFromHex(LP_USER), 12000n);
       const recipient = createEitherFromHex(LP_USER);
 
       const result = calculateAddLiquidityAmounts(
         8000n, // desired NIGHT
-        12000n, // desired DUST
+        12000n, // desired MOON
         0n, // reserve NIGHT
-        0n, // reserve DUST
+        0n, // reserve MOON
         SLIPPAGE_TOLERANCE.LOW, // 0.5% slippage
       );
       lunarswap.addLiquidity(
         nightCoin,
-        dustCoin,
+        moonCoin,
         result.amountAMin,
         result.amountBMin,
         recipient,
       );
 
       // Use getPairId to get the correct order for getIdentity
-      const pair = lunarswap.getPair(nightCoin, dustCoin);
+      const pair = lunarswap.getPair(nightCoin, moonCoin);
 
       expect(pair).toBeDefined();
 
       // Use getPairId to determine expected token order
       const [reserveNIGHT, reserveDUST] = lunarswap.getPairReserves(
         nightCoin,
-        dustCoin,
+        moonCoin,
       );
       expect(reserveNIGHT.value).toBe(8000n);
       expect(reserveDUST.value).toBe(12000n);
-      expect(lunarswap.getLpTokenTotalSupply(nightCoin, dustCoin).value).toBe(
-        9797n,
-      );
+      expect(lunarswap.getTotalSupply(nightCoin, moonCoin).value).toBe(9797n);
       expect(pair.kLast).toBe(0n);
     });
   });
@@ -376,9 +372,9 @@ describe('Lunarswap', () => {
       expect(reserveNIGHT.value).toBe(1000n);
     });
 
-    it('should return correct reserves for NIGHT/DUST pair', () => {
+    it('should return correct reserves for NIGHT/MOON pair', () => {
       const nightCoin = night.mint(createEitherFromHex(LP_USER), 8000n);
-      const dustCoin = dust.mint(createEitherFromHex(LP_USER), 12000n);
+      const moonCoin = moon.mint(createEitherFromHex(LP_USER), 12000n);
       const recipient = createEitherFromHex(LP_USER);
       const result = calculateAddLiquidityAmounts(
         8000n,
@@ -389,14 +385,14 @@ describe('Lunarswap', () => {
       );
       lunarswap.addLiquidity(
         nightCoin,
-        dustCoin,
+        moonCoin,
         result.amountAMin,
         result.amountBMin,
         recipient,
       );
       const [reserveNIGHT, reserveDUST] = lunarswap.getPairReserves(
         nightCoin,
-        dustCoin,
+        moonCoin,
       );
       expect(reserveNIGHT.value).toBe(8000n);
       expect(reserveDUST.value).toBe(12000n);
@@ -412,18 +408,18 @@ describe('Lunarswap', () => {
       expect(pairId.length).toBe(32);
     });
 
-    it('should calculate correct pair hash for USDC/DUST', () => {
+    it('should calculate correct pair hash for USDC/MOON', () => {
       const usdcCoin = usdc.mint(createEitherFromHex(LP_USER), 100n);
-      const dustCoin = dust.mint(createEitherFromHex(LP_USER), 100n);
-      const pairId = lunarswap.getPairId(usdcCoin, dustCoin);
+      const moonCoin = moon.mint(createEitherFromHex(LP_USER), 100n);
+      const pairId = lunarswap.getPairId(usdcCoin, moonCoin);
       expect(pairId).toBeDefined();
       expect(pairId.length).toBe(32);
     });
 
-    it('should calculate correct pair hash for NIGHT/DUST', () => {
+    it('should calculate correct pair hash for NIGHT/MOON', () => {
       const nightCoin = night.mint(createEitherFromHex(LP_USER), 100n);
-      const dustCoin = dust.mint(createEitherFromHex(LP_USER), 100n);
-      const pairId = lunarswap.getPairId(nightCoin, dustCoin);
+      const moonCoin = moon.mint(createEitherFromHex(LP_USER), 100n);
+      const pairId = lunarswap.getPairId(nightCoin, moonCoin);
       expect(pairId).toBeDefined();
       expect(pairId.length).toBe(32);
     });
@@ -437,7 +433,7 @@ describe('Lunarswap', () => {
     });
   });
 
-  describe('getLpTokenTotalSupply', () => {
+  describe('getTotalSupply', () => {
     it('should track LP token total supply correctly', () => {
       const usdcCoin = usdc.mint(createEitherFromHex(LP_USER), 10000n);
       const nightCoin = night.mint(createEitherFromHex(LP_USER), 5000n);
@@ -458,10 +454,8 @@ describe('Lunarswap', () => {
         createEitherFromHex(LP_USER),
       );
 
-      // Use getPairId to get the correct order for getLpTokenTotalSupply
-      expect(lunarswap.getLpTokenTotalSupply(usdcCoin, nightCoin).value).toBe(
-        7071n,
-      ); // LP token total supply tracking
+      // Use getPairId to get the correct order for getTotalSupply
+      expect(lunarswap.getTotalSupply(usdcCoin, nightCoin).value).toBe(7071n); // LP token total supply tracking
     });
   });
 
@@ -527,7 +521,7 @@ describe('Lunarswap', () => {
       const usdcCoin1 = usdc.mint(createEitherFromHex(LP_USER), 100n);
       const nightCoin1 = night.mint(createEitherFromHex(LP_USER), 100n);
       const usdcCoin2 = usdc.mint(createEitherFromHex(LP_USER), 100n);
-      const dustCoin = dust.mint(createEitherFromHex(LP_USER), 100n);
+      const moonCoin = moon.mint(createEitherFromHex(LP_USER), 100n);
 
       // Create first pair (USDC/NIGHT)
       const result1 = calculateAddLiquidityAmounts(
@@ -545,7 +539,7 @@ describe('Lunarswap', () => {
         createEitherFromHex(LP_USER),
       );
 
-      // Create second pair (USDC/DUST)
+      // Create second pair (USDC/MOON)
       const result2 = calculateAddLiquidityAmounts(
         100n,
         100n,
@@ -555,14 +549,14 @@ describe('Lunarswap', () => {
       );
       lunarswap.addLiquidity(
         usdcCoin2,
-        dustCoin,
+        moonCoin,
         result2.amountAMin,
         result2.amountBMin,
         createEitherFromHex(LP_USER),
       );
 
       const pairId1 = lunarswap.getPairId(usdcCoin1, nightCoin1);
-      const pairId2 = lunarswap.getPairId(usdcCoin2, dustCoin);
+      const pairId2 = lunarswap.getPairId(usdcCoin2, moonCoin);
 
       const reserveId1 = lunarswap.getReserveId(pairId1, usdcCoin1.color);
       const reserveId2 = lunarswap.getReserveId(pairId2, usdcCoin2.color);
@@ -641,14 +635,14 @@ describe('Lunarswap', () => {
     it('should generate unique reserve IDs for all token types in multiple pairs', () => {
       const usdcCoin = usdc.mint(createEitherFromHex(LP_USER), 1000n);
       const nightCoin = night.mint(createEitherFromHex(LP_USER), 1000n);
-      const dustCoin = dust.mint(createEitherFromHex(LP_USER), 1000n);
+      const moonCoin = moon.mint(createEitherFromHex(LP_USER), 1000n);
       const fooCoin = foo.mint(createEitherFromHex(LP_USER), 1000n);
 
       // Create multiple pairs
       const pairs = [
         { tokenA: usdcCoin, tokenB: nightCoin },
-        { tokenA: usdcCoin, tokenB: dustCoin },
-        { tokenA: nightCoin, tokenB: dustCoin },
+        { tokenA: usdcCoin, tokenB: moonCoin },
+        { tokenA: nightCoin, tokenB: moonCoin },
         { tokenA: usdcCoin, tokenB: fooCoin },
       ];
 

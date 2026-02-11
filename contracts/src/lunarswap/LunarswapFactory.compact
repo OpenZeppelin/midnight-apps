@@ -35,7 +35,7 @@ module LunarswapFactory {
 
   import { Pair } from LunarswapPair;
   import { initialize, initializePair } from LunarswapPair prefix LunarswapPair_;
-  import { getIdentity } from LunarswapLibrary prefix LunarswapLibrary_;
+  import { getIdentity, sortByColor } from LunarswapLibrary prefix LunarswapLibrary_;
 
   /**
    * @title pool ledger
@@ -59,28 +59,49 @@ module LunarswapFactory {
   export ledger reserves: Map<Bytes<32>, QualifiedShieldedCoinInfo>;
 
   /**
-   * @title initialize circuit
-   * @description Initializes the Lunarswap factory with LP token configuration.
+    * @title initialize circuit
+    * @description Initializes the Lunarswap factory with LP token configuration.
+    *
+    * @remarks
+    * This circuit sets up the initial configuration for LP tokens including name,
+    * symbol, decimals, and nonce. It should only be called once during contract deployment.
+    *
+    * @circuitInfo k=11, rows=1200
+    *
+    * @param {Bytes<32>} nonce      - The nonce for LP token generation.
+    * @param {Opaque<"string">} name - The name of the LP token.
+    * @param {Opaque<"string">} symbol - The symbol of the LP token.
+    * @param {Uint<8>} decimals     - The number of decimals for LP tokens.
+    *
+    * @returns [] - No return values.
+    */
+  export circuit initialize(
+      nonce: Bytes<32>,
+      name: Opaque<"string">,
+      symbol: Opaque<"string">,
+      decimals: Uint<8>
+  ): [] {
+      return LunarswapPair_initialize(nonce, name, symbol, decimals);
+  }
+
+  /**
+   * @title getPairId circuit
+   * @description Returns the pairId for a given token pair.
    *
    * @remarks
-   * This circuit sets up the initial configuration for LP tokens including name,
-   * symbol, decimals, and nonce. It should only be called once during contract deployment.
+   * This circuit returns the pairId for a given token pair.
    *
+   * @circuitInfo k=9, rows=305
    *
-   * @param {Bytes<32>} lpTokenNonce      - The nonce for LP token generation.
-   * @param {Opaque<"string">} lpTokenName - The name of the LP token.
-   * @param {Opaque<"string">} lpTokenSymbol - The symbol of the LP token.
-   * @param {Uint<8>} lpTokenDecimals     - The number of decimals for LP tokens.
+   * @param {ShieldedCoinInfo} tokenA - The first token in the pair.
+   * @param {ShieldedCoinInfo} tokenB - The second token in the pair.
    *
-   * @returns [] - No return values.
+   * @returns {Bytes<32>} - The pairId for the given token pair.
    */
-  export circuit initialize(
-                   lpTokenNonce: Bytes<32>,
-                   lpTokenName: Opaque<"string">,
-                   lpTokenSymbol: Opaque<"string">,
-                   lpTokenDecimals: Uint<8>
-                   ): [] {
-    return LunarswapPair_initialize(lpTokenNonce, lpTokenName, lpTokenSymbol, lpTokenDecimals);
+  export circuit getPairId(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo): Bytes<32> {
+    const [token0, token1] =
+            disclose(LunarswapLibrary_sortByColor<ShieldedCoinInfo>(tokenA, tokenB));
+    return LunarswapLibrary_getIdentity(token0.color, token1.color, true);
   }
 
   /**
@@ -99,8 +120,8 @@ module LunarswapFactory {
   }
 
   /**
-   * @title isIdentityExists circuit
-   * @description Checks if a trading pair exists for the given pairId hash.
+   * @title isPairExists circuit
+   * @description Checks if a pair exists for the given pairId hash.
    *
    * @remarks
    * This circuit verifies whether a pair with the specified pairId hash exists
@@ -112,7 +133,7 @@ module LunarswapFactory {
    *
    * @returns {Boolean} - True if the pair exists, false otherwise.
    */
-  export circuit isIdentityExists(pairId: Bytes<32>): Boolean {
+  export circuit isPairExists(pairId: Bytes<32>): Boolean {
     return pool.member(disclose(pairId));
   }
 
@@ -133,7 +154,7 @@ module LunarswapFactory {
    * @returns {Pair} - The pair information including reserves and metadata.
    */
   export circuit getPair(pairId: Bytes<32>): Pair {
-    assert(isIdentityExists(pairId), "LunarswapFactory: getPair() - Pair does not exist");
+    assert(isPairExists(pairId), "LunarswapFactory: getPair() - Pair does not exist");
     return pool.lookup(disclose(pairId));
   }
 
@@ -160,7 +181,7 @@ module LunarswapFactory {
                    reserve0Id: Bytes<32>,
                    reserve1Id: Bytes<32>
                    ): [QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo] {
-    assert(isIdentityExists(pairId), "LunarswapFactory: getReserves() - Pair does not exist");
+    assert(isPairExists(pairId), "LunarswapFactory: getReserves() - Pair does not exist");
     assert(reserves.member(disclose(reserve0Id)),
            "LunarswapFactory: getReserves() - Reserve0 does not exist"
            );
@@ -391,7 +412,7 @@ module LunarswapFactory {
    * @returns {Pair} - The updated pair data.
    */
   export circuit updatePair(pairId: Bytes<32>, pair: Pair): Pair {
-    assert(isIdentityExists(pairId), "LunarswapFactory: updatePair() - Pair does not exist");
+    assert(isPairExists(pairId), "LunarswapFactory: updatePair() - Pair does not exist");
     pool.insert(disclose(pairId), disclose(pair));
     return pair;
   }
@@ -421,7 +442,7 @@ module LunarswapFactory {
                      disclose(pair.token1Type),
                      true
                      );
-    assert(isIdentityExists(pairId), "LunarswapFactory: removePair() - Pair does not exist");
+    assert(isPairExists(pairId), "LunarswapFactory: removePair() - Pair does not exist");
     return pool.remove(disclose(pairId));
   }
 }
