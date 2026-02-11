@@ -39,9 +39,10 @@ module LunarswapLiquidity {
       evolveNonce }
     from CompactStandardLibrary;
 
-  import { mint, burn } from "../openzeppelin/ShieldedERC20" prefix ShieldedERC20_;
   import { sub, addChecked } from "../math/Uint128" prefix Uint128_;
   import { isZero } from "../math/Bytes32" prefix Bytes32_;
+
+  import { PairId } from LunarswapTypes;
 
   /**
    * @ledger {Counter} _counter
@@ -56,11 +57,17 @@ module LunarswapLiquidity {
   export ledger nonce: Bytes<32>;
 
   /**
-   * @ledger {Map<Bytes<32>, QualifiedShieldedCoinInfo>} lpTotalSupply
-   * @description Mapping of trading pair hash (pairId) to the total supply and metadata of LP tokens for that pair.
+   * @ledger {Map<PairId, QualifiedShieldedCoinInfo>} lpTotalSupply
+   * @description Mapping of pair hash (pairId) to the total supply and metadata of LP tokens for that pair.
    * The key is the pair hash (Bytes<32>), and the value is the QualifiedShieldedCoinInfo for the LP token.
    */
-  export ledger totalSupply: Map<Bytes<32>, QualifiedShieldedCoinInfo>;
+  export ledger totalSupply: Map<PairId, QualifiedShieldedCoinInfo>;
+
+  /**
+   * @ledger {Map<PairId, Bytes<32>>} color
+   * @description The color of the LP token (Map<Bytes<32>, Bytes<32>>).
+   */
+  export ledger color: Map<PairId, Bytes<32>>;
 
   /**
    * @ledger {Bytes<32>} domain
@@ -85,12 +92,6 @@ module LunarswapLiquidity {
    * @description The number of decimals used for the LP token (e.g., 18).
    */
   export sealed ledger decimals: Uint<8>;
-
-  /**
-   * @ledger {Bytes<32>} color
-   * @description The color of the LP token (Bytes<32>).
-   */
-  export ledger color: Bytes<32>;
 
   /**
    * @title initialize circuit
@@ -133,13 +134,13 @@ module LunarswapLiquidity {
    *
    * @circuitInfo k=9, rows=308
    *
-   * @param {Bytes<32>} pairId - The unique pairId hash of the trading pair.
+   * @param {PairId} pairId - The unique pairId hash of the trading pair.
    *
    * @throws {Error} "LunarswapLiquidity: initializePairLpToken() - Lp token already exists" if LP tokens already exist for this pair.
    *
    * @returns [] - No return values.
    */
-  export circuit initializePairLpToken(pairId: Bytes<32>): [] {
+  export circuit initializePairLpToken(pairId: PairId): [] {
     assert(!totalSupply.member(disclose(pairId)),
            "LunarswapLiquidity: initializePairLpToken() - Lp token already exists"
            );
@@ -148,7 +149,7 @@ module LunarswapLiquidity {
   }
 
   /**
-   * @title getTotalSupply circuit
+   * @title getLpTokenTotalSupply circuit
    * @description Returns the total supply of LP tokens for a specific pair.
    *
    * @remarks
@@ -160,15 +161,15 @@ module LunarswapLiquidity {
    *
    * @circuitInfo k=9, rows=377
    *
-   * @param {Bytes<32>} pairId - The unique pairId hash of the trading pair.
+   * @param {PairId} pairId - The unique pairId hash of the trading pair.
    *
    * @throws {Error} "LunarswapLiquidity: totalSupply() - Lp token not found" if LP tokens don't exist for this pair.
    *
    * @returns {Uint<128>} - The total supply of LP tokens for the pair.
    */
-  export circuit getTotalSupply(pairId: Bytes<32>): QualifiedShieldedCoinInfo {
+  export circuit getLpTokenTotalSupply(pairId: PairId): QualifiedShieldedCoinInfo {
     assert(totalSupply.member(disclose(pairId)),
-           "LunarswapLiquidity: totalSupply() - Lp token not found"
+           "LunarswapLiquidity: getLpTokenTotalSupply() - Lp token not found"
            );
     return totalSupply.lookup(disclose(pairId));
   }
@@ -188,33 +189,34 @@ module LunarswapLiquidity {
    *
    * @circuitInfo k=15, rows=17016
    *
-   * @param {Bytes<32>} pairId - The unique pairId hash of the trading pair.
+   * @param {PairId} pairId - The unique pairId hash of the trading pair.
    * @param {Either<ZswapCoinPublicKey, ContractAddress>} recipient - The recipient of the minted LP tokens.
    * @param {Uint<64>} amount - The amount of LP tokens to mint.
    *
    * @returns {ShieldedCoinInfo} - The minted LP token coin.
    */
-  export circuit mint(pairId: Bytes<32>,
+  export circuit mint(pairId: PairId,
                       recipient: Either<ZswapCoinPublicKey, ContractAddress>,
                       amount: Uint<64>
                       ): ShieldedCoinInfo {
     counter.increment(1);
     const newNonce = evolveNonce(counter, nonce);
     // pairId is used as domainSep in mintShieldedToken
-    const ret = mintShieldedToken(pairId, amount, newNonce, disclose(recipient));
+    const ret = mintShieldedToken(pairId as Bytes<32>, amount, newNonce, disclose(recipient));
 
-    if (Bytes32_isZero(color)) {
-      color = ret.color;
+    if (!color.member(disclose(pairId as PairId))) {
+      color.insert(disclose(pairId as PairId), ret.color);
     }
 
-
-    const newTotalSupply = QualifiedShieldedCoinInfo {
-            nonce: ret.nonce,
-            color: ret.color,
-            value: Uint128_addChecked(totalSupply.lookup(disclose(pairId)).value, amount),
-            mt_index: totalSupply.lookup(disclose(pairId)).mt_index,
-        };
-    totalSupply.insert(disclose(pairId), disclose(newTotalSupply));
+    const newTotalSupply =
+            QualifiedShieldedCoinInfo { nonce: ret.nonce,
+                                        color: ret.color,
+                                        value: Uint128_addChecked(
+                                                 totalSupply.lookup(disclose(pairId as PairId)).value,
+                                                 amount
+                                                 ),
+                                        mt_index: totalSupply.lookup(disclose(pairId as PairId)).mt_index, };
+    totalSupply.insert(disclose(pairId as PairId), disclose(newTotalSupply));
     //totalSupply.insertCoin(pairId, ret, disclose(recipient));
 
     return ret;
@@ -235,7 +237,7 @@ module LunarswapLiquidity {
    *
    * @circuitInfo k=16, rows=43735
    *
-   * @param {Bytes<32>} pairId - The unique pairId hash of the trading pair.
+   * @param {PairId} pairId - The unique pairId hash of the trading pair.
    * @param {ShieldedCoinInfo} coin - The LP token coin to burn.
    * @param {Uint<128>} amount - The amount of LP tokens to burn.
    *
@@ -244,11 +246,8 @@ module LunarswapLiquidity {
    *
    * @returns {ShieldedSendResult} - The result of the burn operation including any change.
    */
-  export circuit burn(pairId: Bytes<32>,
-                      coin: ShieldedCoinInfo,
-                      amount: Uint<128>
-                      ): ShieldedSendResult {
-    assert(totalSupply.member(disclose(pairId)),
+  export circuit burn(pairId: PairId, coin: ShieldedCoinInfo, amount: Uint<128>): ShieldedSendResult {
+    assert(totalSupply.member(disclose(pairId as PairId)),
            "LunarswapLiquidity: totalSupply() - Lp token not found"
            );
     assert(coin.value >= amount, "LunarswapLiquidity: burn() - Insufficient coin value");
@@ -262,13 +261,16 @@ module LunarswapLiquidity {
     //                                     totalSupply.lookup(disclose(pairId)).value,
     //                                     amount
     //                                     ), };
-    const newTotalSupply = QualifiedShieldedCoinInfo {
-            nonce: coin.nonce,
-            color: coin.color,
-            value: Uint128_sub(totalSupply.lookup(disclose(pairId)).value, amount),
-            mt_index: totalSupply.lookup(disclose(pairId)).mt_index, // TODO: needs review
-        };
-    totalSupply.insert(disclose(pairId), disclose(newTotalSupply));
+    const newTotalSupply =
+            QualifiedShieldedCoinInfo { nonce: coin.nonce,
+                                        color: coin.color,
+                                        value: Uint128_sub(
+                                                 totalSupply.lookup(disclose(pairId as PairId)).value,
+                                                 amount
+                                                 ),
+                                        mt_index: totalSupply.lookup(disclose(pairId as PairId)).mt_index, // TODO: needs review
+                                        };
+    totalSupply.insert(disclose(pairId as PairId), disclose(newTotalSupply));
 
     //totalSupply.insertCoin(disclose(pairId), disclose(newTotalSupply), shieldedBurnAddress());
 

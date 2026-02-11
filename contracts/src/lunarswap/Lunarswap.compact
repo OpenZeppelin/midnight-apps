@@ -58,22 +58,26 @@ import { pool, reserves } from "./LunarswapFactory";
 
 import { Pair } from "./LunarswapPair";
 
+import { PairId, ReserveId } from "./LunarswapTypes";
+
 import { totalSupply, name, symbol, decimals, color } from "./LunarswapLiquidity";
 
 import
-  { addLiquidity, removeLiquidity, swapExactTokensForTokens,
-  swapTokensForExactTokens,
-  getTotalSupply,
-  getPair,
-  getPairReserves,
-  isPairExists,
-  getPairId,
-  getAllPairLength,
-  getIdentity,
-  sortCoinByColor,
-  sortQualifiedCoinByColor,
-  getFeeTo,
-  getFeeToSetter, }
+  { addLiquidity,
+    removeLiquidity,
+    swapExactTokensForTokens,
+    swapTokensForExactTokens,
+    getLpTokenTotalSupply,
+    getPair,
+    getPairReserves,
+    isPairExists,
+    getPairId,
+    getAllPairLength,
+    getIdentity,
+    sortCoinByColor,
+    sortQualifiedCoinByColor,
+    getFeeTo,
+    getFeeToSetter, }
   from "./LunarswapRouter";
 
 import { initialize } from "./LunarswapRouter" prefix LunarswapRouter_;
@@ -121,7 +125,7 @@ export { U128, DivResultU128 };
 
 export { ShieldedCoinInfo, QualifiedShieldedCoinInfo, Either, ZswapCoinPublicKey, ContractAddress };
 
-export { Pair };
+export { Pair, PairId, ReserveId };
 
 /**
  * @ledger {Map<Bytes<32>, Pair>} pool
@@ -156,7 +160,7 @@ export { getIdentity, sortCoinByColor, sortQualifiedCoinByColor };
  * @title Liquidity functions
  * @description Functions exported from the LunarswapLiquidity contract.
  */
-export { getTotalSupply };
+export { getLpTokenTotalSupply };
 
 /**
  * @title Fee functions

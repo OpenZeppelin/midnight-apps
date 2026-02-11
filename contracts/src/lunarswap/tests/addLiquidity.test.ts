@@ -98,12 +98,19 @@ describe('addLiquidity', () => {
         usdcCoin,
         nightCoin,
       );
+
+      console.log('reserveUSDC', reserveUSDC);
+      console.log('reserveNIGHT', reserveNIGHT);
+
       expect(reserveUSDC.value).toBe(2000n);
       expect(reserveNIGHT.value).toBe(1000n);
 
       // Check liquidity (should be sqrt(2000 * 1000) - MINIMUM_LIQUIDITY = 414)
       // Liquidity is now tracked via LP token total supply
-      const lpTotalSupply = lunarswap.getTotalSupply(usdcCoin, nightCoin);
+      const lpTotalSupply = lunarswap.getLpTokenTotalSupply(
+        usdcCoin,
+        nightCoin,
+      );
       // Total LP tokens = MINIMUM_LIQUIDITY (1000) + liquidity (414) = 1414
       expect(lpTotalSupply.value).toBe(1414n);
 
@@ -154,7 +161,10 @@ describe('addLiquidity', () => {
 
       // Check liquidity (should be sqrt(1000 * 800) - MINIMUM_LIQUIDITY = 894 - 1 = 893)
       // Total LP tokens = MINIMUM_LIQUIDITY (1) + liquidity (893) = 894
-      const lpTotalSupply = lunarswap.getTotalSupply(usdcCoin, nightCoin);
+      const lpTotalSupply = lunarswap.getLpTokenTotalSupply(
+        usdcCoin,
+        nightCoin,
+      );
       // Total LP tokens = MINIMUM_LIQUIDITY (1) + liquidity (sqrt(800000) - 1)
       // sqrt(800000) = 894 (rounded down), so liquidity = 893, total = 894
       expect(lpTotalSupply.value).toBe(894n);
@@ -258,7 +268,9 @@ describe('addLiquidity', () => {
         expect(pair.volume1Cumulative).toBe(2000n);
       }
 
-      expect(lunarswap.getTotalSupply(usdcCoin1, nightCoin1).value).toBe(2828n); // USDC/NIGHT existing pair
+      expect(lunarswap.getLpTokenTotalSupply(usdcCoin1, nightCoin1).value).toBe(
+        2828n,
+      ); // USDC/NIGHT existing pair
       expect(pair.kLast).toBe(0n);
     });
 
@@ -293,7 +305,10 @@ describe('addLiquidity', () => {
         recipient,
       );
 
-      const lpTotalSupply = lunarswap.getTotalSupply(usdcCoin, nightCoin);
+      const lpTotalSupply = lunarswap.getLpTokenTotalSupply(
+        usdcCoin,
+        nightCoin,
+      );
 
       // LP tokens should be sqrt(2000 * 1000) = 1414
       const expectedLPTokens = 1414n;
@@ -410,7 +425,9 @@ describe('addLiquidity', () => {
       );
       expect(reservesUSDC.value).toBe(3000n);
       expect(reservesDUST.value).toBe(1500n);
-      expect(lunarswap.getTotalSupply(usdcCoin1, moonCoin1).value).toBe(2121n); // USDC/MOON existing pair
+      expect(lunarswap.getLpTokenTotalSupply(usdcCoin1, moonCoin1).value).toBe(
+        2121n,
+      ); // USDC/MOON existing pair
       expect(updatedPair.kLast).toBe(0n);
     });
 
@@ -443,7 +460,7 @@ describe('addLiquidity', () => {
         recipient,
       );
 
-      const lpTotalSupply = lunarswap.getTotalSupply(usdcCoin, moonCoin);
+      const lpTotalSupply = lunarswap.getLpTokenTotalSupply(usdcCoin, moonCoin);
 
       // LP tokens should be sqrt(2000 * 1000) - MINIMUM_LIQUIDITY
       const expectedLPTokens = 1414n; // sqrt(2000 * 1000) ≈ 1414
@@ -494,7 +511,9 @@ describe('addLiquidity', () => {
       );
       expect(reserveNight.value).toBe(8000n);
       expect(reserveDust.value).toBe(12000n);
-      expect(lunarswap.getTotalSupply(nightCoin, moonCoin).value).toBe(9797n); // NIGHT/MOON new pair
+      expect(lunarswap.getLpTokenTotalSupply(nightCoin, moonCoin).value).toBe(
+        9797n,
+      ); // NIGHT/MOON new pair
       expect(pair.kLast).toBe(0n);
     });
 
@@ -567,7 +586,7 @@ describe('addLiquidity', () => {
       );
       expect(reservesNight.value).toBe(12000n);
       expect(reservesDust.value).toBe(18000n);
-      expect(lunarswap.getTotalSupply(nightCoin1, moonCoin1).value).toBe(
+      expect(lunarswap.getLpTokenTotalSupply(nightCoin1, moonCoin1).value).toBe(
         14695n,
       ); // NIGHT/MOON existing pair
       expect(updatedPair.kLast).toBe(0n);
@@ -603,7 +622,10 @@ describe('addLiquidity', () => {
       );
 
       // Use getPairId to get the correct order for getTotalSupply
-      const lpTotalSupply = lunarswap.getTotalSupply(nightCoin, moonCoin);
+      const lpTotalSupply = lunarswap.getLpTokenTotalSupply(
+        nightCoin,
+        moonCoin,
+      );
 
       // LP tokens should be sqrt(8000 * 12000) - MINIMUM_LIQUIDITY
       const expectedLPTokens = 9797n; // sqrt(8000 * 12000) ≈ 9797
@@ -645,7 +667,7 @@ describe('addLiquidity', () => {
 
       // Should have minimum liquidity of 1000
       expect(
-        lunarswap.getTotalSupply(usdcCoin, nightCoin).value,
+        lunarswap.getLpTokenTotalSupply(usdcCoin, nightCoin).value,
       ).toBeGreaterThan(1000n);
     });
 
@@ -688,7 +710,9 @@ describe('addLiquidity', () => {
       );
       expect(reserveUSDC.value).toBe(10000n);
       expect(reserveNIGHT.value).toBe(10000n);
-      expect(lunarswap.getTotalSupply(usdcCoin, nightCoin).value).toBe(10000n); // equal token amounts
+      expect(lunarswap.getLpTokenTotalSupply(usdcCoin, nightCoin).value).toBe(
+        10000n,
+      ); // equal token amounts
       expect(pair.kLast).toBe(0n);
     });
 
@@ -903,7 +927,9 @@ describe('addLiquidity', () => {
         recipient,
       );
 
-      expect(lunarswap.getTotalSupply(usdcCoin, nightCoin).value).toBe(2000n);
+      expect(lunarswap.getLpTokenTotalSupply(usdcCoin, nightCoin).value).toBe(
+        2000n,
+      );
     });
   });
 
@@ -1147,7 +1173,9 @@ describe('addLiquidity', () => {
       );
 
       // Verify the pair has accumulated liquidity
-      expect(lunarswap.getTotalSupply(usdcCoin1, nightCoin1).value).toBe(6000n); // multiple rapid additions
+      expect(lunarswap.getLpTokenTotalSupply(usdcCoin1, nightCoin1).value).toBe(
+        6000n,
+      ); // multiple rapid additions
     });
 
     /**
@@ -1217,6 +1245,7 @@ describe('addLiquidity', () => {
         result3.amountBMin,
         recipient,
       );
+
       expect(lunarswap.getAllPairLength()).toBe(3n);
     });
 
@@ -1257,7 +1286,9 @@ describe('addLiquidity', () => {
       );
 
       // Use getPairId to get the correct order for getIdentity
-      expect(lunarswap.getTotalSupply(usdcCoin, nightCoin).value).toBe(2000n);
+      expect(lunarswap.getLpTokenTotalSupply(usdcCoin, nightCoin).value).toBe(
+        2000n,
+      );
     });
   });
 });

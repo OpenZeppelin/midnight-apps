@@ -26,7 +26,9 @@ module LunarswapPair {
       ZswapCoinPublicKey,
       ContractAddress,
       Either,
-      left }
+      left,
+      sendImmediateShielded,
+      shieldedBurnAddress }
     from CompactStandardLibrary;
   import { isKeyOrAddressZero, eitherZPK } from "../openzeppelin/Utils" prefix Utils_;
 
@@ -39,14 +41,16 @@ module LunarswapPair {
   import { getIdentity } from "./LunarswapLibrary" prefix LunarswapLibrary_;
   import { getFeeTo } from "./LunarswapFee" prefix LunarswapFee_;
   import
-    { initialize, initializePairLpToken, getTotalSupply, mint, burn }
-    from "./LunarswapLiquidity"
+    { initialize, initializePairLpToken, getLpTokenTotalSupply, mint, burn }
+    from LunarswapLiquidity
       prefix LunarswapLiquidity_;
+
+  import { PairId, ReserveId } from LunarswapTypes;
 
   /**
    * @struct Pair
    * @description
-   * Represents a Lunarswap trading pair, tracking cumulative price and volume statistics,
+   * Represents a Lunarswap pair, tracking cumulative price and volume statistics,
    * as well as the last recorded product of reserves (kLast) for fee calculations.
    *
    * @field {Bytes<32>} token0Type - The color (type) of the first token in the pair.
@@ -62,8 +66,8 @@ module LunarswapPair {
     token0Type: Bytes<32>,
     token1Type: Bytes<32>,
     lpTokenType: Bytes<32>,
-    reserve0Id: Bytes<32>,
-    reserve1Id: Bytes<32>,
+    reserve0Id: ReserveId,
+    reserve1Id: ReserveId,
     price0VolCumulative: Uint<128>,
     price1VolCumulative: Uint<128>,
     volume0Cumulative: Uint<128>,
@@ -158,20 +162,20 @@ module LunarswapPair {
    * @returns {Pair} - The initialized pair with zero reserves and metadata.
    */
   export circuit initializePair(
-                   pairId: Bytes<32>,
+                   pairId: PairId,
                    token0: ShieldedCoinInfo,
                    token1: ShieldedCoinInfo
                    ): Pair {
     LunarswapLiquidity_initializePairLpToken(pairId);
-    const reserve0Id = LunarswapLibrary_getIdentity(pairId, token0.color, false);
-    const reserve1Id = LunarswapLibrary_getIdentity(pairId, token1.color, false);
+    const reserve0Id = LunarswapLibrary_getIdentity(pairId as Bytes<32>, token0.color, false);
+    const reserve1Id = LunarswapLibrary_getIdentity(pairId as Bytes<32>, token1.color, false);
 
     return Pair { token0Type: token0.color,
                   token1Type: token1.color,
                   // TODO: calculate the expected lpTokenType
                   lpTokenType: default<Bytes<32>>,
-                  reserve0Id: reserve0Id,
-                  reserve1Id: reserve1Id,
+                  reserve0Id: reserve0Id as ReserveId,
+                  reserve1Id: reserve1Id as ReserveId,
                   price0VolCumulative: default<Uint<128>>,
                   price1VolCumulative: default<Uint<128>>,
                   volume0Cumulative: default<Uint<128>>,
@@ -216,7 +220,7 @@ module LunarswapPair {
    *
    * @returns {[Pair, Uint<128>]} - The updated pair, liquidity minted.
    */
-  export circuit mint(pairId: Bytes<32>,
+  export circuit mint(pairId: PairId,
                       pair: Pair,
                       amount0: Uint<128>,
                       amount1: Uint<128>,
@@ -232,7 +236,7 @@ module LunarswapPair {
     // TODO: review the risk of using totalSupply here. Because of the nature of UTXO that
     // a user could send the LP tokens to the burn address directly without using the burn function,
     // but the totalSupply will not be updated.
-    const totalSupply = LunarswapLiquidity_getTotalSupply(pairId).value;
+    const totalSupply = LunarswapLiquidity_getLpTokenTotalSupply(pairId).value;
     if (totalSupply == 0) {
       // liquidity = (√amount0 * amount1) - MINIMUM_LIQUIDITY = Uint<128>
       // TODO: review disclose
@@ -251,7 +255,7 @@ module LunarswapPair {
       //LunarswapLiquidity_mint(pairId, burn_address(), MINIMUM_LIQUIDITY());
       const lpTokens = LunarswapLiquidity_mint(pairId, to, liquidity as Uint<64>);
       // Send the minimum liquidity to the contract address itself to lock the minimum liquidity
-      // send_immediate(minLiquidityCoinInfo, burn_address(), MINIMUM_LIQUIDITY());
+      // sendImmediateShielded(lpTokens, shieldedBurnAddress(), MINIMUM_LIQUIDITY());
 
       const updatedPair =
               _update(pair,
@@ -315,7 +319,7 @@ module LunarswapPair {
    * @returns {[Boolean, Uint<128>]} - Whether fees are enabled and the updated kLast value.
    */
   circuit _mintFee(
-            pairId: Bytes<32>,
+            pairId: PairId,
             reserve0: Uint<128>,
             reserve1: Uint<128>,
             kLast: Uint<128>
@@ -333,7 +337,7 @@ module LunarswapPair {
         const rootKLast = disclose(Uint128_sqrt(kLast));
         if (rootK > rootKLast) {
           // TODO: review the security of the totalSupply.
-          const totalSupply = LunarswapLiquidity_getTotalSupply(pairId).value;
+          const totalSupply = LunarswapLiquidity_getLpTokenTotalSupply(pairId).value;
           const numerator = Uint128_mulChecked(Uint128_sub(rootK, rootKLast), totalSupply);
           const denominator = Uint128_addChecked(Uint128_mulChecked(rootK, 5), rootKLast);
           const liquidity = disclose(Uint128_div(numerator, denominator));
@@ -376,7 +380,7 @@ module LunarswapPair {
    *
    * @returns {[Pair, Uint<128>, Uint<128>]} - The updated pair, token0, token1.
    */
-  export circuit burn(pairId: Bytes<32>,
+  export circuit burn(pairId: PairId,
                       pair: Pair,
                       liquidity: ShieldedCoinInfo,
                       token0Type: Bytes<32>,
@@ -391,7 +395,7 @@ module LunarswapPair {
     // transferred to the recipient yet.
     const balance0 = reserve0.value;
     const balance1 = reserve1.value;
-    const totalSupply = LunarswapLiquidity_getTotalSupply(pairId).value;
+    const totalSupply = LunarswapLiquidity_getLpTokenTotalSupply(pairId).value;
 
     const [isFeeOn, kLast] = _mintFee(pairId, reserve0.value, reserve1.value, pair.kLast);
     // Call the internal _burn circuit and return its result
@@ -438,7 +442,7 @@ module LunarswapPair {
    *
    * @returns {[Uint<128>, Uint<128>]} - The amounts of token0 and token1 returned.
    */
-  circuit _burn(pairId: Bytes<32>,
+  circuit _burn(pairId: PairId,
                 pair: Pair,
                 token0Type: Bytes<32>,
                 token1Type: Bytes<32>,
@@ -521,7 +525,7 @@ module LunarswapPair {
    * @throws {Error} "LunarswapPair: swap() - k" if the product invariant is violated.
    */
   // TODO: support flash swap that requires contracts to contracts calls.
-  export circuit swap(pairId: Bytes<32>,
+  export circuit swap(pairId: PairId,
                       pair: Pair,
                       balance0: Uint<128>,
                       balance1: Uint<128>,
@@ -669,5 +673,25 @@ module LunarswapPair {
               pair.volume0Cumulative,
               pair.volume1Cumulative];
     }
+  }
+
+  /**
+   * @title getLpTokenTotalSupply circuit
+   * @description Returns the total supply of LP tokens for a specific pair.
+   *
+   * @remarks
+   *  As LunarswapPair is a parent module for LunarswapLiquidity,
+   *  we need to wrap the LunarswapLiquidity_getLpTokenTotalSupply circuit in a wrapper function.
+   *  This is necessary to ensure that the state is the same as the parent module otherwise
+   *  the state will not be the same.
+   *
+   * @circuitInfo k=, rows=
+   *
+   * @param {PairId} pairId - The unique pairId hash of the pair.
+   *
+   * @returns {QualifiedShieldedCoinInfo} - The total supply of LP tokens for the pair.
+   */
+  export circuit getLpTokenTotalSupply(pairId: PairId): QualifiedShieldedCoinInfo {
+    return LunarswapLiquidity_getLpTokenTotalSupply(pairId);
   }
 }

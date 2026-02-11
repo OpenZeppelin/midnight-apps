@@ -7,12 +7,14 @@ import CompactStandardLibrary;
 
 import "../../../LunarswapPair" prefix LunarswapPair_;
 
+import { PairId } from "../../../LunarswapTypes";
+
 // Helper for test suite: toggling this variable activates circuit metadata reporting.
 // Only increases circuit size by 3 rows per exposed circuit.
 ledger toImpure: Boolean;
 
 export circuit initializePair(
-                 pairId: Bytes<32>,
+                 pairId: PairId,
                  token0: ShieldedCoinInfo,
                  token1: ShieldedCoinInfo
                  ): LunarswapPair_Pair {
@@ -21,7 +23,7 @@ export circuit initializePair(
   return disclose(result);
 }
 
-export circuit mint(pairId: Bytes<32>,
+export circuit mint(pairId: PairId,
                     pair: LunarswapPair_Pair,
                     amount0: Uint<128>,
                     amount1: Uint<128>,
@@ -43,7 +45,7 @@ export circuit mint(pairId: Bytes<32>,
   return [disclose(resultPair), disclose(resultLiquidity)];
 }
 
-export circuit burn(pairId: Bytes<32>,
+export circuit burn(pairId: PairId,
                     pair: LunarswapPair_Pair,
                     liquidity: ShieldedCoinInfo,
                     token0Type: Bytes<32>,
@@ -67,7 +69,7 @@ export circuit burn(pairId: Bytes<32>,
   return [disclose(resultPair), disclose(resultAmount0), disclose(resultAmount1)];
 }
 
-export circuit swap(pairId: Bytes<32>,
+export circuit swap(pairId: PairId,
                     pair: LunarswapPair_Pair,
                     balance0: Uint<128>,
                     balance1: Uint<128>,

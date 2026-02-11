@@ -19,7 +19,9 @@ pragma language_version >= 0.20.0;
  * - Price calculation and quoting (quote, getAmountOut, getAmountIn)
  */
 module LunarswapLibrary {
-  import { persistentHash, evolveNonce, ShieldedCoinInfo, QualifiedShieldedCoinInfo } from CompactStandardLibrary;
+  import
+    { persistentHash, evolveNonce, ShieldedCoinInfo, QualifiedShieldedCoinInfo }
+    from CompactStandardLibrary;
 
   import { sub, addChecked, div, mulChecked } from "../math/Uint128" prefix Uint128_;
   import { lt } from "../math/Bytes32" prefix Bytes32_;
@@ -89,7 +91,7 @@ module LunarswapLibrary {
   export circuit sortByColor<T>(a: T, b: T): [T, T] {
     assert(a.color != b.color, "LunarswapLibrary: sortByColor() - Identical colors");
     const first = Bytes32_lt(a.color, b.color) ? a : b;
-    const second = Bytes32_lt(b.color, a.color) ? b : a;
+    const second = Bytes32_lt(a.color, b.color) ? b : a;
     return [first, second];
   }
 
@@ -109,7 +111,10 @@ module LunarswapLibrary {
    *
    * @returns {[ShieldedCoinInfo, ShieldedCoinInfo]} - The sorted pair [smaller, larger] by color.
    */
-  export circuit sortCoinByColor(coin: ShieldedCoinInfo, coin2: ShieldedCoinInfo): [ShieldedCoinInfo, ShieldedCoinInfo] {
+  export circuit sortCoinByColor(
+                   coin: ShieldedCoinInfo,
+                   coin2: ShieldedCoinInfo
+                   ): [ShieldedCoinInfo, ShieldedCoinInfo] {
     return disclose(sortByColor<ShieldedCoinInfo>(disclose(coin), disclose(coin2)));
   }
 
@@ -129,7 +134,10 @@ module LunarswapLibrary {
    *
    * @returns {[QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo]} - The sorted pair [smaller, larger] by color.
    */
-  export circuit sortQualifiedCoinByColor(coin: QualifiedShieldedCoinInfo, coin2: QualifiedShieldedCoinInfo): [QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo] {
+  export circuit sortQualifiedCoinByColor(
+                   coin: QualifiedShieldedCoinInfo,
+                   coin2: QualifiedShieldedCoinInfo
+                   ): [QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo] {
     return disclose(sortByColor<QualifiedShieldedCoinInfo>(disclose(coin), disclose(coin)));
   }
 

@@ -183,10 +183,10 @@ export class LunarswapSimulator extends LunarswapSimulatorBase {
     return [sortedTokenA, sortedTokenB, amount0Min, amount1Min];
   }
 
-  public getTotalSupply(
+  public getLpTokenTotalSupply(
     tokenA: ShieldedCoinInfo,
     tokenB: ShieldedCoinInfo,
   ): QualifiedShieldedCoinInfo {
-    return this.circuits.impure.getTotalSupply(tokenA, tokenB);
+    return this.circuits.impure.getLpTokenTotalSupply(tokenA, tokenB);
   }
 }
