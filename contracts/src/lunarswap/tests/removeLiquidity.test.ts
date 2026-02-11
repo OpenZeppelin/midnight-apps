@@ -4,9 +4,9 @@ import {
   calculateRemoveLiquidityMinimums,
   SLIPPAGE_TOLERANCE,
 } from '@openzeppelin-midnight-apps/lunarswap-sdk';
+import { ShieldedFungibleTokenSimulator } from '@src/shielded-token/test/mocks/ShieldedFungibleTokenSimulator.js';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { LunarswapSimulator } from './mocks/LunarswapSimulator.js';
-import { ShieldedFungibleTokenSimulator } from './mocks/ShieldedFungibleTokenSimulator.js';
 
 const NONCE = new Uint8Array(32).fill(0x44);
 const DOMAIN_USDC = new Uint8Array(32).fill(0x01);

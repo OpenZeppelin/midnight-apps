@@ -88,7 +88,7 @@ module LunarswapLibrary {
    */
   export circuit sortByColor<T>(a: T, b: T): [T, T] {
     assert(a.color != b.color, "LunarswapLibrary: sortByColor() - Identical colors");
-    const first = Bytes32_lt(a.color, b.color) ? disclose(a) : disclose(b);
+    const first = Bytes32_lt(a.color, b.color) ? a : b;
     const second = first == a ? b : a;
     return [first, second];
   }

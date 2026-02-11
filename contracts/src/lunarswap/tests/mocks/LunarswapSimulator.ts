@@ -15,7 +15,7 @@ import {
 import {
   LunarswapPrivateState,
   LunarswapWitnesses,
-} from './witnesses/Lunarswap.js';
+} from '../../witnesses/Lunarswap.js';
 
 /**
  * Base simulator for Lunarswap contract
