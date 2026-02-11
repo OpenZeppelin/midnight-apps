@@ -2,12 +2,15 @@ import {
   type BaseSimulatorOptions,
   createSimulator,
 } from '@openzeppelin/compact-tools-simulator';
+import type { Witnesses } from '@src/artifacts/math/test/mocks/contracts/Vector8.mock/contract/index.js';
 import {
   Contract,
   ledger,
 } from '@src/artifacts/math/test/mocks/contracts/Vector8.mock/contract/index.js';
-import type { Vector8PrivateState } from '@src/math/test/mocks/witnesses/Vector8.js';
-import { Vector8Witnesses } from '@src/math/test/mocks/witnesses/Vector8.js';
+
+export type Vector8PrivateState = Record<string, never>;
+
+export const Vector8Witnesses = (): Witnesses<Vector8PrivateState> => ({});
 
 /**
  * Base simulator for Vector8 mock contract
