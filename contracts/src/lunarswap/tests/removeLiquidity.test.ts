@@ -62,13 +62,13 @@ describe('removeLiquidity', () => {
      * Tests removing liquidity from a USDC/NIGHT pair
      *
      * Mathematical calculations:
-     * - Initial: 2000 USDC, 1000 NIGHT → liquidity = 414
-     * - Total LP supply = 1414 (MINIMUM_LIQUIDITY + liquidity)
-     * - Remove all burnable LP tokens: 414 LP tokens
-     * - Expected token0 amount = (414 * 2000) / 1414 = 585 (integer division)
-     * - Expected token1 amount = (414 * 1000) / 1414 = 292 (integer division)
-     * - Remaining reserves: 1415 USDC (2000 - 585), 708 NIGHT (1000 - 292)
-     * - Remaining LP tokens: 1000 (MINIMUM_LIQUIDITY)
+     * - Initial: 2000 USDC, 1000 NIGHT → liquidity = sqrt(2,000,000) - MINIMUM_LIQUIDITY(1) = 1413
+     * - Total LP supply = 1413
+     * - Remove LP tokens: 1413 - 1000 = 413 LP tokens
+     * - Expected token0 amount = (413 * 2000) / 1413 = 584 (integer division)
+     * - Expected token1 amount = (413 * 1000) / 1413 = 292 (integer division)
+     * - Remaining reserves: 1416 USDC (2000 - 584), 708 NIGHT (1000 - 292)
+     * - Remaining LP tokens: 1000
      *
      * Expected: Correct proportional token amounts returned, reserves updated
      */
@@ -94,7 +94,7 @@ describe('removeLiquidity', () => {
 
       // Get initial pair state
       lunarswap.getPair(usdcCoin, nightCoin);
-      const initialLpTotalSupply = lunarswap.getTotalSupply(
+      const initialLpTotalSupply = lunarswap.getLpTokenTotalSupply(
         usdcCoin,
         nightCoin,
       );
@@ -131,7 +131,7 @@ describe('removeLiquidity', () => {
       );
 
       // Get updated pair state
-      const updatedLpTotalSupply = lunarswap.getTotalSupply(
+      const updatedLpTotalSupply = lunarswap.getLpTokenTotalSupply(
         usdcCoin,
         nightCoin,
       );
@@ -147,7 +147,7 @@ describe('removeLiquidity', () => {
         usdcCoin,
         nightCoin,
       );
-      expect(reserveUSDC.value).toBe(1415n);
+      expect(reserveUSDC.value).toBe(1416n);
       expect(reserveNIGHT.value).toBe(708n);
     });
 
@@ -155,13 +155,15 @@ describe('removeLiquidity', () => {
      * Tests removing all burnable liquidity from a USDC/NIGHT pair
      *
      * Mathematical calculations:
-     * - Initial: 2000 USDC, 1000 NIGHT → liquidity = 414
-     * - MINIMUM_LIQUIDITY = 1000, total LP supply = 1414
-     * - Remove all burnable LP tokens: 414
-     * - Remaining LP tokens: 1000 (MINIMUM_LIQUIDITY)
+     * - Initial: 2000 USDC, 1000 NIGHT → liquidity = sqrt(2,000,000) - MINIMUM_LIQUIDITY(1) = 1413
+     * - Total LP supply = 1413
+     * - Remove all burnable LP tokens: 1413 - 1000 = 413
+     * - Remaining LP tokens: 1000
      * - Expected reserves (integer division):
-     *   USDC: (1000 * 2000) / 1414 = 1415
-     *   NIGHT: (1000 * 1000) / 1414 = 708
+     *   amount0 = (413 * 2000) / 1413 = 584
+     *   amount1 = (413 * 1000) / 1413 = 292
+     *   USDC: 2000 - 584 = 1416
+     *   NIGHT: 1000 - 292 = 708
      *
      * Expected: All removable liquidity removed, MINIMUM_LIQUIDITY remains, reserves match proportionally
      */
@@ -187,7 +189,7 @@ describe('removeLiquidity', () => {
 
       // Get initial pair state
       lunarswap.getPair(usdcCoin, nightCoin);
-      const initialLpTotalSupply = lunarswap.getTotalSupply(
+      const initialLpTotalSupply = lunarswap.getLpTokenTotalSupply(
         usdcCoin,
         nightCoin,
       );
@@ -224,7 +226,7 @@ describe('removeLiquidity', () => {
       );
 
       // Get updated pair state
-      const updatedLpTotalSupply = lunarswap.getTotalSupply(
+      const updatedLpTotalSupply = lunarswap.getLpTokenTotalSupply(
         usdcCoin,
         nightCoin,
       );
@@ -237,7 +239,7 @@ describe('removeLiquidity', () => {
         usdcCoin,
         nightCoin,
       );
-      expect(reserveUSDC.value).toBe(1415n);
+      expect(reserveUSDC.value).toBe(1416n);
       expect(reserveNIGHT.value).toBe(708n);
     });
 
@@ -275,7 +277,7 @@ describe('removeLiquidity', () => {
 
       // Get initial pair state
       lunarswap.getPair(usdcCoin, nightCoin);
-      const initialLpTotalSupply = lunarswap.getTotalSupply(
+      const initialLpTotalSupply = lunarswap.getLpTokenTotalSupply(
         usdcCoin,
         nightCoin,
       );
@@ -312,7 +314,7 @@ describe('removeLiquidity', () => {
       );
 
       // Get updated pair state
-      const updatedLpTotalSupply = lunarswap.getTotalSupply(
+      const updatedLpTotalSupply = lunarswap.getLpTokenTotalSupply(
         usdcCoin,
         nightCoin,
       );
@@ -366,7 +368,7 @@ describe('removeLiquidity', () => {
 
       // Get initial pair state
       lunarswap.getPair(nightCoin, moonCoin);
-      const initialLpTotalSupply = lunarswap.getTotalSupply(
+      const initialLpTotalSupply = lunarswap.getLpTokenTotalSupply(
         nightCoin,
         moonCoin,
       );
@@ -403,7 +405,7 @@ describe('removeLiquidity', () => {
       );
 
       // Get updated pair state
-      const updatedLpTotalSupply = lunarswap.getTotalSupply(
+      const updatedLpTotalSupply = lunarswap.getLpTokenTotalSupply(
         nightCoin,
         moonCoin,
       );
@@ -460,7 +462,7 @@ describe('removeLiquidity', () => {
 
       // Get initial pair state
       lunarswap.getPair(usdcCoin, nightCoin);
-      const initialLpTotalSupply = lunarswap.getTotalSupply(
+      const initialLpTotalSupply = lunarswap.getLpTokenTotalSupply(
         usdcCoin,
         nightCoin,
       );
@@ -520,7 +522,7 @@ describe('removeLiquidity', () => {
 
       // Get initial pair state
       lunarswap.getPair(usdcCoin, nightCoin);
-      const initialLpTotalSupply = lunarswap.getTotalSupply(
+      const initialLpTotalSupply = lunarswap.getLpTokenTotalSupply(
         usdcCoin,
         nightCoin,
       );
@@ -577,7 +579,7 @@ describe('removeLiquidity', () => {
 
       // Get initial pair state
       lunarswap.getPair(usdcCoin, nightCoin);
-      const initialLpTotalSupply = lunarswap.getTotalSupply(
+      const initialLpTotalSupply = lunarswap.getLpTokenTotalSupply(
         usdcCoin,
         nightCoin,
       );
@@ -670,7 +672,7 @@ describe('removeLiquidity', () => {
 
       // Get initial pair state
       lunarswap.getPair(usdcCoin, nightCoin);
-      const initialLpTotalSupply = lunarswap.getTotalSupply(
+      const initialLpTotalSupply = lunarswap.getLpTokenTotalSupply(
         usdcCoin,
         nightCoin,
       );
@@ -692,7 +694,7 @@ describe('removeLiquidity', () => {
           recipient,
         );
         // If successful, verify the change
-        const updatedLpTotalSupply = lunarswap.getTotalSupply(
+        const updatedLpTotalSupply = lunarswap.getLpTokenTotalSupply(
           usdcCoin,
           nightCoin,
         );
@@ -749,7 +751,10 @@ describe('removeLiquidity', () => {
 
       // Get initial pair state
       lunarswap.getPair(usdcCoin, nightCoin);
-      let currentLpTotalSupply = lunarswap.getTotalSupply(usdcCoin, nightCoin);
+      let currentLpTotalSupply = lunarswap.getLpTokenTotalSupply(
+        usdcCoin,
+        nightCoin,
+      );
 
       try {
         // First removal: 20% of LP tokens
@@ -783,7 +788,10 @@ describe('removeLiquidity', () => {
           recipient,
         );
 
-        currentLpTotalSupply = lunarswap.getTotalSupply(usdcCoin, nightCoin);
+        currentLpTotalSupply = lunarswap.getLpTokenTotalSupply(
+          usdcCoin,
+          nightCoin,
+        );
 
         // Second removal: 30% of remaining LP tokens
         const secondRemoval = (currentLpTotalSupply.value * 3n) / 10n;
@@ -816,7 +824,10 @@ describe('removeLiquidity', () => {
           recipient,
         );
 
-        currentLpTotalSupply = lunarswap.getTotalSupply(usdcCoin, nightCoin);
+        currentLpTotalSupply = lunarswap.getLpTokenTotalSupply(
+          usdcCoin,
+          nightCoin,
+        );
 
         // Third removal: 50% of remaining LP tokens
         const thirdRemoval = currentLpTotalSupply.value / 2n;
@@ -850,7 +861,7 @@ describe('removeLiquidity', () => {
         );
 
         // Verify final state
-        const finalLpTotalSupply = lunarswap.getTotalSupply(
+        const finalLpTotalSupply = lunarswap.getLpTokenTotalSupply(
           usdcCoin,
           nightCoin,
         );
@@ -910,7 +921,7 @@ describe('removeLiquidity', () => {
       );
 
       // Get initial pair state
-      lunarswap.getTotalSupply(usdcCoin, nightCoin);
+      lunarswap.getLpTokenTotalSupply(usdcCoin, nightCoin);
 
       // Create LP token with completely wrong nonce and color
       const invalidLpTokenCoin = {
@@ -962,7 +973,7 @@ describe('removeLiquidity', () => {
       );
 
       // Get initial pair state
-      const initialLpTotalSupply = lunarswap.getTotalSupply(
+      const initialLpTotalSupply = lunarswap.getLpTokenTotalSupply(
         usdcCoin,
         nightCoin,
       );
@@ -986,7 +997,7 @@ describe('removeLiquidity', () => {
       );
 
       // Verify the operation succeeded
-      const updatedLpTotalSupply = lunarswap.getTotalSupply(
+      const updatedLpTotalSupply = lunarswap.getLpTokenTotalSupply(
         usdcCoin,
         nightCoin,
       );
@@ -1059,7 +1070,7 @@ describe('removeLiquidity', () => {
       );
 
       // Get initial pair state
-      const initialLpTotalSupply = lunarswap.getTotalSupply(
+      const initialLpTotalSupply = lunarswap.getLpTokenTotalSupply(
         usdcCoin,
         nightCoin,
       );
@@ -1119,7 +1130,7 @@ describe('removeLiquidity', () => {
       );
 
       // Get initial pair state
-      const initialLpTotalSupply = lunarswap.getTotalSupply(
+      const initialLpTotalSupply = lunarswap.getLpTokenTotalSupply(
         usdcCoin,
         nightCoin,
       );
@@ -1175,7 +1186,7 @@ describe('removeLiquidity', () => {
       );
 
       // Get initial pair state
-      const initialLpTotalSupply = lunarswap.getTotalSupply(
+      const initialLpTotalSupply = lunarswap.getLpTokenTotalSupply(
         usdcCoin,
         nightCoin,
       );
@@ -1233,7 +1244,7 @@ describe('removeLiquidity', () => {
       );
 
       // Get initial pair state
-      const initialLpTotalSupply = lunarswap.getTotalSupply(
+      const initialLpTotalSupply = lunarswap.getLpTokenTotalSupply(
         usdcCoin,
         nightCoin,
       );
@@ -1257,7 +1268,7 @@ describe('removeLiquidity', () => {
       );
 
       // Verify the operation succeeded
-      const updatedLpTotalSupply = lunarswap.getTotalSupply(
+      const updatedLpTotalSupply = lunarswap.getLpTokenTotalSupply(
         usdcCoin,
         nightCoin,
       );

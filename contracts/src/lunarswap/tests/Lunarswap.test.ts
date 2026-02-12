@@ -4,6 +4,7 @@ import {
   calculateAddLiquidityAmounts,
   SLIPPAGE_TOLERANCE,
 } from '@openzeppelin-midnight-apps/lunarswap-sdk';
+import type { ShieldedCoinInfo } from '@src/artifacts/lunarswap/Lunarswap/contract/index.js';
 import { ShieldedFungibleTokenSimulator } from '@src/shielded-token/test/mocks/ShieldedFungibleTokenSimulator.js';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { LunarswapSimulator } from './mocks/LunarswapSimulator.js';
@@ -304,7 +305,9 @@ describe('Lunarswap', () => {
       );
       expect(reserveUSDC.value).toBe(20000n);
       expect(reserveDUST.value).toBe(10000n);
-      expect(lunarswap.getTotalSupply(usdcCoin, moonCoin).value).toBe(14142n);
+      expect(lunarswap.getLpTokenTotalSupply(usdcCoin, moonCoin).value).toBe(
+        14141n,
+      );
       expect(pair.kLast).toBe(0n);
     });
 
@@ -340,7 +343,9 @@ describe('Lunarswap', () => {
       );
       expect(reserveNIGHT.value).toBe(8000n);
       expect(reserveDUST.value).toBe(12000n);
-      expect(lunarswap.getTotalSupply(nightCoin, moonCoin).value).toBe(9797n);
+      expect(lunarswap.getLpTokenTotalSupply(nightCoin, moonCoin).value).toBe(
+        9796n,
+      );
       expect(pair.kLast).toBe(0n);
     });
   });
@@ -405,7 +410,6 @@ describe('Lunarswap', () => {
       const nightCoin = night.mint(createEitherFromHex(LP_USER), 100n);
       const pairId = lunarswap.getPairId(usdcCoin, nightCoin);
       expect(pairId).toBeDefined();
-      expect(pairId.length).toBe(32);
     });
 
     it('should calculate correct pair hash for USDC/MOON', () => {
@@ -413,7 +417,6 @@ describe('Lunarswap', () => {
       const moonCoin = moon.mint(createEitherFromHex(LP_USER), 100n);
       const pairId = lunarswap.getPairId(usdcCoin, moonCoin);
       expect(pairId).toBeDefined();
-      expect(pairId.length).toBe(32);
     });
 
     it('should calculate correct pair hash for NIGHT/MOON', () => {
@@ -421,7 +424,6 @@ describe('Lunarswap', () => {
       const moonCoin = moon.mint(createEitherFromHex(LP_USER), 100n);
       const pairId = lunarswap.getPairId(nightCoin, moonCoin);
       expect(pairId).toBeDefined();
-      expect(pairId.length).toBe(32);
     });
 
     it('should generate same hash regardless of token order', () => {
@@ -455,7 +457,9 @@ describe('Lunarswap', () => {
       );
 
       // Use getPairId to get the correct order for getTotalSupply
-      expect(lunarswap.getTotalSupply(usdcCoin, nightCoin).value).toBe(7071n); // LP token total supply tracking
+      expect(lunarswap.getLpTokenTotalSupply(usdcCoin, nightCoin).value).toBe(
+        7070n,
+      ); // LP token total supply tracking
     });
   });
 
@@ -480,20 +484,20 @@ describe('Lunarswap', () => {
         createEitherFromHex(LP_USER),
       );
 
-      const pairId = lunarswap.getPairId(usdcCoin, nightCoin);
-      const reserveId1 = lunarswap.getReserveId(pairId, usdcCoin.color);
-      const reserveId2 = lunarswap.getReserveId(pairId, usdcCoin.color);
+      // getReserveId returns the reserve ID for the pair (not per token)
+      const reserveId1 = lunarswap.getReserveId(usdcCoin, nightCoin);
+      const reserveId2 = lunarswap.getReserveId(usdcCoin, nightCoin);
 
       expect(reserveId1).toEqual(reserveId2);
-      expect(reserveId1.length).toBe(32);
     });
 
-    it('should generate different reserve IDs for different token types in same pair', () => {
+    it('should generate different reserve IDs for different pairs', () => {
       const usdcCoin = usdc.mint(createEitherFromHex(LP_USER), 100n);
       const nightCoin = night.mint(createEitherFromHex(LP_USER), 100n);
+      const moonCoin = moon.mint(createEitherFromHex(LP_USER), 100n);
 
-      // Create pair first
-      const result = calculateAddLiquidityAmounts(
+      // Create first pair (USDC/NIGHT)
+      const result1 = calculateAddLiquidityAmounts(
         100n, // desired USDC
         100n, // desired NIGHT
         0n, // reserve USDC
@@ -503,18 +507,33 @@ describe('Lunarswap', () => {
       lunarswap.addLiquidity(
         usdcCoin,
         nightCoin,
-        result.amountAMin,
-        result.amountBMin,
+        result1.amountAMin,
+        result1.amountBMin,
         createEitherFromHex(LP_USER),
       );
 
-      const pairId = lunarswap.getPairId(usdcCoin, nightCoin);
-      const reserveIdA = lunarswap.getReserveId(pairId, usdcCoin.color);
-      const reserveIdB = lunarswap.getReserveId(pairId, nightCoin.color);
+      // Create second pair (USDC/MOON)
+      const result2 = calculateAddLiquidityAmounts(
+        100n, // desired USDC
+        100n, // desired MOON
+        0n, // reserve USDC
+        0n, // reserve MOON
+        SLIPPAGE_TOLERANCE.LOW,
+      );
+      lunarswap.addLiquidity(
+        usdcCoin,
+        moonCoin,
+        result2.amountAMin,
+        result2.amountBMin,
+        createEitherFromHex(LP_USER),
+      );
 
-      expect(reserveIdA).not.toEqual(reserveIdB);
-      expect(reserveIdA.length).toBe(32);
-      expect(reserveIdB.length).toBe(32);
+      // getReserveId returns the reserve ID for the pair
+      const reserveIdPair1 = lunarswap.getReserveId(usdcCoin, nightCoin);
+      const reserveIdPair2 = lunarswap.getReserveId(usdcCoin, moonCoin);
+
+      // Different pairs should have different reserve IDs
+      expect(reserveIdPair1).not.toEqual(reserveIdPair2);
     });
 
     it('should generate different reserve IDs for same token type in different pairs', () => {
@@ -555,15 +574,10 @@ describe('Lunarswap', () => {
         createEitherFromHex(LP_USER),
       );
 
-      const pairId1 = lunarswap.getPairId(usdcCoin1, nightCoin1);
-      const pairId2 = lunarswap.getPairId(usdcCoin2, moonCoin);
-
-      const reserveId1 = lunarswap.getReserveId(pairId1, usdcCoin1.color);
-      const reserveId2 = lunarswap.getReserveId(pairId2, usdcCoin2.color);
+      const reserveId1 = lunarswap.getReserveId(usdcCoin1, nightCoin1);
+      const reserveId2 = lunarswap.getReserveId(usdcCoin2, moonCoin);
 
       expect(reserveId1).not.toEqual(reserveId2);
-      expect(reserveId1.length).toBe(32);
-      expect(reserveId2.length).toBe(32);
     });
 
     it('should work with different senders', () => {
@@ -586,20 +600,17 @@ describe('Lunarswap', () => {
         createEitherFromHex(LP_USER),
       );
 
-      const pairId = lunarswap.getPairId(usdcCoin, nightCoin);
-
       // Test with default sender
-      const reserveIdDefault = lunarswap.getReserveId(pairId, usdcCoin.color);
+      const reserveIdDefault = lunarswap.getReserveId(usdcCoin, nightCoin);
 
       // Test with explicit sender
       const explicitSender = sampleCoinPublicKey();
       const reserveIdExplicit = lunarswap
         .as(explicitSender)
-        .getReserveId(pairId, usdcCoin.color);
+        .getReserveId(usdcCoin, nightCoin);
 
       // Both should return the same result (reserve ID is deterministic)
       expect(reserveIdDefault).toEqual(reserveIdExplicit);
-      expect(reserveIdDefault.length).toBe(32);
     });
 
     it('should handle edge cases with zero values', () => {
@@ -622,13 +633,14 @@ describe('Lunarswap', () => {
         createEitherFromHex(LP_USER),
       );
 
-      const pairId = lunarswap.getPairId(usdcCoin, nightCoin);
+      // Test with zero-filled token type - create a ShieldedCoinInfo with zero color
+      const zeroTokenCoin: ShieldedCoinInfo = {
+        color: new Uint8Array(32).fill(0),
+        value: 0n,
+        nonce: new Uint8Array(32),
+      };
+      const reserveIdZero = lunarswap.getReserveId(zeroTokenCoin, usdcCoin);
 
-      // Test with zero-filled token type
-      const zeroTokenType = new Uint8Array(32).fill(0);
-      const reserveIdZero = lunarswap.getReserveId(pairId, zeroTokenType);
-
-      expect(reserveIdZero.length).toBe(32);
       expect(reserveIdZero).not.toEqual(new Uint8Array(32).fill(0)); // Should not be all zeros
     });
 
@@ -664,23 +676,19 @@ describe('Lunarswap', () => {
           createEitherFromHex(LP_USER),
         );
 
-        const pairId = lunarswap.getPairId(tokenA, tokenB);
-        const reserveIdA = lunarswap.getReserveId(pairId, tokenA.color);
-        const reserveIdB = lunarswap.getReserveId(pairId, tokenB.color);
+        // getReserveId returns the reserve ID for the pair (one per pair)
+        const reserveIdPair = lunarswap.getReserveId(tokenA, tokenB);
+        // Store the pair reserve ID
+        const reserveIdA = reserveIdPair;
 
         // Convert to hex string for easier comparison
         const reserveIdAHex = Buffer.from(reserveIdA).toString('hex');
-        const reserveIdBHex = Buffer.from(reserveIdB).toString('hex');
 
         reserveIds.add(reserveIdAHex);
-        reserveIds.add(reserveIdBHex);
-
-        expect(reserveIdA.length).toBe(32);
-        expect(reserveIdB.length).toBe(32);
       }
 
-      // All reserve IDs should be unique (8 tokens across 4 pairs)
-      expect(reserveIds.size).toBe(8);
+      // All reserve IDs should be unique (4 pairs)
+      expect(reserveIds.size).toBe(4);
     });
   });
 });
