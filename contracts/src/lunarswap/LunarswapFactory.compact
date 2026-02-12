@@ -473,9 +473,9 @@ module LunarswapFactory {
    *
    * @param {PairId} pairId - The unique pairId hash of the pair.
    *
-   * @returns {QualifiedShieldedCoinInfo} - The total supply of LP tokens for the pair.
+   * @returns {Uint<128>} - The total supply of LP tokens for the pair.
    */
-  export circuit getLpTokenTotalSupply(pairId: PairId): QualifiedShieldedCoinInfo {
+  export circuit getLpTokenTotalSupply(pairId: PairId): Uint<128> {
     return LunarswapPair_getLpTokenTotalSupply(pairId);
   }
 }

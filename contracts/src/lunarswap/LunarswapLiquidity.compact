@@ -31,12 +31,15 @@ module LunarswapLiquidity {
       Counter,
       ShieldedSendResult,
       left,
+      right,
       receiveShielded,
       sendImmediateShielded,
       ownPublicKey,
       mintShieldedToken,
       shieldedBurnAddress,
-      evolveNonce }
+      evolveNonce,
+      mergeCoinImmediate,
+      kernel }
     from CompactStandardLibrary;
 
   import { sub, addChecked } from "../math/Uint128" prefix Uint128_;
@@ -57,11 +60,11 @@ module LunarswapLiquidity {
   export ledger nonce: Bytes<32>;
 
   /**
-   * @ledger {Map<PairId, QualifiedShieldedCoinInfo>} lpTotalSupply
-   * @description Mapping of pair hash (pairId) to the total supply and metadata of LP tokens for that pair.
-   * The key is the pair hash (Bytes<32>), and the value is the QualifiedShieldedCoinInfo for the LP token.
+   * @ledger {Map<PairId, Uint<128>>} lpTotalSupply
+   * @description Mapping of pair hash (pairId) to the total supply of LP tokens for that pair.
+   * The key is the pair hash (Bytes<32>), and the value is the total supply balance (Uint<128>).
    */
-  export ledger totalSupply: Map<PairId, QualifiedShieldedCoinInfo>;
+  export ledger totalSupply: Map<PairId, Uint<128>>;
 
   /**
    * @ledger {Map<PairId, Bytes<32>>} color
@@ -144,7 +147,7 @@ module LunarswapLiquidity {
     assert(!totalSupply.member(disclose(pairId)),
            "LunarswapLiquidity: initializePairLpToken() - Lp token already exists"
            );
-    totalSupply.insert(pairId, default<QualifiedShieldedCoinInfo>);
+    totalSupply.insert(pairId, 0 as Uint<128>);
     return [];
   }
 
@@ -167,7 +170,7 @@ module LunarswapLiquidity {
    *
    * @returns {Uint<128>} - The total supply of LP tokens for the pair.
    */
-  export circuit getLpTokenTotalSupply(pairId: PairId): QualifiedShieldedCoinInfo {
+  export circuit getLpTokenTotalSupply(pairId: PairId): Uint<128> {
     assert(totalSupply.member(disclose(pairId)),
            "LunarswapLiquidity: getLpTokenTotalSupply() - Lp token not found"
            );
@@ -208,16 +211,10 @@ module LunarswapLiquidity {
       color.insert(disclose(pairId as PairId), ret.color);
     }
 
-    const newTotalSupply =
-            QualifiedShieldedCoinInfo { nonce: ret.nonce,
-                                        color: ret.color,
-                                        value: Uint128_addChecked(
-                                                 totalSupply.lookup(disclose(pairId as PairId)).value,
-                                                 amount
-                                                 ),
-                                        mt_index: totalSupply.lookup(disclose(pairId as PairId)).mt_index, };
+    // Update total supply tracking - simple balance increment
+    const currentTotalSupply = totalSupply.lookup(disclose(pairId as PairId));
+    const newTotalSupply = Uint128_addChecked(currentTotalSupply, amount);
     totalSupply.insert(disclose(pairId as PairId), disclose(newTotalSupply));
-    //totalSupply.insertCoin(pairId, ret, disclose(recipient));
 
     return ret;
   }
@@ -254,25 +251,10 @@ module LunarswapLiquidity {
 
     receiveShielded(disclose(coin));
 
-    // const newTotalSupply =
-    //         ShieldedCoinInfo { nonce: coin.nonce,
-    //                            color: coin.color,
-    //                            value: Uint128_sub(
-    //                                     totalSupply.lookup(disclose(pairId)).value,
-    //                                     amount
-    //                                     ), };
-    const newTotalSupply =
-            QualifiedShieldedCoinInfo { nonce: coin.nonce,
-                                        color: coin.color,
-                                        value: Uint128_sub(
-                                                 totalSupply.lookup(disclose(pairId as PairId)).value,
-                                                 amount
-                                                 ),
-                                        mt_index: totalSupply.lookup(disclose(pairId as PairId)).mt_index, // TODO: needs review
-                                        };
+    // Update total supply tracking - simple balance decrement
+    const currentTotalSupply = totalSupply.lookup(disclose(pairId as PairId));
+    const newTotalSupply = Uint128_sub(currentTotalSupply, amount);
     totalSupply.insert(disclose(pairId as PairId), disclose(newTotalSupply));
-
-    //totalSupply.insertCoin(disclose(pairId), disclose(newTotalSupply), shieldedBurnAddress());
 
     const ret = disclose(sendImmediateShielded(
                            disclose(coin),

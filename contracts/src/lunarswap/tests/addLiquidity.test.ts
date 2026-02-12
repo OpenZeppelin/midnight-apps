@@ -108,7 +108,7 @@ describe('addLiquidity', () => {
         nightCoin,
       );
       // Total LP tokens = sqrt(2,000,000) - MINIMUM_LIQUIDITY(1) = 1414 - 1 = 1413
-      expect(lpTotalSupply.value).toBe(1413n);
+      expect(lpTotalSupply).toBe(1413n);
 
       // Check price and volume cumulative values
       // For first liquidity provision, these should be 0 since no trades have occurred
@@ -162,7 +162,7 @@ describe('addLiquidity', () => {
         nightCoin,
       );
       // sqrt(800000) = 894 (rounded down), so liquidity = 894 - 1 = 893
-      expect(lpTotalSupply.value).toBe(893n);
+      expect(lpTotalSupply).toBe(893n);
 
       // Check price and volume cumulative values
       // For first liquidity provision, these should be 0 since no trades have occurred
@@ -263,7 +263,7 @@ describe('addLiquidity', () => {
         expect(pair.volume1Cumulative).toBe(2000n);
       }
 
-      expect(lunarswap.getLpTokenTotalSupply(usdcCoin1, nightCoin1).value).toBe(
+      expect(lunarswap.getLpTokenTotalSupply(usdcCoin1, nightCoin1)).toBe(
         2826n,
       ); // USDC/NIGHT existing pair (1413 + 1413)
       expect(pair.kLast).toBe(0n);
@@ -307,7 +307,7 @@ describe('addLiquidity', () => {
 
       // LP tokens should be sqrt(2000 * 1000) - MINIMUM_LIQUIDITY(1) = 1414 - 1 = 1413
       const expectedLPTokens = 1413n;
-      expect(lpTotalSupply.value).toBe(expectedLPTokens);
+      expect(lpTotalSupply).toBe(expectedLPTokens);
     });
   });
 
@@ -420,9 +420,7 @@ describe('addLiquidity', () => {
       );
       expect(reservesUSDC.value).toBe(3000n);
       expect(reservesDUST.value).toBe(1500n);
-      expect(lunarswap.getLpTokenTotalSupply(usdcCoin1, moonCoin1).value).toBe(
-        2119n,
-      ); // USDC/MOON existing pair (1413 + 706)
+      expect(lunarswap.getLpTokenTotalSupply(usdcCoin1, moonCoin1)).toBe(2119n); // USDC/MOON existing pair (1413 + 706)
       expect(updatedPair.kLast).toBe(0n);
     });
 
@@ -459,7 +457,7 @@ describe('addLiquidity', () => {
 
       // LP tokens should be sqrt(2000 * 1000) - MINIMUM_LIQUIDITY(1) = 1414 - 1 = 1413
       const expectedLPTokens = 1413n;
-      expect(lpTotalSupply.value).toBe(expectedLPTokens);
+      expect(lpTotalSupply).toBe(expectedLPTokens);
     });
   });
 
@@ -503,9 +501,7 @@ describe('addLiquidity', () => {
       );
       expect(reserveNight.value).toBe(8000n);
       expect(reserveDust.value).toBe(12000n);
-      expect(lunarswap.getLpTokenTotalSupply(nightCoin, moonCoin).value).toBe(
-        9796n,
-      ); // NIGHT/MOON new pair (sqrt(96,000,000) - 1 = 9797 - 1 = 9796)
+      expect(lunarswap.getLpTokenTotalSupply(nightCoin, moonCoin)).toBe(9796n); // NIGHT/MOON new pair (sqrt(96,000,000) - 1 = 9797 - 1 = 9796)
       expect(pair.kLast).toBe(0n);
     });
 
@@ -578,7 +574,7 @@ describe('addLiquidity', () => {
       );
       expect(reservesNight.value).toBe(12000n);
       expect(reservesDust.value).toBe(18000n);
-      expect(lunarswap.getLpTokenTotalSupply(nightCoin1, moonCoin1).value).toBe(
+      expect(lunarswap.getLpTokenTotalSupply(nightCoin1, moonCoin1)).toBe(
         14694n,
       ); // NIGHT/MOON existing pair (9796 + 4898)
       expect(updatedPair.kLast).toBe(0n);
@@ -621,7 +617,7 @@ describe('addLiquidity', () => {
 
       // LP tokens should be sqrt(8000 * 12000) - MINIMUM_LIQUIDITY(1)
       const expectedLPTokens = 9796n; // sqrt(96,000,000) - 1 = 9797 - 1 = 9796
-      expect(lpTotalSupply.value).toEqual(expectedLPTokens);
+      expect(lpTotalSupply).toEqual(expectedLPTokens);
     });
   });
 
@@ -659,7 +655,7 @@ describe('addLiquidity', () => {
 
       // Should have minimum liquidity of 1000
       expect(
-        lunarswap.getLpTokenTotalSupply(usdcCoin, nightCoin).value,
+        lunarswap.getLpTokenTotalSupply(usdcCoin, nightCoin),
       ).toBeGreaterThan(1000n);
     });
 
@@ -702,9 +698,7 @@ describe('addLiquidity', () => {
       );
       expect(reserveUSDC.value).toBe(10000n);
       expect(reserveNIGHT.value).toBe(10000n);
-      expect(lunarswap.getLpTokenTotalSupply(usdcCoin, nightCoin).value).toBe(
-        9999n,
-      ); // equal token amounts (sqrt(100,000,000) - 1 = 10000 - 1 = 9999)
+      expect(lunarswap.getLpTokenTotalSupply(usdcCoin, nightCoin)).toBe(9999n); // equal token amounts (sqrt(100,000,000) - 1 = 10000 - 1 = 9999)
       expect(pair.kLast).toBe(0n);
     });
 
@@ -919,9 +913,7 @@ describe('addLiquidity', () => {
         recipient,
       );
 
-      expect(lunarswap.getLpTokenTotalSupply(usdcCoin, nightCoin).value).toBe(
-        1999n,
-      ); // sqrt(4,000,000) - MINIMUM_LIQUIDITY(1) = 2000 - 1 = 1999
+      expect(lunarswap.getLpTokenTotalSupply(usdcCoin, nightCoin)).toBe(1999n); // sqrt(4,000,000) - MINIMUM_LIQUIDITY(1) = 2000 - 1 = 1999
     });
   });
 
@@ -1165,7 +1157,7 @@ describe('addLiquidity', () => {
       );
 
       // Verify the pair has accumulated liquidity
-      expect(lunarswap.getLpTokenTotalSupply(usdcCoin1, nightCoin1).value).toBe(
+      expect(lunarswap.getLpTokenTotalSupply(usdcCoin1, nightCoin1)).toBe(
         5997n,
       ); // multiple rapid additions (1999 + 1999 + 1999)
     });
@@ -1278,9 +1270,7 @@ describe('addLiquidity', () => {
       );
 
       // Use getPairId to get the correct order for getIdentity
-      expect(lunarswap.getLpTokenTotalSupply(usdcCoin, nightCoin).value).toBe(
-        1999n,
-      ); // sqrt(4,000,000) - MINIMUM_LIQUIDITY(1) = 2000 - 1 = 1999
+      expect(lunarswap.getLpTokenTotalSupply(usdcCoin, nightCoin)).toBe(1999n); // sqrt(4,000,000) - MINIMUM_LIQUIDITY(1) = 2000 - 1 = 1999
     });
   });
 });

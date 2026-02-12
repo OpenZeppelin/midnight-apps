@@ -27,7 +27,7 @@ export circuit initializePairLpToken(pairId: PairId): [] {
   return LunarswapLiquidity_initializePairLpToken(disclose(pairId));
 }
 
-export circuit getLpTokenTotalSupply(pairId: PairId): QualifiedShieldedCoinInfo {
+export circuit getLpTokenTotalSupply(pairId: PairId): Uint<128> {
   toImpure = true;
   return LunarswapLiquidity_getLpTokenTotalSupply(pairId);
 }

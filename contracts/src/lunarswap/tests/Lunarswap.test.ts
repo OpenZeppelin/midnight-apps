@@ -305,9 +305,7 @@ describe('Lunarswap', () => {
       );
       expect(reserveUSDC.value).toBe(20000n);
       expect(reserveDUST.value).toBe(10000n);
-      expect(lunarswap.getLpTokenTotalSupply(usdcCoin, moonCoin).value).toBe(
-        14141n,
-      );
+      expect(lunarswap.getLpTokenTotalSupply(usdcCoin, moonCoin)).toBe(14141n);
       expect(pair.kLast).toBe(0n);
     });
 
@@ -343,9 +341,7 @@ describe('Lunarswap', () => {
       );
       expect(reserveNIGHT.value).toBe(8000n);
       expect(reserveDUST.value).toBe(12000n);
-      expect(lunarswap.getLpTokenTotalSupply(nightCoin, moonCoin).value).toBe(
-        9796n,
-      );
+      expect(lunarswap.getLpTokenTotalSupply(nightCoin, moonCoin)).toBe(9796n);
       expect(pair.kLast).toBe(0n);
     });
   });
@@ -457,9 +453,7 @@ describe('Lunarswap', () => {
       );
 
       // Use getPairId to get the correct order for getTotalSupply
-      expect(lunarswap.getLpTokenTotalSupply(usdcCoin, nightCoin).value).toBe(
-        7070n,
-      ); // LP token total supply tracking
+      expect(lunarswap.getLpTokenTotalSupply(usdcCoin, nightCoin)).toBe(7070n); // LP token total supply tracking
     });
   });
 

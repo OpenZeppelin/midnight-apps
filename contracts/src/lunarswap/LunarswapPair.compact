@@ -236,7 +236,7 @@ module LunarswapPair {
     // TODO: review the risk of using totalSupply here. Because of the nature of UTXO that
     // a user could send the LP tokens to the burn address directly without using the burn function,
     // but the totalSupply will not be updated.
-    const totalSupply = LunarswapLiquidity_getLpTokenTotalSupply(pairId).value;
+    const totalSupply = LunarswapLiquidity_getLpTokenTotalSupply(pairId);
     if (totalSupply == 0) {
       // liquidity = (√amount0 * amount1) - MINIMUM_LIQUIDITY = Uint<128>
       // TODO: review disclose
@@ -337,7 +337,7 @@ module LunarswapPair {
         const rootKLast = disclose(Uint128_sqrt(kLast));
         if (rootK > rootKLast) {
           // TODO: review the security of the totalSupply.
-          const totalSupply = LunarswapLiquidity_getLpTokenTotalSupply(pairId).value;
+          const totalSupply = LunarswapLiquidity_getLpTokenTotalSupply(pairId);
           const numerator = Uint128_mulChecked(Uint128_sub(rootK, rootKLast), totalSupply);
           const denominator = Uint128_addChecked(Uint128_mulChecked(rootK, 5), rootKLast);
           const liquidity = disclose(Uint128_div(numerator, denominator));
@@ -395,7 +395,7 @@ module LunarswapPair {
     // transferred to the recipient yet.
     const balance0 = reserve0.value;
     const balance1 = reserve1.value;
-    const totalSupply = LunarswapLiquidity_getLpTokenTotalSupply(pairId).value;
+    const totalSupply = LunarswapLiquidity_getLpTokenTotalSupply(pairId);
 
     const [isFeeOn, kLast] = _mintFee(pairId, reserve0.value, reserve1.value, pair.kLast);
     // Call the internal _burn circuit and return its result
@@ -689,9 +689,9 @@ module LunarswapPair {
    *
    * @param {PairId} pairId - The unique pairId hash of the pair.
    *
-   * @returns {QualifiedShieldedCoinInfo} - The total supply of LP tokens for the pair.
+   * @returns {Uint<128>} - The total supply of LP tokens for the pair.
    */
-  export circuit getLpTokenTotalSupply(pairId: PairId): QualifiedShieldedCoinInfo {
+  export circuit getLpTokenTotalSupply(pairId: PairId): Uint<128> {
     return LunarswapLiquidity_getLpTokenTotalSupply(pairId);
   }
 }

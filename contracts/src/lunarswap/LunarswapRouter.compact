@@ -329,10 +329,7 @@ module LunarswapRouter {
     // TODO: double check the totalSupply is correct.
     const totalSupply = LunarswapFactory_getLpTokenTotalSupply(pairId as PairId);
 
-    assert(totalSupply.value > 0, "LunarswapRouter: removeLiquidity() - totalSupply is zero");
-    assert(totalSupply.color == liquidity.color,
-           "LunarswapRouter: removeLiquidity() - mismatched LP token color"
-           );
+    assert(totalSupply > 0, "LunarswapRouter: removeLiquidity() - totalSupply is zero");
 
     // Send the liquidity to the pair
     receiveShielded(disclose(liquidity));
@@ -587,12 +584,12 @@ module LunarswapRouter {
    * @param {ShieldedCoinInfo} tokenA - The first token in the pair.
    * @param {ShieldedCoinInfo} tokenB - The second token in the pair.
    *
-   * @returns {QualifiedShieldedCoinInfo} - The total supply of LP tokens for the pair.
+   * @returns {Uint<128>} - The total supply of LP tokens for the pair.
    */
   export circuit getLpTokenTotalSupply(
                    tokenA: ShieldedCoinInfo,
                    tokenB: ShieldedCoinInfo
-                   ): QualifiedShieldedCoinInfo {
+                   ): Uint<128> {
     const [token0, token1] = disclose(LunarswapLibrary_sortCoinByColor(tokenA, tokenB));
     const pairId = LunarswapLibrary_getIdentity(token0.color, token1.color, true);
     return LunarswapFactory_getLpTokenTotalSupply(pairId as PairId);
