@@ -21,7 +21,7 @@
   "homepage": "",
   "type": "module",
   "config": {
-    "compactVersion": "+0.28.0",
+    "compactVersion": "+0.29.0",
     "artifactsOutDir": "src/artifacts",
     "artifactsStructure": "--hierarchical"
   },
