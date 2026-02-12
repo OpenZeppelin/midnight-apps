@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (access/test/AccessControl.mock.compact)
 
-pragma language_version >= 0.20.0;
+pragma language_version >= 0.21.0;
 
 import CompactStandardLibrary;
 
@@ -12,15 +12,9 @@ export { AccessControl_hashUserRole,
          AccessControl_roleCommits,
          AccessControl_isInitialized,
          AccessControl_index,
-         AccessControl_Role};
+         AccessControl_Role };
 
-export {
-  ZswapCoinPublicKey,
-  MerkleTreePath,
-  MerkleTreeDigest,
-  Maybe
-}
-
+export { ZswapCoinPublicKey, MerkleTreePath, MerkleTreeDigest, Maybe }
 
 /**
  * @description Constructs the contract by initializing the AccessControl module with an initial admin.

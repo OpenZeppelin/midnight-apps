@@ -6,16 +6,18 @@ import type {
   ContractAddress,
   Either,
   ShieldedCoinInfo,
+  Witnesses,
   ZswapCoinPublicKey,
 } from '@src/artifacts/shielded-token/ShieldedFungibleToken/contract/index.js';
 import {
   Contract,
   ledger,
 } from '@src/artifacts/shielded-token/ShieldedFungibleToken/contract/index.js';
-import {
-  type ShieldedFungibleTokenPrivateState,
-  ShieldedFungibleTokenWitnesses,
-} from './witnesses/index.js';
+
+export type ShieldedFungibleTokenPrivateState = Record<string, never>;
+
+export const ShieldedFungibleTokenWitnesses =
+  (): Witnesses<ShieldedFungibleTokenPrivateState> => ({});
 
 /**
  * Base simulator for ShieldedFungibleToken contract
@@ -23,16 +25,16 @@ import {
 const ShieldedFungibleTokenSimulatorBase = createSimulator<
   ShieldedFungibleTokenPrivateState,
   ReturnType<typeof ledger>,
-  typeof ShieldedFungibleTokenWitnesses,
+  ReturnType<typeof ShieldedFungibleTokenWitnesses>,
   Contract<ShieldedFungibleTokenPrivateState>,
   readonly [Uint8Array, string, string, Uint8Array]
 >({
   contractFactory: (witnesses) =>
     new Contract<ShieldedFungibleTokenPrivateState>(witnesses),
-  defaultPrivateState: () => ({}),
+  defaultPrivateState: (): ShieldedFungibleTokenPrivateState => ({}),
   contractArgs: (nonce, name, symbol, domain) => [nonce, name, symbol, domain],
   ledgerExtractor: (state) => ledger(state),
-  witnessesFactory: () => ShieldedFungibleTokenWitnesses,
+  witnessesFactory: () => ShieldedFungibleTokenWitnesses(),
 });
 
 /**
@@ -46,7 +48,7 @@ export class ShieldedFungibleTokenSimulator extends ShieldedFungibleTokenSimulat
     domain: Uint8Array,
     options: BaseSimulatorOptions<
       ShieldedFungibleTokenPrivateState,
-      typeof ShieldedFungibleTokenWitnesses
+      ReturnType<typeof ShieldedFungibleTokenWitnesses>
     > = {},
   ) {
     super([nonce, name, symbol, domain], options);
@@ -68,8 +70,8 @@ export class ShieldedFungibleTokenSimulator extends ShieldedFungibleTokenSimulat
     return this.circuits.impure.totalSupply();
   }
 
-  public tokenType(): Uint8Array {
-    return this.circuits.impure.tokenType();
+  public color(): Uint8Array {
+    return this.circuits.impure.color();
   }
 
   public mint(

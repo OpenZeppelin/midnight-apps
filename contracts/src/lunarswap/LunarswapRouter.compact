@@ -1,0 +1,741 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (lunarswap-v1/LunarswapRouter.compact)
+
+pragma language_version >= 0.21.0;
+
+/**
+ * @title LunarswapRouter
+ * @description Router contract providing user-friendly interface for liquidity operations in the Lunarswap protocol.
+ *
+ * @remarks
+ * The LunarswapRouter abstracts pair management complexity and provides simplified functions for adding and removing
+ * liquidity, handling token splitting, managing optimal amount calculations, and facilitating token swapping.
+ *
+ * Key Features:
+ * - Simplified liquidity addition interface
+ * - Automatic token splitting and change handling
+ * - Optimal amount calculation for price maintenance
+ * - Pair creation for new token combinations
+ */
+module LunarswapRouter {
+  import
+    { ShieldedCoinInfo,
+      QualifiedShieldedCoinInfo,
+      ZswapCoinPublicKey,
+      ContractAddress,
+      Either,
+      left,
+      sendImmediateShielded,
+      receiveShielded }
+    from CompactStandardLibrary;
+  import { isKeyOrAddressZero, eitherZPK } from "../openzeppelin/Utils" prefix Utils_;
+  import { addChecked } from "../math/Uint128" prefix Uint128_;
+
+  import { Pair } from LunarswapPair;
+  import { PairId, ReserveId } from LunarswapTypes;
+  import
+    { sortCoinByColor,
+      sortQualifiedCoinByColor,
+      getIdentity,
+      quote,
+      getAmountOut,
+      getAmountIn,
+      splitByValue }
+    from LunarswapLibrary
+      prefix LunarswapLibrary_;
+  import
+    { isPairExists,
+      createPair,
+      getPair,
+      getPairId,
+      getReserves,
+      addReserves,
+      removeReserves,
+      swapReserves,
+      updatePair,
+      getAllPairLength }
+    from LunarswapFactory
+      prefix LunarswapFactory_;
+  import { getFeeTo, getFeeToSetter } from LunarswapFee prefix LunarswapFee_;
+  import { mint, burn, swap } from LunarswapPair prefix LunarswapPair_;
+  import { initialize } from LunarswapFee prefix LunarswapFee_;
+  import { initialize, getLpTokenTotalSupply } from LunarswapFactory prefix LunarswapFactory_;
+
+  /**
+   * @title initialize circuit
+   * @description Initializes the Lunarswap router with factory and fee configuration.
+   *
+   * @remarks
+   * This circuit sets up the initial configuration for the router by initializing
+   * both the factory and fee management systems. It should only be called once
+   * during contract deployment.
+   *
+   * @circuitInfo k=11, rows=2000
+   *
+   * @param {Bytes<32>} nonce      - The nonce for LP token generation.
+   * @param {Opaque<"string">} name - The name of the LP token.
+   * @param {Opaque<"string">} symbol - The symbol of the LP token.
+   * @param {Uint<8>} decimals     - The number of decimals for LP tokens.
+   * @param {ZswapCoinPublicKey} feeToSetter - The address that can set protocol fees.
+   *
+   * @returns [] - No return values.
+   */
+  export circuit initialize(
+                   nonce: Bytes<32>,
+                   name: Opaque<"string">,
+                   symbol: Opaque<"string">,
+                   decimals: Uint<8>,
+                   feeToSetter: ZswapCoinPublicKey
+                   ): [] {
+    LunarswapFactory_initialize(nonce, name, symbol, decimals);
+    LunarswapFee_initialize(feeToSetter);
+    return [];
+  }
+
+  /**
+   * @title addLiquidity circuit
+   * @description Adds liquidity to a trading pair and mints LP tokens.
+   *
+   * @remarks
+   * This circuit handles the complete liquidity addition process. It calculates
+   * optimal amounts to maintain the current price ratio, receives the tokens,
+   * returns any excess tokens to the user, and mints LP tokens to the specified
+   * recipient.
+   *
+   * TODO: Maybe we can add a deadline for the router if passed then router considered expired.
+   * TODO: Maybe I should replace all those params with witnesses.
+   *
+   * Requirements:
+   * - The pair must exist or be created during this operation
+   * - The calculated amounts must meet minimum requirements
+   *
+   * @circuitInfo k=19, rows=280789
+   *
+   * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
+   * @param {ShieldedCoinInfo} token0    - The first token to add liquidity for.
+   * @param {ShieldedCoinInfo} token1    - The second token to add liquidity for.
+   * @param {Uint<128>} amount0Min - The minimum amount of token0 to add.
+   * @param {Uint<128>} amount1Min - The minimum amount of token1 to add.
+   * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The recipient of the LP tokens.
+   *
+   * @throws {Error} "LunarswapRouter: Insufficient A amount" if calculated amount is below minimum.
+   * @throws {Error} "LunarswapRouter: Insufficient B amount" if calculated amount is below minimum.
+   *
+   * @returns {Uint<128>} - The amount of liquidity minted.
+   */
+  export circuit addLiquidity(
+                   tokenA: ShieldedCoinInfo,
+                   tokenB: ShieldedCoinInfo,
+                   amountAMin: Uint<128>,
+                   amountBMin: Uint<128>,
+                   to: Either<ZswapCoinPublicKey, ContractAddress>,
+                   ): Uint<128> {
+    // Prepare the pair and the tokens
+    assert(tokenA.color != tokenB.color, "LunarswapRouter: addLiquidity() - Identical addresses");
+    const [token0, token1] = disclose(LunarswapLibrary_sortCoinByColor(tokenA, tokenB));
+    const [amount0Min, amount1Min] =
+            token0.color == tokenA.color ? [amountAMin, amountBMin] : [amountBMin, amountAMin];
+    const pairId = LunarswapLibrary_getIdentity(token0.color, token1.color, true);
+
+    // Compute the optimal amounts to add, given the sorted tokens and min amounts
+    const [pair, amount0Optimal, amount1Optimal, reserve0, reserve1] =
+            _addLiquidity(
+              token0,
+              token1,
+              token0.value,
+              token1.value,
+              amount0Min,
+              amount1Min,
+              pairId
+              );
+
+    // Split the tokens into used and remainder
+    const splitToken0 =
+            disclose(LunarswapLibrary_splitByValue<ShieldedCoinInfo>(token0, amount0Optimal));
+    const splitToken1 =
+            disclose(LunarswapLibrary_splitByValue<ShieldedCoinInfo>(token1, amount1Optimal));
+
+    // Receive the used amounts of the tokens
+    receiveShielded(disclose(splitToken0.used));
+    receiveShielded(disclose(splitToken1.used));
+
+    // Mint LP tokens and update the pair with the optimal amounts
+    const [updatedPair, liquidity] =
+            LunarswapPair_mint(
+              pairId as PairId,
+              pair,
+              amount0Optimal,
+              amount1Optimal,
+              reserve0,
+              reserve1,
+              to
+              );
+
+    // Update the pair with the optimal amounts
+    LunarswapFactory_updatePair(pairId as PairId, updatedPair);
+    LunarswapFactory_addReserves(
+      pair.reserve0Id,
+      pair.reserve1Id,
+      splitToken0.used,
+      splitToken1.used
+      );
+
+    // Send the remainder of the tokens to the user
+    if (splitToken0.remainder.value > 0) {
+      sendImmediateShielded(splitToken0.remainder, disclose(to), splitToken0.remainder.value);
+    }
+
+    // Send the remainder of the tokens to the user
+    if (splitToken1.remainder.value > 0) {
+      sendImmediateShielded(splitToken1.remainder, disclose(to), splitToken1.remainder.value);
+    }
+
+    return liquidity;
+  }
+
+  /**
+   * @title _addLiquidity circuit
+   * @description Calculates optimal amounts for adding liquidity to a pair.
+   *
+   * @remarks
+   * This internal circuit calculates the optimal amounts of tokens to add to a pair
+   * while maintaining the current price ratio. For new pairs, it uses the desired amounts.
+   * For existing pairs, it calculates amounts based on the current reserves and desired ratios.
+   *
+   * Requirements:
+   * - The calculated amounts must meet minimum requirements
+   * - The amounts must not exceed desired amounts
+   *
+   * @circuitInfo k=11, rows=2000
+   *
+   * @param {ShieldedCoinInfo} token0        - The first token in the pair.
+   * @param {ShieldedCoinInfo} token1        - The second token in the pair.
+   * @param {Uint<128>} amount0Desired - The desired amount of token0.
+   * @param {Uint<128>} amount1Desired - The desired amount of token1.
+   * @param {Uint<128>} amount0Min     - The minimum amount of token0 to add.
+   * @param {Uint<128>} amount1Min     - The minimum amount of token1 to add.
+   * @param {Bytes<32>} pairId       - The unique pairId hash of the pair.
+   *
+   * @throws {Error} "LunarswapRouter: Insufficient B amount" if calculated amount1 is below minimum.
+   * @throws {Error} "LunarswapRouter: Insufficient A amount" if calculated amount0 is below minimum or exceeds desired.
+   *
+   * @returns {[Pair, Uint<128>, Uint<128>, QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo]} - The optimal amounts and reserves [amount0Optimal, amount1Optimal, reserve0, reserve1].
+   */
+  circuit _addLiquidity(
+            token0: ShieldedCoinInfo,
+            token1: ShieldedCoinInfo,
+            amount0Desired: Uint<128>,
+            amount1Desired: Uint<128>,
+            amount0Min: Uint<128>,
+            amount1Min: Uint<128>,
+            pairId: Bytes<32>
+            ): [Pair, Uint<128>, Uint<128>, QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo] {
+    if (!LunarswapFactory_isPairExists(pairId as PairId)) {
+      const pair = LunarswapFactory_createPair(pairId as PairId, token0, token1);
+      // TODO: double check if default is zero value and zero color or not.
+      return [pair,
+              amount0Desired,
+              amount1Desired,
+              default<QualifiedShieldedCoinInfo>,
+              default<QualifiedShieldedCoinInfo>];
+    } else {
+      const pair = LunarswapFactory_getPair(pairId as PairId);
+      const [reserve0, reserve1] =
+              LunarswapFactory_getReserves(
+                pairId as PairId,
+                pair.reserve0Id as ReserveId,
+                pair.reserve1Id as ReserveId
+                );
+      if (reserve0.value == 0 && reserve1.value == 0) {
+        return [pair, amount0Desired, amount1Desired, reserve0, reserve1];
+      } else {
+        const amount1Optimal =
+                LunarswapLibrary_quote(amount0Desired, reserve0.value, reserve1.value);
+        if (amount1Optimal <= amount1Desired) {
+          // TODO: convert assert message to token1
+          assert(amount1Optimal >= amount1Min,
+                 "LunarswapRouter: _addLiquidity() - Insufficient B amount"
+                 );
+          return [pair, amount0Desired, amount1Optimal, reserve0, reserve1];
+        } else {
+          const amount0Optimal =
+                  LunarswapLibrary_quote(amount1Desired, reserve1.value, reserve0.value);
+          // TODO: convert assert message to token0
+          assert(amount0Optimal <= amount0Desired,
+                 "LunarswapRouter: _addLiquidity() - Insufficient A amount"
+                 );
+          assert(amount0Optimal >= amount0Min,
+                 "LunarswapRouter: _addLiquidity() - Insufficient A amount"
+                 );
+          return [pair, amount0Optimal, amount1Desired, reserve0, reserve1];
+        }
+      }
+    }
+  }
+
+  /**
+   * @title removeLiquidity circuit
+   * @description Removes liquidity from a trading pair and burns LP tokens.
+   *
+   * @remarks
+   * This circuit handles the complete liquidity removal process. It receives the LP tokens,
+   * adds them to the liquidity pot, burns them, and distributes the underlying tokens to the
+   * liquidity provider.
+   *
+   * @circuitInfo k=18, rows=162893
+   *
+   * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
+   * @param {Pair} pair - The current pair state.
+   * @param {QualifiedShieldedCoinInfo} reserve0 - The current reserve of token0.
+   * @param {QualifiedShieldedCoinInfo} reserve1 - The current reserve of token1.
+   * @param {ShieldedCoinInfo} liquidity - The LP tokens to remove.
+   * @param {Uint<128>} amount0Min - The minimum amount of token0 to remove.
+   * @param {Uint<128>} amount1Min - The minimum amount of token1 to remove.
+   * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The recipient of the removed tokens.
+   *
+   * @returns [] - No return values.
+   */
+  export circuit removeLiquidity(
+                   tokenA: ShieldedCoinInfo,
+                   tokenB: ShieldedCoinInfo,
+                   liquidity: ShieldedCoinInfo,
+                   amountAMin: Uint<128>,
+                   amountBMin: Uint<128>,
+                   to: Either<ZswapCoinPublicKey, ContractAddress>,
+                   ): [Uint<128>, Uint<128>] {
+    assert(tokenA.color != tokenB.color, "Lunarswap: removeLiquidity() - Identical addresses");
+    const [token0, token1] = disclose(LunarswapLibrary_sortCoinByColor(tokenA, tokenB));
+    const amount0Min = token0.color == tokenA.color ? amountAMin : amountBMin;
+    const amount1Min = token0.color == tokenA.color ? amountBMin : amountAMin;
+    const pairId = LunarswapLibrary_getIdentity(token0.color, token1.color, true);
+    const pair = LunarswapFactory_getPair(pairId as PairId);
+    const [reserve0, reserve1] =
+            LunarswapFactory_getReserves(
+              pairId as PairId,
+              pair.reserve0Id as ReserveId,
+              pair.reserve1Id as ReserveId
+              );
+
+    assert(pair.token0Type == token0.color,
+           "Lunarswap: removeLiquidity() - mismatched token0 color"
+           );
+    assert(pair.token1Type == token1.color,
+           "Lunarswap: removeLiquidity() - mismatched token1 color"
+           );
+    assert(pair.lpTokenType == liquidity.color,
+           "Lunarswap: removeLiquidity() - mismatched LP token color"
+           );
+
+    // TODO: double check the totalSupply is correct.
+    const totalSupply = LunarswapFactory_getLpTokenTotalSupply(pairId as PairId);
+
+    assert(totalSupply > 0, "LunarswapRouter: removeLiquidity() - totalSupply is zero");
+
+    // Send the liquidity to the pair
+    receiveShielded(disclose(liquidity));
+
+    // Burn the liquidity and get the amounts
+    const [updatedPair, amount0, amount1] =
+            LunarswapPair_burn(
+              pairId as PairId,
+              pair,
+              liquidity,
+              pair.token0Type,
+              pair.token1Type,
+              reserve0,
+              reserve1,
+              to
+              );
+
+    LunarswapFactory_updatePair(pairId as PairId, updatedPair);
+    LunarswapFactory_removeReserves(
+      disclose(pairId as PairId),
+      pair.reserve0Id,
+      pair.reserve1Id,
+      amount0,
+      amount1,
+      disclose(to)
+      );
+
+    // Convert amounts back to original A/B order for assertions using ternary operations
+    const amountA = (tokenA.color == token0.color) ? amount0 : amount1;
+    const amountB = (tokenA.color == token0.color) ? amount1 : amount0;
+
+    assert(amountA >= amountAMin, "LunarswapRouter: removeLiquidity() - Insufficient A amount");
+    assert(amountB >= amountBMin, "LunarswapRouter: removeLiquidity() - Insufficient B amount");
+
+    return [amountA, amountB];
+  }
+
+  /**
+   * @title swapExactTokensForTokens circuit
+   * @description Swaps an exact amount of input tokens for a minimum amount of output tokens.
+   *
+   * @remarks
+   * This circuit handles the complete swap process. It receives the input tokens,
+   * calculates the exact amount of output tokens, and returns the amount of input tokens
+   * used.
+   *
+   * @circuitInfo k=18, rows=160631
+   *
+   * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
+   * @param {Pair} pair - The current pair state.
+   * @param {ShieldedCoinInfo} tokenIn - The input token.
+   * @param {ShieldedCoinInfo} tokenOut - The output token.
+   * @param {Uint<128>} amountIn - The amount of input tokens to swap.
+   * @param {Uint<128>} amountOutMin - The minimum amount of output tokens to receive.
+   * @param {QualifiedShieldedCoinInfo} reserve0 - The current reserve of token0.
+   * @param {QualifiedShieldedCoinInfo} reserve1 - The current reserve of token1.
+   * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The recipient of the output tokens.
+   *
+   * @returns {Uint<128>} - The amount of input tokens used.
+   */
+  export circuit swapExactTokensForTokens(
+                   tokenIn: ShieldedCoinInfo,
+                   tokenOut: ShieldedCoinInfo,
+                   amountIn: Uint<128>,
+                   amountOutMin: Uint<128>,
+                   to: Either<ZswapCoinPublicKey, ContractAddress>,
+                   ): Uint<128> {
+
+    assert(tokenIn.color != tokenOut.color,
+           "Lunarswap: swapExactTokensForTokens() - Identical addresses"
+           );
+    const [token0, token1] = disclose(LunarswapLibrary_sortCoinByColor(tokenIn, tokenOut));
+    const pairId = LunarswapLibrary_getIdentity(token0.color, token1.color, true);
+    const pair = LunarswapFactory_getPair(pairId as PairId);
+    const [reserve0, reserve1] =
+            LunarswapFactory_getReserves(
+              pairId as PairId,
+              pair.reserve0Id as ReserveId,
+              pair.reserve1Id as ReserveId
+              );
+
+    const [reserveIn, reserveOut] =
+            (token0.color == tokenIn.color) ? [reserve0, reserve1] : [reserve1, reserve0];
+    const amountOut = LunarswapLibrary_getAmountOut(amountIn, reserveIn.value, reserveOut.value);
+
+    assert(amountOut >= amountOutMin,
+           "LunarswapRouter: swapExactTokensForTokens() - Insufficient output amount"
+           );
+
+    const splitTokenIn =
+            disclose(LunarswapLibrary_splitByValue<ShieldedCoinInfo>(tokenIn, amountIn));
+    receiveShielded(splitTokenIn.used);
+
+    const isToken0 = token0.color == tokenIn.color;
+
+    // Calculate intermediate balances (after input is received but before output is sent)
+    const [balance0, balance1] =
+            isToken0
+              ? [Uint128_addChecked(reserve0.value, splitTokenIn.used.value), reserve1.value]
+              : [reserve0.value, Uint128_addChecked(reserve1.value, splitTokenIn.used.value)];
+
+    const [amount0Out, amount1Out] =
+            isToken0 ? [0 as Uint<128>, amountOut] : [amountOut, 0 as Uint<128>];
+
+    const updatedPair =
+            LunarswapPair_swap(
+              pairId as PairId,
+              pair,
+              balance0,
+              balance1,
+              amount0Out,
+              amount1Out,
+              reserve0,
+              reserve1,
+              to
+              );
+
+    LunarswapFactory_updatePair(pairId as PairId, updatedPair);
+
+    // Execute actual swap after pair state is updated
+    const tokenInSwap = splitTokenIn.used;
+    const tokenOutSwap =
+            (amount0Out > 0)
+              ? ShieldedCoinInfo { color: token0.color, value: amount0Out, nonce: token0.nonce, }
+              : ShieldedCoinInfo { color: token1.color, value: amount1Out, nonce: token1.nonce, };
+    LunarswapFactory_swapReserves(
+      disclose(pairId as PairId),
+      tokenInSwap,
+      disclose(tokenOutSwap),
+      disclose(to)
+      );
+
+    if (splitTokenIn.remainder.value > 0) {
+      sendImmediateShielded(splitTokenIn.remainder, disclose(to), splitTokenIn.remainder.value);
+    }
+    return amountOut;
+  }
+
+  /**
+   * @title swapTokensForExactTokens circuit
+   * @description Swaps an amount of input tokens for an exact amount of output tokens.
+   *
+   * @remarks
+   * This circuit handles the complete swap process. It receives the input tokens,
+   * calculates the exact amount of input tokens, and returns the amount of output tokens
+   * received.
+   *
+   * @circuitInfo k=18, rows=160680
+   *
+   * @param {Bytes<32>} pairId - The unique pairId hash of the pair.
+   * @param {Pair} pair - The current pair state.
+   * @param {ShieldedCoinInfo} tokenIn - The input token.
+   * @param {ShieldedCoinInfo} tokenOut - The output token.
+   * @param {Uint<128>} amountOut - The amount of output tokens to receive.
+   * @param {Uint<128>} amountInMax - The maximum amount of input tokens to use.
+   * @param {Uint<128>} reserve0 - The current reserve of token0.
+   * @param {Uint<128>} reserve1 - The current reserve of token1.
+   * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The recipient of the output tokens.
+   *
+   * @returns {Uint<128>} - The amount of input tokens used.
+   */
+  export circuit swapTokensForExactTokens(
+                   tokenIn: ShieldedCoinInfo,
+                   tokenOut: ShieldedCoinInfo,
+                   amountOut: Uint<128>,
+                   amountInMax: Uint<128>,
+                   to: Either<ZswapCoinPublicKey, ContractAddress>,
+                   ): Uint<128> {
+    assert(tokenIn.color != tokenOut.color,
+           "Lunarswap: swapTokensForExactTokens() - Identical addresses"
+           );
+    const [token0, token1] = disclose(LunarswapLibrary_sortCoinByColor(tokenIn, tokenOut));
+    const pairId = LunarswapLibrary_getIdentity(token0.color, token1.color, true);
+    const pair = LunarswapFactory_getPair(pairId as PairId);
+    const [reserve0, reserve1] =
+            LunarswapFactory_getReserves(
+              pairId as PairId,
+              pair.reserve0Id as ReserveId,
+              pair.reserve1Id as ReserveId
+              );
+    const [reserveIn, reserveOut] =
+            (token0.color == tokenIn.color)
+              ? [reserve0.value, reserve1.value]
+              : [reserve1.value, reserve0.value];
+    const amountIn = LunarswapLibrary_getAmountIn(amountOut, reserveIn, reserveOut);
+
+    assert(amountIn <= amountInMax,
+           "LunarswapRouter: swapTokensForExactTokens() - Insufficient input amount"
+           );
+
+    const splitTokenIn =
+            disclose(LunarswapLibrary_splitByValue<ShieldedCoinInfo>(tokenIn, amountIn));
+    receiveShielded(splitTokenIn.used);
+
+    const isToken0 = token0.color == tokenIn.color;
+
+    // Calculate intermediate balances (after input is received but before output is sent)
+    const [balance0, balance1] =
+            isToken0
+              ? [Uint128_addChecked(reserve0.value, splitTokenIn.used.value), reserve1.value]
+              : [reserve0.value, Uint128_addChecked(reserve1.value, splitTokenIn.used.value)];
+
+    const [amount0Out, amount1Out] =
+            isToken0 ? [0 as Uint<128>, amountOut] : [amountOut, 0 as Uint<128>];
+    const updatedPair =
+            LunarswapPair_swap(
+              pairId as PairId,
+              pair,
+              balance0,
+              balance1,
+              amount0Out,
+              amount1Out,
+              reserve0,
+              reserve1,
+              to
+              );
+    LunarswapFactory_updatePair(pairId as PairId, updatedPair);
+
+    // Execute actual swap after pair state is updated
+    const tokenInSwap = splitTokenIn.used;
+    const tokenOutSwap =
+            (amount0Out > 0)
+              ? ShieldedCoinInfo { color: token0.color, value: amount0Out, nonce: token0.nonce, }
+              : ShieldedCoinInfo { color: token1.color, value: amount1Out, nonce: token1.nonce, };
+    LunarswapFactory_swapReserves(
+      disclose(pairId as PairId),
+      tokenInSwap,
+      disclose(tokenOutSwap),
+      disclose(to)
+      );
+
+    if (splitTokenIn.remainder.value > 0) {
+      sendImmediateShielded(splitTokenIn.remainder, disclose(to), splitTokenIn.remainder.value);
+    }
+    return disclose(amountIn);
+  }
+
+  // In Compact it is necessary to export all circuits that are used in the module.
+
+  /**
+   * @title getLpTokenTotalSupply circuit
+   * @description Returns the total supply of LP tokens for the factory.
+   *
+   * @remarks
+   * As LunarswapRouter is a parent module for LunarswapFactory,
+   * we need to wrap the LunarswapFactory_getLpTokenTotalSupply circuit in a wrapper function.
+   * This is necessary to ensure that the state is the same as the parent module otherwise
+   * the state will not be the same.
+   *
+   * @circuitInfo k=, rows=
+   *
+   * @param {ShieldedCoinInfo} tokenA - The first token in the pair.
+   * @param {ShieldedCoinInfo} tokenB - The second token in the pair.
+   *
+   * @returns {Uint<128>} - The total supply of LP tokens for the pair.
+   */
+  export circuit getLpTokenTotalSupply(
+                   tokenA: ShieldedCoinInfo,
+                   tokenB: ShieldedCoinInfo
+                   ): Uint<128> {
+    const [token0, token1] = disclose(LunarswapLibrary_sortCoinByColor(tokenA, tokenB));
+    const pairId = LunarswapLibrary_getIdentity(token0.color, token1.color, true);
+    return LunarswapFactory_getLpTokenTotalSupply(pairId as PairId);
+  }
+
+  /**
+   * @title getPair circuit
+   * @description Returns the pair for a given pairId hash.
+   *
+   * @remarks
+   * This circuit returns the pair for a given token pair.
+   *
+   * @circuitInfo k=6, rows=26
+   *
+   * @returns {Pair} - The pair for the given token pair.
+   */
+  export circuit getPair(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo): Pair {
+    const [token0, token1] = disclose(LunarswapLibrary_sortCoinByColor(tokenA, tokenB));
+    const pairId = LunarswapLibrary_getIdentity(token0.color, token1.color, true);
+    return LunarswapFactory_getPair(pairId as PairId);
+  }
+
+  /**
+   * @title getPairReserves circuit
+   * @description Returns the reserves for a given token pair.
+   *
+   * @remarks
+   * This circuit returns the reserves for a given token pair.
+   *
+   * @circuitInfo k=6, rows=26
+   *
+   * @returns {[QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo]} - The reserves for the given token pair.
+   */
+  export circuit getPairReserves(
+                   tokenA: ShieldedCoinInfo,
+                   tokenB: ShieldedCoinInfo
+                   ): [QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo] {
+    const [token0, token1] = disclose(LunarswapLibrary_sortCoinByColor(tokenA, tokenB));
+    const pairId = LunarswapLibrary_getIdentity(token0.color, token1.color, true);
+    const pair = LunarswapFactory_getPair(pairId as PairId);
+    const [reserve0, reserve1] =
+            LunarswapFactory_getReserves(
+              pairId as PairId,
+              pair.reserve0Id as ReserveId,
+              pair.reserve1Id as ReserveId
+              );
+    if (token0.color == tokenA.color) {
+      return [reserve0, reserve1];
+    } else {
+      return [reserve1, reserve0];
+    }
+  }
+
+  /**
+   * @title isPairExists circuit
+   * @description Checks if a pair exists for a given token pair.
+   *
+   * @remarks
+   * This circuit checks if a pair exists for a given token pair.
+   *
+   * @circuitInfo k=6, rows=26
+   *
+   * @returns {Boolean} - True if the token pair exists, false otherwise.
+   */
+  export circuit isPairExists(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo): Boolean {
+    const [token0, token1] = disclose(LunarswapLibrary_sortCoinByColor(tokenA, tokenB));
+    const pairId = LunarswapLibrary_getIdentity(token0.color, token1.color, true);
+    return LunarswapFactory_isPairExists(pairId as PairId);
+  }
+
+  /**
+   * @title getPairId circuit
+   * @description Returns the pairId for a given pair.
+   *
+   * @remarks
+   * This circuit returns the pairId for a given pair.
+   *
+   * @circuitInfo k=6, rows=26
+   *
+   * @returns {Bytes<32>} - The pairId for the given token pair.
+
+   * @returns {Bytes<32>} - The pairId for the given pair.
+   */
+  export circuit getPairId(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo): PairId {
+    const [token0, token1] = disclose(LunarswapLibrary_sortCoinByColor(tokenA, tokenB));
+    return LunarswapLibrary_getIdentity(token0.color, token1.color, true) as PairId;
+  }
+
+  /**
+   * @title getReserveId circuit
+   * @description Returns the reserveId for a given token pair.
+   *
+   * @remarks
+   * This circuit returns the reserveId for a given token pair.
+   *
+   * @circuitInfo k=6, rows=26
+   *
+   * @returns {Bytes<32>} - The reserveId for the given token pair.
+   */
+  export circuit getReserveId(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo): ReserveId {
+    const [token0, token1] = disclose(LunarswapLibrary_sortCoinByColor(tokenA, tokenB));
+    return LunarswapLibrary_getIdentity(token0.color, token1.color, false) as ReserveId;
+  }
+
+  /**
+   * @title getAllPairLength circuit
+   * @description Returns the total number of trading pairs in the factory.
+   *
+   * @remarks
+   * This circuit provides a count of all registered trading pairs stored in the liquidity pool.
+   *
+   * @circuitInfo k=6, rows=26
+   *
+   * @returns {Uint<64>} - The total number of trading pairs.
+   */
+  export circuit getAllPairLength(): Uint<64> {
+    return LunarswapFactory_getAllPairLength();
+  }
+
+  export circuit getIdentity(
+                   tokenA: ShieldedCoinInfo,
+                   tokenB: ShieldedCoinInfo,
+                   isPairId: Boolean
+                   ): Bytes<32> {
+    return LunarswapLibrary_getIdentity(tokenA.color, tokenB.color, isPairId);
+  }
+
+  export circuit sortCoinByColor(
+                   tokenA: ShieldedCoinInfo,
+                   tokenB: ShieldedCoinInfo
+                   ): [ShieldedCoinInfo, ShieldedCoinInfo] {
+    return LunarswapLibrary_sortCoinByColor(tokenA, tokenB);
+  }
+
+  export circuit sortQualifiedCoinByColor(
+                   tokenA: QualifiedShieldedCoinInfo,
+                   tokenB: QualifiedShieldedCoinInfo
+                   ): [QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo] {
+    return LunarswapLibrary_sortQualifiedCoinByColor(tokenA, tokenB);
+  }
+
+  export circuit getFeeTo(): ZswapCoinPublicKey {
+    return LunarswapFee_getFeeTo();
+  }
+
+  export circuit getFeeToSetter(): ZswapCoinPublicKey {
+    return LunarswapFee_getFeeToSetter();
+  }
+}

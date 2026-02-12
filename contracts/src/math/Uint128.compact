@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/Uint128.compact)
 
-pragma language_version >= 0.20.0;
+pragma language_version >= 0.21.0;
 
 /**
  * @title Uint128
@@ -536,11 +536,11 @@ module Uint128 {
     const highDiff = a.high - highWithBorrow;
 
     if (borrow == 0) {
-       const lowDiff = a.low - b.low;
-       return U128 { low: lowDiff, high: highDiff };
+      const lowDiff = a.low - b.low;
+      return U128 { low: lowDiff, high: highDiff };
     } else {
-       const lowDiff = a.low + MODULUS() - b.low;
-       return U128 { low: lowDiff as Uint<64>, high: highDiff };
+      const lowDiff = a.low + MODULUS() - b.low;
+      return U128 { low: lowDiff as Uint<64>, high: highDiff };
     }
   }
 

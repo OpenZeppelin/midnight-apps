@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (shielded-token/openzeppelin/ShieldedERC20.compact)
 
-pragma language_version >= 0.20.0;
+pragma language_version >= 0.21.0;
 
 /**
  * @module ShieldedToken (archived until further notice, DO NOT USE IN PRODUCTION)
@@ -32,22 +32,22 @@ pragma language_version >= 0.20.0;
  * - Should this be a part of the Shielded module itself or as an extension?
  */
 module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
-  import {
-    ShieldedCoinInfo,
-    ShieldedSendResult,
-    sendImmediateShielded,
-    mintShieldedToken,
-    shieldedBurnAddress,
-    ZswapCoinPublicKey,
-    ContractAddress,
-    Either,
-    left,
-    ownPublicKey,
-    receiveShielded,
-    evolveNonce,
-    upgradeFromTransient,
-    Counter
-  } from CompactStandardLibrary;
+  import
+    { ShieldedCoinInfo,
+      ShieldedSendResult,
+      sendImmediateShielded,
+      mintShieldedToken,
+      shieldedBurnAddress,
+      ZswapCoinPublicKey,
+      ContractAddress,
+      Either,
+      left,
+      ownPublicKey,
+      receiveShielded,
+      evolveNonce,
+      upgradeFromTransient,
+      Counter }
+    from CompactStandardLibrary;
   import { isKeyOrAddressZero } from "./Utils";
 
   // Public state
@@ -58,7 +58,7 @@ module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
   export sealed ledger _name: Opaque<"string">;
   export sealed ledger _symbol: Opaque<"string">;
   export sealed ledger _decimals: Uint<8>;
-  export ledger _type: Bytes<32>;
+  export ledger _color: Bytes<32>;
 
   /**
    * @description Initializes the contract by setting the initial nonce
@@ -108,12 +108,12 @@ module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
   }
 
   /**
-   * @description Returns the type of the token.
+   * @description Returns the color of the token.
    *
-   * @return {Bytes<32>} - The type of the token.
+   * @return {Bytes<32>} - The color of the token.
    */
-  export circuit tokenType(): Bytes<32> {
-    return _type;
+  export circuit color(): Bytes<32> {
+    return _color;
   }
 
   /**
@@ -148,7 +148,9 @@ module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
   //       (Bytes<32>, Uint<64>, Bytes<32>, struct Either<is_left: Boolean, left: struct
   //       ZswapCoinPublicKey<bytes: Bytes<32>>, right: struct ContractAddress<bytes:
   //       Bytes<32>>>)
-  export circuit mint(recipient: Either<ZswapCoinPublicKey, ContractAddress>, amount: Uint<64>): ShieldedCoinInfo {
+  export circuit mint(recipient: Either<ZswapCoinPublicKey, ContractAddress>,
+                      amount: Uint<64>
+                      ): ShieldedCoinInfo {
     assert(!isKeyOrAddressZero(recipient), "ShieldedToken: invalid recipient");
 
     // TODO: Is that correct here? Do we need to increment after minting? not before?
@@ -158,8 +160,8 @@ module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
     // TODO: had to add disclose here, what does that mean?
     const ret = mintShieldedToken(_domain, disclose(amount), _nonce, disclose(recipient));
     // TODO: find a better solution for detecting the type
-    if (isZero(_type)) {
-      _type = ret.color;
+    if (isZero(_color)) {
+      _color = ret.color;
     }
     _totalSupply = _totalSupply + disclose(amount) as Uint<128>;
     return ret;
@@ -192,7 +194,7 @@ module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
    * spending the output if available.
    */
   export circuit burn(coin: ShieldedCoinInfo, amount: Uint<128>): ShieldedSendResult {
-    assert(coin.color == _type, "ShieldedToken: token not created from this contract");
+    assert(coin.color == _color, "ShieldedToken: token not created from this contract");
     assert(coin.value >= amount, "ShieldedToken: insufficient token amount to burn");
 
     receiveShielded(disclose(coin));

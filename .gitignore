@@ -150,6 +150,8 @@ dist
 # Turbo
 .turbo
 
-
 # Compact
 artifacts/
+
+# AI
+.claude/

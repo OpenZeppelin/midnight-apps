@@ -1,0 +1,78 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (lunarswap/test/LunarswapLibrary.mock.compact)
+
+pragma language_version >= 0.21.0;
+
+import CompactStandardLibrary;
+
+import { SplitResult } from "../../../LunarswapLibrary";
+
+import "../../../LunarswapLibrary" prefix LunarswapLibrary_;
+
+export { SplitResult };
+
+// Helper for test suite: toggling this variable activates circuit metadata reporting.
+// Only increases circuit size by 3 rows per exposed circuit.
+ledger toImpure: Boolean;
+
+// splitByValue variants for concrete types
+export circuit splitByValueCoin(
+                 coin: ShieldedCoinInfo,
+                 amount: Uint<128>
+                 ): SplitResult<ShieldedCoinInfo> {
+  toImpure = true;
+  return LunarswapLibrary_splitByValue<ShieldedCoinInfo>(coin, amount);
+}
+
+export circuit splitByValueQualifiedCoin(
+                 coin: QualifiedShieldedCoinInfo,
+                 amount: Uint<128>
+                 ): SplitResult<QualifiedShieldedCoinInfo> {
+  toImpure = true;
+  return LunarswapLibrary_splitByValue<QualifiedShieldedCoinInfo>(coin, amount);
+}
+
+// sortByColor variants for concrete types
+export circuit sortByColorCoin(
+                 a: ShieldedCoinInfo,
+                 b: ShieldedCoinInfo
+                 ): [ShieldedCoinInfo, ShieldedCoinInfo] {
+  toImpure = true;
+  return disclose(LunarswapLibrary_sortByColor<ShieldedCoinInfo>(a, b));
+}
+
+export circuit sortByColorQualifiedCoin(
+                 a: QualifiedShieldedCoinInfo,
+                 b: QualifiedShieldedCoinInfo
+                 ): [QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo] {
+  toImpure = true;
+  return disclose(LunarswapLibrary_sortByColor<QualifiedShieldedCoinInfo>(a, b));
+}
+
+export circuit getIdentity(type0: Bytes<32>, type1: Bytes<32>, isPairId: Boolean): Bytes<32> {
+  toImpure = true;
+  return LunarswapLibrary_getIdentity(type0, type1, isPairId);
+}
+
+export circuit quote(amount0: Uint<128>, reserve0: Uint<128>, reserve1: Uint<128>): Uint<128> {
+  toImpure = true;
+  return disclose(LunarswapLibrary_quote(amount0, reserve0, reserve1));
+}
+
+export circuit getAmountOut(
+                 amountIn: Uint<128>,
+                 reserveIn: Uint<128>,
+                 reserveOut: Uint<128>
+                 ): Uint<128> {
+  toImpure = true;
+  return disclose(LunarswapLibrary_getAmountOut(amountIn, reserveIn, reserveOut));
+}
+
+export circuit getAmountIn(
+                 amountOut: Uint<128>,
+                 reserveIn: Uint<128>,
+                 reserveOut: Uint<128>
+                 ): Uint<128> {
+  toImpure = true;
+  return disclose(LunarswapLibrary_getAmountIn(amountOut, reserveIn, reserveOut));
+}

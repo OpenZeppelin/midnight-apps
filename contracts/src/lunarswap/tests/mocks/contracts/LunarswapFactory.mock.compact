@@ -1,0 +1,94 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (lunarswap/test/LunarswapFactory.mock.compact)
+
+pragma language_version >= 0.21.0;
+
+import CompactStandardLibrary;
+
+import { Pair } from "../../../LunarswapPair";
+
+import { PairId, ReserveId } from "../../../LunarswapTypes";
+
+import "../../../LunarswapFactory" prefix LunarswapFactory_;
+
+export { Pair };
+
+// Helper for test suite: toggling this variable activates circuit metadata reporting.
+// Only increases circuit size by 3 rows per exposed circuit.
+ledger toImpure: Boolean;
+
+export circuit getPairId(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo): PairId {
+  toImpure = true;
+  return LunarswapFactory_getPairId(tokenA, tokenB) as PairId;
+}
+
+export circuit getAllPairLength(): Uint<64> {
+  toImpure = true;
+  return LunarswapFactory_getAllPairLength();
+}
+
+export circuit isPairExists(pairId: PairId): Boolean {
+  toImpure = true;
+  return LunarswapFactory_isPairExists(pairId);
+}
+
+export circuit getPair(pairId: PairId): Pair {
+  toImpure = true;
+  return LunarswapFactory_getPair(pairId);
+}
+
+export circuit getReserves(
+                 pairId: PairId,
+                 reserve0Id: ReserveId,
+                 reserve1Id: ReserveId
+                 ): [QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo] {
+  toImpure = true;
+  return LunarswapFactory_getReserves(pairId, reserve0Id, reserve1Id);
+}
+
+export circuit addReserves(
+                 reserve0Id: ReserveId,
+                 reserve1Id: ReserveId,
+                 token0: ShieldedCoinInfo,
+                 token1: ShieldedCoinInfo
+                 ): [] {
+  toImpure = true;
+  return LunarswapFactory_addReserves(reserve0Id, reserve1Id, token0, token1);
+}
+
+export circuit removeReserves(
+                 pairId: PairId,
+                 reserve0Id: ReserveId,
+                 reserve1Id: ReserveId,
+                 amount0: Uint<128>,
+                 amount1: Uint<128>,
+                 to: Either<ZswapCoinPublicKey, ContractAddress>
+                 ): [ShieldedCoinInfo, ShieldedCoinInfo] {
+  toImpure = true;
+  return LunarswapFactory_removeReserves(pairId, reserve0Id, reserve1Id, amount0, amount1, to);
+}
+
+export circuit swapReserves(
+                 pairId: PairId,
+                 tokenIn: ShieldedCoinInfo,
+                 tokenOut: ShieldedCoinInfo,
+                 to: Either<ZswapCoinPublicKey, ContractAddress>
+                 ): [] {
+  toImpure = true;
+  return LunarswapFactory_swapReserves(pairId, tokenIn, tokenOut, to);
+}
+
+export circuit createPair(pairId: PairId, token0: ShieldedCoinInfo, token1: ShieldedCoinInfo): Pair {
+  toImpure = true;
+  return LunarswapFactory_createPair(pairId, token0, token1);
+}
+
+export circuit updatePair(pairId: PairId, pair: Pair): Pair {
+  toImpure = true;
+  return LunarswapFactory_updatePair(pairId, pair);
+}
+
+export circuit removePair(pair: Pair): [] {
+  toImpure = true;
+  return LunarswapFactory_removePair(pair);
+}
