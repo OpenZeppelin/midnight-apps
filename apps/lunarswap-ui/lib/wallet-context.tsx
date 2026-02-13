@@ -11,7 +11,6 @@ import {
 } from '@midnight-ntwrk/ledger-v7';
 import { indexerPublicDataProvider } from '@midnight-ntwrk/midnight-js-indexer-public-data-provider';
 import { levelPrivateStateProvider } from '@midnight-ntwrk/midnight-js-level-private-state-provider';
-import { getNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 import type {
   MidnightProvider,
   PrivateStateProvider,
@@ -22,7 +21,6 @@ import type {
   ZKConfigProvider,
 } from '@midnight-ntwrk/midnight-js-types';
 import type { Address } from '@midnight-ntwrk/wallet-api';
-import { Transaction as ZswapTransaction } from '@midnight-ntwrk/zswap';
 import type { LunarswapPrivateState } from '@openzeppelin/midnight-apps-contracts/dist/lunarswap/witnesses/Lunarswap';
 import type {
   LunarswapCircuitKeys,
@@ -221,7 +219,7 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
 
       setIsConnecting(false);
     },
-    [logger],
+    [logger, checkProofServerStatus],
   );
 
   // Reconnection function with exponential backoff
@@ -355,7 +353,7 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
       return {
         balanceTx(
           tx: UnboundTransaction,
-          ttl?: Date,
+          _ttl?: Date,
         ): Promise<FinalizedTransaction> {
           providerCallback('balanceTxStarted');
           return walletAPI.wallet

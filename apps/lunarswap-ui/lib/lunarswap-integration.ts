@@ -1,4 +1,4 @@
-import type { RawTokenType, TokenType } from '@midnight-ntwrk/ledger-v7';
+import type { RawTokenType } from '@midnight-ntwrk/ledger-v7';
 import {
   createShieldedCoinInfo,
   encodeShieldedCoinInfo,
@@ -19,10 +19,7 @@ import type {
   Witnesses,
   ZswapCoinPublicKey,
 } from '@openzeppelin/midnight-apps-contracts/dist/artifacts/lunarswap/Lunarswap/contract';
-import {
-  type LunarswapPrivateState,
-  LunarswapWitnesses,
-} from '@openzeppelin/midnight-apps-contracts/dist/lunarswap/witnesses/Lunarswap';
+import type { LunarswapPrivateState } from '@openzeppelin/midnight-apps-contracts/dist/lunarswap/witnesses/Lunarswap';
 import {
   Lunarswap,
   type LunarswapProviders,
@@ -60,7 +57,6 @@ export class LunarswapIntegration {
   private lunarswap: Lunarswap | null = null;
   private lunarswapSimulator: LunarswapSimulator;
   private poolData: Ledger | null = null;
-  private callback: (action: ProviderCallbackAction) => void;
   private _status: ContractStatus = 'not-configured';
   private _statusInfo: ContractStatusInfo = { status: 'not-configured' };
   private contractAddress?: string;
@@ -316,8 +312,8 @@ export class LunarswapIntegration {
       return new Uint8Array(32);
     }
 
-    const tokenAInfo = LunarswapIntegration.toCoinInfo(tokenA, BigInt(0));
-    const tokenBInfo = LunarswapIntegration.toCoinInfo(tokenB, BigInt(0));
+    const _tokenAInfo = LunarswapIntegration.toCoinInfo(tokenA, BigInt(0));
+    const _tokenBInfo = LunarswapIntegration.toCoinInfo(tokenB, BigInt(0));
 
     // This method needs to be async now
     throw new Error(
@@ -581,37 +577,6 @@ export class LunarswapIntegration {
       left: { bytes: coinPublicKey.data },
       right: { bytes: new Uint8Array(32) },
     };
-  }
-
-  /**
-   * Calculate pool address for token pair using the actual getPairId circuit
-   */
-  private async calculatePoolAddress(
-    tokenA: RawTokenType,
-    tokenB: RawTokenType,
-  ): Promise<string> {
-    if (!this.lunarswap) {
-      throw new Error('Contract not initialized');
-    }
-
-    try {
-      const tokenAInfo = LunarswapIntegration.toCoinInfo(tokenA, BigInt(0));
-      const tokenBInfo = LunarswapIntegration.toCoinInfo(tokenB, BigInt(0));
-
-      // Use the Lunarswap API method
-      const pairIdentity = await this.lunarswap.getPairId(
-        tokenAInfo,
-        tokenBInfo,
-      );
-
-      return `0x${Buffer.from(pairIdentity).toString('hex')}`;
-    } catch (error) {
-      this._logger?.error(
-        { error },
-        `Failed to calculate pool address using getPairId: ${error instanceof Error ? error.message : String(error)}`,
-      );
-      throw error;
-    }
   }
 }
 

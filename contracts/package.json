@@ -54,7 +54,7 @@
   "devDependencies": {
     "@openzeppelin/compact-tools-cli": "file:../compact-tools/packages/cli",
     "@openzeppelin/compact-tools-simulator": "file:../compact-tools/packages/simulator",
-    "@openzeppelin-midnight-apps/lunarswap-sdk": "workspace:^",
+    "@openzeppelin/midnight-apps-lunarswap-sdk": "workspace:^",
     "@openzeppelin/midnight-apps-biome-config": "workspace:^",
     "@tsconfig/node24": "^24.0.3",
     "@types/node": "24.10.0",

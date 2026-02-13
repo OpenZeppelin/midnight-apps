@@ -12,7 +12,6 @@ import {
   Contract,
   type ContractAddress,
   type Either,
-  ledger,
   type Pair,
   type QualifiedShieldedCoinInfo,
   type ShieldedCoinInfo,

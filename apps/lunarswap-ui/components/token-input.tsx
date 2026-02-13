@@ -90,9 +90,7 @@ export function TokenInput({
                 <span className="font-medium truncate">{token.symbol}</span>
               </>
             ) : (
-              <>
-                <span className="font-medium truncate">Choose token</span>
-              </>
+              <span className="font-medium truncate">Choose token</span>
             )}
           </div>
           <ChevronDown

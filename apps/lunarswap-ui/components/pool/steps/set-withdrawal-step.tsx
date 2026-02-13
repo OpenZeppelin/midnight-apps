@@ -84,7 +84,7 @@ export function SetWithdrawalStep({ positionData }: SetWithdrawalStepProps) {
     if (lunarswap && status === 'connected') {
       fetchPairData();
     }
-  }, [lunarswap, status]);
+  }, [lunarswap, status, fetchPairData]);
 
   const fetchPairData = async () => {
     if (!lunarswap) return;

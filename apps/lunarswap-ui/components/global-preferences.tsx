@@ -397,29 +397,27 @@ export function GlobalPreferences({
   }
 
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 px-2 hover:bg-muted rounded-full"
-          >
-            <Settings className="h-4 w-4" />
-            <span className="sr-only">Global preferences</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="end"
-          className="w-80 bg-background/80 dark:bg-background/80 backdrop-blur-xl border-white/20 dark:border-gray-800/30 rounded-xl shadow-lg"
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 px-2 hover:bg-muted rounded-full"
         >
-          <DropdownMenuLabel className="text-sm font-medium">
-            Global Preferences
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <PreferencesContent />
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </>
+          <Settings className="h-4 w-4" />
+          <span className="sr-only">Global preferences</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        className="w-80 bg-background/80 dark:bg-background/80 backdrop-blur-xl border-white/20 dark:border-gray-800/30 rounded-xl shadow-lg"
+      >
+        <DropdownMenuLabel className="text-sm font-medium">
+          Global Preferences
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <PreferencesContent />
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

@@ -416,8 +416,10 @@ function TokensContent() {
                 </Button>
               )}
             </div>
+          ) : viewMode === 'grid' ? (
+            <GridView />
           ) : (
-            <>{viewMode === 'grid' ? <GridView /> : <ListView />}</>
+            <ListView />
           )}
 
           <div className="mt-12 text-center">

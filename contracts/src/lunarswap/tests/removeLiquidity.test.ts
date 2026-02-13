@@ -3,7 +3,7 @@ import {
   calculateAddLiquidityAmounts,
   calculateRemoveLiquidityMinimums,
   SLIPPAGE_TOLERANCE,
-} from '@openzeppelin-midnight-apps/lunarswap-sdk';
+} from '@openzeppelin/midnight-apps-lunarswap-sdk';
 import { ShieldedFungibleTokenSimulator } from '@src/shielded-token/test/mocks/ShieldedFungibleTokenSimulator.js';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { LunarswapSimulator } from './mocks/LunarswapSimulator.js';
