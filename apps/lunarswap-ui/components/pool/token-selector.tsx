@@ -1,8 +1,8 @@
 'use client';
 
 import { ChevronDown, Search } from 'lucide-react';
-import Image from 'next/image';
 import { useState } from 'react';
+import { TokenIcon } from '@/components/token-icon';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -11,50 +11,12 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-
-// Sample token list - in a real app, this would come from an API
-const popularTokens = [
-  {
-    symbol: 'NIGHT',
-    name: 'Midnight',
-    logo: '/placeholder.svg?height=32&width=32',
-    balance: '1.56',
-  },
-  {
-    symbol: 'USDC',
-    name: 'USD Coin',
-    logo: '/placeholder.svg?height=32&width=32',
-    balance: '2,456.78',
-  },
-  {
-    symbol: 'USDT',
-    name: 'Tether',
-    logo: '/placeholder.svg?height=32&width=32',
-    balance: '1,245.00',
-  },
-  {
-    symbol: 'DAI',
-    name: 'Dai Stablecoin',
-    logo: '/placeholder.svg?height=32&width=32',
-    balance: '567.89',
-  },
-  {
-    symbol: 'WBTC',
-    name: 'Wrapped Bitcoin',
-    logo: '/placeholder.svg?height=32&width=32',
-    balance: '0.05',
-  },
-  {
-    symbol: 'UNI',
-    name: 'Uniswap',
-    logo: '/placeholder.svg?height=32&width=32',
-    balance: '125.45',
-  },
-];
+import type { Token as UiToken } from '@/lib/token-config';
+import { popularTokens } from '@/lib/token-config';
 
 interface TokenSelectorProps {
-  selectedToken: any;
-  onSelectToken: (token: any) => void;
+  selectedToken: UiToken | null;
+  onSelectToken: (token: UiToken) => void;
   placeholder?: string;
   showTokenIcon?: boolean;
 }
@@ -68,13 +30,17 @@ export function TokenSelector({
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredTokens = popularTokens.filter(
+  // Always show all popular tokens for add liquidity, not just tokens in existing pools
+  // This allows users to create new pools for any token pair
+  const availableTokens = popularTokens;
+
+  const filteredTokens = availableTokens.filter(
     (token) =>
       token.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       token.symbol.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const handleSelectToken = (token: any) => {
+  const handleSelectToken = (token: UiToken) => {
     onSelectToken(token);
     setOpen(false);
   };
@@ -86,25 +52,28 @@ export function TokenSelector({
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls="token-selector-dialog"
-        className="w-full justify-between h-12 bg-white dark:bg-gray-800"
+        className={`w-full justify-between h-12 ${
+          selectedToken
+            ? 'bg-white dark:bg-gray-800'
+            : 'bg-blue-500 hover:bg-blue-600 text-white border-blue-500 hover:border-blue-600'
+        }`}
         onClick={() => setOpen(true)}
       >
         {selectedToken ? (
           <div className="flex items-center">
             {showTokenIcon && (
               <div className="relative h-6 w-6 mr-2">
-                <Image
-                  src={selectedToken.logo || '/placeholder.svg'}
-                  alt={selectedToken.name}
-                  fill
-                  className="rounded-full"
-                />
+                <TokenIcon symbol={selectedToken.symbol} size={24} />
               </div>
             )}
             <span>{selectedToken.symbol}</span>
           </div>
         ) : (
-          <span className="text-gray-500 dark:text-gray-400">
+          <span
+            className={
+              selectedToken ? 'text-gray-500 dark:text-gray-400' : 'text-white'
+            }
+          >
             {placeholder}
           </span>
         )}
@@ -132,16 +101,12 @@ export function TokenSelector({
             {filteredTokens.map((token) => (
               <button
                 key={token.symbol}
+                type="button"
                 className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                 onClick={() => handleSelectToken(token)}
               >
                 <div className="relative h-8 w-8 rounded-full overflow-hidden">
-                  <Image
-                    src={token.logo || '/placeholder.svg'}
-                    alt={token.name}
-                    fill
-                    className="object-cover"
-                  />
+                  <TokenIcon symbol={token.symbol} size={32} />
                 </div>
                 <div className="flex flex-col items-start">
                   <span className="font-medium">{token.symbol}</span>
@@ -149,9 +114,6 @@ export function TokenSelector({
                     {token.name}
                   </span>
                 </div>
-                <span className="ml-auto text-gray-500 dark:text-gray-400">
-                  {token.balance}
-                </span>
               </button>
             ))}
 

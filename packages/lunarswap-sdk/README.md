@@ -5,7 +5,7 @@ A TypeScript SDK for Lunarswap liquidity calculations. Provides a simple functio
 ## Installation
 
 ```bash
-pnpm add @openzeppelin-midnight-apps/lunarswap-sdk
+pnpm add @openzeppelin/midnight-apps-lunarswap-sdk
 ```
 
 ## Usage
@@ -16,7 +16,7 @@ pnpm add @openzeppelin-midnight-apps/lunarswap-sdk
 import { 
   calculateLiquidityAmounts, 
   SLIPPAGE_TOLERANCE 
-} from '@openzeppelin-midnight-apps/lunarswap-sdk';
+} from '@openzeppelin/midnight-apps-lunarswap-sdk';
 
 // Calculate minimum amounts for adding liquidity to an existing pair
 const result = calculateLiquidityAmounts(
@@ -63,7 +63,7 @@ const result = calculateLiquidityAmounts(
 ### Slippage Tolerance Options
 
 ```typescript
-import { SLIPPAGE_TOLERANCE } from '@openzeppelin-midnight-apps/lunarswap-sdk';
+import { SLIPPAGE_TOLERANCE } from '@openzeppelin/midnight-apps-lunarswap-sdk';
 
 // Available slippage tolerance values:
 // SLIPPAGE_TOLERANCE.VERY_LOW  // 0.1%

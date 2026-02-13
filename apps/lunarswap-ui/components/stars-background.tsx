@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 export function StarsBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDark, setIsDark] = useState(true);
+  const [animationsEnabled, setAnimationsEnabled] = useState(true);
 
   // Listen for theme changes
   useEffect(() => {
@@ -23,6 +24,40 @@ export function StarsBackground() {
     });
 
     return () => observer.disconnect();
+  }, []);
+
+  // Listen for animation settings changes
+  useEffect(() => {
+    // Load initial setting from localStorage
+    const loadAnimationSetting = () => {
+      try {
+        const stored = localStorage.getItem('lunarswap-animations-enabled');
+        if (stored !== null) {
+          setAnimationsEnabled(JSON.parse(stored));
+        }
+      } catch (error) {
+        console.warn('Failed to load animation settings:', error);
+      }
+    };
+
+    loadAnimationSetting();
+
+    // Listen for animation toggle events
+    const handleAnimationToggle = (event: CustomEvent) => {
+      setAnimationsEnabled(event.detail.enabled);
+    };
+
+    window.addEventListener(
+      'animations-toggled',
+      handleAnimationToggle as EventListener,
+    );
+
+    return () => {
+      window.removeEventListener(
+        'animations-toggled',
+        handleAnimationToggle as EventListener,
+      );
+    };
   }, []);
 
   useEffect(() => {
@@ -73,22 +108,25 @@ export function StarsBackground() {
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw stars
-      for (const star of stars) {
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-        ctx.fillStyle = isDark
-          ? `rgba(255, 255, 255, ${star.opacity})`
-          : `rgba(0, 0, 50, ${star.opacity * 0.3})`;
-        ctx.fill();
+      // Only animate if animations are enabled
+      if (animationsEnabled) {
+        // Draw stars
+        for (const star of stars) {
+          ctx.beginPath();
+          ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+          ctx.fillStyle = isDark
+            ? `rgba(255, 255, 255, ${star.opacity})`
+            : `rgba(0, 0, 50, ${star.opacity * 0.3})`;
+          ctx.fill();
 
-        // Move star
-        star.y += star.speed;
+          // Move star
+          star.y += star.speed;
 
-        // Reset if off‐screen
-        if (star.y > canvas.height) {
-          star.y = 0;
-          star.x = Math.random() * canvas.width;
+          // Reset if off-screen
+          if (star.y > canvas.height) {
+            star.y = 0;
+            star.x = Math.random() * canvas.width;
+          }
         }
       }
 
@@ -102,7 +140,7 @@ export function StarsBackground() {
       window.removeEventListener('resize', createStars);
       cancelAnimationFrame(animationFrame);
     };
-  }, [isDark]);
+  }, [isDark, animationsEnabled]);
 
   return (
     <canvas

@@ -17,19 +17,19 @@ export function FeeTierSelector({
       value: 0.05,
       label: '0.05%',
       description: 'Best for stable pairs',
-      example: 'DAI/USDC',
+      example: 'TUSD/TEURO',
     },
     {
       value: 0.3,
       label: '0.3%',
       description: 'Best for most pairs',
-      example: 'NIGHT/USDC',
+      example: 'TUSD/TJPY',
     },
     {
       value: 1,
       label: '1%',
       description: 'Best for exotic pairs',
-      example: 'NIGHT/DAI',
+      example: 'TJPY/TCNY',
     },
   ];
 

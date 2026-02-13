@@ -1,0 +1,9 @@
+{
+  "LOGGING_LEVEL": "silent",
+  "NETWORK_ID": "TestNet",
+  "PUBLIC_URL": "http://127.0.0.1:8080",
+  "INDEXER_URI": "https://indexer.testnet-02.midnight.network/api/v1/graphql",
+  "INDEXER_WS_URI": "wss://indexer.testnet-02.midnight.network/api/v1/graphql/ws",
+  "LUNARSWAP_ADDRESS": "0200c6507ce8942998ecf07d57a0fa024de504c0a9d3df67cab6686f8dfb80bde20e",
+  "FAUCET_URL": "https://faucet.testnet-02.midnight.network"
+}

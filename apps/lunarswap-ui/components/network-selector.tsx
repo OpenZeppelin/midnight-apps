@@ -19,9 +19,11 @@ export function NetworkSelector() {
     availableNetworks,
     isNetworkSynced,
     syncWithWallet,
+    isMainnetEnabled,
   } = useNetwork();
-  const { isWalletConnected } = useWallet();
+  const { isConnected } = useWallet();
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Mark as hydrated after initial render
   useEffect(() => {
@@ -31,11 +33,29 @@ export function NetworkSelector() {
   const handleNetworkChange = async (
     network: (typeof availableNetworks)[0],
   ) => {
+    // Don't allow switching to mainnet if it's disabled
+    if (network.type === 'mainnet' && !isMainnetEnabled) {
+      return;
+    }
+
     setCurrentNetwork(network);
 
     // If wallet is connected, try to sync with the new network
-    if (isWalletConnected) {
+    if (isConnected) {
       await syncWithWallet();
+    }
+  };
+
+  const handleSyncClick = async () => {
+    if (!isConnected || isSyncing) return;
+
+    setIsSyncing(true);
+    try {
+      await syncWithWallet();
+    } catch (error) {
+      console.error('Failed to sync wallet:', error);
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -49,10 +69,14 @@ export function NetworkSelector() {
         >
           <div className="flex items-center gap-2">
             <div
-              className={`w-2 h-2 rounded-full ${currentNetwork.type === 'mainnet' ? 'bg-green-500' : 'bg-yellow-500'}`}
+              className={`w-2 h-2 rounded-full ${
+                currentNetwork.type === 'mainnet'
+                  ? 'bg-green-500'
+                  : 'bg-yellow-500'
+              }`}
             />
             {currentNetwork.name}
-            {isHydrated && isWalletConnected && (
+            {isHydrated && isConnected && (
               <div className="flex items-center">
                 {isNetworkSynced ? (
                   <Wifi className="h-3 w-3 text-green-500" />
@@ -65,18 +89,20 @@ export function NetworkSelector() {
           <ChevronDown className="ml-2 h-4 w-4 text-gray-500" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[200px]">
+      <DropdownMenuContent align="end" className="w-[220px]">
         <div className="p-2">
-          {isHydrated && isWalletConnected && (
+          {isHydrated && isConnected && (
             <div className="mb-2 p-2 bg-gray-50 dark:bg-gray-800 rounded text-xs">
               <div className="flex items-center gap-2 mb-1">
                 <span className="font-medium">Wallet Sync:</span>
                 {isNetworkSynced ? (
-                  <span className="text-green-600 dark:text-green-400">
+                  <span className="text-green-600 dark:text-green-400 flex items-center gap-1">
+                    <Wifi className="h-3 w-3" />
                     Synced
                   </span>
                 ) : (
-                  <span className="text-red-600 dark:text-red-400">
+                  <span className="text-red-600 dark:text-red-400 flex items-center gap-1">
+                    <WifiOff className="h-3 w-3" />
                     Not Synced
                   </span>
                 )}
@@ -85,25 +111,26 @@ export function NetworkSelector() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={syncWithWallet}
-                  className="w-full h-8 text-xs font-medium bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/20 dark:hover:bg-blue-950/40 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300"
+                  onClick={handleSyncClick}
+                  disabled={isSyncing}
+                  className="w-full h-8 text-xs font-medium bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/20 dark:hover:bg-blue-950/40 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 disabled:opacity-50"
                 >
-                  Sync Now
+                  {isSyncing ? 'Syncing...' : 'Sync Now'}
                 </Button>
               )}
             </div>
           )}
 
-          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">
-            Mainnet
-          </div>
           {availableNetworks
             .filter((n) => n.type === 'mainnet')
             .map((network) => (
               <DropdownMenuItem
                 key={network.id}
-                className="flex items-center justify-between cursor-pointer"
+                className={`flex items-center justify-between cursor-pointer ${
+                  !isMainnetEnabled ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
                 onClick={() => handleNetworkChange(network)}
+                disabled={!isMainnetEnabled}
               >
                 <span>{network.name}</span>
                 {currentNetwork.id === network.id && (
@@ -112,9 +139,6 @@ export function NetworkSelector() {
               </DropdownMenuItem>
             ))}
 
-          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mt-3 mb-1.5">
-            Testnet
-          </div>
           {availableNetworks
             .filter((n) => n.type === 'testnet')
             .map((network) => (

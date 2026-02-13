@@ -1,0 +1,81 @@
+/* Custom animations for TokenCloud component - Gentle floating effect */
+
+@keyframes float {
+  0% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-20px) translateX(5px);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.3;
+  }
+}
+
+@keyframes bounce {
+  0% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.3;
+  }
+  25% {
+    transform: translateY(-15px) translateX(-3px);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(10px) translateX(3px);
+    opacity: 0.3;
+  }
+  75% {
+    transform: translateY(-10px) translateX(-2px);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.3;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: translateY(0px) translateX(0px) scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-10px) translateX(2px) scale(1.05);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(0px) translateX(0px) scale(1);
+    opacity: 0.3;
+  }
+}
+
+@keyframes wiggle {
+  0% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.3;
+  }
+  20% {
+    transform: translateY(-8px) translateX(8px);
+    opacity: 0.3;
+  }
+  40% {
+    transform: translateY(5px) translateX(-5px);
+    opacity: 0.3;
+  }
+  60% {
+    transform: translateY(-5px) translateX(3px);
+    opacity: 0.3;
+  }
+  80% {
+    transform: translateY(8px) translateX(-3px);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.3;
+  }
+}

@@ -1,12 +1,12 @@
 import { useContext } from 'react';
-import { WalletContext, type WalletContextType } from '@/lib/wallet-context';
+import { type MidnightWalletState, WalletContext } from '@/lib/wallet-context';
 
 /**
  * Retrieves the currently in-scope wallet provider.
  *
  * @returns The currently in-scope wallet context implementation.
  */
-export const useWallet = (): WalletContextType => {
+export const useWallet = (): MidnightWalletState => {
   const context = useContext(WalletContext);
 
   if (!context) {

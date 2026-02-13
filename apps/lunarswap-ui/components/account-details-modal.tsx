@@ -1,16 +1,26 @@
 'use client';
 
-import type { DAppConnectorWalletState } from '@midnight-ntwrk/dapp-connector-api';
-import { X } from 'lucide-react';
+// DAppConnectorWalletState no longer exists in new API
+import { Database, Server, X } from 'lucide-react';
+import type React from 'react';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Button } from '@/components/ui/button';
 import { Identicon } from './identicon';
+import { Button } from './ui/button';
 
 interface AccountDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  walletState: DAppConnectorWalletState | null;
+  walletAPI?: {
+    address: string;
+    coinPublicKey: string;
+    encryptionPublicKey: string;
+    configuration: {
+      proverServerUri?: string;
+      indexerUri?: string;
+      indexerWsUri?: string;
+    };
+  };
 }
 
 interface AccountField {
@@ -18,13 +28,13 @@ interface AccountField {
   value: string;
   description?: string;
   isLegacy?: boolean;
-  type: 'address' | 'coin' | 'encryption';
+  type: 'address' | 'coin' | 'encryption' | 'service';
 }
 
 export function AccountDetailsModal({
   isOpen,
   onClose,
-  walletState,
+  walletAPI,
 }: AccountDetailsModalProps) {
   const [mounted, setMounted] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -91,7 +101,7 @@ export function AccountDetailsModal({
     if (!isOpen) setShowLegacy({});
   }, [isOpen]);
 
-  if (!isOpen || !walletState || !mounted) return null;
+  if (!isOpen || !walletAPI || !mounted) return null;
 
   const copyToClipboard = async (text: string, label: string) => {
     try {
@@ -118,45 +128,47 @@ export function AccountDetailsModal({
   const accountFields: AccountField[] = [
     {
       label: 'Address',
-      value: walletState.address || '',
+      value: walletAPI.address || '',
       description: 'Your main wallet address',
       type: 'address',
       isLegacy: false,
     },
     {
-      label: 'Address (Legacy)',
-      value: walletState.addressLegacy || '',
-      description: 'Legacy format wallet address',
-      type: 'address',
-      isLegacy: true,
-    },
-    {
       label: 'Coin Public Key',
-      value: walletState.coinPublicKey || '',
+      value: walletAPI.coinPublicKey || '',
       description: 'Public key for coin operations',
       type: 'coin',
       isLegacy: false,
     },
     {
-      label: 'Coin Public Key (Legacy)',
-      value: walletState.coinPublicKeyLegacy || '',
-      description: 'Legacy format coin public key',
-      type: 'coin',
-      isLegacy: true,
-    },
-    {
       label: 'Encryption Public Key',
-      value: walletState.encryptionPublicKey || '',
+      value: walletAPI.encryptionPublicKey || '',
       description: 'Public key for encryption operations',
       type: 'encryption',
       isLegacy: false,
     },
+    // Service URLs
     {
-      label: 'Encryption Public Key (Legacy)',
-      value: walletState.encryptionPublicKeyLegacy || '',
-      description: 'Legacy format encryption public key',
-      type: 'encryption',
-      isLegacy: true,
+      label: 'Proof Server',
+      value:
+        walletAPI?.configuration?.proverServerUri || 'http://localhost:6300',
+      description: 'ZK proof generation server',
+      type: 'service',
+      isLegacy: false,
+    },
+    {
+      label: 'Indexer HTTP',
+      value: walletAPI?.configuration?.indexerUri || 'http://localhost:8088',
+      description: 'Blockchain data indexer (HTTP)',
+      type: 'service',
+      isLegacy: false,
+    },
+    {
+      label: 'Indexer WebSocket',
+      value: walletAPI?.configuration?.indexerWsUri || 'ws://localhost:8088',
+      description: 'Blockchain data indexer (WebSocket)',
+      type: 'service',
+      isLegacy: false,
     },
   ];
 
@@ -194,7 +206,6 @@ export function AccountDetailsModal({
       data-modal-portal
     >
       <div
-        role="dialog"
         className="bg-background rounded-xl shadow-2xl w-full max-w-4xl max-h-[80vh] overflow-hidden relative pointer-events-auto"
         style={{
           zIndex: 100000,
@@ -206,7 +217,7 @@ export function AccountDetailsModal({
         <div className="flex items-center justify-between p-4 border-b bg-muted/30 sticky top-0 z-10">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/20 shrink-0">
-              <Identicon address={walletState.address || ''} size={40} />
+              <Identicon address={walletAPI.address || ''} size={40} />
             </div>
             <div className="min-w-0 flex-1">
               <h2
@@ -216,8 +227,8 @@ export function AccountDetailsModal({
                 Account Details
               </h2>
               <p className="text-xs text-muted-foreground font-mono truncate">
-                {walletState.address
-                  ? `${walletState.address.slice(0, 10)}...${walletState.address.slice(-10)}`
+                {walletAPI.address
+                  ? `${walletAPI.address.slice(0, 10)}...${walletAPI.address.slice(-10)}`
                   : '...'}
               </p>
             </div>
@@ -243,10 +254,20 @@ export function AccountDetailsModal({
                       <div className="bg-card border rounded-lg p-3 hover:bg-muted/30 transition-colors">
                         <div className="flex items-start gap-2">
                           <div className="w-6 h-6 rounded-full overflow-hidden border border-primary/20 shrink-0 mt-0.5">
-                            <Identicon
-                              address={field.value || walletState.address || ''}
-                              size={24}
-                            />
+                            {field.type === 'service' ? (
+                              <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                                {field.label.includes('Proof') ? (
+                                  <Server className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+                                ) : (
+                                  <Database className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+                                )}
+                              </div>
+                            ) : (
+                              <Identicon
+                                address={field.value || walletAPI.address || ''}
+                                size={24}
+                              />
+                            )}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
@@ -254,7 +275,8 @@ export function AccountDetailsModal({
                                 {field.label}
                               </span>
                               <span className="text-xs text-muted-foreground">
-                                • Main
+                                •{' '}
+                                {field.type === 'service' ? 'Service' : 'Main'}
                               </span>
                             </div>
                             {field.description && (
@@ -321,7 +343,7 @@ export function AccountDetailsModal({
                               <div className="w-5 h-5 rounded-full overflow-hidden border border-muted-foreground/30 shrink-0 mt-0.5">
                                 <Identicon
                                   address={
-                                    field.value || walletState.address || ''
+                                    field.value || walletAPI.address || ''
                                   }
                                   size={20}
                                 />

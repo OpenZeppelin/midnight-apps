@@ -1,5 +1,5 @@
 {
-	"name": "@openzeppelin-midnight-apps/lunarswap-sdk",
+	"name": "@openzeppelin/midnight-apps-lunarswap-sdk",
 	"version": "1.0.0",
 	"description": "SDK for Lunarswap liquidity calculations. Provides a simple function to calculate minimum amounts for addLiquidity calls.",
 	"main": "dist/index.js",

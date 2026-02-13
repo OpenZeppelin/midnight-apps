@@ -8,7 +8,7 @@ export function TokenStats() {
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-500 dark:text-gray-400">
-              NIGHT Price
+              TUSD Price
             </div>
             <div className="flex items-center text-green-500 dark:text-green-400 text-sm">
               <ArrowUp className="h-3 w-3 mr-1" />

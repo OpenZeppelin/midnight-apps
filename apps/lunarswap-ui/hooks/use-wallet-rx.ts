@@ -1,9 +1,16 @@
-import type { DAppConnectorWalletState } from '@midnight-ntwrk/dapp-connector-api';
+// DAppConnectorWalletState no longer exists in new API
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useWallet } from './use-wallet';
 
+interface WalletState {
+  address: string;
+  coinPublicKey: string;
+  encryptionPublicKey: string;
+  balances: Record<string, bigint>;
+}
+
 interface WalletRxState {
-  state: DAppConnectorWalletState | null;
+  state: WalletState | null;
   error: string | null;
 }
 
@@ -12,15 +19,15 @@ interface WalletRxActions {
 }
 
 export function useWalletRx(): WalletRxState & WalletRxActions {
-  const { wallet, isWalletConnected } = useWallet();
-  const [state, setState] = useState<DAppConnectorWalletState | null>(null);
+  const { walletAPI, isConnected } = useWallet();
+  const [state, setState] = useState<WalletState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // Start polling when wallet connects
   useEffect(() => {
-    if (!wallet || !isWalletConnected) {
+    if (!walletAPI || !isConnected) {
       setState(null);
       setError(null);
       return;
@@ -37,8 +44,15 @@ export function useWalletRx(): WalletRxState & WalletRxActions {
     // Initial state fetch
     const fetchState = async () => {
       try {
-        const walletState = await wallet.state();
-        setState(walletState);
+        const addressInfo = await walletAPI.wallet.getShieldedAddresses();
+        const balances = await walletAPI.wallet.getShieldedBalances();
+
+        setState({
+          address: addressInfo.shieldedAddress,
+          coinPublicKey: addressInfo.shieldedCoinPublicKey,
+          encryptionPublicKey: addressInfo.shieldedEncryptionPublicKey,
+          balances,
+        });
         setError(null);
       } catch (err) {
         setError(
@@ -61,17 +75,24 @@ export function useWalletRx(): WalletRxState & WalletRxActions {
         abortControllerRef.current.abort();
       }
     };
-  }, [wallet, isWalletConnected]);
+  }, [walletAPI, isConnected]);
 
   // Manual refresh
   const refresh = useCallback(async (): Promise<void> => {
-    if (!wallet) {
+    if (!walletAPI) {
       throw new Error('Wallet not connected');
     }
 
     try {
-      const walletState = await wallet.state();
-      setState(walletState);
+      const addressInfo = await walletAPI.wallet.getShieldedAddresses();
+      const balances = await walletAPI.wallet.getShieldedBalances();
+
+      setState({
+        address: addressInfo.shieldedAddress,
+        coinPublicKey: addressInfo.shieldedCoinPublicKey,
+        encryptionPublicKey: addressInfo.shieldedEncryptionPublicKey,
+        balances,
+      });
       setError(null);
     } catch (err) {
       setError(
@@ -79,7 +100,7 @@ export function useWalletRx(): WalletRxState & WalletRxActions {
       );
       throw err;
     }
-  }, [wallet]);
+  }, [walletAPI]);
 
   return {
     // State

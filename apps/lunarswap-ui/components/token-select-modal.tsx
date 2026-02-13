@@ -1,7 +1,9 @@
 'use client';
-import { Search } from 'lucide-react';
-import Image from 'next/image';
-import { useState } from 'react';
+import { Droplets, Plus, Search } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { TokenIcon } from '@/components/token-icon';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -9,71 +11,135 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { useLogger } from '@/hooks/use-logger';
+import { useLunarswapContext } from '@/lib/lunarswap-context';
+import { popularTokens } from '@/lib/token-config';
 
-const popularTokens = [
-  {
-    symbol: 'NIGHT',
-    name: 'Midnight',
-    logo: '/placeholder.svg?height=32&width=32',
-    balance: '1.56',
-  },
-  {
-    symbol: 'USDC',
-    name: 'USD Coin',
-    logo: '/placeholder.svg?height=32&width=32',
-    balance: '2,456.78',
-  },
-  {
-    symbol: 'USDT',
-    name: 'Tether',
-    logo: '/placeholder.svg?height=32&width=32',
-    balance: '1,245.00',
-  },
-  {
-    symbol: 'DAI',
-    name: 'Dai Stablecoin',
-    logo: '/placeholder.svg?height=32&width=32',
-    balance: '567.89',
-  },
-  {
-    symbol: 'WBTC',
-    name: 'Wrapped Bitcoin',
-    logo: '/placeholder.svg?height=32&width=32',
-    balance: '0.05',
-  },
-  {
-    symbol: 'UNI',
-    name: 'Uniswap',
-    logo: '/placeholder.svg?height=32&width=32',
-    balance: '125.45',
-  },
-];
+interface Token {
+  symbol: string;
+  name: string;
+  type: string;
+  address: string;
+}
 
 interface TokenSelectModalProps {
   show: boolean;
   onClose: () => void;
-  onSelect: (token: any) => void;
+  onSelect: (token: Token | null) => void;
+  customTokens?: Token[];
+  selectedToken?: Token | null;
+  isLoading?: boolean;
 }
 
 export function TokenSelectModal({
   show,
   onClose,
   onSelect,
+  customTokens,
+  selectedToken,
+  isLoading: externalIsLoading = false,
 }: TokenSelectModalProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [availableTokens, setAvailableTokens] = useState<Token[]>([]);
+  const [isLoading, _setIsLoading] = useState(false);
+  const { allPairs } = useLunarswapContext();
+  const navigate = useNavigate();
+  const _logger = useLogger();
 
-  const filteredTokens = popularTokens.filter(
+  // Filter available tokens from global context (only if no custom tokens provided)
+  useEffect(() => {
+    // If custom tokens are provided, skip the default logic
+    if (customTokens && customTokens.length > 0) {
+      return;
+    }
+
+    // Convert Uint8Array to lowercase hex
+    const bytesToHex = (bytes: Uint8Array): string =>
+      Array.from(bytes)
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('')
+        .toLowerCase();
+
+    if (!show) {
+      setAvailableTokens([]);
+      return;
+    }
+
+    if (allPairs.length === 0) {
+      // Don't set empty tokens, let it show loading state
+      return;
+    }
+
+    // Extract unique tokens from all pairs
+    const tokenSet = new Set<string>();
+    for (const { pair } of allPairs) {
+      const token0Color = bytesToHex(pair.token0Type);
+      const token1Color = bytesToHex(pair.token1Type);
+      // Add both tokens from each pair
+      tokenSet.add(token0Color);
+      tokenSet.add(token1Color);
+    }
+
+    // Filter popular tokens to only include those with pools
+    const available = popularTokens.filter((token) => {
+      const tokenType = token.type.replace(/^0x/i, '').toLowerCase();
+      const tokenTypeWithoutPrefix = tokenType.replace(/^0200/, '');
+
+      // Try exact match first
+      let hasMatch = tokenSet.has(tokenType);
+
+      // If no exact match, try without the 0200 prefix
+      if (!hasMatch) {
+        hasMatch = tokenSet.has(tokenTypeWithoutPrefix);
+      }
+
+      // If still no match, try adding 0200 prefix to pool tokens
+      if (!hasMatch) {
+        hasMatch = Array.from(tokenSet).some(
+          (poolType) =>
+            poolType === tokenTypeWithoutPrefix ||
+            `0200${poolType}` === tokenType,
+        );
+      }
+
+      return hasMatch;
+    });
+
+    setAvailableTokens(available);
+  }, [show, allPairs, customTokens]);
+
+  // Use custom tokens if provided, otherwise use the default logic
+  const tokensToUse =
+    customTokens && customTokens.length > 0 ? customTokens : availableTokens;
+
+  const filteredTokens = tokensToUse.filter(
     (token) =>
       token.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       token.symbol.toLowerCase().includes(searchQuery.toLowerCase()),
   );
+
+  const handleAddLiquidity = () => {
+    onClose();
+    navigate('/pool/new');
+  };
 
   return (
     <Dialog open={show} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-gray-200/50 dark:border-blue-900/30 text-foreground rounded-2xl">
         <DialogHeader className="flex flex-row items-center justify-between">
           <DialogTitle>Select a token</DialogTitle>
-          {/* Removed the duplicate close button that was here */}
+          {selectedToken && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onSelect(null)}
+                className="text-xs h-7 px-2"
+              >
+                Clear
+              </Button>
+            </div>
+          )}
         </DialogHeader>
         <div className="relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -85,36 +151,53 @@ export function TokenSelectModal({
           />
         </div>
         <div className="space-y-1 max-h-[300px] overflow-y-auto pr-1">
-          {filteredTokens.map((token) => (
-            <button
-              key={token.symbol}
-              className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-              onClick={() => onSelect(token)}
-            >
-              <div className="relative h-8 w-8 rounded-full overflow-hidden">
-                <Image
-                  src={token.logo || '/placeholder.svg'}
-                  alt={token.name}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="flex flex-col items-start">
-                <span className="font-medium">{token.symbol}</span>
-                <span className="text-sm text-gray-500 dark:text-gray-400">
-                  {token.name}
-                </span>
-              </div>
-              <span className="ml-auto text-gray-500 dark:text-gray-400">
-                {token.balance}
-              </span>
-            </button>
-          ))}
-
-          {filteredTokens.length === 0 && (
+          {externalIsLoading ||
+          isLoading ||
+          allPairs.length === 0 ||
+          (customTokens && customTokens.length === 0) ? (
             <div className="text-center py-6 text-gray-500 dark:text-gray-400">
-              No tokens found
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-2" />
+              Loading available tokens...
             </div>
+          ) : tokensToUse.length === 0 ? (
+            <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+              <Droplets className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+              <p className="text-sm mb-2">No liquidity pools available</p>
+              <p className="text-xs mb-3">
+                Add liquidity to create trading pairs
+              </p>
+              <Button
+                onClick={handleAddLiquidity}
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add Liquidity
+              </Button>
+            </div>
+          ) : filteredTokens.length === 0 ? (
+            <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+              No tokens found matching your search
+            </div>
+          ) : (
+            filteredTokens.map((token) => (
+              <button
+                key={token.symbol}
+                type="button"
+                className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                onClick={() => onSelect(token)}
+              >
+                <div className="relative h-8 w-8 rounded-full overflow-hidden">
+                  <TokenIcon symbol={token.symbol} size={32} />
+                </div>
+                <div className="flex flex-col items-start">
+                  <span className="font-medium">{token.symbol}</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    {token.name}
+                  </span>
+                </div>
+              </button>
+            ))
           )}
         </div>
       </DialogContent>

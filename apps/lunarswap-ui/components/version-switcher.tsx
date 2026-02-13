@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, ChevronsUpDown, ExternalLink } from 'lucide-react';
+import { Check, ChevronsUpDown, Clock, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -9,8 +9,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
 import { useVersion } from '@/lib/version-context';
+import { cn } from '@/utils/cn';
 
 export function VersionSwitcher() {
   const { version, setVersion } = useVersion();
@@ -45,50 +45,38 @@ export function VersionSwitcher() {
           </div>
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => setVersion('V2')}
-          className="items-start cursor-pointer"
+          disabled
+          className="items-start cursor-not-allowed opacity-50"
         >
-          <Check
-            className={cn(
-              'mr-2 h-4 w-4 flex-shrink-0 mt-1',
-              version === 'V2' ? 'opacity-100' : 'opacity-0',
-            )}
-          />
+          <Clock className="mr-2 h-4 w-4 flex-shrink-0 mt-1 text-orange-500" />
           <div>
             <p className="font-semibold leading-none">V2</p>
             <p className="text-xs text-muted-foreground mt-1">
-              Unpermissioned Shielded
+              Unpermissioned Shielded · Coming Soon
             </p>
           </div>
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => setVersion('V3')}
-          className="items-start cursor-pointer"
+          disabled
+          className="items-start cursor-not-allowed opacity-50"
         >
-          <Check
-            className={cn(
-              'mr-2 h-4 w-4 flex-shrink-0 mt-1',
-              version === 'V3' ? 'opacity-100' : 'opacity-0',
-            )}
-          />
+          <Clock className="mr-2 h-4 w-4 flex-shrink-0 mt-1 text-orange-500" />
           <div>
             <p className="font-semibold leading-none">V3</p>
             <p className="text-xs text-muted-foreground mt-1">
-              Permissioned Shielded
+              Permissioned Shielded · Coming Soon
             </p>
           </div>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <a
-            href={`https://docs.lunarswap.com/${version.toLowerCase()}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-between w-full"
-          >
-            Documentation
-            <ExternalLink className="h-4 w-4 opacity-50" />
-          </a>
+        <DropdownMenuItem className="items-start cursor-pointer">
+          <ExternalLink className="mr-2 h-4 w-4 flex-shrink-0 mt-1" />
+          <div>
+            <p className="font-semibold leading-none">Docs</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Read the documentation
+            </p>
+          </div>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
