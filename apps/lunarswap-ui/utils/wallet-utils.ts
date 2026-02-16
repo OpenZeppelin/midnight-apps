@@ -73,12 +73,31 @@ export const detectWalletNetwork = async (
 };
 
 /**
+ * Map app network ID to wallet connector network ID.
+ * Lace wallet networks: Preprod, Preview, Undeployed
+ */
+function toWalletNetworkId(networkId: string): string {
+  const normalized = networkId.toLowerCase();
+  if (normalized === 'testnet' || normalized === 'testnet-02' || normalized === 'preprod')
+    return 'Preprod';
+  if (normalized === 'preview') return 'Preview';
+  if (normalized === 'undeployed') return 'Undeployed';
+  return networkId;
+}
+
+export interface ConnectToWalletOptions {
+  networkId?: string;
+}
+
+/**
  * Connect to the Midnight Lace wallet with proper error handling and timeouts
  */
 export const connectToWallet = (
   logger: Logger,
+  options: ConnectToWalletOptions = {},
 ): Promise<{ wallet: WalletConnectedAPI; configuration: Configuration }> => {
   const COMPATIBLE_CONNECTOR_API_VERSION = '1.x';
+  const networkId = toWalletNetworkId(options.networkId ?? 'testnet');
 
   return firstValueFrom(
     fnPipe(
@@ -116,7 +135,7 @@ export const connectToWallet = (
       }),
       take(1),
       timeout({
-        first: 1_000,
+        first: 5_000,
         with: () =>
           throwError(() => {
             logger.error({}, 'Could not find wallet connector API');
@@ -132,7 +151,7 @@ export const connectToWallet = (
         return connectorAPI;
       }),
       timeout({
-        first: 5_000,
+        first: 10_000,
         with: () =>
           throwError(() => {
             logger.error({}, 'Wallet connector API has failed to respond');
@@ -143,8 +162,7 @@ export const connectToWallet = (
       }),
       concatMap(async (connectorAPI) => {
         try {
-          // Use connect instead of enable, need to get networkId from somewhere
-          const connectedAPI = await connectorAPI.connect('testnet'); // TODO: get networkId dynamically
+          const connectedAPI = await connectorAPI.connect(networkId);
           return {
             walletConnectorAPI: connectedAPI,
             connectorAPI,

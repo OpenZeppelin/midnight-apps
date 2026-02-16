@@ -6,7 +6,7 @@ import {
 } from '@openzeppelin/midnight-apps-lunarswap-sdk';
 import { Buffer } from 'buffer';
 import { Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { SplitTokenIcon } from '@/components/pool/split-token-icon';
 import { Badge } from '@/components/ui/badge';
@@ -79,14 +79,7 @@ export function SetWithdrawalStep({ positionData }: SetWithdrawalStepProps) {
     };
   }, [isProofGenerating]);
 
-  // Fetch pair data when component mounts
-  useEffect(() => {
-    if (lunarswap && status === 'connected') {
-      fetchPairData();
-    }
-  }, [lunarswap, status, fetchPairData]);
-
-  const fetchPairData = async () => {
+  const fetchPairData = useCallback(async () => {
     if (!lunarswap) return;
 
     setIsCalculating(true);
@@ -119,7 +112,14 @@ export function SetWithdrawalStep({ positionData }: SetWithdrawalStepProps) {
     } finally {
       setIsCalculating(false);
     }
-  };
+  }, [lunarswap, positionData.token0Type, positionData.token1Type, lpTotalSupply, _logger]);
+
+  // Fetch pair data when component mounts
+  useEffect(() => {
+    if (lunarswap && status === 'connected') {
+      fetchPairData();
+    }
+  }, [lunarswap, status, fetchPairData]);
 
   const calculateTokenAmounts = (lpAmount: string) => {
     if (!pairReserves || !totalLpSupply || !lpAmount) {

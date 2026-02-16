@@ -171,6 +171,22 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
     setIsReconnecting(false);
   }, []);
 
+  const checkProofServerStatus = useCallback(
+    async (proverServerUri: string): Promise<void> => {
+      try {
+        const response = await fetch(proverServerUri);
+        if (!response.ok) {
+          setProofServerIsOnline(false);
+        }
+        const text = await response.text();
+        setProofServerIsOnline(text.includes("We're alive 🎉!"));
+      } catch (_error) {
+        setProofServerIsOnline(false);
+      }
+    },
+    [],
+  );
+
   // Enhanced connect function with better error handling
   const connect = useCallback(
     async (manual: boolean): Promise<void> => {
@@ -182,7 +198,9 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
         | undefined;
 
       try {
-        walletResult = await connectToWallet(logger);
+        walletResult = await connectToWallet(logger, {
+          networkId: config?.NETWORK_ID ?? 'testnet',
+        });
       } catch (e) {
         const walletError = getErrorType(e as Error);
         setWalletError(walletError);
@@ -219,7 +237,7 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
 
       setIsConnecting(false);
     },
-    [logger, checkProofServerStatus],
+    [logger, config?.NETWORK_ID, checkProofServerStatus],
   );
 
   // Reconnection function with exponential backoff
@@ -264,20 +282,6 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
     setReconnectAttempts(0);
     await connect(true);
   }, [connect]);
-
-  const privateStateProvider: PrivateStateProvider<
-    typeof LunarswapPrivateStateId,
-    LunarswapPrivateState
-  > = useMemo(
-    () =>
-      new PrivateDataProviderWrapper(
-        levelPrivateStateProvider({
-          privateStateStoreName: 'lunarswap-private-state',
-        }),
-        logger,
-      ),
-    [logger],
-  );
 
   const providerCallback = useCallback(
     (action: ProviderCallbackAction): void => {
@@ -396,6 +400,44 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
     };
   }, [walletAPI, providerCallback]);
 
+  const privateStateProvider: PrivateStateProvider<
+    typeof LunarswapPrivateStateId,
+    LunarswapPrivateState
+  > = useMemo(() => {
+    // levelPrivateStateProvider requires either walletProvider or privateStoragePasswordProvider
+    // Use walletProvider when wallet is connected, otherwise use a password provider
+    const providerConfig: {
+      privateStateStoreName: string;
+      walletProvider?: WalletProvider;
+      privateStoragePasswordProvider?: () => Promise<string>;
+    } = {
+      privateStateStoreName: 'lunarswap-private-state',
+    };
+
+    // Only use walletProvider if wallet is connected (walletAPI exists)
+    if (walletAPI) {
+      providerConfig.walletProvider = walletProvider;
+    } else {
+      // Use password provider when wallet is not connected
+      // This allows the app to initialize even without a connected wallet
+      providerConfig.privateStoragePasswordProvider = async () => {
+        // Use a consistent password based on localStorage or a default
+        const storedPassword = localStorage.getItem('lunarswap-storage-password');
+        if (storedPassword) {
+          return storedPassword;
+        }
+        const defaultPassword = 'lunarswap-default-password';
+        localStorage.setItem('lunarswap-storage-password', defaultPassword);
+        return defaultPassword;
+      };
+    }
+
+    return new PrivateDataProviderWrapper(
+      levelPrivateStateProvider(providerConfig),
+      logger,
+    );
+  }, [walletAPI, walletProvider, logger]);
+
   const midnightProvider: MidnightProvider = useMemo(() => {
     if (walletAPI) {
       return {
@@ -449,21 +491,6 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
     walletError,
     snackBarText,
   });
-
-  async function checkProofServerStatus(
-    proverServerUri: string,
-  ): Promise<void> {
-    try {
-      const response = await fetch(proverServerUri);
-      if (!response.ok) {
-        setProofServerIsOnline(false);
-      }
-      const text = await response.text();
-      setProofServerIsOnline(text.includes("We're alive 🎉!"));
-    } catch (_error) {
-      setProofServerIsOnline(false);
-    }
-  }
 
   useEffect(() => {
     setWalletState((state) => ({

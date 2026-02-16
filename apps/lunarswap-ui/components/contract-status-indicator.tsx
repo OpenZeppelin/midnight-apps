@@ -71,6 +71,7 @@ export function ContractStatusIndicator() {
         LunarswapPrivateState
       > = levelPrivateStateProvider({
         privateStateStoreName: 'lunarswap-private-state',
+        walletProvider: midnightWallet.walletProvider,
       });
 
       // Create proof provider

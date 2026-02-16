@@ -61,6 +61,7 @@ export class LunarswapIntegration {
   private _statusInfo: ContractStatusInfo = { status: 'not-configured' };
   private contractAddress?: string;
   private _logger?: Logger;
+  private callback: (action: ProviderCallbackAction) => void;
   constructor(
     providers: LunarswapProviders,
     walletAPI: WalletAPI,

@@ -20,6 +20,29 @@
   },
   "homepage": "",
   "type": "module",
+  "exports": {
+    "./dist/artifacts/lunarswap/Lunarswap/contract": {
+      "types": "./dist/artifacts/lunarswap/Lunarswap/contract/index.d.ts",
+      "import": "./dist/artifacts/lunarswap/Lunarswap/contract/index.js",
+      "default": "./dist/artifacts/lunarswap/Lunarswap/contract/index.js"
+    },
+    "./dist/*": "./dist/*",
+    "./math/witnesses/*": {
+      "types": "./src/math/witnesses/*.ts",
+      "import": "./dist/math/witnesses/*.js",
+      "default": "./dist/math/witnesses/*.js"
+    },
+    "./math/utils/*": {
+      "types": "./src/math/utils/*.ts",
+      "import": "./dist/math/utils/*.js",
+      "default": "./dist/math/utils/*.js"
+    },
+    "./lunarswap/witnesses/*": {
+      "types": "./src/lunarswap/witnesses/*.ts",
+      "import": "./dist/lunarswap/witnesses/*.js",
+      "default": "./dist/lunarswap/witnesses/*.js"
+    }
+  },
   "config": {
     "compactVersion": "+0.29.0",
     "artifactsOutDir": "src/artifacts",
