@@ -39,9 +39,15 @@ module Vector32 {
   pure circuit limbToUint64(vec: Vector<32, Uint<8>>, limbIndex: Uint<2>): Uint<64> {
     const offset = limbIndex * 8;
     return Bytes8_toUint64(
-      vec[offset], vec[offset + 1], vec[offset + 2], vec[offset + 3],
-      vec[offset + 4], vec[offset + 5], vec[offset + 6], vec[offset + 7]
-    );
+             vec[offset],
+             vec[offset + 1],
+             vec[offset + 2],
+             vec[offset + 3],
+             vec[offset + 4],
+             vec[offset + 5],
+             vec[offset + 6],
+             vec[offset + 7]
+             );
   }
 
   /**
@@ -68,16 +74,8 @@ module Vector32 {
    * @returns {U256} - The 256-bit unsigned integer.
    */
   export pure circuit toU256(vec: Vector<32, Uint<8>>): U256 {
-    return U256 {
-      low: U128 {
-        low: limbToUint64(vec, 0),
-        high: limbToUint64(vec, 1)
-      },
-      high: U128 {
-        low: limbToUint64(vec, 2),
-        high: limbToUint64(vec, 3)
-      }
-    };
+    return U256 { low: U128 { low: limbToUint64(vec, 0), high: limbToUint64(vec, 1) },
+                  high: U128 { low: limbToUint64(vec, 2), high: limbToUint64(vec, 3) } };
   }
 
   /**

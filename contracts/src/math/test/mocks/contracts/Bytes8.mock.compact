@@ -10,8 +10,16 @@ import "../../../Bytes8" prefix Bytes8_;
 // Helper for test suite: hardcoded to true in every circuit to enable circuit metadata reporting; only increases circuit size by 3 rows per exposed circuit.
 ledger toImpure: Boolean;
 
-export circuit toUint64(b0: Uint<8>, b1: Uint<8>, b2: Uint<8>, b3: Uint<8>,
-  b4: Uint<8>, b5: Uint<8>, b6: Uint<8>, b7: Uint<8>): Uint<64> {
+export circuit toUint64(
+                 b0: Uint<8>,
+                 b1: Uint<8>,
+                 b2: Uint<8>,
+                 b3: Uint<8>,
+                 b4: Uint<8>,
+                 b5: Uint<8>,
+                 b6: Uint<8>,
+                 b7: Uint<8>
+                 ): Uint<64> {
   toImpure = true;
   return Bytes8_toUint64(b0, b1, b2, b3, b4, b5, b6, b7);
 }

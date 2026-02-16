@@ -38,8 +38,16 @@ module Bytes8 {
    *
    * @returns {Uint<64>} - The 64-bit unsigned integer.
    */
-  export pure circuit toUint64(b0: Uint<8>, b1: Uint<8>, b2: Uint<8>, b3: Uint<8>,
-                               b4: Uint<8>, b5: Uint<8>, b6: Uint<8>, b7: Uint<8>): Uint<64> {
+  export pure circuit toUint64(
+                        b0: Uint<8>,
+                        b1: Uint<8>,
+                        b2: Uint<8>,
+                        b3: Uint<8>,
+                        b4: Uint<8>,
+                        b5: Uint<8>,
+                        b6: Uint<8>,
+                        b7: Uint<8>
+                        ): Uint<64> {
     return b0 +
            b1 * 0x100 +
            b2 * 0x10000 +
