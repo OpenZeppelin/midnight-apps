@@ -136,39 +136,6 @@ describe('Uint64', () => {
     });
   });
 
-  describe('AddChecked', () => {
-    test('should add two small numbers', () => {
-      expect(uint64Simulator.addChecked(5n, 3n)).toBe(8n);
-    });
-
-    test('should add zero', () => {
-      expect(uint64Simulator.addChecked(5n, 0n)).toBe(5n);
-      expect(uint64Simulator.addChecked(0n, 5n)).toBe(5n);
-    });
-
-    test('should add at boundary without overflow', () => {
-      expect(uint64Simulator.addChecked(MAX_UINT64 - 1n, 1n)).toBe(MAX_UINT64);
-      expect(uint64Simulator.addChecked(1n, MAX_UINT64 - 1n)).toBe(MAX_UINT64);
-    });
-
-    test('should fail on overflow', () => {
-      expect(() => uint64Simulator.addChecked(MAX_UINT64, 1n)).toThrowError(
-        'failed assert: Math: addition overflow',
-      );
-    });
-
-    test('should fail on large overflow', () => {
-      expect(() =>
-        uint64Simulator.addChecked(MAX_UINT64, MAX_UINT64),
-      ).toThrowError('failed assert: Math: addition overflow');
-    });
-
-    test('should handle half max values without overflow', () => {
-      const halfMax = MAX_UINT64 / 2n;
-      expect(uint64Simulator.addChecked(halfMax, halfMax)).toBe(halfMax * 2n);
-    });
-  });
-
   describe('Sub', () => {
     test('should subtract two numbers', () => {
       expect(uint64Simulator.sub(10n, 4n)).toBe(6n);

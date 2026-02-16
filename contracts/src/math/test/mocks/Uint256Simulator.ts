@@ -61,12 +61,12 @@ export class Uint256Simulator extends Uint256SimulatorBase {
     return this.circuits.impure.MAX_U256();
   }
 
-  public toBytes(value: U256): Uint8Array {
-    return this.circuits.impure.toBytes(value);
-  }
-
   public toVector(value: U256): bigint[] {
     return this.circuits.impure.toVector(value);
+  }
+
+  public toBytes(value: U256): Uint8Array {
+    return this.circuits.impure.toBytes(value);
   }
 
   public eq(a: U256, b: U256): boolean {
