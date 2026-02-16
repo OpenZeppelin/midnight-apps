@@ -30,7 +30,7 @@ module Vector32 {
    * @remarks
    * This circuit converts a 32-element vector of bytes to a 256-bit unsigned integer
    * using little-endian byte ordering. The vector is split into four 8-byte chunks,
-   * each packed into a Uint<64> limb (same formula as Vector8.toUint64). The packing
+   * each packed into a Uint<64> limb (same formula as `Vector8_toUint64`). The packing
    * is inlined so this module has no prefix imports and can be used as a single-module
    * dependency (e.g. from mock contracts).
    *
