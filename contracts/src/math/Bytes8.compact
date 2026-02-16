@@ -1,0 +1,52 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/Bytes8.compact)
+
+pragma language_version >= 0.20.0;
+
+/**
+ * @title Bytes8 module
+ * @description A utility module providing conversion from 8 bytes to Uint<64>
+ * using little-endian (LE) byte ordering.
+ *
+ * @remarks
+ * Byte ordering convention (little-endian):
+ * - b0 is the least significant byte, b7 is the most significant.
+ * - This mirrors the pattern of Vector8 ↔ Uint<64> conversions.
+ *
+ * Supported circuits:
+ * - toUint64(b0..b7): Converts 8 bytes to Uint<64>
+ */
+module Bytes8 {
+  /**
+   * @title toUint64 circuit
+   * @description Converts 8 bytes to a Uint<64> using pure arithmetic.
+   *
+   * @remarks
+   * This circuit converts 8 bytes to a 64-bit unsigned integer using little-endian
+   * byte ordering (b0 is the LSB, b7 is the MSB). Each multiplier is a power of 256.
+   *
+   * @circuitInfo k=8, rows=193
+   *
+   * @param {Uint<8>} b0 - The first byte (least significant).
+   * @param {Uint<8>} b1 - The second byte.
+   * @param {Uint<8>} b2 - The third byte.
+   * @param {Uint<8>} b3 - The fourth byte.
+   * @param {Uint<8>} b4 - The fifth byte.
+   * @param {Uint<8>} b5 - The sixth byte.
+   * @param {Uint<8>} b6 - The seventh byte.
+   * @param {Uint<8>} b7 - The eighth byte (most significant).
+   *
+   * @returns {Uint<64>} - The 64-bit unsigned integer.
+   */
+  export pure circuit toUint64(b0: Uint<8>, b1: Uint<8>, b2: Uint<8>, b3: Uint<8>,
+                               b4: Uint<8>, b5: Uint<8>, b6: Uint<8>, b7: Uint<8>): Uint<64> {
+    return b0 +
+           b1 * 0x100 +
+           b2 * 0x10000 +
+           b3 * 0x1000000 +
+           b4 * 0x100000000 +
+           b5 * 0x10000000000 +
+           b6 * 0x1000000000000 +
+           b7 * 0x100000000000000;
+  }
+}

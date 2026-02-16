@@ -22,6 +22,27 @@ pragma language_version >= 0.20.0;
 module Vector32 {
   import { U128 } from "./types/TU128";
   import { U256 } from "./types/TU256";
+  import { toUint64 } from "./Bytes8" prefix Bytes8_;
+
+  /**
+   * @title limbToUint64 circuit
+   * @description Converts an 8-byte limb of the vector to a Uint<64> using pure arithmetic.
+   *
+   * @remarks
+   * This circuit converts an 8-byte limb to a 64-bit unsigned integer using pure arithmetic.
+   *
+   * @param {Vector<32, Uint<8>>} vec - The vector of 32 bytes.
+   * @param {Uint<2>} limbIndex - The limb index (0-3).
+   *
+   * @returns {Uint<64>} - The 64-bit unsigned integer.
+   */
+  pure circuit limbToUint64(vec: Vector<32, Uint<8>>, limbIndex: Uint<2>): Uint<64> {
+    const offset = limbIndex * 8;
+    return Bytes8_toUint64(
+      vec[offset], vec[offset + 1], vec[offset + 2], vec[offset + 3],
+      vec[offset + 4], vec[offset + 5], vec[offset + 6], vec[offset + 7]
+    );
+  }
 
   /**
    * @title toU256 circuit
@@ -40,84 +61,23 @@ module Vector32 {
    * - v16-v23 → high.low
    * - v24-v31 → high.high (most significant)
    *
+   * @circuitInfo k=10, rows=739
+   *
    * @param {Vector<32, Uint<8>>} vec - The vector of 32 bytes to convert.
    *
    * @returns {U256} - The 256-bit unsigned integer.
    */
-  export circuit toU256(vec: Vector<32, Uint<8>>): U256 {
-    const [v0,
-           v1,
-           v2,
-           v3,
-           v4,
-           v5,
-           v6,
-           v7,
-           v8,
-           v9,
-           v10,
-           v11,
-           v12,
-           v13,
-           v14,
-           v15,
-           v16,
-           v17,
-           v18,
-           v19,
-           v20,
-           v21,
-           v22,
-           v23,
-           v24,
-           v25,
-           v26,
-           v27,
-           v28,
-           v29,
-           v30,
-           v31] =
-            vec;
-
-    const lowLow: Uint<64> =
-            v0 +
-            v1 * 256 +
-            v2 * 65536 +
-            v3 * 16777216 +
-            v4 * 4294967296 +
-            v5 * 1099511627776 +
-            v6 * 281474976710656 +
-            v7 * 72057594037927936;
-    const lowHigh: Uint<64> =
-            v8 +
-            v9 * 256 +
-            v10 * 65536 +
-            v11 * 16777216 +
-            v12 * 4294967296 +
-            v13 * 1099511627776 +
-            v14 * 281474976710656 +
-            v15 * 72057594037927936;
-    const highLow: Uint<64> =
-            v16 +
-            v17 * 256 +
-            v18 * 65536 +
-            v19 * 16777216 +
-            v20 * 4294967296 +
-            v21 * 1099511627776 +
-            v22 * 281474976710656 +
-            v23 * 72057594037927936;
-    const highHigh: Uint<64> =
-            v24 +
-            v25 * 256 +
-            v26 * 65536 +
-            v27 * 16777216 +
-            v28 * 4294967296 +
-            v29 * 1099511627776 +
-            v30 * 281474976710656 +
-            v31 * 72057594037927936;
-
-    return disclose(U256 { low: U128 { low: lowLow, high: lowHigh },
-                           high: U128 { low: highLow, high: highHigh } });
+  export pure circuit toU256(vec: Vector<32, Uint<8>>): U256 {
+    return U256 {
+      low: U128 {
+        low: limbToUint64(vec, 0),
+        high: limbToUint64(vec, 1)
+      },
+      high: U128 {
+        low: limbToUint64(vec, 2),
+        high: limbToUint64(vec, 3)
+      }
+    };
   }
 
   /**
@@ -128,11 +88,13 @@ module Vector32 {
    * This circuit converts a 32-element vector of bytes to a 32-byte array
    * by spreading the vector elements into a Bytes literal.
    *
+   * @circuitInfo k=14, rows=10231
+   *
    * @param {Vector<32, Uint<8>>} vec - The vector of 32 bytes to convert.
    *
    * @returns {Bytes<32>} - The 32-byte array.
    */
-  export circuit toBytes(vec: Vector<32, Uint<8>>): Bytes<32> {
+  export pure circuit toBytes(vec: Vector<32, Uint<8>>): Bytes<32> {
     return Bytes[...vec];
   }
 }

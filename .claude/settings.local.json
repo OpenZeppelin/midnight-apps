@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git ls-tree:*)",
+      "Bash(git tag:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(pnpm install:*)",
+      "Bash(tee:*)",
+      "Bash(node --version:*)",
+      "Bash(corepack enable:*)",
+      "Bash(corepack prepare:*)",
+      "Bash(ls:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm --filter @openzeppelin-midnight-apps/lunarswap-ui build:*)",
+      "Bash(npm:*)",
+      "Bash(git checkout:*)"
+    ]
+  }
+}

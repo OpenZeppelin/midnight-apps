@@ -29,16 +29,6 @@ module Vector8 {
    * expression to be evaluated in a Uint<64> context, avoiding the need for explicit
    * type casts on each operand.
    *
-   * Each multiplier is a power of 256 (2^8), positioning each byte at its correct bit offset:
-   *   b0 * 256^0 = b0 * 1                   (bits 0-7)
-   *   b1 * 256^1 = b1 * 256                 (bits 8-15)
-   *   b2 * 256^2 = b2 * 65536               (bits 16-23)
-   *   b3 * 256^3 = b3 * 16777216            (bits 24-31)
-   *   b4 * 256^4 = b4 * 4294967296          (bits 32-39)
-   *   b5 * 256^5 = b5 * 1099511627776       (bits 40-47)
-   *   b6 * 256^6 = b6 * 281474976710656     (bits 48-55)
-   *   b7 * 256^7 = b7 * 72057594037927936   (bits 56-63)
-   *
    * @circuitInfo k=8, rows=193
    *
    * @param {Vector<8, Uint<8>>} vec - The vector of 8 bytes to convert.
@@ -47,19 +37,15 @@ module Vector8 {
    */
   export pure circuit toUint64(vec: Vector<8, Uint<8>>): Uint<64> {
     const [b0, b1, b2, b3, b4, b5, b6, b7] = vec;
-    // The explicit Uint<64> type annotation ensures the arithmetic is evaluated
-    // in a 64-bit context, eliminating the need for explicit casts.
-    const result: Uint<64> =
-            b0 + // 256^0 = 1
-            b1 * 256 + // 256^1
-            b2 * 65536 + // 256^2
-            b3 * 16777216 + // 256^3
-            b4 * 4294967296 + // 256^4
-            b5 * 1099511627776 + // 256^5
-            b6 * 281474976710656 + // 256^6
-            b7 * 72057594037927936; // 256^7
 
-    return result;
+    return b0 +
+            b1 * 0x100 +
+            b2 * 0x10000 +
+            b3 * 0x1000000 +
+            b4 * 0x100000000 +
+            b5 * 0x10000000000 +
+            b6 * 0x1000000000000 +
+            b7 * 0x100000000000000;
   }
 
   /**

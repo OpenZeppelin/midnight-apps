@@ -44,7 +44,7 @@ module Uint256 {
    *
    * @returns {U256} A U256 struct representing 0.
    */
-  export circuit ZERO_U256(): U256 {
+  export pure circuit ZERO_U256(): U256 {
     return U256 { low: U128 { low: 0, high: 0 }, high: U128 { low: 0, high: 0 } };
   }
 
@@ -76,6 +76,8 @@ module Uint256 {
    * - high.low  → bytes 16-23
    * - high.high → bytes 24-31 (most significant)
    *
+   * @circuitInfo k=11, rows=1033
+   *
    * @param {U256} value - The 256-bit value to convert.
    *
    * @returns {Vector<32, Uint<8>>} - The 32-element byte vector representation.
@@ -86,41 +88,8 @@ module Uint256 {
     const lowHigh = Uint64_toVector(value.low.high);
     const highLow = Uint64_toVector(value.high.low);
     const highHigh = Uint64_toVector(value.high.high);
-    
-    return [...lowLow, ...lowHigh, ...highLow, ...highHigh];
 
-    return [v0,
-            v1,
-            v2,
-            v3,
-            v4,
-            v5,
-            v6,
-            v7,
-            v8,
-            v9,
-            v10,
-            v11,
-            v12,
-            v13,
-            v14,
-            v15,
-            v16,
-            v17,
-            v18,
-            v19,
-            v20,
-            v21,
-            v22,
-            v23,
-            v24,
-            v25,
-            v26,
-            v27,
-            v28,
-            v29,
-            v30,
-            v31];
+    return [...lowLow, ...lowHigh, ...highLow, ...highHigh];
   }
 
   /**
@@ -131,6 +100,8 @@ module Uint256 {
    * This circuit converts a 256-bit unsigned integer to a 32-byte array.
    * The conversion is done by first unpacking the U256 into a vector via
    * `toVector`, then casting the vector to `Bytes<32>`.
+   *
+   * @circuitInfo k=14, rows=10273
    *
    * @param {U256} value - The 256-bit value to convert.
    *
@@ -164,7 +135,7 @@ module Uint256 {
    *
    * @returns {Boolean} True if a == b, false otherwise.
    */
-  export circuit eq(a: U256, b: U256): Boolean {
+  export pure circuit eq(a: U256, b: U256): Boolean {
     return Uint128_eqU128(a.high, b.high) && Uint128_eqU128(a.low, b.low);
   }
 
@@ -188,7 +159,7 @@ module Uint256 {
    *
    * @returns {Boolean} True if a < b, false otherwise.
    */
-  export circuit lt(a: U256, b: U256): Boolean {
+  export pure circuit lt(a: U256, b: U256): Boolean {
     return Uint128_ltU128(a.high, b.high) ||
            (Uint128_eqU128(a.high, b.high) && Uint128_ltU128(a.low, b.low));
   }
@@ -212,7 +183,7 @@ module Uint256 {
    *
    * @returns {Boolean} True if a <= b, false otherwise.
    */
-  export circuit lte(a: U256, b: U256): Boolean {
+  export pure circuit lte(a: U256, b: U256): Boolean {
     return lt(a, b) || eq(a, b);
   }
 
@@ -236,7 +207,7 @@ module Uint256 {
    *
    * @returns {Boolean} True if a > b, false otherwise.
    */
-  export circuit gt(a: U256, b: U256): Boolean {
+  export pure circuit gt(a: U256, b: U256): Boolean {
     return Uint128_gtU128(a.high, b.high) ||
            (Uint128_eqU128(a.high, b.high) && Uint128_gtU128(a.low, b.low));
   }
@@ -260,7 +231,7 @@ module Uint256 {
    *
    * @returns {Boolean} True if a >= b, false otherwise.
    */
-  export circuit gte(a: U256, b: U256): Boolean {
+  export pure circuit gte(a: U256, b: U256): Boolean {
     return gt(a, b) || eq(a, b);
   }
 }
