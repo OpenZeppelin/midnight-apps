@@ -82,10 +82,12 @@ module Uint256 {
    */
   export circuit toVector(value: U256): Vector<32, Uint<8>> {
     // Unpack each limb into 8 bytes
-    const [v0, v1, v2, v3, v4, v5, v6, v7] = Uint64_toVector(value.low.low);
-    const [v8, v9, v10, v11, v12, v13, v14, v15] = Uint64_toVector(value.low.high);
-    const [v16, v17, v18, v19, v20, v21, v22, v23] = Uint64_toVector(value.high.low);
-    const [v24, v25, v26, v27, v28, v29, v30, v31] = Uint64_toVector(value.high.high);
+    const lowLow = Uint64_toVector(value.low.low);
+    const lowHigh = Uint64_toVector(value.low.high);
+    const highLow = Uint64_toVector(value.high.low);
+    const highHigh = Uint64_toVector(value.high.high);
+    
+    return [...lowLow, ...lowHigh, ...highLow, ...highHigh];
 
     return [v0,
             v1,
