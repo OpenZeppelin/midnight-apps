@@ -7,10 +7,15 @@ import {
   Contract,
   ledger,
 } from '@src/artifacts/math/test/mocks/contracts/Bytes8.mock/contract/index.js';
+import { wit_unpackBytes8 } from '@src/math/witnesses/wit_unpackBytes8.js';
 
 export type Bytes8PrivateState = Record<string, never>;
 
-export const Bytes8Witnesses = (): Witnesses<Bytes8PrivateState> => ({});
+export const Bytes8Witnesses = (): Witnesses<Bytes8PrivateState> => ({
+  wit_unpackBytes8(_context, bytes) {
+    return [{}, wit_unpackBytes8(bytes)];
+  },
+});
 
 /**
  * Base simulator for Bytes8 mock contract
@@ -43,20 +48,45 @@ export class Bytes8Simulator extends Bytes8SimulatorBase {
   }
 
   /**
-   * Converts 8 bytes to Uint<64> (little-endian).
+   * Packs Vector<8, Uint<8>> into Bytes<8>.
    */
-  public toUint64(
-    bytes: [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint],
+  public pack(
+    vec: [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint],
+  ): Uint8Array {
+    return this.circuits.impure.pack(vec);
+  }
+
+  /**
+   * Unpacks Bytes<8> into Vector<8, Uint<8>>.
+   */
+  public unpack(
+    bytes: Uint8Array,
+  ): [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint] {
+    return this.circuits.impure.unpack(bytes) as [
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+    ];
+  }
+
+  /**
+   * Converts Vector<8, Uint<8>> to Uint<64> (little-endian).
+   */
+  public vectorToUint64(
+    vec: [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint],
   ): bigint {
-    return this.circuits.impure.toUint64(
-      bytes[0],
-      bytes[1],
-      bytes[2],
-      bytes[3],
-      bytes[4],
-      bytes[5],
-      bytes[6],
-      bytes[7],
-    );
+    return this.circuits.impure.vectorToUint64(vec);
+  }
+
+  /**
+   * Converts Bytes<8> to Uint<64> (little-endian).
+   */
+  public bytesToUint64(bytes: Uint8Array): bigint {
+    return this.circuits.impure.bytesToUint64(bytes);
   }
 }

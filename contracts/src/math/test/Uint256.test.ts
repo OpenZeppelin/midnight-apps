@@ -55,17 +55,17 @@ describe('MathU256', () => {
     });
   });
 
-  describe('toVector', () => {
+  describe('toUnpackedBytes', () => {
     test('should convert zero U256 to zero vector', () => {
       const u256 = toU256(0n);
-      const result = uint256Simulator.toVector(u256);
+      const result = uint256Simulator.toUnpackedBytes(u256);
       expect(result).toHaveLength(32);
       expect(result.every((b) => b === 0n)).toBe(true);
     });
 
     test('should convert small U256 to vector', () => {
       const u256 = toU256(123n);
-      const result = uint256Simulator.toVector(u256);
+      const result = uint256Simulator.toUnpackedBytes(u256);
       expect(result).toHaveLength(32);
       expect(result[0]).toBe(123n);
       expect(result.slice(1).every((b) => b === 0n)).toBe(true);
@@ -73,14 +73,14 @@ describe('MathU256', () => {
 
     test('should convert MAX_U256 to all-0xFF vector', () => {
       const u256 = toU256(MAX_UINT256);
-      const result = uint256Simulator.toVector(u256);
+      const result = uint256Simulator.toUnpackedBytes(u256);
       expect(result).toHaveLength(32);
       expect(result.every((b) => b === 255n)).toBe(true);
     });
 
     test('should roundtrip with toBytes', () => {
       const u256 = toU256(1n + (2n << 64n) + (3n << 128n) + (4n << 192n));
-      const vec = uint256Simulator.toVector(u256);
+      const vec = uint256Simulator.toUnpackedBytes(u256);
       const bytes = new Uint8Array(vec.map((b) => Number(b)));
       const back = uint256Simulator.toBytes(u256);
       expect(bytes).toEqual(back);

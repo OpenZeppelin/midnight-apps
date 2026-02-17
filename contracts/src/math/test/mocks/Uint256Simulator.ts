@@ -8,7 +8,7 @@ import {
   ledger,
   type U256,
 } from '@src/artifacts/math/test/mocks/contracts/Uint256.mock/contract/index.js';
-import { wit_uint64ToVector } from '@src/math/witnesses/wit_uint64ToVector.js';
+import { wit_uint64ToUnpackedBytes } from '@src/math/witnesses/wit_uint64ToUnpackedBytes.js';
 
 export type Uint256PrivateState = Record<string, never>;
 
@@ -19,8 +19,8 @@ export const Uint256PrivateState = {
 };
 
 export const Uint256Witnesses = (): Witnesses<Uint256PrivateState> => ({
-  wit_uint64ToVector(_context, value) {
-    return [{}, wit_uint64ToVector(value)];
+  wit_uint64ToUnpackedBytes(_context, value) {
+    return [{}, wit_uint64ToUnpackedBytes(value)];
   },
 });
 
@@ -61,8 +61,8 @@ export class Uint256Simulator extends Uint256SimulatorBase {
     return this.circuits.impure.MAX_U256();
   }
 
-  public toVector(value: U256): bigint[] {
-    return this.circuits.impure.toVector(value);
+  public toUnpackedBytes(value: U256): bigint[] {
+    return this.circuits.impure.toUnpackedBytes(value);
   }
 
   public toBytes(value: U256): Uint8Array {

@@ -263,6 +263,8 @@ module Uint128 {
    * @title Less Than U128 circuit
    * @description Checks if one U128 value is less than another.
    *
+   * @circuitInfo k=9, rows=392
+   *
    * @param a The first U128 value.
    * @param b The second U128 value.
    * @returns Boolean True if a is less than b, false otherwise.
@@ -415,7 +417,7 @@ module Uint128 {
    * - `a` and `b` must be valid `U128` structs.
    * - Result is returned as `U256` to handle potential overflow.
    *
-   * @circuitInfo k=10, rows=992
+   * @circuitInfo k=10, rows=902
    *
    * @param {U128} a - The first U128 value.
    * @param {U128} b - The second U128 value.
@@ -462,7 +464,7 @@ module Uint128 {
    * - `a` and `b` must be valid `U128` structs.
    * - Result must not overflow 128 bits.
    *
-   * @circuitInfo k=9, rows=364
+   * @circuitInfo k=10, rows=992
    *
    * @param {U128} a - The first U128 value.
    * @param {U128} b - The second U128 value.

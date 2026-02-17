@@ -19,39 +19,73 @@ const bytes = (...values: number[]): Bytes8 => {
 describe('Bytes8', () => {
   beforeEach(setup);
 
-  describe('toUint64', () => {
+  describe('vectorToUint64', () => {
     test('should convert zero bytes to zero', () => {
-      expect(bytes8Simulator.toUint64(bytes(0, 0, 0, 0, 0, 0, 0, 0))).toBe(0n);
+      expect(
+        bytes8Simulator.vectorToUint64(bytes(0, 0, 0, 0, 0, 0, 0, 0)),
+      ).toBe(0n);
     });
 
     test('should place single byte at b0', () => {
-      expect(bytes8Simulator.toUint64(bytes(0xab))).toBe(0xabn);
+      expect(bytes8Simulator.vectorToUint64(bytes(0xab))).toBe(0xabn);
     });
 
     test('should place single byte at b1 through b7', () => {
-      expect(bytes8Simulator.toUint64(bytes(0, 1))).toBe(0x100n);
-      expect(bytes8Simulator.toUint64(bytes(0, 0, 1))).toBe(0x10000n);
-      expect(bytes8Simulator.toUint64(bytes(0, 0, 0, 1))).toBe(0x1000000n);
-      expect(bytes8Simulator.toUint64(bytes(0, 0, 0, 0, 1))).toBe(0x100000000n);
-      expect(bytes8Simulator.toUint64(bytes(0, 0, 0, 0, 0, 1))).toBe(
+      expect(bytes8Simulator.vectorToUint64(bytes(0, 1))).toBe(0x100n);
+      expect(bytes8Simulator.vectorToUint64(bytes(0, 0, 1))).toBe(0x10000n);
+      expect(bytes8Simulator.vectorToUint64(bytes(0, 0, 0, 1))).toBe(
+        0x1000000n,
+      );
+      expect(bytes8Simulator.vectorToUint64(bytes(0, 0, 0, 0, 1))).toBe(
+        0x100000000n,
+      );
+      expect(bytes8Simulator.vectorToUint64(bytes(0, 0, 0, 0, 0, 1))).toBe(
         0x10000000000n,
       );
-      expect(bytes8Simulator.toUint64(bytes(0, 0, 0, 0, 0, 0, 1))).toBe(
+      expect(bytes8Simulator.vectorToUint64(bytes(0, 0, 0, 0, 0, 0, 1))).toBe(
         0x1000000000000n,
       );
-      expect(bytes8Simulator.toUint64(bytes(0, 0, 0, 0, 0, 0, 0, 1))).toBe(
-        0x100000000000000n,
-      );
+      expect(
+        bytes8Simulator.vectorToUint64(bytes(0, 0, 0, 0, 0, 0, 0, 1)),
+      ).toBe(0x100000000000000n);
     });
 
     test('should convert MAX_UINT64 all-0xFF bytes', () => {
       const allFF: Bytes8 = [255n, 255n, 255n, 255n, 255n, 255n, 255n, 255n];
-      expect(bytes8Simulator.toUint64(allFF)).toBe(MAX_UINT64);
+      expect(bytes8Simulator.vectorToUint64(allFF)).toBe(MAX_UINT64);
     });
 
     test('should convert arbitrary multi-byte value', () => {
       const b = bytes(0xef, 0xcd, 0xab, 0x89, 0x67, 0x45, 0x23, 0x01);
-      expect(bytes8Simulator.toUint64(b)).toBe(0x0123456789abcdefn);
+      expect(bytes8Simulator.vectorToUint64(b)).toBe(0x0123456789abcdefn);
+    });
+  });
+
+  describe('pack', () => {
+    test('should convert zero vector to zero bytes', () => {
+      const result = bytes8Simulator.pack(bytes(0, 0, 0, 0, 0, 0, 0, 0));
+      expect(result).toEqual(new Uint8Array(8).fill(0));
+    });
+
+    test('should match vector elements as bytes', () => {
+      const v = bytes(1, 2, 3, 4, 5, 6, 7, 8);
+      const result = bytes8Simulator.pack(v);
+      expect(result.length).toBe(8);
+      for (let i = 0; i < 8; i++) {
+        expect(result[i]).toBe(Number(v[i]));
+      }
+    });
+
+    test('should roundtrip with vectorToUint64', () => {
+      const v = bytes(0xef, 0xcd, 0xab, 0x89, 0x67, 0x45, 0x23, 0x01);
+      const asU64 = bytes8Simulator.vectorToUint64(v);
+      const backBytes = bytes8Simulator.pack(v);
+      expect(asU64).toBe(0x0123456789abcdefn);
+      const fromBack = Array.from(backBytes).reduce(
+        (acc, b, i) => acc + (BigInt(b) << (8n * BigInt(i))),
+        0n,
+      );
+      expect(fromBack).toBe(asU64);
     });
   });
 });

@@ -27,11 +27,11 @@ pragma language_version >= 0.20.0;
  *   - min(): Returns the smaller of two `Uint<64>` numbers.
  *   - max(): Returns the larger of two `Uint<64>` numbers.
  * - Conversion:
- *   - toVector(value): Converts Uint<64> to Vector<8, Uint<8>> (little-endian)
+ *   - toUnpackedBytes(value): Converts Uint<64> to Vector<8, Uint<8>> (little-endian)
  *   - toBytes(value): Converts Uint<64> to Bytes<8> (little-endian)
  */
 module Uint64 {
-  import { toUint64, toBytes } from "./Vector8" prefix Vector8_;
+  import { toUint64, pack } from "./Bytes8" prefix Bytes8_;
   /**
    * @dev Struct containing the quotient and remainder from a division operation
    */
@@ -64,10 +64,10 @@ module Uint64 {
   witness wit_sqrtUint64(radicand: Uint<64>): Uint<32>;
 
   /**
-   * @title wit_uint64ToVector witness
-   * @description Unpacks a Uint<64> into 8 individual bytes off-chain.
+   * @title wit_uint64ToUnpackedBytes witness
+   * @description Converts a Uint<64> into 8 individual bytes off-chain.
    */
-  witness wit_uint64ToVector(value: Uint<64>): Vector<8, Uint<8>>;
+  witness wit_uint64ToUnpackedBytes(value: Uint<64>): Vector<8, Uint<8>>;
 
   /**
   * @title MAX_UINT8 circuit
@@ -118,55 +118,55 @@ module Uint64 {
   }
 
   /**
-   * @title toVector circuit
-   * @description Converts a Uint<64> to a Vector<8, Uint<8>> using witness verification.
-   *
-   * @remarks
-   * This circuit unpacks a 64-bit unsigned integer into a vector of 8 individual bytes
-   * using little-endian byte ordering. The unpacking is performed off-chain via a witness,
-   * then verified on-chain by packing the bytes back and checking equality.
-   *
-   * Uses `Vector8_toUint64` for the packing verification.
-   *
-   * @circuitInfo k=9, rows=267
-   *
-   * @param {Uint<64>} value - The 64-bit value to convert.
-   *
-   * @throws {Error} "Uint64: toVector verification failed" if the witness result doesn't match.
-   *
-   * @returns {Vector<8, Uint<8>>} - The vector of 8 individual bytes [b0, b1, b2, b3, b4, b5, b6, b7].
-   */
-  export circuit toVector(value: Uint<64>): Vector<8, Uint<8>> {
-    // Get bytes from witness as its cheaper
-    const vec = wit_uint64ToVector(value);
-
-    // Verify by packing back using arithmetic
-    const reconstructed = Vector8_toUint64(vec);
-    assert(reconstructed == value, "Uint64: toVector verification failed");
-
-    return vec;
-  }
-
-  /**
    * @title toBytes circuit
    * @description Converts a Uint<64> to a Bytes<8> using little-endian byte ordering.
    *
    * @remarks
    * This circuit converts a 64-bit unsigned integer to an 8-byte array.
-   * The conversion is done by first unpacking to a vector via `toVector`,
-   * then casting to `Bytes<8>` via `Vector8.toBytes`.
+   * The conversion is done by first converting to unpacked bytes via `toUnpackedBytes`,
+   * then packing to `Bytes<8>` via `Bytes8.pack`.
    *
    * @circuitInfo k=12, rows=2433
    *
    * @param {Uint<64>} value - The 64-bit value to convert.
    *
-   * @throws {Error} "Uint64: toVector verification failed" if witness verification fails.
+   * @throws {Error} "Uint64: toUnpackedBytes verification failed" if witness verification fails.
    *
    * @returns {Bytes<8>} - The 8-byte array representation.
    */
   export circuit toBytes(value: Uint<64>): Bytes<8> {
-    const vec = toVector(value);
-    return Vector8_toBytes(vec);
+    const vec = toUnpackedBytes(value);
+    return Bytes8_pack(vec);
+  }
+
+  /**
+   * @title toUnpackedBytes circuit
+   * @description Converts a Uint<64> to individual bytes as a Vector<8, Uint<8>>.
+   *
+   * @remarks
+   * This circuit converts a 64-bit unsigned integer into a vector of 8 individual bytes
+   * using little-endian byte ordering. The conversion is performed off-chain via a witness,
+   * then verified on-chain by packing the bytes back and checking equality.
+   *
+   * Uses `Bytes8_toUint64` for the packing verification.
+   *
+   * @circuitInfo k=9, rows=267
+   *
+   * @param {Uint<64>} value - The 64-bit value to convert.
+   *
+   * @throws {Error} "Uint64: toUnpackedBytes verification failed" if the witness result doesn't match.
+   *
+   * @returns {Vector<8, Uint<8>>} - The vector of 8 individual bytes [b0, b1, b2, b3, b4, b5, b6, b7].
+   */
+  export circuit toUnpackedBytes(value: Uint<64>): Vector<8, Uint<8>> {
+    // Get bytes from witness as its cheaper
+    const vec = wit_uint64ToUnpackedBytes(value);
+
+    // Verify by packing back using arithmetic
+    const reconstructed = Bytes8_toUint64(vec);
+    assert(reconstructed == value, "Uint64: toUnpackedBytes verification failed");
+
+    return vec;
   }
 
   /**

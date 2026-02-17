@@ -20,11 +20,12 @@ pragma language_version >= 0.20.0;
  *   - gte(): Checks if one 256-bit number is greater than or equal to another.
  * - Conversions:
  *   - toBytes(value): Converts U256 to Bytes<32> (little-endian)
- *   - toVector(value): Converts U256 to Vector<32, Uint<8>> (little-endian)
+ *   - toUnpackedBytes(value): Converts U256 to Vector<32, Uint<8>> (little-endian)
  */
 module Uint256 {
-  import { toVector } from Uint64 prefix Uint64_;
+  import { toUnpackedBytes } from Uint64 prefix Uint64_;
   import { MAX_U128, eqU128, ltU128, gtU128 } from Uint128 prefix Uint128_;
+  import { pack } from Bytes32 prefix Bytes32_;
 
   // U256 type is imported from the types module to avoid cyclic dependencies
   // between Uint128 and Uint256 modules. See TU256 module documentation.
@@ -40,7 +41,7 @@ module Uint256 {
    * {low: {0, 0}, high: {0, 0}}, representing the 256-bit value 0.
    * No computations are performed, only struct construction.
    *
-   * @circuitInfo k=10, rows=71
+   * @circuitInfo k=7, rows=68
    *
    * @returns {U256} A U256 struct representing 0.
    */
@@ -53,7 +54,7 @@ module Uint256 {
    * @description Returns the maximum value for a U256 struct, where both low and high
    * fields are set to the maximum 128-bit value (2^128 - 1).
    *
-   * @circuitInfo k=10, rows=72
+   * @circuitInfo k=7, rows=68
    *
    * @returns {U256} A U256 struct representing 2^256 - 1.
    */
@@ -62,15 +63,35 @@ module Uint256 {
   }
 
   /**
-   * @title toVector circuit
+   * @title toBytes circuit
+   * @description Converts a U256 to a Bytes<32> using little-endian byte ordering.
+   *
+   * @remarks
+   * This circuit converts a 256-bit unsigned integer to a 32-byte array.
+   * The conversion is done by first converting the U256 to unpacked bytes via
+   * `toUnpackedBytes`, then casting the vector to `Bytes<32>`.
+   *
+   * @circuitInfo k=14, rows=10273
+   *
+   * @param {U256} value - The 256-bit value to convert.
+   *
+   * @returns {Bytes<32>} - The 32-byte array representation.
+   */
+  export circuit toBytes(value: U256): Bytes<32> {
+    const vector = toUnpackedBytes(value);
+    return Bytes32_pack(vector);
+  }
+
+  /**
+   * @title toUnpackedBytes circuit
    * @description Converts a U256 to a Vector<32, Uint<8>> using little-endian byte ordering.
    *
    * @remarks
-   * This circuit unpacks a 256-bit unsigned integer into a 32-element vector of bytes.
-   * Each 64-bit limb of the U256 is unpacked via `Uint64.toVector`, then the bytes
+   * This circuit converts a 256-bit unsigned integer into a 32-element vector of bytes.
+   * Each 64-bit limb of the U256 is converted via `Uint64.toUnpackedBytes`, then the bytes
    * are assembled into the final vector.
    *
-   * Limb unpacking order (little-endian):
+   * Limb ordering (little-endian):
    * - low.low   → bytes 0-7   (least significant)
    * - low.high  → bytes 8-15
    * - high.low  → bytes 16-23
@@ -82,34 +103,14 @@ module Uint256 {
    *
    * @returns {Vector<32, Uint<8>>} - The 32-element byte vector representation.
    */
-  export circuit toVector(value: U256): Vector<32, Uint<8>> {
-    // Unpack each limb into 8 bytes
-    const lowLow = Uint64_toVector(value.low.low);
-    const lowHigh = Uint64_toVector(value.low.high);
-    const highLow = Uint64_toVector(value.high.low);
-    const highHigh = Uint64_toVector(value.high.high);
+  export circuit toUnpackedBytes(value: U256): Vector<32, Uint<8>> {
+    // Convert each limb into 8 bytes
+    const lowLow = Uint64_toUnpackedBytes(value.low.low);
+    const lowHigh = Uint64_toUnpackedBytes(value.low.high);
+    const highLow = Uint64_toUnpackedBytes(value.high.low);
+    const highHigh = Uint64_toUnpackedBytes(value.high.high);
 
     return [...lowLow, ...lowHigh, ...highLow, ...highHigh];
-  }
-
-  /**
-   * @title toBytes circuit
-   * @description Converts a U256 to a Bytes<32> using little-endian byte ordering.
-   *
-   * @remarks
-   * This circuit converts a 256-bit unsigned integer to a 32-byte array.
-   * The conversion is done by first unpacking the U256 into a vector via
-   * `toVector`, then casting the vector to `Bytes<32>`.
-   *
-   * @circuitInfo k=14, rows=10273
-   *
-   * @param {U256} value - The 256-bit value to convert.
-   *
-   * @returns {Bytes<32>} - The 32-byte array representation.
-   */
-  export circuit toBytes(value: U256): Bytes<32> {
-    const vector = toVector(value);
-    return vector as Bytes<32>;
   }
 
   /**
@@ -128,7 +129,7 @@ module Uint256 {
    * - A.low == B.low (using Uint128_eqU128).
    * The result is true only if both conditions hold.
    *
-   * @circuitInfo k=10, rows=270
+   * @circuitInfo k=10, rows=644
    *
    * @param {U256} a - The first U256 value.
    * @param {U256} b - The second U256 value.
@@ -152,7 +153,7 @@ module Uint256 {
    * equal, returning true if A < B, false otherwise. No arithmetic operations are performed,
    * only comparisons and logical operations (OR, AND).
    *
-   * @circuitInfo k=10, rows=335
+   * @circuitInfo k=10, rows=770
    *
    * @param {U256} a - The first U256 value.
    * @param {U256} b - The second U256 value.
@@ -176,7 +177,7 @@ module Uint256 {
    * parts first, then the low parts if the high parts are equal, returning true if A <= B,
    * false otherwise.
    *
-   * @circuitInfo k=10, rows=350
+   * @circuitInfo k=10, rows=781
    *
    * @param {U256} a - The first U256 value.
    * @param {U256} b - The second U256 value.
@@ -200,7 +201,7 @@ module Uint256 {
    * equal, returning true if A > B, false otherwise. No arithmetic operations are performed,
    * only comparisons and logical operations (OR, AND).
    *
-   * @circuitInfo k=10, rows=335
+   * @circuitInfo k=10, rows=770
    *
    * @param {U256} a - The first U256 value.
    * @param {U256} b - The second U256 value.
@@ -224,7 +225,7 @@ module Uint256 {
    * parts first, then the low parts if the high parts are equal, returning true if A >= B,
    * false otherwise.
    *
-   * @circuitInfo k=10, rows=350
+   * @circuitInfo k=10, rows=781
    *
    * @param {U256} a - The first U256 value.
    * @param {U256} b - The second U256 value.

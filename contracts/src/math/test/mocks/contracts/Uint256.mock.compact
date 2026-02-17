@@ -24,14 +24,14 @@ export circuit MAX_U256(): U256 {
   return Uint256_MAX_U256();
 }
 
-export circuit toVector(value: U256): Vector<32, Uint<8>> {
-  toImpure = true;
-  return disclose(Uint256_toVector(value));
-}
-
 export circuit toBytes(value: U256): Bytes<32> {
   toImpure = true;
   return disclose(Uint256_toBytes(value));
+}
+
+export circuit toUnpackedBytes(value: U256): Vector<32, Uint<8>> {
+  toImpure = true;
+  return disclose(Uint256_toUnpackedBytes(value));
 }
 
 export circuit eq(a: U256, b: U256): Boolean {

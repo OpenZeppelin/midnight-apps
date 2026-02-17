@@ -1,0 +1,35 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/test/Bytes32.mock.compact)
+
+pragma language_version >= 0.20.0;
+
+import CompactStandardLibrary;
+
+import { U256 } from "../../../types/TU256";
+
+import "../../../Bytes32" prefix Bytes32_;
+
+export { U256 };
+
+// Helper for test suite: hardcoded to true in every circuit to enable circuit metadata reporting; only increases circuit size by 3 rows per exposed circuit.
+ledger toImpure: Boolean;
+
+export circuit pack(vec: Vector<32, Uint<8>>): Bytes<32> {
+  toImpure = true;
+  return Bytes32_pack(vec);
+}
+
+export circuit unpack(bytes: Bytes<32>): Vector<32, Uint<8>> {
+  toImpure = true;
+  return disclose(Bytes32_unpack(bytes));
+}
+
+export circuit vectorToU256(vec: Vector<32, Uint<8>>): U256 {
+  toImpure = true;
+  return disclose(Bytes32_toU256(vec));
+}
+
+export circuit bytesToU256(bytes: Bytes<32>): U256 {
+  toImpure = true;
+  return disclose(Bytes32_toU256(bytes));
+}

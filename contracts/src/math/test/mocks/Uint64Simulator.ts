@@ -12,7 +12,7 @@ import {
 } from '@src/artifacts/math/test/mocks/contracts/Uint64.mock/contract/index.js';
 import { wit_divUint64 } from '@src/math/witnesses/wit_divUint64.js';
 import { wit_sqrtUint64 } from '@src/math/witnesses/wit_sqrtUint64.js';
-import { wit_uint64ToVector } from '@src/math/witnesses/wit_uint64ToVector.js';
+import { wit_uint64ToUnpackedBytes } from '@src/math/witnesses/wit_uint64ToUnpackedBytes.js';
 
 export type Uint64PrivateState = Record<string, never>;
 
@@ -25,8 +25,8 @@ export const Uint64Witnesses = (): Witnesses<Uint64PrivateState> => ({
     return [{}, wit_divUint64(dividend, divisor)];
   },
 
-  wit_uint64ToVector(_context, value) {
-    return [{}, wit_uint64ToVector(value)];
+  wit_uint64ToUnpackedBytes(_context, value) {
+    return [{}, wit_uint64ToUnpackedBytes(value)];
   },
 });
 
@@ -76,10 +76,10 @@ export class Uint64Simulator extends Uint64SimulatorBase {
     return this.circuits.impure.MAX_UINT64();
   }
 
-  public toVector(
+  public toUnpackedBytes(
     value: bigint,
   ): [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint] {
-    return this.circuits.impure.toVector(value) as [
+    return this.circuits.impure.toUnpackedBytes(value) as [
       bigint,
       bigint,
       bigint,
