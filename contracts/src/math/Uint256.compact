@@ -24,7 +24,7 @@ pragma language_version >= 0.20.0;
  */
 module Uint256 {
   import { toUnpackedBytes } from Uint64 prefix Uint64_;
-  import { MAX_U128, eqU128, ltU128, gtU128 } from Uint128 prefix Uint128_;
+  import { MAX_U128, eq, lt, gt } from Uint128 prefix Uint128_;
   import { pack } from Bytes32 prefix Bytes32_;
 
   // U256 type is imported from the types module to avoid cyclic dependencies
@@ -137,7 +137,7 @@ module Uint256 {
    * @returns {Boolean} True if a == b, false otherwise.
    */
   export pure circuit eq(a: U256, b: U256): Boolean {
-    return Uint128_eqU128(a.high, b.high) && Uint128_eqU128(a.low, b.low);
+    return Uint128_eq(a.high, b.high) && Uint128_eq(a.low, b.low);
   }
 
   /**
@@ -161,8 +161,7 @@ module Uint256 {
    * @returns {Boolean} True if a < b, false otherwise.
    */
   export pure circuit lt(a: U256, b: U256): Boolean {
-    return Uint128_ltU128(a.high, b.high) ||
-           (Uint128_eqU128(a.high, b.high) && Uint128_ltU128(a.low, b.low));
+    return Uint128_lt(a.high, b.high) || (Uint128_eq(a.high, b.high) && Uint128_lt(a.low, b.low));
   }
 
   /**
@@ -209,8 +208,7 @@ module Uint256 {
    * @returns {Boolean} True if a > b, false otherwise.
    */
   export pure circuit gt(a: U256, b: U256): Boolean {
-    return Uint128_gtU128(a.high, b.high) ||
-           (Uint128_eqU128(a.high, b.high) && Uint128_gtU128(a.low, b.low));
+    return Uint128_gt(a.high, b.high) || (Uint128_eq(a.high, b.high) && Uint128_gt(a.low, b.low));
   }
 
   /**

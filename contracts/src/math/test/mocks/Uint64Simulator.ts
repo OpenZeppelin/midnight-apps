@@ -76,6 +76,10 @@ export class Uint64Simulator extends Uint64SimulatorBase {
     return this.circuits.impure.MAX_UINT64();
   }
 
+  public toBytes(value: bigint): Uint8Array {
+    return this.circuits.impure.toBytes(value);
+  }
+
   public toUnpackedBytes(
     value: bigint,
   ): [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint] {
@@ -89,10 +93,6 @@ export class Uint64Simulator extends Uint64SimulatorBase {
       bigint,
       bigint,
     ];
-  }
-
-  public toBytes(value: bigint): Uint8Array {
-    return this.circuits.impure.toBytes(value);
   }
 
   public add(a: bigint, b: bigint): bigint {

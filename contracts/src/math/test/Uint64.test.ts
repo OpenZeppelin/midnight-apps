@@ -60,6 +60,19 @@ describe('Uint64', () => {
         expect(Number(vec[i])).toBe(bytes[i]);
       }
     });
+
+    test('should fail when witness returns Bytes8_toUint64(vec) != value', () => {
+      uint64Simulator.overrideWitness(
+        'wit_uint64ToUnpackedBytes',
+        (context, _value) => [
+          context.privateState,
+          [0n, 0n, 0n, 0n, 0n, 0n, 0n, 0n],
+        ],
+      );
+      expect(() => uint64Simulator.toBytes(123n)).toThrow(
+        'failed assert: Uint64: toUnpackedBytes verification failed',
+      );
+    });
   });
 
   describe('toUnpackedBytes', () => {
@@ -91,6 +104,19 @@ describe('Uint64', () => {
       expect(uint64Simulator.toUnpackedBytes(0x1000000000000n)[6]).toBe(1n);
       expect(uint64Simulator.toUnpackedBytes(0x100000000000000n)[7]).toBe(1n);
     });
+
+    test('should fail when witness returns Bytes8_toUint64(vec) != value', () => {
+      uint64Simulator.overrideWitness(
+        'wit_uint64ToUnpackedBytes',
+        (context, _value) => [
+          context.privateState,
+          [0n, 0n, 0n, 0n, 0n, 0n, 0n, 0n],
+        ],
+      );
+      expect(() => uint64Simulator.toUnpackedBytes(123n)).toThrow(
+        'failed assert: Uint64: toUnpackedBytes verification failed',
+      );
+    });
   });
 
   describe('Add', () => {
@@ -120,14 +146,14 @@ describe('Uint64', () => {
 
     test('should fail on overflow', () => {
       expect(() => uint64Simulator.addChecked(MAX_UINT64, 1n)).toThrowError(
-        'failed assert: Math: addition overflow',
+        'failed assert: Uint64: addition overflow',
       );
     });
 
     test('should fail on large overflow', () => {
       expect(() =>
         uint64Simulator.addChecked(MAX_UINT64, MAX_UINT64),
-      ).toThrowError('failed assert: Math: addition overflow');
+      ).toThrowError('failed assert: Uint64: addition overflow');
     });
 
     test('should handle half max values without overflow', () => {
@@ -148,7 +174,7 @@ describe('Uint64', () => {
 
     test('should subtract from zero', () => {
       expect(() => uint64Simulator.sub(0n, 5n)).toThrowError(
-        'failed assert: Math: subtraction underflow',
+        'failed assert: Uint64: subtraction underflow',
       );
     });
 
@@ -162,14 +188,14 @@ describe('Uint64', () => {
 
     test('should fail on underflow with small numbers', () => {
       expect(() => uint64Simulator.sub(3n, 5n)).toThrowError(
-        'failed assert: Math: subtraction underflow',
+        'failed assert: Uint64: subtraction underflow',
       );
     });
 
     test('should fail on underflow with large numbers', () => {
       expect(() =>
         uint64Simulator.sub(MAX_UINT64 - 10n, MAX_UINT64),
-      ).toThrowError('failed assert: Math: subtraction underflow');
+      ).toThrowError('failed assert: Uint64: subtraction underflow');
     });
   });
 
@@ -214,14 +240,14 @@ describe('Uint64', () => {
 
     test('should fail on overflow', () => {
       expect(() => uint64Simulator.mulChecked(MAX_UINT64, 2n)).toThrowError(
-        'failed assert: Math: multiplication overflow',
+        'failed assert: Uint64: multiplication overflow',
       );
     });
 
     test('should fail on large overflow', () => {
       expect(() =>
         uint64Simulator.mulChecked(MAX_UINT64, MAX_UINT64),
-      ).toThrowError('failed assert: Math: multiplication overflow');
+      ).toThrowError('failed assert: Uint64: multiplication overflow');
     });
 
     test('should fail when product exceeds MAX_UINT64', () => {
@@ -229,7 +255,7 @@ describe('Uint64', () => {
       const sqrtMaxPlusOne = MAX_UINT32 + 1n;
       expect(() =>
         uint64Simulator.mulChecked(sqrtMaxPlusOne, sqrtMaxPlusOne),
-      ).toThrowError('failed assert: Math: multiplication overflow');
+      ).toThrowError('failed assert: Uint64: multiplication overflow');
     });
   });
 
@@ -260,7 +286,7 @@ describe('Uint64', () => {
 
     test('should fail on division by zero', () => {
       expect(() => uint64Simulator.div(5n, 0n)).toThrowError(
-        'failed assert: Math: division by zero',
+        'failed assert: Uint64: division by zero',
       );
     });
 
@@ -270,7 +296,7 @@ describe('Uint64', () => {
         { quotient: 1n, remainder: 10n },
       ]);
       expect(() => uint64Simulator.div(10n, 5n)).toThrow(
-        'failed assert: Math: remainder error',
+        'failed assert: Uint64: remainder error',
       );
     });
 
@@ -280,7 +306,7 @@ describe('Uint64', () => {
         { quotient: 1n, remainder: 1n },
       ]);
       expect(() => uint64Simulator.div(10n, 5n)).toThrow(
-        'failed assert: Math: division invalid',
+        'failed assert: Uint64: division invalid',
       );
     });
   });
@@ -316,7 +342,7 @@ describe('Uint64', () => {
 
     test('should fail on division by zero', () => {
       expect(() => uint64Simulator.rem(5n, 0n)).toThrowError(
-        'failed assert: Math: division by zero',
+        'failed assert: Uint64: division by zero',
       );
     });
 
@@ -326,7 +352,7 @@ describe('Uint64', () => {
         { quotient: 1n, remainder: 5n },
       ]);
       expect(() => uint64Simulator.rem(10n, 5n)).toThrow(
-        'failed assert: Math: remainder error',
+        'failed assert: Uint64: remainder error',
       );
     });
 
@@ -336,7 +362,7 @@ describe('Uint64', () => {
         { quotient: 0n, remainder: 2n },
       ]);
       expect(() => uint64Simulator.rem(10n, 5n)).toThrow(
-        'failed assert: Math: division invalid',
+        'failed assert: Uint64: division invalid',
       );
     });
   });
@@ -386,7 +412,7 @@ describe('Uint64', () => {
 
     test('should fail on division by zero', () => {
       expect(() => uint64Simulator.divRem(5n, 0n)).toThrowError(
-        'failed assert: Math: division by zero',
+        'failed assert: Uint64: division by zero',
       );
     });
 
@@ -396,7 +422,7 @@ describe('Uint64', () => {
         { quotient: 1n, remainder: 5n },
       ]);
       expect(() => uint64Simulator.divRem(10n, 5n)).toThrow(
-        'failed assert: Math: remainder error',
+        'failed assert: Uint64: remainder error',
       );
     });
 
@@ -406,7 +432,7 @@ describe('Uint64', () => {
         { quotient: 2n, remainder: 0n },
       ]);
       expect(() => uint64Simulator.divRem(11n, 5n)).toThrow(
-        'failed assert: Math: division invalid',
+        'failed assert: Uint64: division invalid',
       ); // 2*5 + 0 = 10 ≠ 11
     });
 
@@ -416,7 +442,7 @@ describe('Uint64', () => {
         { quotient: 1n, remainder: 10n },
       ]);
       expect(() => uint64Simulator.divRem(10n, 5n)).toThrow(
-        'failed assert: Math: remainder error',
+        'failed assert: Uint64: remainder error',
       );
     });
   });
@@ -479,7 +505,7 @@ describe('Uint64', () => {
         5n,
       ]);
       expect(() => uint64Simulator.sqrt(10n)).toThrow(
-        'failed assert: Math: sqrt overestimate',
+        'failed assert: Uint64: sqrt overestimate',
       );
     });
 
@@ -489,7 +515,7 @@ describe('Uint64', () => {
         3n,
       ]);
       expect(() => uint64Simulator.sqrt(16n)).toThrow(
-        'failed assert: Math: sqrt underestimate',
+        'failed assert: Uint64: sqrt underestimate',
       );
     });
   });
@@ -501,7 +527,7 @@ describe('Uint64', () => {
 
     test('should fail on zero divisor', () => {
       expect(() => uint64Simulator.isMultiple(5n, 0n)).toThrowError(
-        'failed assert: Math: division by zero',
+        'failed assert: Uint64: division by zero',
       );
     });
 
@@ -511,6 +537,16 @@ describe('Uint64', () => {
 
     test('should detect a failed case', () => {
       expect(uint64Simulator.isMultiple(7n, 3n)).toBe(false);
+    });
+
+    test('should fail when witness returns quotient * b + remainder != a', () => {
+      uint64Simulator.overrideWitness('wit_divUint64', (context) => [
+        context.privateState,
+        { quotient: 1n, remainder: 1n },
+      ]);
+      expect(() => uint64Simulator.isMultiple(6n, 3n)).toThrow(
+        'failed assert: Uint64: division invalid',
+      );
     });
   });
 
