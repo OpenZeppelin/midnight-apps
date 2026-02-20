@@ -11,7 +11,8 @@ import "../../../Uint256" prefix Uint256_;
 
 export { U256 };
 
-// Helper for test suite: hardcoded to true in every circuit to enable circuit metadata reporting; only increases circuit size by 3 rows per exposed circuit.
+// Helper for test suite: hardcoded to true in every circuit to enable circuit metadata reporting;
+// only increases circuit size by 3 rows per exposed circuit.
 ledger toImpure: Boolean;
 
 export circuit ZERO_U256(): U256 {
