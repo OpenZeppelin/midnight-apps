@@ -112,7 +112,13 @@ export function SetWithdrawalStep({ positionData }: SetWithdrawalStepProps) {
     } finally {
       setIsCalculating(false);
     }
-  }, [lunarswap, positionData.token0Type, positionData.token1Type, lpTotalSupply, _logger]);
+  }, [
+    lunarswap,
+    positionData.token0Type,
+    positionData.token1Type,
+    lpTotalSupply,
+    _logger,
+  ]);
 
   // Fetch pair data when component mounts
   useEffect(() => {

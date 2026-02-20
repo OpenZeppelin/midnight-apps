@@ -134,11 +134,13 @@ const Carousel = React.forwardRef<
           canScrollNext,
         }}
       >
+        {/* biome-ignore lint/a11y/useSemanticElements: section with role=region is correct for carousel per WAI-ARIA */}
         <section
           ref={ref}
+          role="region"
+          aria-roledescription="carousel"
           onKeyDownCapture={handleKeyDown}
           className={cn('relative', className)}
-          aria-roledescription="carousel"
           {...props}
         >
           {children}
@@ -178,6 +180,7 @@ const CarouselItem = React.forwardRef<
   const { orientation } = useCarousel();
 
   return (
+    // biome-ignore lint/a11y/useSemanticElements: role="group" is correct for carousel slide per WAI-ARIA
     <div
       ref={ref}
       role="group"

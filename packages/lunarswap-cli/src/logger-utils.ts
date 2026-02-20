@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-import { dirname } from 'node:path';
-import { mkdir } from 'node:fs/promises';
-import pinoPretty from 'pino-pretty';
-import pino from 'pino';
 import { createWriteStream } from 'node:fs';
+import { mkdir } from 'node:fs/promises';
+import { dirname } from 'node:path';
+import pino from 'pino';
+import pinoPretty from 'pino-pretty';
 
 export const createLogger = async (logPath: string): Promise<pino.Logger> => {
   await mkdir(dirname(logPath), { recursive: true });

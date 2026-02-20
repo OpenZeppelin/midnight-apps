@@ -41,7 +41,9 @@ export function Logo({ size = 36, className = '' }) {
   ];
 
   return (
+    // biome-ignore lint/a11y/useSemanticElements: fieldset is for forms; div with role=group is correct for dropdown
     <div
+      role="group"
       className="relative"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

@@ -21,8 +21,9 @@
   },
   "dependencies": {
     "@openzeppelin/midnight-apps-contracts": "workspace:*",
+    "@midnight-ntwrk/compact-js": "2.4.0",
     "@midnight-ntwrk/compact-runtime": "0.14.0",
-    "@midnight-ntwrk/ledger-v7": "7.0.1",
+    "@midnight-ntwrk/ledger-v7": "7.0.0",
     "@midnight-ntwrk/midnight-js-contracts": "3.0.0",
     "@midnight-ntwrk/midnight-js-types": "3.0.0",
     "pino": "^9.7.0",

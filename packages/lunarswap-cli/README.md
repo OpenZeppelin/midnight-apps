@@ -90,6 +90,14 @@ pnpm run proof-server:testnet
 pnpm run proof-server:down
 ```
 
+### Using an Existing Proof Server
+
+If you already have a proof server running (e.g. via `docker run -p 6300:6300 midnightnetwork/proof-server -- midnight-proof-server --network preprod`), set `PROOF_SERVER_PORT` to skip starting a new container:
+
+```bash
+PROOF_SERVER_PORT=6300 pnpm preprod
+```
+
 ## CLI Features
 
 The LunarSwap CLI provides the following functionality:

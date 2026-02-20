@@ -1,34 +1,36 @@
 // TODO: Question: Why is ContractAddress exported differently in compact-std and compact-runtime?
 // TODO: Question: why is also the coinInfo type are different?
+
+import { CompiledContract } from '@midnight-ntwrk/compact-js';
 import type {
   ContractAddress as ContractAddressRuntime,
   ContractState,
 } from '@midnight-ntwrk/compact-runtime';
 import type { ZswapChainState } from '@midnight-ntwrk/ledger-v7';
 import {
-  type FinalizedCallTxData,
   deployContract,
+  type FinalizedCallTxData,
   findDeployedContract,
 } from '@midnight-ntwrk/midnight-js-contracts';
 import type {
-  ShieldedCoinInfo,
   ContractAddress,
   Either,
   QualifiedShieldedCoinInfo,
+  ShieldedCoinInfo,
   ZswapCoinPublicKey,
 } from '@openzeppelin/midnight-apps-contracts/dist/artifacts/lunarswap/Lunarswap/contract';
 import {
   Contract,
   type Ledger,
-  type Pair,
   ledger,
+  type Pair,
 } from '@openzeppelin/midnight-apps-contracts/dist/artifacts/lunarswap/Lunarswap/contract';
 import {
   LunarswapPrivateState,
   LunarswapWitnesses,
 } from '@openzeppelin/midnight-apps-contracts/dist/lunarswap/witnesses/Lunarswap';
 import type { Logger } from 'pino';
-import { type Observable, combineLatest, from, map, tap } from 'rxjs';
+import { combineLatest, from, map, type Observable, tap } from 'rxjs';
 import {
   type DeployedLunarswapContract,
   type LunarswapContract,
@@ -37,15 +39,28 @@ import {
   type LunarswapPublicState,
 } from './types';
 
-const lunarswapContractInstance: LunarswapContract = new Contract(
-  LunarswapWitnesses(),
+const createCompiledContract = (zkConfigPath: string) => {
+  const base = CompiledContract.make('Lunarswap', Contract);
+  const withWit = CompiledContract.withWitnesses(base, LunarswapWitnesses());
+  return CompiledContract.withCompiledFileAssets(withWit, zkConfigPath);
+};
+
+// TODO: that should be inside lunarswap contracts package
+export const CompiledLunarswapContract = CompiledContract.make(
+  'Lunarswap',
+  Contract<LunarswapPrivateState>,
+).pipe(
+  CompiledContract.withWitnesses(LunarswapWitnesses()),
+  CompiledContract.withCompiledFileAssets(
+    '../../../contracts/src/artifacts/lunarswap/Lunarswap/contract',
+  ),
 );
 
 export interface ILunarswap {
   deployedContractAddressHex: string;
   state$: Observable<LunarswapPublicState>;
   addLiquidity(
-    tokenA:  ShieldedCoinInfo,
+    tokenA: ShieldedCoinInfo,
     tokenB: ShieldedCoinInfo,
     amountAMin: bigint,
     amountBMin: bigint,
@@ -77,14 +92,20 @@ export interface ILunarswap {
   ): Promise<
     FinalizedCallTxData<LunarswapContract, 'swapTokensForExactTokens'>
   >;
-  isPairExists(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo): Promise<boolean>;
+  isPairExists(
+    tokenA: ShieldedCoinInfo,
+    tokenB: ShieldedCoinInfo,
+  ): Promise<boolean>;
   getAllPairLength(): Promise<bigint>;
   getPair(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo): Promise<Pair>;
   getPairReserves(
     tokenA: ShieldedCoinInfo,
     tokenB: ShieldedCoinInfo,
   ): Promise<[QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo]>;
-  getPairId(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo): Promise<Uint8Array>;
+  getPairId(
+    tokenA: ShieldedCoinInfo,
+    tokenB: ShieldedCoinInfo,
+  ): Promise<Uint8Array>;
   getLpTokenTotalSupply(
     tokenA: ShieldedCoinInfo,
     tokenB: ShieldedCoinInfo,
@@ -146,14 +167,10 @@ export class Lunarswap implements ILunarswap {
   ): Promise<Lunarswap> {
     logger?.info('Deploying Lunarswap contract...');
 
-    // Create a fresh contract instance for each deployment
-    const lunarswapContractInstance: LunarswapContract = new Contract(
-      LunarswapWitnesses(),
-    );
-
-    const deployedContract = (await deployContract(
+    const deployedContract = await deployContract<LunarswapContract>(
       providers,
       {
+        compiledContract: CompiledLunarswapContract,
         privateStateId: LunarswapPrivateStateId,
         initialPrivateState: await Lunarswap.getPrivateState(providers),
         args: [
@@ -162,9 +179,8 @@ export class Lunarswap implements ILunarswap {
           lpTokenNonce, // lpTokenNonce (32 bytes)
           Lunarswap.LP_TOKEN_DECIMALS, // lpTokenDecimals
         ],
-        contract: lunarswapContractInstance,
-      } as any,
-    )) as unknown as DeployedLunarswapContract;
+      },
+    );
 
     logger?.info('Lunarswap contract deployed');
     return new Lunarswap(deployedContract, providers, lpTokenNonce, logger);
@@ -173,26 +189,29 @@ export class Lunarswap implements ILunarswap {
   static async join(
     providers: LunarswapProviders,
     contractAddress: ContractAddress,
+    zkConfigPath: string,
     logger?: Logger,
   ): Promise<Lunarswap> {
     logger?.info('Joining Lunarswap contract...');
-
-    // Convert contractAddress.bytes (Uint8Array) to hex string for findDeployedContract
-    const contractAddressHex = Buffer.from(contractAddress.bytes).toString(
-      'hex',
-    );
 
     await providers.privateStateProvider.set(
       'lunarswapPrivateState',
       LunarswapPrivateState.generate(),
     );
 
-    const deployedContract = (await findDeployedContract(providers, {
-      contractAddress: contractAddressHex,
-      privateStateId: 'lunarswapPrivateState',
-      initialPrivateState: await Lunarswap.getPrivateState(providers),
-      contract: lunarswapContractInstance,
-    } as any)) as unknown as DeployedLunarswapContract;
+    const contractAddressHex = Buffer.from(contractAddress.bytes).toString(
+      'hex',
+    );
+
+    const deployedContract = await findDeployedContract<LunarswapContract>(
+      providers,
+      {
+        contractAddress: contractAddressHex,
+        compiledContract: createCompiledContract(zkConfigPath),
+        privateStateId: LunarswapPrivateStateId,
+        initialPrivateState: await Lunarswap.getPrivateState(providers),
+      },
+    );
     logger?.info('Lunarswap contract joined');
     logger?.trace({
       contractJoined: {
@@ -372,7 +391,10 @@ export class Lunarswap implements ILunarswap {
     return txData;
   }
 
-  async isPairExists(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo): Promise<boolean> {
+  async isPairExists(
+    tokenA: ShieldedCoinInfo,
+    tokenB: ShieldedCoinInfo,
+  ): Promise<boolean> {
     const txData = await this.deployedContract.callTx.isPairExists(
       tokenA,
       tokenB,
@@ -385,7 +407,10 @@ export class Lunarswap implements ILunarswap {
     return txData.private.result;
   }
 
-  async getPair(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo): Promise<Pair> {
+  async getPair(
+    tokenA: ShieldedCoinInfo,
+    tokenB: ShieldedCoinInfo,
+  ): Promise<Pair> {
     const txData = await this.deployedContract.callTx.getPair(tokenA, tokenB);
     return txData.private.result;
   }
@@ -401,7 +426,10 @@ export class Lunarswap implements ILunarswap {
     return txData.private.result;
   }
 
-  async getPairId(tokenA: ShieldedCoinInfo, tokenB: ShieldedCoinInfo): Promise<Uint8Array> {
+  async getPairId(
+    tokenA: ShieldedCoinInfo,
+    tokenB: ShieldedCoinInfo,
+  ): Promise<Uint8Array> {
     const txData = await this.deployedContract.callTx.getPairId(tokenA, tokenB);
     return txData.private.result;
   }

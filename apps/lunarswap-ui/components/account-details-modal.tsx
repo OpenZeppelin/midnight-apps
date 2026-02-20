@@ -1,26 +1,19 @@
 'use client';
 
 // DAppConnectorWalletState no longer exists in new API
-import { Database, Server, X } from 'lucide-react';
+import { Coins, Database, Globe, Server, Wallet, X } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useWalletRx } from '@/hooks/use-wallet-rx';
+import type { WalletAPI } from '@/lib/wallet-context';
 import { Identicon } from './identicon';
 import { Button } from './ui/button';
 
 interface AccountDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  walletAPI?: {
-    address: string;
-    coinPublicKey: string;
-    encryptionPublicKey: string;
-    configuration: {
-      proverServerUri?: string;
-      indexerUri?: string;
-      indexerWsUri?: string;
-    };
-  };
+  walletAPI?: WalletAPI;
 }
 
 interface AccountField {
@@ -28,7 +21,8 @@ interface AccountField {
   value: string;
   description?: string;
   isLegacy?: boolean;
-  type: 'address' | 'coin' | 'encryption' | 'service';
+  type: 'shielded' | 'unshielded' | 'dust' | 'balance' | 'service' | 'network';
+  icon?: React.ReactNode;
 }
 
 export function AccountDetailsModal({
@@ -39,6 +33,7 @@ export function AccountDetailsModal({
   const [mounted, setMounted] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [showLegacy, setShowLegacy] = useState<Record<string, boolean>>({});
+  const { state: walletState } = useWalletRx();
 
   useEffect(() => {
     setMounted(true);
@@ -125,51 +120,142 @@ export function AccountDetailsModal({
     setShowLegacy((prev) => ({ ...prev, [type]: !prev[type] }));
   };
 
+  // Format balances for display
+  const formatBalance = (
+    balances: Record<string, bigint> | undefined,
+  ): string => {
+    if (!balances || Object.keys(balances).length === 0) return 'No balances';
+    return Object.entries(balances)
+      .map(([token, amount]) => `${token}: ${amount.toString()}`)
+      .join(', ');
+  };
+
   const accountFields: AccountField[] = [
+    // Shielded Section
     {
-      label: 'Address',
+      label: 'Shielded Address',
       value: walletAPI.address || '',
-      description: 'Your main wallet address',
-      type: 'address',
+      description: 'Your main shielded wallet address for private transactions',
+      type: 'shielded',
       isLegacy: false,
     },
     {
-      label: 'Coin Public Key',
+      label: 'Shielded Coin Public Key',
       value: walletAPI.coinPublicKey || '',
-      description: 'Public key for coin operations',
-      type: 'coin',
+      description: 'Public key for shielded coin operations',
+      type: 'shielded',
       isLegacy: false,
     },
     {
-      label: 'Encryption Public Key',
+      label: 'Shielded Encryption Public Key',
       value: walletAPI.encryptionPublicKey || '',
-      description: 'Public key for encryption operations',
-      type: 'encryption',
+      description: 'Public key for shielded encryption operations',
+      type: 'shielded',
       isLegacy: false,
     },
-    // Service URLs
     {
-      label: 'Proof Server',
-      value:
-        walletAPI?.configuration?.proverServerUri || 'http://localhost:6300',
-      description: 'ZK proof generation server',
-      type: 'service',
+      label: 'Shielded Balances',
+      value: formatBalance(walletState?.shieldedBalances),
+      description: 'Your shielded token balances',
+      type: 'balance',
       isLegacy: false,
+      icon: <Wallet className="h-3 w-3" />,
+    },
+    // Unshielded Section
+    ...(walletState?.unshieldedAddress
+      ? [
+          {
+            label: 'Unshielded Address',
+            value: walletState.unshieldedAddress,
+            description:
+              'Your unshielded wallet address for public transactions',
+            type: 'unshielded' as const,
+            isLegacy: false,
+          },
+        ]
+      : []),
+    ...(walletState?.unshieldedBalances
+      ? [
+          {
+            label: 'Unshielded Balances',
+            value: formatBalance(walletState.unshieldedBalances),
+            description: 'Your unshielded token balances',
+            type: 'balance' as const,
+            isLegacy: false,
+            icon: <Coins className="h-3 w-3" />,
+          },
+        ]
+      : []),
+    // Dust Section
+    ...(walletState?.dustAddress
+      ? [
+          {
+            label: 'Dust Address',
+            value: walletState.dustAddress,
+            description: 'Your Dust wallet address',
+            type: 'dust' as const,
+            isLegacy: false,
+          },
+        ]
+      : []),
+    ...(walletState?.dustBalance
+      ? [
+          {
+            label: 'Dust Balance',
+            value: `${walletState.dustBalance.balance.toString()} / ${walletState.dustBalance.cap.toString()} (cap)`,
+            description: 'Your current Dust balance and generation cap',
+            type: 'balance' as const,
+            isLegacy: false,
+            icon: <Coins className="h-3 w-3" />,
+          },
+        ]
+      : []),
+    // Network & Services Section
+    {
+      label: 'Network ID',
+      value: walletAPI?.configuration?.networkId || 'unknown',
+      description: 'Connected network identifier',
+      type: 'network',
+      isLegacy: false,
+      icon: <Globe className="h-3 w-3" />,
     },
     {
       label: 'Indexer HTTP',
-      value: walletAPI?.configuration?.indexerUri || 'http://localhost:8088',
-      description: 'Blockchain data indexer (HTTP)',
+      value: walletAPI?.configuration?.indexerUri || 'Not configured',
+      description: 'Blockchain data indexer (HTTP endpoint)',
       type: 'service',
       isLegacy: false,
+      icon: <Database className="h-3 w-3" />,
     },
     {
       label: 'Indexer WebSocket',
-      value: walletAPI?.configuration?.indexerWsUri || 'ws://localhost:8088',
-      description: 'Blockchain data indexer (WebSocket)',
+      value: walletAPI?.configuration?.indexerWsUri || 'Not configured',
+      description: 'Blockchain data indexer (WebSocket endpoint)',
       type: 'service',
       isLegacy: false,
+      icon: <Database className="h-3 w-3" />,
     },
+    {
+      label: 'Substrate Node',
+      value: walletAPI?.configuration?.substrateNodeUri || 'Not configured',
+      description: 'Substrate blockchain node URI',
+      type: 'service',
+      isLegacy: false,
+      icon: <Server className="h-3 w-3" />,
+    },
+    ...(walletAPI?.configuration?.proverServerUri
+      ? [
+          {
+            label: 'Prover Server (Deprecated)',
+            value: walletAPI.configuration.proverServerUri,
+            description:
+              'Legacy ZK proof generation server - use getProvingProvider instead',
+            type: 'service' as const,
+            isLegacy: true,
+            icon: <Server className="h-3 w-3" />,
+          },
+        ]
+      : []),
   ];
 
   const groupedFields = accountFields.reduce(
@@ -205,7 +291,9 @@ export function AccountDetailsModal({
       open
       data-modal-portal
     >
+      {/* biome-ignore lint/a11y/useSemanticElements: fieldset is for forms; div with role=group is correct for modal content */}
       <div
+        role="group"
         className="bg-background rounded-xl shadow-2xl w-full max-w-4xl max-h-[80vh] overflow-hidden relative pointer-events-auto"
         style={{
           zIndex: 100000,
@@ -248,19 +336,36 @@ export function AccountDetailsModal({
           <div className="space-y-6">
             {Object.entries(groupedFields).map(([type, fields]) => (
               <div key={type} className="space-y-2">
+                <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3">
+                  {type === 'shielded'
+                    ? '🛡️ Shielded'
+                    : type === 'unshielded'
+                      ? '👁️ Unshielded'
+                      : type === 'dust'
+                        ? '✨ Dust'
+                        : type === 'balance'
+                          ? '💰 Balances'
+                          : type === 'service'
+                            ? '⚙️ Services'
+                            : type === 'network'
+                              ? '🌐 Network'
+                              : type}
+                </h3>
                 {fields.map((field, _index) => (
                   <div key={field.label} className="relative">
                     {!field.isLegacy && (
                       <div className="bg-card border rounded-lg p-3 hover:bg-muted/30 transition-colors">
                         <div className="flex items-start gap-2">
                           <div className="w-6 h-6 rounded-full overflow-hidden border border-primary/20 shrink-0 mt-0.5">
-                            {field.type === 'service' ? (
+                            {field.icon ? (
                               <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                                {field.label.includes('Proof') ? (
-                                  <Server className="h-3 w-3 text-blue-600 dark:text-blue-400" />
-                                ) : (
-                                  <Database className="h-3 w-3 text-blue-600 dark:text-blue-400" />
-                                )}
+                                <span className="text-blue-600 dark:text-blue-400">
+                                  {field.icon}
+                                </span>
+                              </div>
+                            ) : field.type === 'balance' ? (
+                              <div className="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                                <Coins className="h-3 w-3 text-green-600 dark:text-green-400" />
                               </div>
                             ) : (
                               <Identicon
@@ -276,7 +381,19 @@ export function AccountDetailsModal({
                               </span>
                               <span className="text-xs text-muted-foreground">
                                 •{' '}
-                                {field.type === 'service' ? 'Service' : 'Main'}
+                                {field.type === 'shielded'
+                                  ? 'Shielded'
+                                  : field.type === 'unshielded'
+                                    ? 'Unshielded'
+                                    : field.type === 'dust'
+                                      ? 'Dust'
+                                      : field.type === 'balance'
+                                        ? 'Balance'
+                                        : field.type === 'service'
+                                          ? 'Service'
+                                          : field.type === 'network'
+                                            ? 'Network'
+                                            : 'Info'}
                               </span>
                             </div>
                             {field.description && (

@@ -6,6 +6,7 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
+.pnpm-store/
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
@@ -40,6 +41,7 @@ build/Release
 
 # Dependency directories
 node_modules/
+node-compile-cache/
 jspm_packages/
 
 # Snowpack dependency directory (https://snowpack.dev/)
@@ -155,3 +157,6 @@ artifacts/
 
 # AI
 .claude/
+CLAUDE.md
+
+midnight-level-db/

@@ -7,6 +7,7 @@ import type { Logger } from 'pino';
 
 export const deployContract = async (
   providers: LunarswapProviders,
+  _zkConfigPath: string,
   logger: Logger,
 ): Promise<Lunarswap> => {
   logger.info('Deploying LunarSwap contract...');
@@ -20,8 +21,14 @@ export const deployContract = async (
     lunarswap = await Lunarswap.deploy(providers, lpTokenNonce, logger);
   } catch (error) {
     if (error instanceof Error) {
-      logger.error({ error: error.message }, 'Failed to deploy LunarSwap contract');
-      logger.error({ error: error.stack }, 'Failed to deploy LunarSwap contract');
+      logger.error(
+        { error: error.message },
+        'Failed to deploy LunarSwap contract',
+      );
+      logger.error(
+        { error: error.stack },
+        'Failed to deploy LunarSwap contract',
+      );
       throw error;
     }
     logger.error({ error }, 'Failed to deploy LunarSwap contract');
@@ -37,6 +44,7 @@ export const deployContract = async (
 export const joinContract = async (
   providers: LunarswapProviders,
   contractAddress: string,
+  zkConfigPath: string,
   logger: Logger,
 ): Promise<Lunarswap> => {
   logger.info('Joining LunarSwap contract...');
@@ -55,6 +63,7 @@ export const joinContract = async (
   const lunarswap = await Lunarswap.join(
     providers,
     { bytes: contractAddressBytes },
+    zkConfigPath,
     logger,
   );
 

@@ -73,8 +73,9 @@ export function TokenCloud() {
             }}
           >
             {/* Static blob */}
-            <div
-              className={`absolute rounded-full ${b.className} transition-all duration-600 cursor-pointer`}
+            <button
+              type="button"
+              className={`absolute rounded-full ${b.className} transition-all duration-600 cursor-pointer border-0 bg-transparent p-0`}
               style={{
                 width: b.size,
                 height: b.size,
@@ -108,7 +109,7 @@ export function TokenCloud() {
                   )}
                 </div>
               </div>
-            </div>
+            </button>
           </div>
         );
       })}

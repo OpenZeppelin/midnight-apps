@@ -78,10 +78,14 @@ export const detectWalletNetwork = async (
  */
 function toWalletNetworkId(networkId: string): string {
   const normalized = networkId.toLowerCase();
-  if (normalized === 'testnet' || normalized === 'testnet-02' || normalized === 'preprod')
-    return 'Preprod';
-  if (normalized === 'preview') return 'Preview';
-  if (normalized === 'undeployed') return 'Undeployed';
+  if (
+    normalized === 'testnet' ||
+    normalized === 'testnet-02' ||
+    normalized === 'preprod'
+  )
+    return 'preprod';
+  if (normalized === 'preview') return 'preview';
+  if (normalized === 'undeployed') return 'undeployed';
   return networkId;
 }
 
@@ -96,8 +100,8 @@ export const connectToWallet = (
   logger: Logger,
   options: ConnectToWalletOptions = {},
 ): Promise<{ wallet: WalletConnectedAPI; configuration: Configuration }> => {
-  const COMPATIBLE_CONNECTOR_API_VERSION = '1.x';
-  const networkId = toWalletNetworkId(options.networkId ?? 'testnet');
+  const COMPATIBLE_CONNECTOR_API_VERSION = '4.x';
+  const networkId = toWalletNetworkId(options.networkId ?? 'preprod');
 
   return firstValueFrom(
     fnPipe(

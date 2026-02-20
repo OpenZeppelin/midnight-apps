@@ -4,7 +4,6 @@ import { ArrowLeft, ChevronsRight, LogOut, Settings } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useWallet } from '@/hooks/use-wallet';
 import { useWalletRx } from '@/hooks/use-wallet-rx';
-import { formatAddress } from '@/utils/wallet-utils';
 import { AccountDetailsModal } from './account-details-modal';
 import { GlobalPreferences } from './global-preferences';
 import { Identicon } from './identicon';
@@ -25,7 +24,7 @@ export function AccountPanel({
   onDisconnect: () => void;
 }) {
   const { address, walletAPI } = useWallet();
-  const { refresh } = useWalletRx();
+  const { refresh, state: walletState } = useWalletRx();
 
   const [currentPage, setCurrentPage] = useState<AccountPanelPage>('main');
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -44,9 +43,11 @@ export function AccountPanel({
     }
   }, [isVisible]);
 
-  // Create a compatible wallet state object for the AccountDetailsModal
-
-  const _walletInfo = formatAddress(address);
+  // Format token balances
+  const formatTokenBalance = (_tokenType: string, amount: bigint): string => {
+    // Simple formatting - can be enhanced based on token decimals
+    return `${amount.toString()}`;
+  };
 
   const copyToClipboard = async (text: string, label: string) => {
     try {
@@ -103,6 +104,55 @@ export function AccountPanel({
           </span>
         </div>
 
+        {/* Balance Summary */}
+        {walletState?.shieldedBalances &&
+          Object.keys(walletState.shieldedBalances).length > 0 && (
+            <div className="mt-4 w-full">
+              <div className="bg-card border rounded-lg p-3">
+                <div className="text-xs text-muted-foreground text-center mb-2">
+                  Shielded Balances
+                </div>
+                <div className="space-y-1">
+                  {Object.entries(walletState.shieldedBalances).map(
+                    ([token, amount]) => (
+                      <div
+                        key={token}
+                        className="flex items-center justify-between text-xs"
+                      >
+                        <span className="font-mono text-muted-foreground truncate">
+                          {token.slice(0, 8)}...
+                        </span>
+                        <span className="font-mono font-semibold">
+                          {formatTokenBalance(token, amount)}
+                        </span>
+                      </div>
+                    ),
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+        {/* Dust Balance */}
+        {walletState?.dustBalance && (
+          <div className="mt-2 w-full">
+            <div className="bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+              <div className="text-xs text-muted-foreground text-center mb-1">
+                ✨ Dust Balance
+              </div>
+              <div className="text-center">
+                <span className="font-mono font-bold text-sm">
+                  {walletState.dustBalance.balance.toString()}
+                </span>
+                <span className="text-xs text-muted-foreground mx-1">/</span>
+                <span className="font-mono text-xs text-muted-foreground">
+                  {walletState.dustBalance.cap.toString()} cap
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* View Details Button */}
         {walletAPI && (
           <div className="mt-4 w-full">
@@ -112,7 +162,7 @@ export function AccountPanel({
               onClick={() => setShowAccountDetails(true)}
               className="w-full"
             >
-              View Account Details
+              View Full Details
             </Button>
           </div>
         )}

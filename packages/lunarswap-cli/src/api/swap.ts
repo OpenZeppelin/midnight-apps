@@ -1,14 +1,17 @@
 import type {
-  ShieldedCoinInfo,
   ContractAddress,
   Either,
+  ShieldedCoinInfo,
   ZswapCoinPublicKey,
 } from '@openzeppelin/midnight-apps-contracts/dist/artifacts/lunarswap/Lunarswap/contract';
 import type { Lunarswap } from '@openzeppelin/midnight-apps-lunarswap-api';
 import type { Logger } from 'pino';
 
 // Helper function to create CoinInfo from user input
-export const createCoinInfo = (color: string, value: bigint): ShieldedCoinInfo => ({
+export const createCoinInfo = (
+  color: string,
+  value: bigint,
+): ShieldedCoinInfo => ({
   color: new Uint8Array(Buffer.from(color, 'hex')),
   value,
   nonce: new Uint8Array(32),

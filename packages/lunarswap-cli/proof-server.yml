@@ -1,0 +1,9 @@
+services:
+  proof-server:
+    image: "midnightnetwork/proof-server:4.0.0"
+    container_name: "proof-server_$TESTCONTAINERS_UID"
+    command: ["sh", "-c", "midnight-proof-server --network ${NETWORK_ID:-undeployed}"]
+    ports:
+      - "0:6300"
+    environment:
+      RUST_BACKTRACE: "full"

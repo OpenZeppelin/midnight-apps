@@ -21,19 +21,23 @@ import './animations.css';
 import type { NetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 import { setNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 import pino from 'pino';
-import type { ReactNode } from 'react';
+import { type ReactNode, useMemo } from 'react';
 
 // Component that creates logger with runtime configuration
 function AppWithLogger({ children }: { children: ReactNode }) {
   const config = useRuntimeConfiguration();
   // TODO: question: why do we need to set the network id here? why not directly detected from the wallet?
   setNetworkId(config.NETWORK_ID as NetworkId);
-  const logger = pino({
-    level: config.LOGGING_LEVEL.toLowerCase(),
-    browser: {
-      asObject: true,
-    },
-  });
+  const logger = useMemo(
+    () =>
+      pino({
+        level: config.LOGGING_LEVEL.toLowerCase(),
+        browser: {
+          asObject: true,
+        },
+      }),
+    [config.LOGGING_LEVEL],
+  );
 
   return (
     <MidnightWalletProvider logger={logger}>{children}</MidnightWalletProvider>

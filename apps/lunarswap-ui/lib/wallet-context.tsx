@@ -202,9 +202,10 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
           networkId: config?.NETWORK_ID ?? 'testnet',
         });
       } catch (e) {
-        const walletError = getErrorType(e as Error);
-        setWalletError(walletError);
+        const errorType = getErrorType(e as Error);
+        setWalletError(errorType);
         setIsConnecting(false);
+        if (manual) throw e;
         return;
       }
 
@@ -231,8 +232,11 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
         });
         // Reset reconnect attempts on successful connection
         setReconnectAttempts(0);
-      } catch (_e) {
+      } catch (e) {
         setWalletError(MidnightWalletErrorType.TIMEOUT_API_RESPONSE);
+        setIsConnecting(false);
+        if (manual) throw e;
+        return;
       }
 
       setIsConnecting(false);
@@ -422,7 +426,9 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
       // This allows the app to initialize even without a connected wallet
       providerConfig.privateStoragePasswordProvider = async () => {
         // Use a consistent password based on localStorage or a default
-        const storedPassword = localStorage.getItem('lunarswap-storage-password');
+        const storedPassword = localStorage.getItem(
+          'lunarswap-storage-password',
+        );
         if (storedPassword) {
           return storedPassword;
         }
@@ -529,8 +535,9 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
       proofServerIsOnline,
       address,
       shake,
+      walletError,
     }));
-  }, [address, isConnecting, proofServerIsOnline, shake]);
+  }, [address, isConnecting, proofServerIsOnline, shake, walletError]);
 
   // Update wallet state when snackBarText changes
   useEffect(() => {
@@ -539,6 +546,17 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
       snackBarText,
     }));
   }, [snackBarText]);
+
+  // Keep function references up to date in wallet state
+  useEffect(() => {
+    setWalletState((state) => ({
+      ...state,
+      connect,
+      disconnect,
+      reconnect: manualReconnect,
+      callback: providerCallback,
+    }));
+  }, [connect, disconnect, manualReconnect, providerCallback]);
 
   //const connectMemo = useCallback(connect, []);
 

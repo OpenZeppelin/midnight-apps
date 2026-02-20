@@ -1,14 +1,14 @@
-import { stdin as input, stdout as output } from 'node:process';
-import { type Interface, createInterface } from 'node:readline/promises';
-import type { Resource } from '@midnight-ntwrk/wallet';
-import type { Wallet } from '@midnight-ntwrk/wallet-api';
+// SPDX-License-Identifier: MIT
+// LunarSwap CLI main loop and handlers
+
+import type { Interface } from 'node:readline/promises';
 import type { ShieldedCoinInfo } from '@openzeppelin/midnight-apps-contracts/dist/artifacts/lunarswap/Lunarswap/contract';
 import type {
   Lunarswap,
   LunarswapProviders,
 } from '@openzeppelin/midnight-apps-lunarswap-api';
 import type { Logger } from 'pino';
-import { deployContract, joinContract } from './api/contract';
+import { deployContract, joinContract } from './api/contract.js';
 import {
   checkPairExists,
   getAllPairsLength,
@@ -16,8 +16,7 @@ import {
   getPairIdentityInfo,
   getPairInfo,
   getPairReservesInfo,
-} from './api/pair-info';
-import { configureProviders } from './api/providers';
+} from './api/pair-info.js';
 import {
   addLiquidity,
   createCoinInfo,
@@ -25,24 +24,7 @@ import {
   removeLiquidity,
   swapExactTokensForTokens,
   swapTokensForExactTokens,
-} from './api/swap';
-import {
-  buildFreshWallet,
-  buildWalletFromRecoveryPhrase,
-  buildWalletFromSeed,
-} from './api/wallet';
-import type { Config } from './config';
-
-let logger: Logger;
-
-const WALLET_LOOP_QUESTION = `
-You can do one of the following:
-  1. Build a fresh wallet
-  2. Build wallet from a seed
-  3. Use test seed (if available)
-  4. Build wallet from recovery phrase
-  5. Exit
-Which would you like to do? `;
+} from './api/swap.js';
 
 const DEPLOY_OR_JOIN_QUESTION = `
 You can do one of the following:
@@ -64,79 +46,33 @@ You can do one of the following:
 7. Get pair information
 8. Get pair reserves
 9. Get pair identity
-10. Get LP token information
-11. Get LP token total supply
-12. Exit
+10. Get LP token total supply
+11. Exit
 
 Which would you like to do? `;
 
-const WALLET_QUESTION = 'Enter your wallet seed: ';
 const CONTRACT_ADDRESS_QUESTION =
   'Enter the deployed LunarSwap contract address: ';
 
-const buildWallet = async (
-  config: Config,
-  rli: Interface,
-): Promise<(Wallet & Resource) | null> => {
-  // For now, always build a fresh wallet since we don't have StandaloneConfig
-  while (true) {
-    const choice = await rli.question(WALLET_LOOP_QUESTION);
-    switch (choice) {
-      case '1':
-        return await buildFreshWallet(config, logger);
-      case '2': {
-        const seed = await rli.question(WALLET_QUESTION);
-        return await buildWalletFromSeed(config, seed, logger);
-      }
-      case '3': {
-        if (config.testSeed) {
-          logger.info('Using test seed from environment variable');
-          return await buildWalletFromSeed(config, config.testSeed, logger);
-        }
-        logger.error('No test seed found in environment variable TEST_SEED');
-        logger.info(
-          'Please set TEST_SEED environment variable or choose option 2 to enter seed manually',
-        );
-        break;
-      }
-      case '4': {
-        if (config.testRecoveryPhrase) {
-          logger.info('Using test recovery phrase from environment variable');
-          return await buildWalletFromRecoveryPhrase(
-            config,
-            config.testRecoveryPhrase,
-            logger,
-          );
-        }
-        logger.error(
-          'No test recovery phrase found in environment variable TEST_RECOVERY_PHRASE',
-        );
-        logger.info(
-          'Please set TEST_RECOVERY_PHRASE environment variable or choose option 2 to enter seed manually',
-        );
-        break;
-      }
-      case '5':
-        logger.info('Exiting...');
-        return null;
-      default:
-        logger.error(`Invalid choice: ${choice}`);
-    }
-  }
-};
-
 const deployOrJoin = async (
   providers: LunarswapProviders,
+  zkConfigPath: string,
   rli: Interface,
+  logger: Logger,
 ): Promise<Lunarswap | null> => {
   while (true) {
     const choice = await rli.question(DEPLOY_OR_JOIN_QUESTION);
     switch (choice) {
       case '1':
-        return await deployContract(providers, logger);
+        return await deployContract(providers, zkConfigPath, logger);
       case '2': {
         const contractAddress = await rli.question(CONTRACT_ADDRESS_QUESTION);
-        return await joinContract(providers, contractAddress, logger);
+        return await joinContract(
+          providers,
+          contractAddress,
+          zkConfigPath,
+          logger,
+        );
       }
       case '3':
         logger.info('Exiting...');
@@ -150,6 +86,7 @@ const deployOrJoin = async (
 const handleAddLiquidity = async (
   lunarswap: Lunarswap,
   rli: Interface,
+  logger: Logger,
 ): Promise<void> => {
   const tokenAColor = await rli.question('Enter token A color (hex): ');
   const tokenAValue = BigInt(await rli.question('Enter token A amount: '));
@@ -177,6 +114,7 @@ const handleAddLiquidity = async (
 const handleRemoveLiquidity = async (
   lunarswap: Lunarswap,
   rli: Interface,
+  logger: Logger,
 ): Promise<void> => {
   const tokenAColor = await rli.question('Enter token A color (hex): ');
   const tokenBColor = await rli.question('Enter token B color (hex): ');
@@ -208,6 +146,7 @@ const handleRemoveLiquidity = async (
 const handleSwapExactTokensForTokens = async (
   lunarswap: Lunarswap,
   rli: Interface,
+  logger: Logger,
 ): Promise<void> => {
   const tokenInColor = await rli.question('Enter input token color (hex): ');
   const tokenInValue = BigInt(await rli.question('Enter input token amount: '));
@@ -235,6 +174,7 @@ const handleSwapExactTokensForTokens = async (
 const handleSwapTokensForExactTokens = async (
   lunarswap: Lunarswap,
   rli: Interface,
+  logger: Logger,
 ): Promise<void> => {
   const tokenInColor = await rli.question('Enter input token color (hex): ');
   const tokenInValue = BigInt(await rli.question('Enter input token amount: '));
@@ -260,7 +200,6 @@ const handleSwapTokensForExactTokens = async (
   );
 };
 
-// Helper function to get token input from user
 const getTokenInput = async (
   rli: Interface,
   tokenLabel: string,
@@ -272,19 +211,24 @@ const getTokenInput = async (
 const handleCheckPairExists = async (
   lunarswap: Lunarswap,
   rli: Interface,
+  logger: Logger,
 ): Promise<void> => {
   const tokenA = await getTokenInput(rli, 'Token A');
   const tokenB = await getTokenInput(rli, 'Token B');
   await checkPairExists(lunarswap, tokenA, tokenB, logger);
 };
 
-const handleGetAllPairsLength = async (lunarswap: Lunarswap): Promise<void> => {
+const handleGetAllPairsLength = async (
+  lunarswap: Lunarswap,
+  logger: Logger,
+): Promise<void> => {
   await getAllPairsLength(lunarswap, logger);
 };
 
 const handleGetPairInfo = async (
   lunarswap: Lunarswap,
   rli: Interface,
+  logger: Logger,
 ): Promise<void> => {
   const tokenA = await getTokenInput(rli, 'Token A');
   const tokenB = await getTokenInput(rli, 'Token B');
@@ -294,6 +238,7 @@ const handleGetPairInfo = async (
 const handleGetPairReserves = async (
   lunarswap: Lunarswap,
   rli: Interface,
+  logger: Logger,
 ): Promise<void> => {
   const tokenA = await getTokenInput(rli, 'Token A');
   const tokenB = await getTokenInput(rli, 'Token B');
@@ -303,122 +248,71 @@ const handleGetPairReserves = async (
 const handleGetPairIdentity = async (
   lunarswap: Lunarswap,
   rli: Interface,
+  logger: Logger,
 ): Promise<void> => {
   const tokenA = await getTokenInput(rli, 'Token A');
   const tokenB = await getTokenInput(rli, 'Token B');
   await getPairIdentityInfo(lunarswap, tokenA, tokenB, logger);
 };
 
-// const handleGetLpTokenInfo = async (
-//   lunarswap: Lunarswap,
-// ): Promise<void> => {
-//   await getLpTokenInfo(lunarswap, logger);
-// };
-
 const handleGetLpTokenTotalSupply = async (
   lunarswap: Lunarswap,
   rli: Interface,
+  logger: Logger,
 ): Promise<void> => {
   const tokenA = await getTokenInput(rli, 'Token A');
   const tokenB = await getTokenInput(rli, 'Token B');
   await getLpTokenTotalSupplyInfo(lunarswap, tokenA, tokenB, logger);
 };
 
-const mainLoop = async (
+export const mainLoop = async (
   providers: LunarswapProviders,
+  zkConfigPath: string,
   rli: Interface,
+  logger: Logger,
 ): Promise<void> => {
-  const lunarswap = await deployOrJoin(providers, rli);
+  const lunarswap = await deployOrJoin(providers, zkConfigPath, rli, logger);
   if (lunarswap === null) {
-    logger.error('Failed to deploy or join LunarSwap contract');
     return;
   }
   while (true) {
     const choice = await rli.question(MAIN_LOOP_QUESTION);
     switch (choice) {
       case '1':
-        await handleAddLiquidity(lunarswap, rli);
+        await handleAddLiquidity(lunarswap, rli, logger);
         break;
       case '2':
-        await handleRemoveLiquidity(lunarswap, rli);
+        await handleRemoveLiquidity(lunarswap, rli, logger);
         break;
       case '3':
-        await handleSwapExactTokensForTokens(lunarswap, rli);
+        await handleSwapExactTokensForTokens(lunarswap, rli, logger);
         break;
       case '4':
-        await handleSwapTokensForExactTokens(lunarswap, rli);
+        await handleSwapTokensForExactTokens(lunarswap, rli, logger);
         break;
       case '5':
-        await handleCheckPairExists(lunarswap, rli);
+        await handleCheckPairExists(lunarswap, rli, logger);
         break;
       case '6':
-        await handleGetAllPairsLength(lunarswap);
+        await handleGetAllPairsLength(lunarswap, logger);
         break;
       case '7':
-        await handleGetPairInfo(lunarswap, rli);
+        await handleGetPairInfo(lunarswap, rli, logger);
         break;
       case '8':
-        await handleGetPairReserves(lunarswap, rli);
+        await handleGetPairReserves(lunarswap, rli, logger);
         break;
       case '9':
-        await handleGetPairIdentity(lunarswap, rli);
+        await handleGetPairIdentity(lunarswap, rli, logger);
         break;
       case '10':
-        await handleGetLpTokenTotalSupply(lunarswap, rli);
+        await handleGetLpTokenTotalSupply(lunarswap, rli, logger);
         break;
       case '11':
         logger.info('Exiting...');
         return;
       default:
         logger.error(`Invalid choice: ${choice}`);
-    }
-  }
-};
-
-export const run = async (
-  config: Config,
-  _logger: Logger,
-  dockerEnv?: unknown,
-): Promise<void> => {
-  logger = _logger;
-  const rli = createInterface({ input, output, terminal: true });
-  let env: unknown;
-  if (dockerEnv !== undefined) {
-    env = await (dockerEnv as { up(): Promise<unknown> }).up();
-    logger.info('Docker environment started');
-  }
-  const wallet = await buildWallet(config, rli);
-  try {
-    if (wallet !== null) {
-      const providers = await configureProviders(wallet, config);
-      await mainLoop(providers, rli);
-    }
-  } catch (e) {
-    logger.error({ error: e }, 'Error');
-    throw e;
-  } finally {
-    try {
-      rli.close();
-      rli.removeAllListeners();
-    } catch (e) {
-      logger.error(`Error closing readline interface: ${e}`);
-    } finally {
-      try {
-        if (wallet !== null) {
-          await wallet.close();
-        }
-      } catch (e) {
-        logger.error(`Error closing wallet: ${e}`);
-      } finally {
-        try {
-          if (env !== undefined) {
-            await (env as { down(): Promise<void> }).down();
-            logger.info('Goodbye');
-          }
-        } catch (e) {
-          logger.error(`Error shutting down docker environment: ${e}`);
-        }
-      }
     }
   }
 };

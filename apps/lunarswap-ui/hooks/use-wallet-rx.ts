@@ -3,10 +3,24 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useWallet } from './use-wallet';
 
 interface WalletState {
-  address: string;
-  coinPublicKey: string;
-  encryptionPublicKey: string;
-  balances: Record<string, bigint>;
+  // Shielded addresses and keys
+  shieldedAddress: string;
+  shieldedCoinPublicKey: string;
+  shieldedEncryptionPublicKey: string;
+
+  // Unshielded address
+  unshieldedAddress?: string;
+
+  // Dust address
+  dustAddress?: string;
+
+  // Balances
+  shieldedBalances: Record<string, bigint>;
+  unshieldedBalances?: Record<string, bigint>;
+  dustBalance?: {
+    balance: bigint;
+    cap: bigint;
+  };
 }
 
 interface WalletRxState {
@@ -44,14 +58,53 @@ export function useWalletRx(): WalletRxState & WalletRxActions {
     // Initial state fetch
     const fetchState = async () => {
       try {
-        const addressInfo = await walletAPI.wallet.getShieldedAddresses();
-        const balances = await walletAPI.wallet.getShieldedBalances();
+        const [
+          addressInfo,
+          shieldedBalances,
+          unshieldedAddressResult,
+          dustAddressResult,
+          unshieldedBalances,
+          dustBalance,
+        ] = await Promise.allSettled([
+          walletAPI.wallet.getShieldedAddresses(),
+          walletAPI.wallet.getShieldedBalances(),
+          walletAPI.wallet.getUnshieldedAddress(),
+          walletAPI.wallet.getDustAddress(),
+          walletAPI.wallet.getUnshieldedBalances(),
+          walletAPI.wallet.getDustBalance(),
+        ]);
 
         setState({
-          address: addressInfo.shieldedAddress,
-          coinPublicKey: addressInfo.shieldedCoinPublicKey,
-          encryptionPublicKey: addressInfo.shieldedEncryptionPublicKey,
-          balances,
+          shieldedAddress:
+            addressInfo.status === 'fulfilled'
+              ? addressInfo.value.shieldedAddress
+              : '',
+          shieldedCoinPublicKey:
+            addressInfo.status === 'fulfilled'
+              ? addressInfo.value.shieldedCoinPublicKey
+              : '',
+          shieldedEncryptionPublicKey:
+            addressInfo.status === 'fulfilled'
+              ? addressInfo.value.shieldedEncryptionPublicKey
+              : '',
+          shieldedBalances:
+            shieldedBalances.status === 'fulfilled'
+              ? shieldedBalances.value
+              : {},
+          unshieldedAddress:
+            unshieldedAddressResult.status === 'fulfilled'
+              ? unshieldedAddressResult.value.unshieldedAddress
+              : undefined,
+          dustAddress:
+            dustAddressResult.status === 'fulfilled'
+              ? dustAddressResult.value.dustAddress
+              : undefined,
+          unshieldedBalances:
+            unshieldedBalances.status === 'fulfilled'
+              ? unshieldedBalances.value
+              : undefined,
+          dustBalance:
+            dustBalance.status === 'fulfilled' ? dustBalance.value : undefined,
         });
         setError(null);
       } catch (err) {
@@ -84,14 +137,51 @@ export function useWalletRx(): WalletRxState & WalletRxActions {
     }
 
     try {
-      const addressInfo = await walletAPI.wallet.getShieldedAddresses();
-      const balances = await walletAPI.wallet.getShieldedBalances();
+      const [
+        addressInfo,
+        shieldedBalances,
+        unshieldedAddressResult,
+        dustAddressResult,
+        unshieldedBalances,
+        dustBalance,
+      ] = await Promise.allSettled([
+        walletAPI.wallet.getShieldedAddresses(),
+        walletAPI.wallet.getShieldedBalances(),
+        walletAPI.wallet.getUnshieldedAddress(),
+        walletAPI.wallet.getDustAddress(),
+        walletAPI.wallet.getUnshieldedBalances(),
+        walletAPI.wallet.getDustBalance(),
+      ]);
 
       setState({
-        address: addressInfo.shieldedAddress,
-        coinPublicKey: addressInfo.shieldedCoinPublicKey,
-        encryptionPublicKey: addressInfo.shieldedEncryptionPublicKey,
-        balances,
+        shieldedAddress:
+          addressInfo.status === 'fulfilled'
+            ? addressInfo.value.shieldedAddress
+            : '',
+        shieldedCoinPublicKey:
+          addressInfo.status === 'fulfilled'
+            ? addressInfo.value.shieldedCoinPublicKey
+            : '',
+        shieldedEncryptionPublicKey:
+          addressInfo.status === 'fulfilled'
+            ? addressInfo.value.shieldedEncryptionPublicKey
+            : '',
+        shieldedBalances:
+          shieldedBalances.status === 'fulfilled' ? shieldedBalances.value : {},
+        unshieldedAddress:
+          unshieldedAddressResult.status === 'fulfilled'
+            ? unshieldedAddressResult.value.unshieldedAddress
+            : undefined,
+        dustAddress:
+          dustAddressResult.status === 'fulfilled'
+            ? dustAddressResult.value.dustAddress
+            : undefined,
+        unshieldedBalances:
+          unshieldedBalances.status === 'fulfilled'
+            ? unshieldedBalances.value
+            : undefined,
+        dustBalance:
+          dustBalance.status === 'fulfilled' ? dustBalance.value : undefined,
       });
       setError(null);
     } catch (err) {
