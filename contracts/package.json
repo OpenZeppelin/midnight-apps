@@ -20,6 +20,12 @@
   },
   "homepage": "",
   "type": "module",
+  "exports": {
+    "./math/witnesses/*": {
+      "types": "./dist/math/witnesses/*.d.ts",
+      "default": "./dist/math/witnesses/*.js"
+    }
+  },
   "config": {
     "compactVersion": "+0.28.0",
     "artifactsOutDir": "src/artifacts",
@@ -36,8 +42,9 @@
     "compact:math": "compact-compiler $npm_package_config_compactVersion --dir math $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir",
     "compact:fmt": "compact format --check",
     "compact:fmt:fix": "compact format",
-    "build": "compact-builder $npm_package_config_compactVersion $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir",
-    "build:fast": "compact-builder $npm_package_config_compactVersion --skip-zk $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir",
+    "build": "compact-builder $npm_package_config_compactVersion $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir && npm run build:ts",
+    "build:fast": "compact-builder $npm_package_config_compactVersion --skip-zk $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir && npm run build:ts",
+    "build:ts": "tsc -p tsconfig.build.json",
     "test": "vitest run",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",

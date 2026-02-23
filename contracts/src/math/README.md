@@ -149,13 +149,10 @@ export type Witnesses<PS> = {
   // From Uint128 module (used by div and sqrt circuits)
   wit_divUint128(context: WitnessContext<Ledger, PS>, a: bigint, b: bigint): [PS, DivResultU128];
   wit_sqrtU128(context: WitnessContext<Ledger, PS>, radicand: U128): [PS, bigint];
-
-  // From Bytes32 module (used by lt circuit internally)
-  wit_bytes32ToU256(context: WitnessContext<Ledger, PS>, bytes: Uint8Array): [PS, U256];
 }
 ```
 
-> **Note:** The `mul` and `toBytes` circuits are pure and don't require witnesses. Only `divU64`, `sqrtU64`, `div`, `sqrt`, and `lt` need witnesses for their off-chain computations.
+> **Note:** The `mul` and `toBytes` circuits are pure and don't require witnesses. Only `divU64`, `sqrtU64`, `div`, and `sqrt` need witnesses for their off-chain computations.
 
 To implement the witnesses, import the required functions from the library and combine them:
 
@@ -169,9 +166,6 @@ import { wit_sqrtU64 } from '@openzeppelin/midnight-apps-contracts/math/witnesse
 // Import witness functions for Uint128
 import { wit_divUint128 } from '@openzeppelin/midnight-apps-contracts/math/witnesses/wit_divUint128';
 import { wit_sqrtU128 } from '@openzeppelin/midnight-apps-contracts/math/witnesses/wit_sqrtU128';
-
-// Import witness function for Bytes32
-import { wit_bytes32ToU256 } from '@openzeppelin/midnight-apps-contracts/math/witnesses/wit_bytes32ToU256';
 
 type MyPrivateState = Record<string, never>;
 
@@ -190,11 +184,6 @@ export const MyContractWitnesses = (): Witnesses<MyPrivateState> => ({
   },
   wit_sqrtU128(_context, radicand) {
     return [{}, wit_sqrtU128(radicand)];
-  },
-
-  // Bytes32 witness (required by lt, lte, gt, gte circuits)
-  wit_bytes32ToU256(_context, bytes) {
-    return [{}, wit_bytes32ToU256(bytes)];
   },
 });
 
@@ -231,10 +220,6 @@ import { wit_sqrtU128 } from '@openzeppelin/midnight-apps-contracts/math/witness
 import { wit_divU128 } from '@openzeppelin/midnight-apps-contracts/math/witnesses/wit_divU128';
 import { wit_divUint128 } from '@openzeppelin/midnight-apps-contracts/math/witnesses/wit_divUint128';
 
-// For Bytes32/Field255 operations
-import { wit_bytes32ToU256 } from '@openzeppelin/midnight-apps-contracts/math/witnesses/wit_bytes32ToU256';
-import { wit_bytes32ToVector } from '@openzeppelin/midnight-apps-contracts/math/witnesses/wit_bytes32ToVector';
-import { wit_uint64ToVector } from '@openzeppelin/midnight-apps-contracts/math/witnesses/wit_uint64ToVector';
 ```
 
 #### Step 3: Create Your Witnesses Object
@@ -271,9 +256,7 @@ const createWitnesses = (): Witnesses<MyPrivateState> => ({
 | `wit_sqrtU128` | Uint128 | Square root of U128 struct | `U128` | `bigint` |
 | `wit_divU128` | Uint128 | Division of U128 structs | `U128, U128` | `DivResultU128` |
 | `wit_divUint128` | Uint128/Uint256 | Division of Uint<128> values | `bigint, bigint` | `DivResultU128` |
-| `wit_bytes32ToU256` | Bytes32/Field255 | Convert 32 bytes to U256 | `Uint8Array` | `U256` |
-| `wit_bytes32ToVector` | Bytes32 | Convert 32 bytes to Vector | `Uint8Array` | `bigint[]` |
-| `wit_uint64ToVector` | Uint64 | Convert Uint64 to 8-byte vector | `bigint` | `bigint[]` |
+| `wit_unpackBytes` | Pack / Bytes8 / Bytes32 | Unpack bytes to byte vector | `Uint8Array` | `bigint[]` |
 
 ### Types
 
@@ -334,9 +317,6 @@ Computes division with quotient and remainder for U128 structs.
 
 #### `wit_divUint128(a: bigint, b: bigint): DivResultU128`
 Computes division with quotient and remainder for Uint<128> values (bigint), returning U128 structs.
-
-#### `wit_bytes32ToU256(bytes: Uint8Array): U256`
-Converts a 32-byte array to a U256 struct using little-endian byte ordering.
 
 ### Types
 
@@ -452,9 +432,7 @@ src/math/
 │   ├── wit_sqrtU128.ts      # Square root for Uint128
 │   ├── wit_divU128.ts       # Division for Uint128
 │   ├── wit_divUint128.ts    # Division for Uint<128> (shared)
-│   ├── wit_bytes32ToU256.ts # Bytes to U256 conversion
-│   ├── wit_bytes32ToVector.ts # Bytes<32> to Vector
-│   └── wit_uint64ToVector.ts # Uint64 to 8-byte vector
+│   └── wit_unpackBytes.ts   # Unpack Bytes to Vector (Pack module)
 ├── utils/                   # Utility functions
 │   ├── sqrtBigint.ts        # Newton-Raphson square root
 │   └── consts.ts            # Mathematical constants
