@@ -6,7 +6,9 @@ pragma language_version >= 0.20.0;
 import CompactStandardLibrary;
 
 import "../../../Pack"<8> prefix Pack8_;
+
 import "../../../Pack"<16> prefix Pack16_;
+
 import "../../../Pack"<32> prefix Pack32_;
 
 // Helper for test suite: hardcoded to true in every circuit to enable circuit metadata reporting;
