@@ -5,7 +5,7 @@ pragma language_version >= 0.20.0;
 
 /**
  * @title Bytes32 module
- * @description A utility module providing conversions from Vector<32, Uint<8>> (32 bytes) to U256
+ * @description A utility module providing mathematical operations and conversions for 32-byte arrays
  * using little-endian (LE) byte ordering.
  *
  * @remarks
@@ -13,27 +13,33 @@ pragma language_version >= 0.20.0;
  * - Element 0 is the least significant byte, element 31 is the most significant.
  * - This mirrors the pattern of Bytes8 ↔ Uint<64> conversions.
  *
- * Supported circuits:
- * - toU256(vec): Converts Vector<32, Uint<8>> to U256
- * - toU256(bytes): Converts Bytes<32> to U256
- * - pack(vec): Converts Vector<32, Uint<8>> to Bytes<32>
- * - unpack(bytes): Converts Bytes<32> to Vector<32, Uint<8>>
+ * Supported Operations:
+ * - Conversion:
+ *   - pack(vec): Converts Vector<32, Uint<8>> to Bytes<32>.
+ *   - unpack(bytes): Converts Bytes<32> to Vector<32, Uint<8>>.
+ *   - toU256(vec): Converts Vector<32, Uint<8>> to U256.
+ *   - toU256(bytes): Converts Bytes<32> to U256.
+ * - Comparisons:
+ *   - eq(a, b): Checks if two Bytes<32> values are equal.
+ *   - lt(a, b): Checks if one Bytes<32> value is less than another.
+ *   - lte(a, b): Checks if one Bytes<32> value is less than or equal to another.
+ *   - gt(a, b): Checks if one Bytes<32> value is greater than another.
+ *   - gte(a, b): Checks if one Bytes<32> value is greater than or equal to another.
+ * - Utilities:
+ *   - isZero(a): Checks if a Bytes<32> value is zero.
  *
- * For the reverse conversion (U256 to Vector), see Uint256.toUnpackedBytes.
+ * For the reverse conversion (U256 to Unpacked Bytes (Vector<32, Uint<8>>)), see Uint256_toUnpackedBytes.
  */
 module Bytes32 {
-  import { U128 } from "./types/TU128";
-  import { U256 } from "./types/TU256";
-  import { toUint64 } from "./Bytes8" prefix Bytes8_;
+  import { U128, U256 } from Types;
 
-  /**
-   * @description Unpacks a Bytes<32> into 32 individual bytes off-chain.
-   * This is the witness for the unpack circuit.
-   *
-   * @param bytes - The 32-byte array to unpack.
-   * @returns A vector of 32 bytes where element 0 is the LSB.
-   */
-  witness wit_unpackBytes32(bytes: Bytes<32>): Vector<32, Uint<8>>;
+  import { pack, unpack } from Pack<32> prefix Pack32_;
+  import { toUint64 } from Bytes8 prefix Bytes8_;
+  import { lt } from Uint256 prefix Uint256_;
+
+  ////////////////////////////////////////////////////////////////
+  // Conversions
+  ////////////////////////////////////////////////////////////////
 
   /**
    * @title pack circuit
@@ -50,7 +56,7 @@ module Bytes32 {
    * @returns {Bytes<32>} - The 32-byte array.
    */
   export pure circuit pack(vec: Vector<32, Uint<8>>): Bytes<32> {
-    return Bytes[...vec];
+    return Pack32_pack(vec);
   }
 
   /**
@@ -68,9 +74,7 @@ module Bytes32 {
    * @returns {Vector<32, Uint<8>>} - The 32-element vector of bytes.
    */
   export circuit unpack(bytes: Bytes<32>): Vector<32, Uint<8>> {
-    const vec = wit_unpackBytes32(bytes);
-    assert(pack(vec) == bytes, "Bytes32: unpack verification failed");
-    return vec;
+    return Pack32_unpack(bytes);
   }
 
   /**
@@ -144,5 +148,116 @@ module Bytes32 {
    */
   export circuit toU256(bytes: Bytes<32>): U256 {
     return toU256(unpack(bytes));
+  }
+
+  ////////////////////////////////////////////////////////////////
+  // Comparisons
+  ////////////////////////////////////////////////////////////////
+
+  /**
+  * @title eq circuit
+  * @description Compares two Bytes<32> for equality.
+  *
+  * @remarks
+  * This function performs a direct equality comparison between two 32-byte arrays.
+  * Uses the built-in equality operator for byte comparison.
+  *
+  * @param {Bytes<32>} a - First bytes value to compare.
+  * @param {Bytes<32>} b - Second bytes value to compare.
+  *
+  * @returns {Boolean} - True if the bytes are equal, false otherwise.
+  */
+  export circuit eq(a: Bytes<32>, b: Bytes<32>): Boolean {
+    return a == b;
+  }
+
+  /**
+   * @title lt circuit
+   * @description Compares two Bytes<32> for less than using U256 conversion and comparison.
+   *
+   * @remarks
+   * This function converts both byte arrays to U256 structs using little-endian ordering,
+   * then compares them using the Uint256 module's lt function.
+   * The comparison is consistent and deterministic for any 32-byte arrays.
+   *
+   * @param {Bytes<32>} a - First bytes value to compare.
+   * @param {Bytes<32>} b - Second bytes value to compare.
+   *
+   * @returns {Boolean} - True if a < b (based on U256 comparison), false otherwise.
+   */
+  export circuit lt(a: Bytes<32>, b: Bytes<32>): Boolean {
+    const aU256 = toU256(a);
+    const bU256 = toU256(b);
+    return Uint256_lt(aU256, bU256);
+  }
+
+  /**
+   * @title lte circuit
+   * @description Compares two Bytes<32> for less than or equal using U256 comparison.
+   *
+   * @remarks
+   * This function combines the less than and equality comparisons.
+   * Returns true if a <= b based on the combined comparison logic.
+   *
+   * @param {Bytes<32>} a - First bytes value to compare.
+   * @param {Bytes<32>} b - Second bytes value to compare.
+   *
+   * @returns {Boolean} - True if a <= b, false otherwise.
+   */
+  export circuit lte(a: Bytes<32>, b: Bytes<32>): Boolean {
+    return lt(a, b) || eq(a, b);
+  }
+
+  /**
+   * @title gt circuit
+   * @description Compares two Bytes<32> for greater than using U256 comparison.
+   *
+   * @remarks
+   * This function uses the less than comparison with swapped operands.
+   * Returns true if a > b based on the comparison logic.
+   *
+   * @param {Bytes<32>} a - First bytes value to compare.
+   * @param {Bytes<32>} b - Second bytes value to compare.
+   *
+   * @returns {Boolean} - True if a > b, false otherwise.
+   */
+  export circuit gt(a: Bytes<32>, b: Bytes<32>): Boolean {
+    return lt(b, a);
+  }
+
+  /**
+   * @title gte circuit
+   * @description Compares two Bytes<32> for greater than or equal using U256 comparison.
+   *
+   * @remarks
+   * This function combines the greater than and equality comparisons.
+   * Returns true if a >= b based on the combined comparison logic.
+   *
+   * @param {Bytes<32>} a - First bytes value to compare.
+   * @param {Bytes<32>} b - Second bytes value to compare.
+   *
+   * @returns {Boolean} - True if a >= b, false otherwise.
+   */
+  export circuit gte(a: Bytes<32>, b: Bytes<32>): Boolean {
+    return lt(b, a) || eq(a, b);
+  }
+
+  ////////////////////////////////////////////////////////////////
+  // Utilities
+  ////////////////////////////////////////////////////////////////
+
+  /**
+   * @title isZero circuit
+   * @description Checks if a Bytes<32> is zero.
+   *
+   * @remarks
+   * This function performs a direct comparison of the bytes with zero.
+   *
+   * @param {Bytes<32>} a - The bytes value to check.
+   *
+   * @returns {Boolean} - True if the bytes are zero, false otherwise.
+   */
+  export circuit isZero(a: Bytes<32>): Boolean {
+    return a == pad(32, "");
   }
 }

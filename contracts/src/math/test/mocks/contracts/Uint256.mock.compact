@@ -5,7 +5,7 @@ pragma language_version >= 0.18.0;
 
 import CompactStandardLibrary;
 
-import { U256 } from "../../../types/TU256";
+import { U256 } from "../../../Types";
 
 import "../../../Uint256" prefix Uint256_;
 
@@ -14,6 +14,10 @@ export { U256 };
 // Helper for test suite: hardcoded to true in every circuit to enable circuit metadata reporting;
 // only increases circuit size by 3 rows per exposed circuit.
 ledger toImpure: Boolean;
+
+////////////////////////////////////////////////////////////////
+// Constants
+////////////////////////////////////////////////////////////////
 
 export circuit ZERO_U256(): U256 {
   toImpure = true;
@@ -25,6 +29,10 @@ export circuit MAX_U256(): U256 {
   return Uint256_MAX_U256();
 }
 
+////////////////////////////////////////////////////////////////
+// Conversions
+////////////////////////////////////////////////////////////////
+
 export circuit toBytes(value: U256): Bytes<32> {
   toImpure = true;
   return disclose(Uint256_toBytes(value));
@@ -34,6 +42,10 @@ export circuit toUnpackedBytes(value: U256): Vector<32, Uint<8>> {
   toImpure = true;
   return disclose(Uint256_toUnpackedBytes(value));
 }
+
+////////////////////////////////////////////////////////////////
+// Comparisons
+////////////////////////////////////////////////////////////////
 
 export circuit eq(a: U256, b: U256): Boolean {
   toImpure = true;

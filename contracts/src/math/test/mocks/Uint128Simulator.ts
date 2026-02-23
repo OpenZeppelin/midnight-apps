@@ -82,6 +82,10 @@ export class Uint128Simulator extends Uint128SimulatorBase {
     super([], options);
   }
 
+  ////////////////////////////////////////////////////////////////
+  // Constants
+  ////////////////////////////////////////////////////////////////
+
   public MODULUS(): bigint {
     return this.circuits.impure.MODULUS();
   }
@@ -98,6 +102,10 @@ export class Uint128Simulator extends Uint128SimulatorBase {
     return this.circuits.impure.MAX_UINT128();
   }
 
+  ////////////////////////////////////////////////////////////////
+  // Conversions
+  ////////////////////////////////////////////////////////////////
+
   public toU128(value: bigint): U128 {
     return this.circuits.impure.toU128(value);
   }
@@ -106,13 +114,9 @@ export class Uint128Simulator extends Uint128SimulatorBase {
     return this.circuits.impure.toUint128(value);
   }
 
-  public isZero(value: bigint): boolean {
-    return this.circuits.impure.isZero(value);
-  }
-
-  public isZeroU128(value: U128): boolean {
-    return this.circuits.impure.isZeroU128(value);
-  }
+  ////////////////////////////////////////////////////////////////
+  // Comparisons
+  ////////////////////////////////////////////////////////////////
 
   public eq(a: bigint, b: bigint): boolean {
     return this.circuits.impure.eq(a, b);
@@ -154,6 +158,10 @@ export class Uint128Simulator extends Uint128SimulatorBase {
     return this.circuits.impure.gteU128(a, b);
   }
 
+  ////////////////////////////////////////////////////////////////
+  // Arithmetic
+  ////////////////////////////////////////////////////////////////
+
   public add(a: bigint, b: bigint): U256 {
     return this.circuits.impure.add(a, b);
   }
@@ -194,6 +202,10 @@ export class Uint128Simulator extends Uint128SimulatorBase {
     return this.circuits.impure.mulCheckedU128(a, b);
   }
 
+  ////////////////////////////////////////////////////////////////
+  // Division
+  ////////////////////////////////////////////////////////////////
+
   public div(a: bigint, b: bigint): bigint {
     return this.circuits.impure.div(a, b);
   }
@@ -218,12 +230,36 @@ export class Uint128Simulator extends Uint128SimulatorBase {
     return this.circuits.impure.divRemU128(a, b);
   }
 
+  ////////////////////////////////////////////////////////////////
+  // Square Root
+  ////////////////////////////////////////////////////////////////
+
   public sqrt(radicand: bigint): bigint {
     return this.circuits.impure.sqrt(radicand);
   }
 
   public sqrtU128(radicand: U128): bigint {
     return this.circuits.impure.sqrtU128(radicand);
+  }
+
+  ////////////////////////////////////////////////////////////////
+  // Utilities
+  ////////////////////////////////////////////////////////////////
+
+  public isZero(value: bigint): boolean {
+    return this.circuits.impure.isZero(value);
+  }
+
+  public isZeroU128(value: U128): boolean {
+    return this.circuits.impure.isZeroU128(value);
+  }
+
+  public isMultiple(value: bigint, divisor: bigint): boolean {
+    return this.circuits.impure.isMultiple(value, divisor);
+  }
+
+  public isMultipleU128(value: U128, divisor: U128): boolean {
+    return this.circuits.impure.isMultipleU128(value, divisor);
   }
 
   public min(a: bigint, b: bigint): bigint {
@@ -240,13 +276,5 @@ export class Uint128Simulator extends Uint128SimulatorBase {
 
   public maxU128(a: U128, b: U128): U128 {
     return this.circuits.impure.maxU128(a, b);
-  }
-
-  public isMultiple(value: bigint, divisor: bigint): boolean {
-    return this.circuits.impure.isMultiple(value, divisor);
-  }
-
-  public isMultipleU128(value: U128, divisor: U128): boolean {
-    return this.circuits.impure.isMultipleU128(value, divisor);
   }
 }

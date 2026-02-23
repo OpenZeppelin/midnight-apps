@@ -13,21 +13,19 @@ pragma language_version >= 0.20.0;
  * - Element 0 is the least significant byte, element 7 is the most significant.
  * - Works with Vector<8, Uint<8>> (e.g. from Uint64.toUnpackedBytes, or slices of Bytes32).
  *
- * Supported circuits:
- * - toUint64(vec): Converts Vector<8, Uint<8>> to Uint<64>
- * - pack(vec): Converts Vector<8, Uint<8>> to Bytes<8>
- * - unpack(bytes): Converts Bytes<8> to Vector<8, Uint<8>>
+ * Supported Operations:
+ * - Conversions:
+ *   - pack(vec): Converts Vector<8, Uint<8>> to Bytes<8>.
+ *   - unpack(bytes): Converts Bytes<8> to Vector<8, Uint<8>>.
+ *   - toUint64(vec): Converts Vector<8, Uint<8>> to Uint<64>.
+ *   - toUint64(bytes): Converts Bytes<8> to Uint<64>.
  */
 module Bytes8 {
+  import { pack, unpack } from Pack<8> prefix Pack8_;
 
-  /**
-   * @description Unpacks a Bytes<8> into 8 individual bytes off-chain.
-   * This is the witness for the unpack circuit.
-   *
-   * @param bytes - The 8-byte array to unpack.
-   * @returns A vector of 8 bytes [b0, b1, b2, b3, b4, b5, b6, b7] where b0 is the LSB.
-   */
-  witness wit_unpackBytes8(bytes: Bytes<8>): Vector<8, Uint<8>>;
+  ////////////////////////////////////////////////////////////////
+  // Conversions
+  ////////////////////////////////////////////////////////////////
 
   /**
    * @title pack circuit
@@ -44,7 +42,7 @@ module Bytes8 {
    * @returns {Bytes<8>} - The 8-byte array.
    */
   export circuit pack(vec: Vector<8, Uint<8>>): Bytes<8> {
-    return Bytes[...vec];
+    return Pack8_pack(vec);
   }
 
   /**
@@ -62,9 +60,7 @@ module Bytes8 {
    * @returns {Vector<8, Uint<8>>} - The 8-element vector of bytes.
    */
   export circuit unpack(bytes: Bytes<8>): Vector<8, Uint<8>> {
-    const vec = wit_unpackBytes8(bytes);
-    assert(pack(vec) == bytes, "Bytes8: unpack verification failed");
-    return vec;
+    return Pack8_unpack(bytes);
   }
 
   /**

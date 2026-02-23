@@ -11,8 +11,13 @@ import "../../../Uint64" prefix Uint64_;
 
 export { DivResultU64 };
 
-// Helper for test suite: hardcoded to true in every circuit to enable circuit metadata reporting; only increases circuit size by 3 rows per exposed circuit.
+// Helper for test suite: hardcoded to true in every circuit to enable circuit metadata reporting;
+// only increases circuit size by 3 rows per exposed circuit.
 ledger toImpure: Boolean;
+
+////////////////////////////////////////////////////////////////
+// Constants
+////////////////////////////////////////////////////////////////
 
 export circuit MAX_UINT8(): Uint<8> {
   toImpure = true;
@@ -34,6 +39,10 @@ export circuit MAX_UINT64(): Uint<64> {
   return Uint64_MAX_UINT64();
 }
 
+////////////////////////////////////////////////////////////////
+// Conversions
+////////////////////////////////////////////////////////////////
+
 export circuit toBytes(value: Uint<64>): Bytes<8> {
   toImpure = true;
   return disclose(Uint64_toBytes(value));
@@ -43,6 +52,10 @@ export circuit toUnpackedBytes(value: Uint<64>): Vector<8, Uint<8>> {
   toImpure = true;
   return disclose(Uint64_toUnpackedBytes(value));
 }
+
+////////////////////////////////////////////////////////////////
+// Arithmetic
+////////////////////////////////////////////////////////////////
 
 export circuit add(a: Uint<64>, b: Uint<64>): Uint<128> {
   toImpure = true;
@@ -69,6 +82,10 @@ export circuit mulChecked(a: Uint<64>, b: Uint<64>): Uint<64> {
   return Uint64_mulChecked(a, b);
 }
 
+////////////////////////////////////////////////////////////////
+// Division
+////////////////////////////////////////////////////////////////
+
 export circuit div(a: Uint<64>, b: Uint<64>): Uint<64> {
   toImpure = true;
   return disclose(Uint64_div(a, b));
@@ -84,10 +101,18 @@ export circuit divRem(a: Uint<64>, b: Uint<64>): DivResultU64 {
   return disclose(Uint64_divRem(a, b));
 }
 
+////////////////////////////////////////////////////////////////
+// Square Root
+////////////////////////////////////////////////////////////////
+
 export circuit sqrt(radical: Uint<64>): Uint<32> {
   toImpure = true;
   return disclose(Uint64_sqrt(radical));
 }
+
+////////////////////////////////////////////////////////////////
+// Utilities
+////////////////////////////////////////////////////////////////
 
 export circuit isMultiple(value: Uint<64>, b: Uint<64>): Boolean {
   toImpure = true;
