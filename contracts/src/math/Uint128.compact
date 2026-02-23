@@ -131,7 +131,7 @@ module Uint128 {
    *
    * @circuitInfo k=9, rows=441
    *
-   * @throws {Error} "MathU128: conversion invalid" if verification fails.
+   * @throws {Error} "Uint128: conversion invalid" if verification fails.
    *
    * @param {Uint<128>} value - The Uint<128> value to convert.
    *
@@ -147,7 +147,7 @@ module Uint128 {
     const reconstructed = highShifted + (low as Uint<128>); // high * 2⁶⁴ + low
 
     // Verify reconstruction matches value
-    assert(reconstructed == value, "MathU128: conversion invalid");
+    assert(reconstructed == value, "Uint128: conversion invalid");
 
     return U128 { low: low, high: high };
   }
@@ -195,7 +195,7 @@ module Uint128 {
    *
    * @returns {Boolean} True if a equals zero (a.low = a.high = 0), false otherwise.
    */
-  export pure circuit isZeroU128(a: U128): Boolean {
+  export pure circuit isZero(a: U128): Boolean {
     return a.low == 0 && a.high == 0;
   }
 
@@ -225,7 +225,7 @@ module Uint128 {
    *
    * @returns {Boolean} True if a is equal b, false otherwise.
    */
-  export pure circuit eqU128(a: U128, b: U128): Boolean {
+  export pure circuit eq(a: U128, b: U128): Boolean {
     return a.low == b.low && a.high == b.high;
   }
 
@@ -263,11 +263,13 @@ module Uint128 {
    * @title Less Than U128 circuit
    * @description Checks if one U128 value is less than another.
    *
+   * @circuitInfo k=9, rows=392
+   *
    * @param a The first U128 value.
    * @param b The second U128 value.
    * @returns Boolean True if a is less than b, false otherwise.
    */
-  export pure circuit ltU128(a: U128, b: U128): Boolean {
+  export pure circuit lt(a: U128, b: U128): Boolean {
     return a.high < b.high || (a.high == b.high && a.low < b.low);
   }
 
@@ -282,8 +284,8 @@ module Uint128 {
    *
    * @returns {Boolean} True if a is less than or equal to b, false otherwise.
    */
-  export pure circuit lteU128(a: U128, b: U128): Boolean {
-    return ltU128(a, b) || eqU128(a, b);
+  export pure circuit lte(a: U128, b: U128): Boolean {
+    return lt(a, b) || eq(a, b);
   }
 
   /**
@@ -327,7 +329,7 @@ module Uint128 {
    *
    * @returns {Boolean} True if a is greater than b, false otherwise.
    */
-  export pure circuit gtU128(a: U128, b: U128): Boolean {
+  export pure circuit gt(a: U128, b: U128): Boolean {
     return a.high > b.high || (a.high == b.high && a.low > b.low);
   }
 
@@ -342,8 +344,8 @@ module Uint128 {
    *
    * @returns {Boolean} True if a is greater than or equal to b, false otherwise.
    */
-  export pure circuit gteU128(a: U128, b: U128): Boolean {
-    return gtU128(a, b) || eqU128(a, b);
+  export pure circuit gte(a: U128, b: U128): Boolean {
+    return gt(a, b) || eq(a, b);
   }
 
   /**
@@ -415,14 +417,14 @@ module Uint128 {
    * - `a` and `b` must be valid `U128` structs.
    * - Result is returned as `U256` to handle potential overflow.
    *
-   * @circuitInfo k=10, rows=992
+   * @circuitInfo k=10, rows=902
    *
    * @param {U128} a - The first U128 value.
    * @param {U128} b - The second U128 value.
    *
    * @returns {U256} The sum of a and b.
    */
-  export circuit addU128(a: U128, b: U128): U256 {
+  export circuit add(a: U128, b: U128): U256 {
     return _add(a, b);
   }
 
@@ -440,7 +442,7 @@ module Uint128 {
    * @param {Uint<128>} a - The first Uint<128> value.
    * @param {Uint<128>} b - The second Uint<128> value.
    *
-   * @throws {Error} "MathU128: addition overflow" if the result would overflow 128 bits.
+   * @throws {Error} "Uint128: addition overflow" if the result would overflow 128 bits.
    *
    * @returns {Uint<128>} The sum of a and b.
    */
@@ -448,7 +450,7 @@ module Uint128 {
     const sum = add(a, b); // U256 { low: U128, high: U128 }
 
     // If high != 0 then a+b exceeded 2¹²⁸-1
-    assert(isZeroU128(sum.high), "MathU128: addition overflow");
+    assert(isZero(sum.high), "Uint128: addition overflow");
 
     return toUint128(sum.low);
   }
@@ -462,20 +464,20 @@ module Uint128 {
    * - `a` and `b` must be valid `U128` structs.
    * - Result must not overflow 128 bits.
    *
-   * @circuitInfo k=9, rows=364
+   * @circuitInfo k=10, rows=992
    *
    * @param {U128} a - The first U128 value.
    * @param {U128} b - The second U128 value.
    *
-   * @throws {Error} "MathU128: addition overflow" if the result would overflow 128 bits.
+   * @throws {Error} "Uint128: addition overflow" if the result would overflow 128 bits.
    *
    * @returns {Uint<128>} The sum of a and b.
    */
-  export circuit addCheckedU128(a: U128, b: U128): Uint<128> {
+  export circuit addChecked(a: U128, b: U128): Uint<128> {
     const sum = _add(a, b); // U256 { low: U128, high: U128 }
 
     // If high != 0 then a+b exceeded 2¹²⁸-1
-    assert(isZeroU128(sum.high), "MathU128: addition overflow");
+    assert(isZero(sum.high), "Uint128: addition overflow");
 
     return toUint128(sum.low);
   }
@@ -496,10 +498,10 @@ module Uint128 {
    *
    * @returns {Uint<128>} The difference between a and b.
    *
-   * @throws {Error} "MathU128: subtraction underflow" If a < b.
+   * @throws {Error} "Uint128: subtraction underflow" If a < b.
    */
   export pure circuit sub(a: Uint<128>, b: Uint<128>): Uint<128> {
-    assert(a >= b, "MathU128: subtraction underflow");
+    assert(a >= b, "Uint128: subtraction underflow");
     return a - b;
   }
 
@@ -520,27 +522,27 @@ module Uint128 {
    *
    * @circuitInfo k=10, rows=579
    *
-   * @throws {Error} "MathU128: subtraction underflow" if a < b.
+   * @throws {Error} "Uint128: subtraction underflow" if a < b.
    *
    * @param {U128} a - The U128 value to subtract from.
    * @param {U128} b - The U128 value to subtract.
    *
    * @returns {U128} The difference between a and b.
    */
-  export pure circuit subU128(a: U128, b: U128): U128 {
+  export pure circuit sub(a: U128, b: U128): U128 {
     // General case
-    assert(gtU128(a, b) || eqU128(a, b), "MathU128: subtraction underflow");
+    assert(gt(a, b) || eq(a, b), "Uint128: subtraction underflow");
 
     const borrow = a.low < b.low ? 1 as Uint<64> : 0 as Uint<64>;
     const highWithBorrow = b.high + borrow;
     const highDiff = a.high - highWithBorrow;
 
     if (borrow == 0) {
-       const lowDiff = a.low - b.low;
-       return U128 { low: lowDiff, high: highDiff };
+      const lowDiff = a.low - b.low;
+      return U128 { low: lowDiff, high: highDiff };
     } else {
-       const lowDiff = a.low + MODULUS() - b.low;
-       return U128 { low: lowDiff as Uint<64>, high: highDiff };
+      const lowDiff = a.low + MODULUS() - b.low;
+      return U128 { low: lowDiff as Uint<64>, high: highDiff };
     }
   }
 
@@ -676,7 +678,7 @@ module Uint128 {
    *
    * @returns {U256} The full product of a and b.
    */
-  export circuit mulU128(a: U128, b: U128): U256 {
+  export circuit mul(a: U128, b: U128): U256 {
     return _mul(a, b);
   }
 
@@ -689,14 +691,14 @@ module Uint128 {
    * @param {U128} a - The first U128 value.
    * @param {U128} b - The second U128 value.
    *
-   * @throws {Error} "MathU128: multiplication overflow" If the result would overflow 128 bits.
+   * @throws {Error} "Uint128: multiplication overflow" If the result would overflow 128 bits.
    *
    * @returns {U128} The product of a and b.
    */
   circuit _mulChecked(a: U128, b: U128): U128 {
     const result = _mul(a, b);
 
-    assert(eqU128(result.high, ZERO_U128()), "MathU128: multiplication overflow");
+    assert(eq(result.high, ZERO_U128()), "Uint128: multiplication overflow");
 
     return result.low;
   }
@@ -715,7 +717,7 @@ module Uint128 {
    * @param {Uint<128>} a - The first Uint<128> value.
    * @param {Uint<128>} b - The second Uint<128> value.
    *
-   * @throws {Error} "MathU128: multiplication overflow" if the result would overflow 128 bits.
+   * @throws {Error} "Uint128: multiplication overflow" if the result would overflow 128 bits.
    *
    * @returns {Uint<128>} The product of a and b.
    */
@@ -740,11 +742,11 @@ module Uint128 {
    * @param {U128} a - The first U128 value.
    * @param {U128} b - The second U128 value.
    *
-   * @throws {Error} "MathU128: multiplication overflow" if the result would overflow 128 bits.
+   * @throws {Error} "Uint128: multiplication overflow" if the result would overflow 128 bits.
    *
    * @returns {Uint<128>} The product of a and b.
    */
-  export circuit mulCheckedU128(a: U128, b: U128): Uint<128> {
+  export circuit mulChecked(a: U128, b: U128): Uint<128> {
     const result = _mulChecked(a, b);
     return toUint128(result);
   }
@@ -774,23 +776,23 @@ module Uint128 {
    * @param {U128} a - The U128 value to divide (dividend).
    * @param {U128} b - The U128 value to divide by (divisor).
    *
-   * @throws {Error} "MathU128: division by zero" If b is zero.
-   * @throws {Error} "MathU128: remainder error" If remainder is not less than b.
-   * @throws {Error} "MathU128: division product overflow" If q*b doesn't fit in 128 bits (indicates bad witness).
-   * @throws {Error} "MathU128: division sum overflow" If (q*b) + r overflows 128 bits (indicates bad witness).
-   * @throws {Error} "MathU128: division invalid" If q*b + r ≠ a.
+   * @throws {Error} "Uint128: division by zero" If b is zero.
+   * @throws {Error} "Uint128: remainder error" If remainder is not less than b.
+   * @throws {Error} "Uint128: division product overflow" If q*b doesn't fit in 128 bits (indicates bad witness).
+   * @throws {Error} "Uint128: division sum overflow" If (q*b) + r overflows 128 bits (indicates bad witness).
+   * @throws {Error} "Uint128: division invalid" If q*b + r ≠ a.
    *
    * @returns {DivResultU128} A struct containing the quotient and remainder as U128 values.
    */
   circuit _div(a: U128, b: U128): DivResultU128 {
     // Step 1: Verify divisor is non-zero
-    assert(!isZeroU128(b), "MathU128: division by zero");
+    assert(!isZero(b), "Uint128: division by zero");
 
     // Step 3: General case - get witness for quotient and remainder
     const result = wit_divU128(a, b);
 
     // Step 4: Verify remainder bounds (0 ≤ r < b)
-    assert(ltU128(result.remainder, b), "MathU128: remainder error");
+    assert(lt(result.remainder, b), "Uint128: remainder error");
 
     // Step 5: Verify correctness (a - q*b = r)
 
@@ -798,12 +800,12 @@ module Uint128 {
     const productU256 = _mul(result.quotient, b);
 
     // Since q*b < a < 2¹²⁸, the product must fit in 128 bits
-    assert(eqU128(productU256.high, ZERO_U128()), "MathU128: division product overflow");
+    assert(eq(productU256.high, ZERO_U128()), "Uint128: division product overflow");
 
     // Verify a - q*b = r (using subtraction instead of addition)
-    // This is more efficient: subU128 returns U128, not U256
-    const diff = subU128(a, productU256.low);
-    assert(eqU128(diff, result.remainder), "MathU128: division invalid");
+    // This is more efficient: sub returns U128, not U256
+    const diff = sub(a, productU256.low);
+    assert(eq(diff, result.remainder), "Uint128: division invalid");
 
     return result;
   }
@@ -822,9 +824,9 @@ module Uint128 {
    * @param {Uint<128>} a - The Uint<128> value to divide.
    * @param {Uint<128>} b - The Uint<128> value to divide by.
    *
-   * @throws {Error} "MathU128: division by zero" if b is zero.
-   * @throws {Error} "MathU128: remainder error" if remainder is not less than b.
-   * @throws {Error} "MathU128: division invalid" if quotient * b + remainder does not equal a.
+   * @throws {Error} "Uint128: division by zero" if b is zero.
+   * @throws {Error} "Uint128: remainder error" if remainder is not less than b.
+   * @throws {Error} "Uint128: division invalid" if quotient * b + remainder does not equal a.
    *
    * @returns {Uint<128>} The quotient of the division.
    */
@@ -849,13 +851,13 @@ module Uint128 {
    * @param {U128} a - The U128 value to divide.
    * @param {U128} b - The U128 value to divide by.
    *
-   * @throws {Error} "MathU128: division by zero" if b is zero.
-   * @throws {Error} "MathU128: remainder error" if remainder is not less than b.
-   * @throws {Error} "MathU128: division invalid" if quotient * b + remainder does not equal a.
+   * @throws {Error} "Uint128: division by zero" if b is zero.
+   * @throws {Error} "Uint128: remainder error" if remainder is not less than b.
+   * @throws {Error} "Uint128: division invalid" if quotient * b + remainder does not equal a.
    *
    * @returns {U128} The quotient of the division.
    */
-  export circuit divU128(a: U128, b: U128): U128 {
+  export circuit div(a: U128, b: U128): U128 {
     return _div(a, b).quotient;
   }
 
@@ -873,9 +875,9 @@ module Uint128 {
    * @param {Uint<128>} a - The Uint<128> value to divide.
    * @param {Uint<128>} b - The Uint<128> value to divide by.
    *
-   * @throws {Error} "MathU128: division by zero" if b is zero.
-   * @throws {Error} "MathU128: remainder error" if remainder is not less than b.
-   * @throws {Error} "MathU128: division invalid" if quotient * b + remainder does not equal a.
+   * @throws {Error} "Uint128: division by zero" if b is zero.
+   * @throws {Error} "Uint128: remainder error" if remainder is not less than b.
+   * @throws {Error} "Uint128: division invalid" if quotient * b + remainder does not equal a.
    *
    * @returns {Uint<128>} The remainder of the division.
    */
@@ -900,13 +902,13 @@ module Uint128 {
    * @param {U128} a - The U128 value to divide.
    * @param {U128} b - The U128 value to divide by.
    *
-   * @throws {Error} "MathU128: division by zero" if b is zero.
-   * @throws {Error} "MathU128: remainder error" if remainder is not less than b.
-   * @throws {Error} "MathU128: division invalid" if quotient * b + remainder does not equal a.
+   * @throws {Error} "Uint128: division by zero" if b is zero.
+   * @throws {Error} "Uint128: remainder error" if remainder is not less than b.
+   * @throws {Error} "Uint128: division invalid" if quotient * b + remainder does not equal a.
    *
    * @returns {U128} The remainder of the division.
    */
-  export circuit remU128(a: U128, b: U128): U128 {
+  export circuit rem(a: U128, b: U128): U128 {
     return _div(a, b).remainder;
   }
 
@@ -924,9 +926,9 @@ module Uint128 {
    * @param {Uint<128>} a - The Uint<128> value to divide.
    * @param {Uint<128>} b - The Uint<128> value to divide by.
    *
-   * @throws {Error} "MathU128: division by zero" if b is zero.
-   * @throws {Error} "MathU128: remainder error" if remainder is not less than b.
-   * @throws {Error} "MathU128: division invalid" if quotient * b + remainder does not equal a.
+   * @throws {Error} "Uint128: division by zero" if b is zero.
+   * @throws {Error} "Uint128: remainder error" if remainder is not less than b.
+   * @throws {Error} "Uint128: division invalid" if quotient * b + remainder does not equal a.
    *
    * @returns {DivResultU128} A struct containing the quotient and remainder.
    */
@@ -950,13 +952,13 @@ module Uint128 {
    * @param {U128} a - The U128 value to divide.
    * @param {U128} b - The U128 value to divide by.
    *
-   * @throws {Error} "MathU128: division by zero" if b is zero.
-   * @throws {Error} "MathU128: remainder error" if remainder is not less than b.
-   * @throws {Error} "MathU128: division invalid" if quotient * b + remainder does not equal a.
+   * @throws {Error} "Uint128: division by zero" if b is zero.
+   * @throws {Error} "Uint128: remainder error" if remainder is not less than b.
+   * @throws {Error} "Uint128: division invalid" if quotient * b + remainder does not equal a.
    *
    * @returns {DivResultU128} A struct containing the quotient and remainder.
    */
-  export circuit divRemU128(a: U128, b: U128): DivResultU128 {
+  export circuit divRem(a: U128, b: U128): DivResultU128 {
     return _div(a, b);
   }
 
@@ -1014,8 +1016,8 @@ module Uint128 {
    *
    * @param {U128} radicand - The U128 value to compute the square root of.
    *
-   * @throws {Error} "MathU128: sqrt overestimate" If R² > radicand.
-   * @throws {Error} "MathU128: sqrt underestimate" If (R+1)² ≤ radicand.
+   * @throws {Error} "Uint128: sqrt overestimate" If R² > radicand.
+   * @throws {Error} "Uint128: sqrt underestimate" If (R+1)² ≤ radicand.
    *
    * @returns {Uint<64>} The floor of the square root of radicand.
    */
@@ -1030,31 +1032,31 @@ module Uint128 {
     const rootSquareU128 = rootSquareU256.low;
 
     // Verify root² ≤ radicand
-    assert(!gtU128(rootSquareU128, radicand), "MathU128: sqrt overestimate");
+    assert(!gt(rootSquareU128, radicand), "Uint128: sqrt overestimate");
 
     // Step 3: Verify upper bound ((root+1)² > radicand)
     // Use identity: (root+1)² = root² + 2·root + 1
 
     // Compute 2·root using addU128 (returns U256)
     // Since root ≤ 2⁶⁴ - 1, we have 2·root ≤ 2⁶⁵ - 2 < 2¹²⁸
-    const twoRootU256 = addU128(rootU128, rootU128);
+    const twoRootU256 = add(rootU128, rootU128);
 
     const twoRootU128 = twoRootU256.low;
 
     // Compute root² + 2·root (returns U256)
-    const sumU256 = addU128(rootSquareU128, twoRootU128);
+    const sumU256 = add(rootSquareU128, twoRootU128);
 
     // Only need to check if both additions don't overflow
     // If either overflows, (root+1)² > 2¹²⁸ - 1 ≥ radicand automatically
-    if (isZeroU128(sumU256.high)) {
+    if (isZero(sumU256.high)) {
       // root² + 2·root fits in 128 bits, add 1 to get (root+1)²
       const one = U128 { low: 1, high: 0 };
-      const nextSquareU256 = addU128(sumU256.low, one);
+      const nextSquareU256 = add(sumU256.low, one);
 
       // Only assert if the final result fits in 128 bits
-      if (isZeroU128(nextSquareU256.high)) {
+      if (isZero(nextSquareU256.high)) {
         // (root+1)² fits in 128 bits, compare directly with radicand
-        assert(gtU128(nextSquareU256.low, radicand), "MathU128: sqrt underestimate");
+        assert(gt(nextSquareU256.low, radicand), "Uint128: sqrt underestimate");
       }
       // If adding 1 caused overflow: (root+1)² = 2¹²⁸ > radicand, verification passes
     }
@@ -1076,8 +1078,8 @@ module Uint128 {
    *
    * @param {Uint<128>} radicand - The Uint<128> value to compute the square root of.
    *
-   * @throws {Error} "MathU128: sqrt overestimate" if root² > radicand.
-   * @throws {Error} "MathU128: sqrt underestimate" if (root + 1)² <= radicand.
+   * @throws {Error} "Uint128: sqrt overestimate" if root² > radicand.
+   * @throws {Error} "Uint128: sqrt underestimate" if (root + 1)² <= radicand.
    *
    * @returns {Uint<64>} The floor of the square root of radicand.
    */
@@ -1099,12 +1101,12 @@ module Uint128 {
    *
    * @param {U128} radicand - The U128 value to compute the square root of.
    *
-   * @throws {Error} "MathU128: sqrt overestimate" if root² > radicand.
-   * @throws {Error} "MathU128: sqrt underestimate" if (root + 1)² <= radicand.
+   * @throws {Error} "Uint128: sqrt overestimate" if root² > radicand.
+   * @throws {Error} "Uint128: sqrt underestimate" if (root + 1)² <= radicand.
    *
    * @returns {Uint<64>} The floor of the square root of radicand.
    */
-  export circuit sqrtU128(radicand: U128): Uint<64> {
+  export circuit sqrt(radicand: U128): Uint<64> {
     return _sqrt(radicand);
   }
 
@@ -1134,8 +1136,8 @@ module Uint128 {
    *
    * @returns {U128} The smaller of a and b.
    */
-  export pure circuit minU128(a: U128, b: U128): U128 {
-    return lteU128(a, b) ? a : b;
+  export pure circuit min(a: U128, b: U128): U128 {
+    return lte(a, b) ? a : b;
   }
 
   /**
@@ -1164,8 +1166,8 @@ module Uint128 {
    *
    * @returns {U128} The larger of a and b.
    */
-  export pure circuit maxU128(a: U128, b: U128): U128 {
-    return gteU128(a, b) ? a : b;
+  export pure circuit max(a: U128, b: U128): U128 {
+    return gte(a, b) ? a : b;
   }
 
   /**
@@ -1192,7 +1194,7 @@ module Uint128 {
    */
   circuit _isMultiple(a: U128, b: U128): Boolean {
     const result = _div(a, b);
-    return eqU128(result.remainder, ZERO_U128());
+    return eq(result.remainder, ZERO_U128());
   }
 
   /**
@@ -1209,7 +1211,7 @@ module Uint128 {
    * @param {Uint<128>} a - The Uint<128> value to check.
    * @param {Uint<128>} b - The Uint<128> b to test against.
    *
-   * @throws {Error} "MathU128: division by zero" if b is zero.
+   * @throws {Error} "Uint128: division by zero" if b is zero.
    *
    * @returns {Boolean} True if value is a multiple of b, false otherwise.
    */
@@ -1233,11 +1235,11 @@ module Uint128 {
    * @param {U128} a - The U128 value to check.
    * @param {U128} b - The U128 b to test against.
    *
-   * @throws {Error} "MathU128: division by zero" if b is zero.
+   * @throws {Error} "Uint128: division by zero" if b is zero.
    *
    * @returns {Boolean} True if value is a multiple of b, false otherwise.
    */
-  export circuit isMultipleU128(a: U128, b: U128): Boolean {
+  export circuit isMultiple(a: U128, b: U128): Boolean {
     return _isMultiple(a, b);
   }
 }

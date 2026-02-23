@@ -32,22 +32,22 @@ pragma language_version >= 0.20.0;
  * - Should this be a part of the Shielded module itself or as an extension?
  */
 module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
-  import {
-    ShieldedCoinInfo,
-    ShieldedSendResult,
-    sendImmediateShielded,
-    mintShieldedToken,
-    shieldedBurnAddress,
-    ZswapCoinPublicKey,
-    ContractAddress,
-    Either,
-    left,
-    ownPublicKey,
-    receiveShielded,
-    evolveNonce,
-    upgradeFromTransient,
-    Counter
-  } from CompactStandardLibrary;
+  import
+    { ShieldedCoinInfo,
+      ShieldedSendResult,
+      sendImmediateShielded,
+      mintShieldedToken,
+      shieldedBurnAddress,
+      ZswapCoinPublicKey,
+      ContractAddress,
+      Either,
+      left,
+      ownPublicKey,
+      receiveShielded,
+      evolveNonce,
+      upgradeFromTransient,
+      Counter }
+    from CompactStandardLibrary;
   import { isKeyOrAddressZero } from "./Utils";
 
   // Public state
@@ -148,7 +148,9 @@ module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
   //       (Bytes<32>, Uint<64>, Bytes<32>, struct Either<is_left: Boolean, left: struct
   //       ZswapCoinPublicKey<bytes: Bytes<32>>, right: struct ContractAddress<bytes:
   //       Bytes<32>>>)
-  export circuit mint(recipient: Either<ZswapCoinPublicKey, ContractAddress>, amount: Uint<64>): ShieldedCoinInfo {
+  export circuit mint(recipient: Either<ZswapCoinPublicKey, ContractAddress>,
+                      amount: Uint<64>
+                      ): ShieldedCoinInfo {
     assert(!isKeyOrAddressZero(recipient), "ShieldedToken: invalid recipient");
 
     // TODO: Is that correct here? Do we need to increment after minting? not before?

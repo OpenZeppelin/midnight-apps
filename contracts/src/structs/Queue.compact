@@ -120,18 +120,18 @@ module Queue<T> {
    */
   export circuit dequeue(): Maybe<T> {
     if (isEmpty()) {
-       return none<T>(); // Queue is empty
+      return none<T>(); // Queue is empty
     } else {
-       const MAX_UINT64 = 18446744073709551615;
-       assert(head != MAX_UINT64, "Queue: head counter reached maximum capacity.");
-       const value = state.lookup(head);
-       state.remove(head);
-       head.increment(1);
-       // Shifting would require re-inserting all elements
-       // with new keys, but Compact lacks iteration or bulk
-       // updates, so we stop here
-       // shift();
-       return some<T>(value);
+      const MAX_UINT64 = 18446744073709551615;
+      assert(head != MAX_UINT64, "Queue: head counter reached maximum capacity.");
+      const value = state.lookup(head);
+      state.remove(head);
+      head.increment(1);
+      // Shifting would require re-inserting all elements
+      // with new keys, but Compact lacks iteration or bulk
+      // updates, so we stop here
+      // shift();
+      return some<T>(value);
     }
   }
 

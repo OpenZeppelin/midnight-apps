@@ -75,7 +75,7 @@ describe('Uint128', () => {
         { quotient: { low: 1n, high: 0n }, remainder: { low: 1n, high: 0n } },
       ]);
       expect(() => uint128Simulator.toU128(123n)).toThrow(
-        'failed assert: MathU128: conversion invalid',
+        'failed assert: Uint128: conversion invalid',
       );
     });
   });
@@ -402,7 +402,7 @@ describe('Uint128', () => {
       const a = MAX_UINT128;
       const b = 1n;
       expect(() => uint128Simulator.addChecked(a, b)).toThrow(
-        'failed assert: MathU128: addition overflow',
+        'failed assert: Uint128: addition overflow',
       );
     });
   });
@@ -419,7 +419,7 @@ describe('Uint128', () => {
       const a = uint128Simulator.toU128(2n ** 128n - 1n);
       const b = uint128Simulator.toU128(1n);
       expect(() => uint128Simulator.addCheckedU128(a, b)).toThrow(
-        'failed assert: MathU128: addition overflow',
+        'failed assert: Uint128: addition overflow',
       );
     });
   });
@@ -447,10 +447,10 @@ describe('Uint128', () => {
 
     test('should fail on underflow', () => {
       expect(() => uint128Simulator.sub(3n, 5n)).toThrowError(
-        'failed assert: MathU128: subtraction underflow',
+        'failed assert: Uint128: subtraction underflow',
       );
       expect(() => uint128Simulator.sub(0n, 1n)).toThrowError(
-        'failed assert: MathU128: subtraction underflow',
+        'failed assert: Uint128: subtraction underflow',
       );
     });
   });
@@ -488,7 +488,7 @@ describe('Uint128', () => {
 
     test('should fail on underflow', () => {
       expect(() => uint128Simulator.subU128(u128(3n), u128(5n))).toThrowError(
-        'failed assert: MathU128: subtraction underflow',
+        'failed assert: Uint128: subtraction underflow',
       );
     });
   });
@@ -635,7 +635,7 @@ describe('Uint128', () => {
       const a = 2n ** 64n;
       const b = 2n ** 64n;
       expect(() => uint128Simulator.mulChecked(a, b)).toThrow(
-        'failed assert: MathU128: multiplication overflow',
+        'failed assert: Uint128: multiplication overflow',
       );
     });
   });
@@ -652,7 +652,7 @@ describe('Uint128', () => {
       const a = uint128Simulator.toU128(2n ** 64n);
       const b = uint128Simulator.toU128(2n ** 64n);
       expect(() => uint128Simulator.mulCheckedU128(a, b)).toThrow(
-        'failed assert: MathU128: multiplication overflow',
+        'failed assert: Uint128: multiplication overflow',
       );
     });
   });
@@ -695,7 +695,7 @@ describe('Uint128', () => {
 
     test('should fail on division by zero', () => {
       expect(() => uint128Simulator.div(5n, 0n)).toThrowError(
-        'failed assert: MathU128: division by zero',
+        'failed assert: Uint128: division by zero',
       );
     });
 
@@ -705,7 +705,7 @@ describe('Uint128', () => {
         { quotient: { low: 1n, high: 0n }, remainder: { low: 5n, high: 0n } },
       ]);
       expect(() => uint128Simulator.div(10n, 5n)).toThrow(
-        'failed assert: MathU128: conversion invalid',
+        'failed assert: Uint128: conversion invalid',
       );
     });
   });
@@ -749,7 +749,7 @@ describe('Uint128', () => {
 
     test('should fail on division by zero', () => {
       expect(() => uint128Simulator.divU128(u128(5n), u128(0n))).toThrowError(
-        'failed assert: MathU128: division by zero',
+        'failed assert: Uint128: division by zero',
       );
     });
 
@@ -759,7 +759,7 @@ describe('Uint128', () => {
         { quotient: { low: 1n, high: 0n }, remainder: { low: 5n, high: 0n } },
       ]);
       expect(() => uint128Simulator.divU128(u128(10n), u128(5n))).toThrow(
-        'failed assert: MathU128: remainder error',
+        'failed assert: Uint128: remainder error',
       );
     });
   });
@@ -802,7 +802,7 @@ describe('Uint128', () => {
 
     test('should fail on division by zero', () => {
       expect(() => uint128Simulator.rem(5n, 0n)).toThrowError(
-        'failed assert: MathU128: division by zero',
+        'failed assert: Uint128: division by zero',
       );
     });
 
@@ -812,7 +812,7 @@ describe('Uint128', () => {
         { quotient: { low: 1n, high: 0n }, remainder: { low: 10n, high: 0n } },
       ]);
       expect(() => uint128Simulator.rem(20n, 10n)).toThrow(
-        'failed assert: MathU128: conversion invalid',
+        'failed assert: Uint128: conversion invalid',
       );
     });
   });
@@ -856,7 +856,7 @@ describe('Uint128', () => {
 
     test('should fail on division by zero', () => {
       expect(() => uint128Simulator.remU128(u128(5n), u128(0n))).toThrowError(
-        'failed assert: MathU128: division by zero',
+        'failed assert: Uint128: division by zero',
       );
     });
 
@@ -866,7 +866,7 @@ describe('Uint128', () => {
         { quotient: { low: 1n, high: 0n }, remainder: { low: 10n, high: 0n } },
       ]);
       expect(() => uint128Simulator.remU128(u128(20n), u128(10n))).toThrow(
-        'failed assert: MathU128: remainder error',
+        'failed assert: Uint128: remainder error',
       );
     });
   });
@@ -913,7 +913,27 @@ describe('Uint128', () => {
 
     test('should fail on division by zero', () => {
       expect(() => uint128Simulator.divRem(5n, 0n)).toThrowError(
-        'failed assert: MathU128: division by zero',
+        'failed assert: Uint128: division by zero',
+      );
+    });
+
+    test('should fail when witness returns remainder >= divisor', () => {
+      uint128Simulator.overrideWitness('wit_divU128', (context) => [
+        context.privateState,
+        { quotient: { low: 1n, high: 0n }, remainder: { low: 5n, high: 0n } },
+      ]);
+      expect(() => uint128Simulator.divRem(10n, 5n)).toThrow(
+        'failed assert: Uint128: remainder error',
+      );
+    });
+
+    test('should fail when witness returns quotient * b + remainder != a', () => {
+      uint128Simulator.overrideWitness('wit_divU128', (context) => [
+        context.privateState,
+        { quotient: { low: 2n, high: 0n }, remainder: { low: 0n, high: 0n } },
+      ]);
+      expect(() => uint128Simulator.divRem(11n, 5n)).toThrow(
+        'failed assert: Uint128: division invalid',
       );
     });
   });
@@ -962,7 +982,27 @@ describe('Uint128', () => {
     test('should fail on division by zero', () => {
       expect(() =>
         uint128Simulator.divRemU128(u128(5n), u128(0n)),
-      ).toThrowError('failed assert: MathU128: division by zero');
+      ).toThrowError('failed assert: Uint128: division by zero');
+    });
+
+    test('should fail when witness returns remainder >= divisor', () => {
+      uint128Simulator.overrideWitness('wit_divU128', (context) => [
+        context.privateState,
+        { quotient: { low: 1n, high: 0n }, remainder: { low: 5n, high: 0n } },
+      ]);
+      expect(() => uint128Simulator.divRemU128(u128(10n), u128(5n))).toThrow(
+        'failed assert: Uint128: remainder error',
+      );
+    });
+
+    test('should fail when witness returns quotient * b + remainder != a', () => {
+      uint128Simulator.overrideWitness('wit_divU128', (context) => [
+        context.privateState,
+        { quotient: { low: 2n, high: 0n }, remainder: { low: 0n, high: 0n } },
+      ]);
+      expect(() => uint128Simulator.divRemU128(u128(11n), u128(5n))).toThrow(
+        'failed assert: Uint128: division invalid',
+      );
     });
   });
 
@@ -1009,7 +1049,7 @@ describe('Uint128', () => {
         11n,
       ]);
       expect(() => uint128Simulator.sqrt(100n)).toThrow(
-        'failed assert: MathU128: sqrt overestimate',
+        'failed assert: Uint128: sqrt overestimate',
       );
     });
 
@@ -1019,7 +1059,7 @@ describe('Uint128', () => {
         9n,
       ]);
       expect(() => uint128Simulator.sqrt(100n)).toThrow(
-        'failed assert: MathU128: sqrt underestimate',
+        'failed assert: Uint128: sqrt underestimate',
       );
     });
   });
@@ -1138,7 +1178,7 @@ describe('Uint128', () => {
 
     test('should fail on division by zero', () => {
       expect(() => uint128Simulator.isMultiple(5n, 0n)).toThrowError(
-        'failed assert: MathU128: division by zero',
+        'failed assert: Uint128: division by zero',
       );
     });
 
@@ -1146,6 +1186,16 @@ describe('Uint128', () => {
       expect(uint128Simulator.isMultiple(MAX_UINT128, MAX_UINT128)).toBe(true);
       expect(uint128Simulator.isMultiple(MAX_UINT128 - 1n, MAX_UINT128)).toBe(
         false,
+      );
+    });
+
+    test('should fail when witness returns quotient * b + remainder != a', () => {
+      uint128Simulator.overrideWitness('wit_divU128', (context) => [
+        context.privateState,
+        { quotient: { low: 1n, high: 0n }, remainder: { low: 1n, high: 0n } },
+      ]);
+      expect(() => uint128Simulator.isMultiple(6n, 3n)).toThrow(
+        'failed assert: Uint128: division invalid',
       );
     });
   });
@@ -1164,7 +1214,17 @@ describe('Uint128', () => {
     test('should fail on division by zero', () => {
       expect(() =>
         uint128Simulator.isMultipleU128(u128(5n), u128(0n)),
-      ).toThrowError('failed assert: MathU128: division by zero');
+      ).toThrowError('failed assert: Uint128: division by zero');
+    });
+
+    test('should fail when witness returns quotient * b + remainder != a', () => {
+      uint128Simulator.overrideWitness('wit_divU128', (context) => [
+        context.privateState,
+        { quotient: { low: 1n, high: 0n }, remainder: { low: 1n, high: 0n } },
+      ]);
+      expect(() => uint128Simulator.isMultipleU128(u128(6n), u128(3n))).toThrow(
+        'failed assert: Uint128: division invalid',
+      );
     });
   });
 });
