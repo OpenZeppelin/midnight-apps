@@ -94,28 +94,28 @@ export const getPairReservesInfo = async (
   }
 };
 
-export const getPairIdentityInfo = async (
-  lunarswap: Lunarswap,
-  tokenA: ShieldedCoinInfo,
-  tokenB: ShieldedCoinInfo,
-  logger: Logger,
-): Promise<void> => {
-  logger.info('Getting pair identity...');
-  try {
-    const identity = await lunarswap.getPairId(tokenA, tokenB);
-    logger.info('');
-    logger.info('🆔 Pair Identity:');
-    logger.info(`   Token A: ${Buffer.from(tokenA.color).toString('hex')}`);
-    logger.info(`   Token B: ${Buffer.from(tokenB.color).toString('hex')}`);
-    logger.info(`   Identity: ${Buffer.from(identity).toString('hex')}`);
-    logger.info('');
-  } catch (error) {
-    logger.error(
-      { error: error instanceof Error ? error.message : error },
-      '❌ Failed to get pair identity',
-    );
-  }
-};
+// export const getPairIdentityInfo = async (
+//   lunarswap: Lunarswap,
+//   tokenA: ShieldedCoinInfo,
+//   tokenB: ShieldedCoinInfo,
+//   logger: Logger,
+// ): Promise<void> => {
+//   logger.info('Getting pair identity...');
+//   try {
+//     const identity = await lunarswap.getPairId(tokenA, tokenB);
+//     logger.info('');
+//     logger.info('🆔 Pair Identity:');
+//     logger.info(`   Token A: ${Buffer.from(tokenA.color).toString('hex')}`);
+//     logger.info(`   Token B: ${Buffer.from(tokenB.color).toString('hex')}`);
+//     logger.info(`   Identity: ${Buffer.from(identity).toString('hex')}`);
+//     logger.info('');
+//   } catch (error) {
+//     logger.error(
+//       { error: error instanceof Error ? error.message : error },
+//       '❌ Failed to get pair identity',
+//     );
+//   }
+// };
 
 // export const getLpTokenInfo = async (
 //   lunarswap: Lunarswap,

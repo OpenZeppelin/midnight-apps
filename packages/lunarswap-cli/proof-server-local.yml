@@ -1,9 +1,9 @@
 services:
   proof-server:
-    container_name: 'lunarswap-proof-server'
-    image: "midnightnetwork/proof-server:4.0.0"
-    command: ["midnight-proof-server --network undeployed"]
+    image: 'bricktowers/proof-server:7.0.0'
+    container_name: "lunarswap-proof-server-local"
     ports:
       - "6300:6300"
     environment:
-      RUST_BACKTRACE: "full" 
+      EXTRA_ARGS: -v
+      RUST_BACKTRACE: "full"

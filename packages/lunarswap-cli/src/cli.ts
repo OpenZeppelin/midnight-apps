@@ -13,7 +13,6 @@ import {
   checkPairExists,
   getAllPairsLength,
   getLpTokenTotalSupplyInfo,
-  getPairIdentityInfo,
   getPairInfo,
   getPairReservesInfo,
 } from './api/pair-info.js';
@@ -245,15 +244,15 @@ const handleGetPairReserves = async (
   await getPairReservesInfo(lunarswap, tokenA, tokenB, logger);
 };
 
-const handleGetPairIdentity = async (
-  lunarswap: Lunarswap,
-  rli: Interface,
-  logger: Logger,
-): Promise<void> => {
-  const tokenA = await getTokenInput(rli, 'Token A');
-  const tokenB = await getTokenInput(rli, 'Token B');
-  await getPairIdentityInfo(lunarswap, tokenA, tokenB, logger);
-};
+// const handleGetPairIdentity = async (
+//   lunarswap: Lunarswap,
+//   rli: Interface,
+//   logger: Logger,
+// ): Promise<void> => {
+//   const tokenA = await getTokenInput(rli, 'Token A');
+//   const tokenB = await getTokenInput(rli, 'Token B');
+//   await getPairIdentityInfo(lunarswap, tokenA, tokenB, logger);
+// };
 
 const handleGetLpTokenTotalSupply = async (
   lunarswap: Lunarswap,
@@ -303,7 +302,7 @@ export const mainLoop = async (
         await handleGetPairReserves(lunarswap, rli, logger);
         break;
       case '9':
-        await handleGetPairIdentity(lunarswap, rli, logger);
+        //await handleGetPairIdentity(lunarswap, rli, logger);
         break;
       case '10':
         await handleGetLpTokenTotalSupply(lunarswap, rli, logger);

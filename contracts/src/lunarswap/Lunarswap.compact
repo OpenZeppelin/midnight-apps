@@ -148,13 +148,13 @@ export { addLiquidity, removeLiquidity, swapExactTokensForTokens, swapTokensForE
  * @title Factory functions
  * @description Functions exported from the LunarswapFactory contract.
  */
-export { getPairId, isPairExists, getPair, getPairReserves, getAllPairLength };
+export { isPairExists, getPair, getPairReserves, getAllPairLength }
 
 /**
  * @title Library functions
  * @description Functions exported from the LunarswapLibrary contract.
  */
-export { getIdentity, sortCoinByColor, sortQualifiedCoinByColor };
+//export { getIdentity, sortCoinByColor, sortQualifiedCoinByColor };
 
 /**
  * @title Liquidity functions

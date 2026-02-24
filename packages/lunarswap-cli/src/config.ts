@@ -106,7 +106,7 @@ export class PreviewRemoteConfig implements Config {
   generateDust = true;
 }
 
-/** Preprod remote - uses preprod network with proof server container */
+/** Preprod remote - uses preprod network with local proof server container */
 export class PreprodRemoteConfig implements Config {
   networkId = preprod.networkId;
   getEnvironment(logger: Logger): TestEnvironment {

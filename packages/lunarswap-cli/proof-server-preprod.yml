@@ -1,10 +1,10 @@
 services:
   proof-server:
     image: 'bricktowers/proof-server:7.0.0'
-    container_name: "lunarswap-proof-server-testnet"
+    container_name: "lunarswap-proof-server-preprod"
     ports:
       - "6300:6300"
     environment:
-      NETWORK_ID: testnet
+      NETWORK_ID: preprod
       EXTRA_ARGS: -v
       RUST_BACKTRACE: "full"

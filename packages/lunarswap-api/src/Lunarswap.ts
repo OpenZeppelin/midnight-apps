@@ -102,10 +102,10 @@ export interface ILunarswap {
     tokenA: ShieldedCoinInfo,
     tokenB: ShieldedCoinInfo,
   ): Promise<[QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo]>;
-  getPairId(
-    tokenA: ShieldedCoinInfo,
-    tokenB: ShieldedCoinInfo,
-  ): Promise<Uint8Array>;
+  // getPairId(
+  //   tokenA: ShieldedCoinInfo,
+  //   tokenB: ShieldedCoinInfo,
+  // ): Promise<Uint8Array>;
   getLpTokenTotalSupply(
     tokenA: ShieldedCoinInfo,
     tokenB: ShieldedCoinInfo,
@@ -426,13 +426,13 @@ export class Lunarswap implements ILunarswap {
     return txData.private.result;
   }
 
-  async getPairId(
-    tokenA: ShieldedCoinInfo,
-    tokenB: ShieldedCoinInfo,
-  ): Promise<Uint8Array> {
-    const txData = await this.deployedContract.callTx.getPairId(tokenA, tokenB);
-    return txData.private.result;
-  }
+  // async getPairId(
+  //   tokenA: ShieldedCoinInfo,
+  //   tokenB: ShieldedCoinInfo,
+  // ): Promise<Uint8Array> {
+  //   const txData = await this.deployedContract.callTx.getPairId(tokenA, tokenB);
+  //   return txData.private.result;
+  // }
 
   async getLpTokenTotalSupply(
     tokenA: ShieldedCoinInfo,
