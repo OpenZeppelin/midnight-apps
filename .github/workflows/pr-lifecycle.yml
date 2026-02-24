@@ -20,10 +20,10 @@ jobs:
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         env:
           PROJECT_ID: ${{ vars.PROJECT_ID }}
-          STATUS_FIELD_ID: ${{ vars.STATUS_FIELD_ID }}
-          STATUS_OPTION_IN_PROGRESS: ${{ vars.STATUS_OPTION_IN_PROGRESS }}
-          STATUS_OPTION_NEEDS_REVIEW: ${{ vars.STATUS_OPTION_NEEDS_REVIEW }}
-          STATUS_OPTION_CLOSED: ${{ vars.STATUS_OPTION_CLOSED }}
+          STATUS_FIELD_ID: ${{ vars.PROJECT_STATUS_FIELD_ID }}
+          STATUS_OPTION_IN_PROGRESS: ${{ vars.PROJECT_IN_PROGRESS_COLUMN_NODE_ID }}
+          STATUS_OPTION_NEEDS_REVIEW: ${{ vars.PROJECT_NEEDS_REVIEW_COLUMN_NODE_ID }}
+          STATUS_OPTION_CLOSED: ${{ vars.PROJECT_CLOSED_COLUMN_NODE_ID }}
         with:
           github-token: ${{ secrets.PROJECT_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
