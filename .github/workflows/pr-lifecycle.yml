@@ -2,7 +2,7 @@ name: PR Lifecycle
 
 on:
   pull_request:
-    types: [opened, converted_to_draft, ready_for_review, closed]
+    types: [opened, reopened, converted_to_draft, ready_for_review, closed]
 
 permissions: {}
 
@@ -35,6 +35,18 @@ jobs:
               closed:       process.env.STATUS_OPTION_CLOSED,
             };
 
+            // Validate required environment variables
+            const missing = [];
+            if (!PROJECT_ID) missing.push('PROJECT_ID');
+            if (!STATUS_FIELD_ID) missing.push('STATUS_FIELD_ID');
+            if (!STATUS_OPTIONS.in_progress) missing.push('STATUS_OPTION_IN_PROGRESS');
+            if (!STATUS_OPTIONS.needs_review) missing.push('STATUS_OPTION_NEEDS_REVIEW');
+            if (!STATUS_OPTIONS.closed) missing.push('STATUS_OPTION_CLOSED');
+
+            if (missing.length > 0) {
+              throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+            }
+
             // Determine target status
             const { action, pull_request: pr } = context.payload;
             let targetStatus;
@@ -45,7 +57,7 @@ jobs:
               targetStatus = STATUS_OPTIONS.needs_review;
             } else if (action === "converted_to_draft") {
               targetStatus = STATUS_OPTIONS.in_progress;
-            } else if (action === "opened") {
+            } else if (action === "opened" || action === "reopened") {
               targetStatus = pr.draft
                 ? STATUS_OPTIONS.in_progress
                 : STATUS_OPTIONS.needs_review;
