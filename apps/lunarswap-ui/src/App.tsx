@@ -18,7 +18,6 @@ import { VersionProvider } from '@/lib/version-context';
 import { MidnightWalletProvider } from '@/lib/wallet-context';
 import '../app/globals.css';
 import './animations.css';
-import type { NetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 import { setNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 import pino from 'pino';
 import { type ReactNode, useMemo } from 'react';
@@ -26,8 +25,7 @@ import { type ReactNode, useMemo } from 'react';
 // Component that creates logger with runtime configuration
 function AppWithLogger({ children }: { children: ReactNode }) {
   const config = useRuntimeConfiguration();
-  // TODO: question: why do we need to set the network id here? why not directly detected from the wallet?
-  setNetworkId(config.NETWORK_ID as NetworkId);
+  setNetworkId(config.DEFAULT_NETWORK);
   const logger = useMemo(
     () =>
       pino({

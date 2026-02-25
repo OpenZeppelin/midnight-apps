@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import { useViewPreference } from '@/hooks/use-view-preference';
 import { useWallet } from '@/hooks/use-wallet';
 import { useLunarswapContext } from '@/lib/lunarswap-context';
+import { useActiveNetworkConfig } from '@/lib/runtime-configuration';
 import type { Token } from '@/lib/token-config';
 import { popularTokens } from '@/lib/token-config';
 
@@ -33,6 +34,7 @@ function TokensContent() {
   }, []);
 
   const viewPreference = useViewPreference();
+  const activeNetwork = useActiveNetworkConfig();
   const { isConnected } = useWallet();
   const { status, isLoading, allPairs } = useLunarswapContext();
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -320,7 +322,7 @@ function TokensContent() {
       <StarsBackground />
       <MoonDustBackground />
       <Header />
-      <main className="container mx-auto px-4 py-8 relative z-0 pt-24">
+      <main className="container mx-auto px-4 py-8 relative z-0 pt-[var(--header-offset)]">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">Supported Tokens</h1>
@@ -429,9 +431,10 @@ function TokensContent() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-4">
-                  These are test tokens deployed on the Midnight testnet for
-                  development and testing purposes. They have no real value and
-                  are used to demonstrate Lunarswap functionality.
+                  These are test tokens deployed on the Midnight network (
+                  {activeNetwork.name}) for development and testing purposes.
+                  They have no real value and are used to demonstrate Lunarswap
+                  functionality.
                 </p>
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <div>
@@ -446,7 +449,7 @@ function TokensContent() {
                   </div>
                   <div>
                     <span className="font-medium">Network:</span>
-                    <span className="ml-2">Midnight Testnet</span>
+                    <span className="ml-2">{activeNetwork.name}</span>
                   </div>
                 </div>
               </CardContent>

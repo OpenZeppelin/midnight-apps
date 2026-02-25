@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useWalletRx } from '@/hooks/use-wallet-rx';
 import type { WalletAPI } from '@/lib/wallet-context';
+import { formatDustAmount } from '@/utils/format-dust';
 import { Identicon } from './identicon';
 import { Button } from './ui/button';
 
@@ -202,7 +203,7 @@ export function AccountDetailsModal({
       ? [
           {
             label: 'Dust Balance',
-            value: `${walletState.dustBalance.balance.toString()} / ${walletState.dustBalance.cap.toString()} (cap)`,
+            value: `${formatDustAmount(walletState.dustBalance.balance)} / ${formatDustAmount(walletState.dustBalance.cap)} tDUST (cap)`,
             description: 'Your current Dust balance and generation cap',
             type: 'balance' as const,
             isLegacy: false,

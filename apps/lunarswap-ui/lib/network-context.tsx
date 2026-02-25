@@ -9,7 +9,8 @@ import {
   useState,
 } from 'react';
 import { useWallet } from '@/hooks/use-wallet';
-import { getNetworkId } from '../utils/config';
+import { useRuntimeConfiguration } from '@/lib/runtime-configuration';
+import type { NetworkConfig } from '@/utils/config';
 import { detectWalletNetwork, type Network } from '../utils/wallet-utils';
 
 export type NetworkContextType = {
@@ -18,25 +19,19 @@ export type NetworkContextType = {
   availableNetworks: Network[];
   isNetworkSynced: boolean;
   syncWithWallet: () => Promise<void>;
-  isMainnetEnabled: boolean;
 };
 
-const availableNetworks: Network[] = [
-  {
-    id: 'midnight-testnet',
-    name: 'Testnet',
-    type: 'testnet',
-    rpcUrl: 'https://testnet.midnight.org',
-    explorerUrl: 'https://testnet.midnight.org/explorer',
-  },
-  {
-    id: 'midnight-mainnet',
-    name: 'Mainnet (Coming Soon)',
-    type: 'mainnet',
-    rpcUrl: 'https://mainnet.midnight.org',
-    explorerUrl: 'https://mainnet.midnight.org/explorer',
-  },
-];
+function buildNetworksFromConfig(
+  networks: Record<string, NetworkConfig>,
+): Network[] {
+  return Object.entries(networks).map(([id, net]) => ({
+    id,
+    name: net.name,
+    rpcUrl: net.RPC_URL ?? '',
+    explorerUrl: net.EXPLORER_URL ?? '',
+    available: net.available,
+  }));
+}
 
 export const NetworkContext = createContext<NetworkContextType | undefined>(
   undefined,
@@ -49,22 +44,28 @@ export interface NetworkProviderProps extends PropsWithChildren {
 export const NetworkProvider: React.FC<Readonly<NetworkProviderProps>> = ({
   children,
 }) => {
+  const config = useRuntimeConfiguration();
   const { walletAPI, isConnected } = useWallet();
-  const [currentNetwork, setCurrentNetwork] = useState<Network>(
-    availableNetworks[0], // Default to testnet
-  );
-  const [isNetworkSynced, setIsNetworkSynced] = useState(false);
-  const [isMainnetEnabled] = useState(false); // Mainnet is disabled for now
 
-  // Initialize network from config
+  const availableNetworks = useMemo(
+    () => buildNetworksFromConfig(config.NETWORKS ?? {}),
+    [config.NETWORKS],
+  );
+
+  const defaultNetwork =
+    availableNetworks.find((n) => n.id === config.DEFAULT_NETWORK) ??
+    availableNetworks[0];
+
+  const [currentNetwork, setCurrentNetwork] = useState<Network>(defaultNetwork);
+  const [isNetworkSynced, setIsNetworkSynced] = useState(false);
+
+  // Initialize/sync current network when config or availableNetworks change
   useEffect(() => {
-    const configNetwork = getNetworkId();
-    if (configNetwork === 'TestNet') {
-      setCurrentNetwork(availableNetworks[0]); // Testnet
-    } else if (configNetwork === 'MainNet' && isMainnetEnabled) {
-      setCurrentNetwork(availableNetworks[1]); // Mainnet (if enabled)
-    }
-  }, [isMainnetEnabled]);
+    const next =
+      availableNetworks.find((n) => n.id === config.DEFAULT_NETWORK) ??
+      availableNetworks[0];
+    setCurrentNetwork((prev) => (prev.id !== next.id ? next : prev));
+  }, [config.DEFAULT_NETWORK, availableNetworks]);
 
   // Sync network with wallet
   const syncWithWallet = useCallback(async () => {
@@ -74,27 +75,17 @@ export const NetworkProvider: React.FC<Readonly<NetworkProviderProps>> = ({
     }
 
     try {
-      // Get wallet state to check if wallet is working
       const addressInfo = await walletAPI.wallet.getShieldedAddresses();
-
-      // If we can get wallet state, consider it synced
-      // In a real implementation, you would check actual sync status
       const isWalletWorking = !!addressInfo;
 
       if (isWalletWorking) {
         setIsNetworkSynced(true);
-
-        // Try to detect network from wallet (if supported)
         const walletNetwork = await detectWalletNetwork(
           walletAPI.wallet,
           availableNetworks,
         );
-
         if (walletNetwork) {
           setCurrentNetwork(walletNetwork);
-        } else {
-          // Network detection not supported, using config network
-          // Keep current network from config
         }
       } else {
         setIsNetworkSynced(false);
@@ -106,9 +97,8 @@ export const NetworkProvider: React.FC<Readonly<NetworkProviderProps>> = ({
       );
       setIsNetworkSynced(false);
     }
-  }, [isConnected, walletAPI]);
+  }, [isConnected, walletAPI, availableNetworks]);
 
-  // Auto-sync when wallet connects/disconnects
   useEffect(() => {
     if (isConnected) {
       syncWithWallet();
@@ -124,9 +114,8 @@ export const NetworkProvider: React.FC<Readonly<NetworkProviderProps>> = ({
       availableNetworks,
       isNetworkSynced,
       syncWithWallet,
-      isMainnetEnabled,
     }),
-    [currentNetwork, isNetworkSynced, syncWithWallet, isMainnetEnabled],
+    [currentNetwork, availableNetworks, isNetworkSynced, syncWithWallet],
   );
 
   return (

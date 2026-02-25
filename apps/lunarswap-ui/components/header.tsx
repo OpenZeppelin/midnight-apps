@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { DemoWarningBanner } from '@/components/demo-warning-banner';
 import { GlobalPreferences } from '@/components/global-preferences';
 import { Logo } from '@/components/logo';
+import { SecurityNoticesButton } from '@/components/security-notices-button';
 import { VersionBadge } from '@/components/version-badge';
 import { WalletConnect } from '@/components/wallet-connect';
 import { useWallet } from '@/hooks/use-wallet';
@@ -32,6 +34,7 @@ export function Header() {
           : 'backdrop-blur-xl border-b bg-white/30 dark:bg-gray-900/20 border-white/20 dark:border-gray-800/30',
       )}
     >
+      <DemoWarningBanner />
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Left side - Logo and Navigation */}
@@ -57,8 +60,9 @@ export function Header() {
             </nav>
           </div>
 
-          {/* Right side - Global Preferences (only when not connected) and Wallet Connect */}
+          {/* Right side - Security notices, Version, Preferences, Wallet */}
           <div className="flex items-center space-x-2">
+            <SecurityNoticesButton />
             <VersionBadge />
             {!isConnected && !isAccountPanelOpen && <GlobalPreferences />}
             <WalletConnect onAccountPanelStateChange={setIsAccountPanelOpen} />

@@ -26,7 +26,7 @@ export default function HomePage() {
       <Header />
 
       {/* Hero Section with TokenCloud background */}
-      <section className="relative min-h-screen flex items-center justify-center px-4 pt-16">
+      <section className="relative min-h-screen flex items-center justify-center px-4 pt-[var(--header-offset)]">
         {/* TokenCloud background only for the hero section */}
         <div className="absolute inset-0">
           <TokenCloud />

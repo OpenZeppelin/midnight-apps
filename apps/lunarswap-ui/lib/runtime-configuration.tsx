@@ -7,14 +7,12 @@ import {
   useEffect,
   useState,
 } from 'react';
+import { getActiveNetworkConfig, type NetworkConfig } from '@/utils/config';
 
 export interface RuntimeConfiguration {
   LOGGING_LEVEL: string;
-  NETWORK_ID: string;
-  PUBLIC_URL: string;
-  INDEXER_URI: string;
-  INDEXER_WS_URI: string;
-  LUNARSWAP_ADDRESS: string;
+  DEFAULT_NETWORK: string;
+  NETWORKS: Record<string, NetworkConfig>;
 }
 
 const RuntimeConfigurationContext = createContext<RuntimeConfiguration | null>(
@@ -29,8 +27,23 @@ export const useRuntimeConfiguration = (): RuntimeConfiguration => {
   return configuration;
 };
 
+/**
+ * Returns the active network config (from DEFAULT_NETWORK).
+ * Use this instead of reading config.INDEXER_URI etc. directly.
+ */
+export const useActiveNetworkConfig = (): NetworkConfig => {
+  const config = useRuntimeConfiguration();
+  return getActiveNetworkConfig(config);
+};
+
 interface RuntimeConfigurationProviderProps {
   children: ReactNode;
+}
+
+interface LoadedConfigJson {
+  LOGGING_LEVEL?: string;
+  DEFAULT_NETWORK?: string;
+  NETWORKS?: Record<string, NetworkConfig>;
 }
 
 /**
@@ -40,15 +53,15 @@ export const loadRuntimeConfiguration =
   async (): Promise<RuntimeConfiguration> => {
     const response = await fetch(`/config.json?t=${Date.now()}`);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const value: Record<string, string> = await response.json();
+    const value: LoadedConfigJson = await response.json();
+
+    const networks = value.NETWORKS ?? {};
+    const defaultNetwork = value.DEFAULT_NETWORK ?? 'preprod';
 
     return {
-      LOGGING_LEVEL: value.LOGGING_LEVEL,
-      NETWORK_ID: value.NETWORK_ID,
-      PUBLIC_URL: value.PUBLIC_URL,
-      INDEXER_URI: value.INDEXER_URI,
-      INDEXER_WS_URI: value.INDEXER_WS_URI,
-      LUNARSWAP_ADDRESS: value.LUNARSWAP_ADDRESS,
+      LOGGING_LEVEL: value.LOGGING_LEVEL ?? 'silent',
+      DEFAULT_NETWORK: defaultNetwork,
+      NETWORKS: networks,
     };
   };
 

@@ -26,7 +26,6 @@ import {
 } from '@openzeppelin/midnight-apps-lunarswap-api';
 import { Buffer } from 'buffer';
 import type { Logger } from 'pino';
-import { ensureLunarswapProofParams } from '../utils/proof-params';
 import { LunarswapSimulator } from './LunarswapSimulator';
 import type { ProviderCallbackAction, WalletAPI } from './wallet-context';
 
@@ -61,17 +60,22 @@ export class LunarswapIntegration {
   private _statusInfo: ContractStatusInfo = { status: 'not-configured' };
   private contractAddress?: string;
   private _logger?: Logger;
+  private zkConfigPath: string;
   constructor(
     providers: LunarswapProviders,
     walletAPI: WalletAPI,
     _callback: (action: ProviderCallbackAction) => void,
     contractAddress?: string,
     logger?: Logger,
+    zkConfigPath?: string,
   ) {
     this.providers = providers;
     this.walletAPI = walletAPI;
     this.contractAddress = contractAddress;
     this._logger = logger;
+    this.zkConfigPath =
+      zkConfigPath ??
+      (typeof window !== 'undefined' ? `${window.location.origin}/zkir` : '');
     this.lunarswapSimulator = new LunarswapSimulator();
   }
 
@@ -132,9 +136,14 @@ export class LunarswapIntegration {
       // Note: We're using a fixed order for lunarswap verifier keys instead of dynamic ordering
 
       // Step 3: Use the original join method
-      this.lunarswap = await Lunarswap.join(this.providers, {
-        bytes: new Uint8Array(Buffer.from(targetAddress, 'hex')),
-      });
+      this.lunarswap = await Lunarswap.join(
+        this.providers,
+        {
+          bytes: new Uint8Array(Buffer.from(targetAddress, 'hex')),
+        },
+        this.zkConfigPath,
+        this._logger,
+      );
 
       this._status = 'connected';
       this._statusInfo = {
@@ -179,17 +188,6 @@ export class LunarswapIntegration {
         { error },
         `Failed to fetch pool data: ${error instanceof Error ? error.message : String(error)}`,
       );
-
-      // Handle the specific case where watchForDeployTxData is not available
-      if (
-        error instanceof Error &&
-        error.message.includes('watchForDeployTxData is not available')
-      ) {
-        // Contract appears to be already deployed; returning empty pool data
-        // Return empty pool data instead of throwing
-        return null;
-      }
-
       return null;
     }
   }
@@ -222,10 +220,6 @@ export class LunarswapIntegration {
     if (!this.isReady) {
       this._logger?.warn('Contract not ready for isPairExists operation');
       return false;
-    }
-
-    if (!this.poolData) {
-      //await this.getPublicState();
     }
 
     if (!this.poolData || !this.lunarswap) {
@@ -302,22 +296,14 @@ export class LunarswapIntegration {
     tokenA: RawTokenType,
     tokenB: RawTokenType,
   ): Promise<Uint8Array> {
-    if (!this.isReady) {
+    if (!this.isReady || !this.lunarswap) {
       this._logger?.warn('Contract not ready for getPairId operation');
       return new Uint8Array(32);
     }
 
-    if (!this.poolData || !this.lunarswap) {
-      return new Uint8Array(32);
-    }
-
-    const _tokenAInfo = LunarswapIntegration.toCoinInfo(tokenA, BigInt(0));
-    const _tokenBInfo = LunarswapIntegration.toCoinInfo(tokenB, BigInt(0));
-
-    // This method needs to be async now
-    throw new Error(
-      'getPairIdSync is deprecated - use getPairId from the Lunarswap API instead',
-    );
+    const tokenAInfo = LunarswapIntegration.toCoinInfo(tokenA, BigInt(0));
+    const tokenBInfo = LunarswapIntegration.toCoinInfo(tokenB, BigInt(0));
+    return this.lunarswap.getPairId(tokenAInfo, tokenBInfo);
   }
 
   /**
@@ -332,14 +318,7 @@ export class LunarswapIntegration {
   ): Promise<
     FinalizedCallTxData<LunarswapContract, 'swapExactTokensForTokens'>
   > {
-    await this.ensureContractJoined();
-
-    // Ensure proof parameters are downloaded before transaction
-    await this.ensureProofParams();
-
-    if (!this.lunarswap) {
-      throw new Error('Contract not initialized');
-    }
+    const lunarswap = await this.ensureReady();
 
     const tokenInInfo = LunarswapIntegration.toCoinInfo(tokenIn, amountIn);
     const tokenOutInfo = LunarswapIntegration.toCoinInfo(tokenOut, BigInt(0));
@@ -347,8 +326,7 @@ export class LunarswapIntegration {
       recipientCoinPublicKey,
     );
 
-    // Use the Lunarswap API method
-    return await this.lunarswap.swapExactTokensForTokens(
+    return await lunarswap.swapExactTokensForTokens(
       tokenInInfo,
       tokenOutInfo,
       amountIn,
@@ -369,14 +347,7 @@ export class LunarswapIntegration {
   ): Promise<
     FinalizedCallTxData<LunarswapContract, 'swapTokensForExactTokens'>
   > {
-    await this.ensureContractJoined();
-
-    // Ensure proof parameters are downloaded before transaction
-    await this.ensureProofParams();
-
-    if (!this.lunarswap) {
-      throw new Error('Contract not initialized');
-    }
+    const lunarswap = await this.ensureReady();
 
     const tokenInInfo = LunarswapIntegration.toCoinInfo(tokenIn, BigInt(0));
     const tokenOutInfo = LunarswapIntegration.toCoinInfo(tokenOut, amountOut);
@@ -384,8 +355,7 @@ export class LunarswapIntegration {
       recipientCoinPublicKey,
     );
 
-    // Use the Lunarswap API method
-    return await this.lunarswap.swapTokensForExactTokens(
+    return await lunarswap.swapTokensForExactTokens(
       tokenInInfo,
       tokenOutInfo,
       amountOut,
@@ -406,14 +376,7 @@ export class LunarswapIntegration {
     minAmountB: bigint,
     recipientCoinPublicKey: string,
   ): Promise<FinalizedCallTxData<LunarswapContract, 'addLiquidity'>> {
-    await this.ensureContractJoined();
-
-    // Ensure proof parameters are downloaded before transaction
-    await this.ensureProofParams();
-
-    if (!this.lunarswap) {
-      throw new Error('Contract not initialized');
-    }
+    const lunarswap = await this.ensureReady();
 
     const tokenAInfo = LunarswapIntegration.toCoinInfo(tokenA, amountA);
     const tokenBInfo = LunarswapIntegration.toCoinInfo(tokenB, amountB);
@@ -421,7 +384,7 @@ export class LunarswapIntegration {
       recipientCoinPublicKey,
     );
 
-    return await this.lunarswap.addLiquidity(
+    return await lunarswap.addLiquidity(
       tokenAInfo,
       tokenBInfo,
       minAmountA,
@@ -442,14 +405,7 @@ export class LunarswapIntegration {
     minAmountB: bigint,
     recipientCoinPublicKey: string,
   ): Promise<FinalizedCallTxData<LunarswapContract, 'removeLiquidity'>> {
-    await this.ensureContractJoined();
-
-    // Ensure proof parameters are downloaded before transaction
-    await this.ensureProofParams();
-
-    if (!this.lunarswap) {
-      throw new Error('Contract not initialized');
-    }
+    const lunarswap = await this.ensureReady();
 
     const token0Info = LunarswapIntegration.toCoinInfo(token0Type, BigInt(0));
     const token1Info = LunarswapIntegration.toCoinInfo(token1Type, BigInt(0));
@@ -461,8 +417,7 @@ export class LunarswapIntegration {
       recipientCoinPublicKey,
     );
 
-    // Use the Lunarswap API method
-    return await this.lunarswap.removeLiquidity(
+    return await lunarswap.removeLiquidity(
       token0Info,
       token1Info,
       liquidityInfo,
@@ -479,49 +434,16 @@ export class LunarswapIntegration {
     token0Type: RawTokenType,
     token1Type: RawTokenType,
   ): Promise<{ value: bigint }> {
-    await this.ensureContractJoined();
-
-    if (!this.lunarswap) {
-      throw new Error('Contract not initialized');
-    }
+    const lunarswap = await this.ensureReady();
 
     const token0Info = LunarswapIntegration.toCoinInfo(token0Type, BigInt(0));
     const token1Info = LunarswapIntegration.toCoinInfo(token1Type, BigInt(0));
 
-    // Use the Lunarswap API method
-    const result = await this.lunarswap.getLpTokenTotalSupply(
+    const result = await lunarswap.getLpTokenTotalSupply(
       token0Info,
       token1Info,
     );
     return { value: result };
-  }
-
-  /**
-   * Ensure proof parameters are downloaded before transactions
-   */
-  private async ensureProofParams(): Promise<void> {
-    try {
-      // Get the proof server URL from the wallet API
-      const proofServerUrl =
-        this.walletAPI?.configuration?.proverServerUri ||
-        'http://localhost:6300';
-
-      const result = await ensureLunarswapProofParams(proofServerUrl);
-
-      if (!result.success) {
-        this._logger?.warn(
-          { errors: result.errors },
-          '[LunarswapIntegration] Some proof parameters failed to download:',
-        );
-        // Don't throw here - let the transaction proceed and fail naturally if needed
-      }
-    } catch (error) {
-      this._logger?.error(
-        { error },
-        `[LunarswapIntegration] Error ensuring proof parameters: ${error instanceof Error ? error.message : String(error)}`,
-      );
-      // Don't throw here - let the transaction proceed and fail naturally if needed
-    }
   }
 
   /**
@@ -534,6 +456,14 @@ export class LunarswapIntegration {
         throw new Error(`Contract not ready: ${status.message}`);
       }
     }
+  }
+
+  private async ensureReady(): Promise<Lunarswap> {
+    await this.ensureContractJoined();
+    if (!this.lunarswap) {
+      throw new Error('Contract not initialized');
+    }
+    return this.lunarswap;
   }
 
   /**
@@ -561,7 +491,6 @@ export class LunarswapIntegration {
     recipientCoinPublicKey: string,
   ): Either<ZswapCoinPublicKey, ContractAddress> {
     if (!recipientCoinPublicKey || recipientCoinPublicKey.length === 0) {
-      console.error('[createRecipient] Empty recipient address provided');
       throw new Error('Recipient address cannot be empty');
     }
 
@@ -585,11 +514,15 @@ export const createContractIntegration = (
   walletAPI: WalletAPI,
   callback: (action: ProviderCallbackAction) => void,
   contractAddress?: string,
+  logger?: Logger,
+  zkConfigPath?: string,
 ) => {
   return new LunarswapIntegration(
     providers,
     walletAPI,
     callback,
     contractAddress,
+    logger,
+    zkConfigPath,
   );
 };

@@ -18,7 +18,7 @@ import {
   type ContractStatusInfo,
   LunarswapIntegration,
 } from './lunarswap-integration';
-import { useRuntimeConfiguration } from './runtime-configuration';
+import { useActiveNetworkConfig } from './runtime-configuration';
 import { useMidnightWallet } from './wallet-context';
 
 interface LunarswapContextType {
@@ -61,7 +61,7 @@ export type Pool = {
 
 export const LunarswapProvider = ({ children }: LunarswapProviderProps) => {
   const _logger = useLogger();
-  const runtimeConfig = useRuntimeConfiguration();
+  const activeNetwork = useActiveNetworkConfig();
   const midnightWallet = useMidnightWallet();
   const [lunarswap, setLunarswap] = useState<LunarswapIntegration | null>(null);
   const [status, setStatus] = useState<ContractStatus>('not-configured');
@@ -82,7 +82,7 @@ export const LunarswapProvider = ({ children }: LunarswapProviderProps) => {
 
   // Initialize or update contract integration
   const initializeLunarswap = useCallback(async () => {
-    if (!runtimeConfig?.LUNARSWAP_ADDRESS) {
+    if (!activeNetwork.LUNARSWAP_ADDRESS) {
       setStatus('not-configured');
       setStatusInfo({
         status: 'not-configured',
@@ -107,11 +107,17 @@ export const LunarswapProvider = ({ children }: LunarswapProviderProps) => {
     setError(null);
 
     try {
+      const zkConfigPath =
+        typeof window !== 'undefined'
+          ? `${window.location.origin}/zkir`
+          : undefined;
       const lunarswap = new LunarswapIntegration(
         midnightWallet.providers,
         midnightWallet.walletAPI,
         midnightWallet.callback,
-        runtimeConfig.LUNARSWAP_ADDRESS,
+        activeNetwork.LUNARSWAP_ADDRESS,
+        _logger,
+        zkConfigPath,
       );
 
       if (!lunarswap) {
@@ -147,7 +153,7 @@ export const LunarswapProvider = ({ children }: LunarswapProviderProps) => {
       setIsLoading(false);
     }
   }, [
-    runtimeConfig,
+    activeNetwork.LUNARSWAP_ADDRESS,
     midnightWallet.isConnected,
     midnightWallet.walletAPI,
     midnightWallet.callback,

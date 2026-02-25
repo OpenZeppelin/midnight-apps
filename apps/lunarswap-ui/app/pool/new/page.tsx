@@ -26,7 +26,7 @@ export default function NewPositionPage() {
         <StarsBackground />
         <MoonDustBackground />
         <Header />
-        <main className="container mx-auto px-4 py-8 relative z-0 pt-24">
+        <main className="container mx-auto px-4 py-8 relative z-0 pt-[var(--header-offset)]">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center text-sm mb-4 text-gray-500 dark:text-gray-400">
               <Link

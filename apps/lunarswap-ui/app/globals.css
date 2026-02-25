@@ -3,6 +3,9 @@
 @tailwind utilities;
 
 :root {
+  /* Space for fixed header + demo warning banner (banner + h-16 nav) */
+  --header-offset: 7rem;
+
   --background: 0 0% 100%;
   --foreground: 222 47% 11%;
 

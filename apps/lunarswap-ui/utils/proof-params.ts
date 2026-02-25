@@ -12,7 +12,8 @@ interface DownloadParamsResult {
 }
 
 /**
- * Download all required public parameters for lunarswap circuits
+ * Download all required public parameters for lunarswap circuits.
+ * @param proofServerUrl - Proof server base URL (from network config, e.g. activeNetwork.PROOF_SERVER_URL). Required.
  */
 export async function downloadLunarswapProofParams(
   proofServerUrl = 'http://localhost:6300',
@@ -66,7 +67,8 @@ export async function downloadLunarswapProofParams(
 }
 
 /**
- * Check if parameters are already downloaded (optional optimization)
+ * Check if parameters are already downloaded (optional optimization).
+ * @param proofServerUrl - Proof server base URL (from network config). Required.
  */
 export async function checkProofParamsStatus(
   proofServerUrl = 'http://localhost:6300',
@@ -117,7 +119,8 @@ export async function checkProofParamsStatus(
 }
 
 /**
- * Smart parameter download - only download missing parameters
+ * Smart parameter download - only download missing parameters.
+ * @param proofServerUrl - Proof server base URL (from network config). Required.
  */
 export async function ensureLunarswapProofParams(
   proofServerUrl = 'http://localhost:6300',

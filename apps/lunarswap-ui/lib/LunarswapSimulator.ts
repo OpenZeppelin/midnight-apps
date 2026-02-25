@@ -21,6 +21,11 @@ import {
   LunarswapPrivateState,
   LunarswapWitnesses,
 } from '@openzeppelin/midnight-apps-contracts/dist/lunarswap/witnesses/Lunarswap';
+import {
+  getPairId as getPairIdUtil,
+  getReserveId as getReserveIdUtil,
+  sortCoinByColor as sortCoinByColorUtil,
+} from '@openzeppelin/midnight-apps-lunarswap-api';
 
 /**
  * @description A simulator implementation for Lunarswap operations.
@@ -192,37 +197,21 @@ export class LunarswapSimulator {
     tokenA: ShieldedCoinInfo,
     tokenB: ShieldedCoinInfo,
   ): Uint8Array {
-    const result = this.contract.impureCircuits.getPairId(
-      this.context,
-      tokenA,
-      tokenB,
-    );
-    return result.result;
+    return getPairIdUtil(tokenA, tokenB);
   }
 
   public getReserveId(
     tokenA: ShieldedCoinInfo,
     tokenB: ShieldedCoinInfo,
   ): Uint8Array {
-    const result = this.contract.circuits.getIdentity(
-      this.context,
-      tokenA,
-      tokenB,
-      false,
-    );
-    return result.result;
+    return getReserveIdUtil(tokenA, tokenB);
   }
 
   public getSortedCoins(
     tokenA: ShieldedCoinInfo,
     tokenB: ShieldedCoinInfo,
   ): [ShieldedCoinInfo, ShieldedCoinInfo] {
-    const result = this.contract.impureCircuits.sortCoinByColor(
-      this.context,
-      tokenA,
-      tokenB,
-    );
-    return result.result;
+    return sortCoinByColorUtil(tokenA, tokenB);
   }
 
   public getSortedCoinsAndAmounts(
@@ -231,12 +220,7 @@ export class LunarswapSimulator {
     amountAMin: bigint,
     amountBMin: bigint,
   ): [ShieldedCoinInfo, ShieldedCoinInfo, bigint, bigint] {
-    const result = this.contract.impureCircuits.sortCoinByColor(
-      this.context,
-      tokenA,
-      tokenB,
-    );
-    const [sortedTokenA, sortedTokenB] = result.result;
+    const [sortedTokenA, sortedTokenB] = sortCoinByColorUtil(tokenA, tokenB);
     const amount0Min =
       sortedTokenA.color === tokenA.color ? amountAMin : amountBMin;
     const amount1Min =

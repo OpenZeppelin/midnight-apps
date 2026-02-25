@@ -1,3 +1,4 @@
+import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
 import { viteCommonjs } from '@originjs/vite-plugin-commonjs';
 import react from '@vitejs/plugin-react';
@@ -5,6 +6,8 @@ import { defineConfig } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import topLevelAwait from 'vite-plugin-top-level-await';
 import wasm from 'vite-plugin-wasm';
+
+const require = createRequire(import.meta.url);
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -48,13 +51,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      buffer: 'buffer',
-      // Resolve vite-plugin-node-polyfills shims to actual polyfills
-      'vite-plugin-node-polyfills/shims/buffer': 'buffer',
-      'vite-plugin-node-polyfills/shims/crypto': 'crypto',
-      'vite-plugin-node-polyfills/shims/fs': false,
-      'vite-plugin-node-polyfills/shims/path': 'path',
-      // Resolve @src imports from @openzeppelin/midnight-apps-contracts package
+      'vite-plugin-node-polyfills/shims/buffer': require.resolve(
+        'vite-plugin-node-polyfills/shims/buffer',
+      ),
       '@src': resolve(__dirname, '../../contracts/dist'),
       '@/components': resolve(__dirname, './components'),
       '@/lib': resolve(__dirname, './lib'),
@@ -69,13 +68,27 @@ export default defineConfig({
     global: 'globalThis',
   },
   server: {
-    proxy: {
-      '/faucet': {
-        target: 'https://faucet.testnet-02.midnight.network',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/faucet/, ''),
-        secure: true,
-      },
-    },
+    // Dev-only: faucet proxy target by network. Set VITE_DEFAULT_NETWORK=preview for Preview (VITE_NETWORK is legacy).
+    // Runtime source of truth for networks is config.json (loaded by RuntimeConfigurationProvider).
+    proxy: (() => {
+      const network =
+        process.env.VITE_NETWORK ??
+        process.env.VITE_DEFAULT_NETWORK ??
+        'preprod';
+      const faucetTargets: Record<string, string> = {
+        preprod: 'https://faucet.preprod.midnight.network',
+        preview: 'https://faucet.preview.midnight.network',
+      };
+      const target =
+        faucetTargets[network] ?? 'https://faucet.preprod.midnight.network';
+      return {
+        '/faucet': {
+          target,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/faucet/, ''),
+          secure: true,
+        },
+      };
+    })(),
   },
 });

@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useLogger } from '@/hooks/use-logger';
-import { useRuntimeConfiguration } from '@/lib/runtime-configuration';
+import { useActiveNetworkConfig } from '@/lib/runtime-configuration';
 import type { Token as UiToken } from '@/lib/token-config';
 import { useWallet } from '../../../hooks/use-wallet';
 import { useLunarswapContext } from '../../../lib/lunarswap-context';
@@ -34,7 +34,7 @@ interface SetDepositStepProps {
 
 export function SetDepositStep({ pairData }: SetDepositStepProps) {
   const _logger = useLogger();
-  const runtimeConfig = useRuntimeConfiguration();
+  const activeNetwork = useActiveNetworkConfig();
   const { isConnected, address, providers, walletAPI, callback } = useWallet();
   const { lunarswap, status, pauseRefresh, resumeRefresh } =
     useLunarswapContext();
@@ -196,7 +196,9 @@ export function SetDepositStep({ pairData }: SetDepositStepProps) {
         providers,
         walletAPI,
         callback,
-        runtimeConfig.LUNARSWAP_ADDRESS,
+        activeNetwork.LUNARSWAP_ADDRESS,
+        undefined,
+        undefined,
       );
       if (!lunarswapIntegration) {
         throw new Error(

@@ -39,7 +39,7 @@ export default function TradePage() {
     <div className="min-h-screen bg-white dark:bg-gradient-to-b dark:from-[#0f172a] dark:via-[#1e293b] dark:to-[#0f172a] text-foreground">
       <MoonDustBackground />
       <Header />
-      <div className="container mx-auto px-3 py-16">
+      <div className="container mx-auto px-3 pt-[var(--header-offset)] pb-16">
         <div className="mt-4">
           <TradeTabs initialTokens={initialTokens} />
         </div>

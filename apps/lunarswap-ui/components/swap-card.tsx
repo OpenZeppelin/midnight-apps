@@ -12,6 +12,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useWallet } from '@/hooks/use-wallet';
 import { useLunarswapContext } from '@/lib/lunarswap-context';
+import { useActiveNetworkConfig } from '@/lib/runtime-configuration';
 import {
   getAvailableTokensForSelection,
   popularTokens,
@@ -54,6 +55,7 @@ export function SwapCard({
 }: SwapCardProps) {
   const midnightWallet = useWallet();
   const { status, allPairs, lunarswap } = useLunarswapContext();
+  const activeNetwork = useActiveNetworkConfig();
   const [isHydrated, setIsHydrated] = useState(false);
 
   const [showTokenModal, setShowTokenModal] = useState(false);
@@ -670,7 +672,7 @@ export function SwapCard({
   const getButtonText = () => {
     if (!isHydrated) return 'Loading...';
     if (previewMode) return 'Get Started';
-    if (mode === 'buy') return 'Get tDUST from Faucet';
+    if (mode === 'buy') return 'Get tNIGHT from Faucet';
     if (!midnightWallet.isConnected) return 'Connect Wallet';
     if (!fromToken || !toToken) return 'Select Tokens';
     if (!fromAmount || !toAmount) return 'Enter amounts';
@@ -697,8 +699,8 @@ export function SwapCard({
   };
 
   const handleBuyModeClick = () => {
-    // Open Midnight testnet faucet in a new tab
-    window.open('https://midnight.network/test-faucet', '_blank');
+    const faucetUrl = activeNetwork.FAUCET_URL;
+    if (faucetUrl) window.open(faucetUrl, '_blank');
   };
 
   const handleProgressComplete = () => {
@@ -726,42 +728,42 @@ export function SwapCard({
             <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <img
                 src="/tDust-icon.svg"
-                alt="tDUST Token Icon"
+                alt="tNIGHT Token Icon"
                 className="h-8 w-8"
               />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Get DUST Test Tokens
+              Get tNIGHT Test Tokens
             </h2>
             <p className="text-gray-600 dark:text-gray-400">
-              Need tDUST to start trading? Get free test tokens from the
-              Midnight testnet faucet.
+              Need tNIGHT to start trading? Get free test tokens from the
+              Midnight faucet. Tokens are sent to your unshielded address.
             </p>
           </div>
 
           {/* Steps */}
           <div className="space-y-3">
             <h3 className="font-semibold text-gray-900 dark:text-white">
-              How to get tDUST:
+              How to get tNIGHT:
             </h3>
             <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <div className="flex items-center gap-2">
                 <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
                   1
                 </span>
-                <span>Visit the Midnight testnet faucet</span>
+                <span>Visit the Midnight faucet</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
                   2
                 </span>
-                <span>Enter your wallet address</span>
+                <span>Enter your unshielded wallet address</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
                   3
                 </span>
-                <span>Request tDUST tokens</span>
+                <span>Request tNIGHT tokens</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
@@ -779,7 +781,7 @@ export function SwapCard({
             className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-semibold py-6 rounded-xl text-lg shadow-lg shadow-blue-900/20"
           >
             <ExternalLink className="h-5 w-5 mr-2" />
-            Get tDUST from Faucet
+            Get tNIGHT from Faucet
           </Button>
         </CardFooter>
       </Card>

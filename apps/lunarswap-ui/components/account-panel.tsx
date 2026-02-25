@@ -4,6 +4,7 @@ import { ArrowLeft, ChevronsRight, LogOut, Settings } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useWallet } from '@/hooks/use-wallet';
 import { useWalletRx } from '@/hooks/use-wallet-rx';
+import { formatDustAmount } from '@/utils/format-dust';
 import { AccountDetailsModal } from './account-details-modal';
 import { GlobalPreferences } from './global-preferences';
 import { Identicon } from './identicon';
@@ -142,11 +143,11 @@ export function AccountPanel({
               </div>
               <div className="text-center">
                 <span className="font-mono font-bold text-sm">
-                  {walletState.dustBalance.balance.toString()}
+                  {formatDustAmount(walletState.dustBalance.balance)}
                 </span>
                 <span className="text-xs text-muted-foreground mx-1">/</span>
                 <span className="font-mono text-xs text-muted-foreground">
-                  {walletState.dustBalance.cap.toString()} cap
+                  {formatDustAmount(walletState.dustBalance.cap)} tDUST cap
                 </span>
               </div>
             </div>
@@ -170,31 +171,33 @@ export function AccountPanel({
         {/* Account Details */}
         {walletAPI && (
           <div className="mt-6 w-full space-y-4">
-            {/* Address */}
+            {/* Shielded Address */}
             <div className="space-y-2">
               <div className="text-xs text-muted-foreground text-center">
-                Address
+                Shielded Address
               </div>
               <button
                 type="button"
-                onClick={() => copyToClipboard(walletAPI.address, 'Address')}
+                onClick={() =>
+                  copyToClipboard(walletAPI.address, 'Shielded Address')
+                }
                 className={`w-full p-2 rounded-md transition-all duration-200 text-center group relative overflow-hidden ${
-                  copiedField === 'Address'
+                  copiedField === 'Shielded Address'
                     ? 'bg-green-50 dark:bg-green-950/20'
                     : 'bg-muted/30 hover:bg-muted/50'
                 }`}
-                title="Click to copy address"
+                title="Click to copy shielded address"
               >
                 <code
                   className={`text-xs break-all font-mono leading-relaxed transition-all duration-200 ${
-                    copiedField === 'Address'
+                    copiedField === 'Shielded Address'
                       ? 'text-green-700 dark:text-green-300 blur-sm'
                       : 'text-foreground group-hover:text-primary'
                   }`}
                 >
                   {walletAPI.address || 'Not available'}
                 </code>
-                {copiedField === 'Address' && (
+                {copiedField === 'Shielded Address' && (
                   <div className="absolute inset-0 bg-green-500/10 flex items-center justify-center">
                     <span className="text-xs font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/50 px-2 py-1 rounded">
                       ✓ Copied!
@@ -204,33 +207,36 @@ export function AccountPanel({
               </button>
             </div>
 
-            {/* Coin Public Key */}
+            {/* Shielded Coin Public Key */}
             <div className="space-y-2">
               <div className="text-xs text-muted-foreground text-center">
-                Coin Public Key
+                Shielded Coin Public Key
               </div>
               <button
                 type="button"
                 onClick={() =>
-                  copyToClipboard(walletAPI.coinPublicKey, 'Coin Public Key')
+                  copyToClipboard(
+                    walletAPI.coinPublicKey,
+                    'Shielded Coin Public Key',
+                  )
                 }
                 className={`w-full p-2 rounded-md transition-all duration-200 text-center group relative overflow-hidden ${
-                  copiedField === 'Coin Public Key'
+                  copiedField === 'Shielded Coin Public Key'
                     ? 'bg-green-50 dark:bg-green-950/20'
                     : 'bg-muted/30 hover:bg-muted/50'
                 }`}
-                title="Click to copy coin public key"
+                title="Click to copy shielded coin public key"
               >
                 <code
                   className={`text-xs break-all font-mono leading-relaxed transition-all duration-200 ${
-                    copiedField === 'Coin Public Key'
+                    copiedField === 'Shielded Coin Public Key'
                       ? 'text-green-700 dark:text-green-300 blur-sm'
                       : 'text-foreground group-hover:text-primary'
                   }`}
                 >
                   {walletAPI.coinPublicKey || 'Not available'}
                 </code>
-                {copiedField === 'Coin Public Key' && (
+                {copiedField === 'Shielded Coin Public Key' && (
                   <div className="absolute inset-0 bg-green-500/10 flex items-center justify-center">
                     <span className="text-xs font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/50 px-2 py-1 rounded">
                       ✓ Copied!
@@ -240,36 +246,36 @@ export function AccountPanel({
               </button>
             </div>
 
-            {/* Encryption Public Key */}
+            {/* Shielded Encryption Public Key */}
             <div className="space-y-2">
               <div className="text-xs text-muted-foreground text-center">
-                Encryption Public Key
+                Shielded Encryption Public Key
               </div>
               <button
                 type="button"
                 onClick={() =>
                   copyToClipboard(
                     walletAPI.encryptionPublicKey,
-                    'Encryption Public Key',
+                    'Shielded Encryption Public Key',
                   )
                 }
                 className={`w-full p-2 rounded-md transition-all duration-200 text-center group relative overflow-hidden ${
-                  copiedField === 'Encryption Public Key'
+                  copiedField === 'Shielded Encryption Public Key'
                     ? 'bg-green-50 dark:bg-green-950/20'
                     : 'bg-muted/30 hover:bg-muted/50'
                 }`}
-                title="Click to copy encryption public key"
+                title="Click to copy shielded encryption public key"
               >
                 <code
                   className={`text-xs break-all font-mono leading-relaxed transition-all duration-200 ${
-                    copiedField === 'Encryption Public Key'
+                    copiedField === 'Shielded Encryption Public Key'
                       ? 'text-green-700 dark:text-green-300 blur-sm'
                       : 'text-foreground group-hover:text-primary'
                   }`}
                 >
                   {walletAPI.encryptionPublicKey || 'Not available'}
                 </code>
-                {copiedField === 'Encryption Public Key' && (
+                {copiedField === 'Shielded Encryption Public Key' && (
                   <div className="absolute inset-0 bg-green-500/10 flex items-center justify-center">
                     <span className="text-xs font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/50 px-2 py-1 rounded">
                       ✓ Copied!

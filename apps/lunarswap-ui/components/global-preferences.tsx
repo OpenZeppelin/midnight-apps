@@ -2,7 +2,6 @@
 
 import {
   AlertCircle,
-  Check,
   CheckCircle,
   Clock,
   DollarSign,
@@ -15,7 +14,6 @@ import { useEffect, useState } from 'react';
 import { useLogger } from '@/hooks/use-logger';
 import { useWallet } from '../hooks/use-wallet';
 import { useLunarswapContext } from '../lib/lunarswap-context';
-import { useVersion } from '../lib/version-context';
 import { ThemeToggle } from './theme-toggle';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
@@ -43,7 +41,6 @@ interface GlobalPreferencesProps {
 function PreferencesContent() {
   const _logger = useLogger();
   const midnightWallet = useWallet();
-  const { version, setVersion } = useVersion();
   const { statusInfo, isLoading, refreshContract } = useLunarswapContext();
   const [animationsEnabled, setAnimationsEnabledState] = useState(true);
   const [showContractDetails, setShowContractDetails] = useState(false);
@@ -135,22 +132,6 @@ function PreferencesContent() {
     }
   };
 
-  const versions = [
-    { id: 'V1', name: 'V1', description: 'Unpermissioned Shielded' },
-    {
-      id: 'V2',
-      name: 'V2',
-      description: 'Permissioned Shielded · Coming Soon',
-      disabled: true,
-    },
-    {
-      id: 'V3',
-      name: 'V3',
-      description: 'Unpermissioned Unshielded · Coming Soon',
-      disabled: true,
-    },
-  ];
-
   return (
     <>
       {/* Contract Status Section - Only show when connected */}
@@ -177,52 +158,6 @@ function PreferencesContent() {
                 Details
               </Badge>
             </button>
-          </div>
-
-          <div className="h-px bg-border my-2" />
-        </>
-      )}
-
-      {/* Version Selection Section - Only show when connected */}
-      {midnightWallet.isConnected && (
-        <>
-          <div className="px-2 py-2">
-            <div className="text-xs font-medium text-muted-foreground mb-2">
-              Version
-            </div>
-            <div className="space-y-1">
-              {versions.map((v) => (
-                <button
-                  key={v.id}
-                  type="button"
-                  onClick={() =>
-                    !v.disabled && setVersion(v.id as 'V1' | 'V2' | 'V3')
-                  }
-                  disabled={v.disabled}
-                  className={`w-full flex items-center justify-between p-2 rounded-lg transition-colors text-left ${
-                    v.disabled
-                      ? 'opacity-50 cursor-not-allowed'
-                      : 'hover:bg-muted cursor-pointer'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    {version === v.id ? (
-                      <Check className="h-4 w-4 text-blue-500" />
-                    ) : v.disabled ? (
-                      <Clock className="h-4 w-4 text-gray-400" />
-                    ) : (
-                      <div className="h-4 w-4" />
-                    )}
-                    <div>
-                      <div className="text-sm font-medium">{v.name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {v.description}
-                      </div>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
           </div>
 
           <div className="h-px bg-border my-2" />

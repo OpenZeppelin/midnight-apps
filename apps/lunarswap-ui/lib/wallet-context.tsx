@@ -42,7 +42,10 @@ import { noopProofClient, proofClient } from '@/providers/proof';
 import { PublicDataProviderWrapper } from '@/providers/public';
 import { ZkConfigProviderWrapper } from '@/providers/zk-config';
 import { connectToWallet } from '@/utils/wallet-utils';
-import { useRuntimeConfiguration } from './runtime-configuration';
+import {
+  useActiveNetworkConfig,
+  useRuntimeConfiguration,
+} from './runtime-configuration';
 
 export interface MidnightWalletState {
   isConnected: boolean;
@@ -149,6 +152,7 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
   const [proofServerIsOnline, setProofServerIsOnline] =
     React.useState<boolean>(false);
   const config = useRuntimeConfiguration();
+  const activeNetwork = useActiveNetworkConfig();
   const [_openWallet, setOpenWallet] = React.useState(false);
   const [_isRotate, setRotate] = React.useState(false);
   const [snackBarText, setSnackBarText] = useState<string | undefined>(
@@ -199,7 +203,7 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
 
       try {
         walletResult = await connectToWallet(logger, {
-          networkId: config?.NETWORK_ID ?? 'testnet',
+          networkId: config?.DEFAULT_NETWORK ?? 'preprod',
         });
       } catch (e) {
         const errorType = getErrorType(e as Error);
@@ -216,7 +220,8 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
       }
 
       await checkProofServerStatus(
-        walletResult.configuration.proverServerUri || 'http://localhost:6300',
+        walletResult.configuration.proverServerUri ||
+          activeNetwork.PROOF_SERVER_URL,
       );
 
       try {
@@ -241,7 +246,12 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
 
       setIsConnecting(false);
     },
-    [logger, config?.NETWORK_ID, checkProofServerStatus],
+    [
+      logger,
+      config?.DEFAULT_NETWORK,
+      activeNetwork.PROOF_SERVER_URL,
+      checkProofServerStatus,
+    ],
   );
 
   // Reconnection function with exponential backoff
@@ -329,11 +339,19 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
   const publicDataProvider = useMemo(
     () =>
       new PublicDataProviderWrapper(
-        indexerPublicDataProvider(config.INDEXER_URI, config.INDEXER_WS_URI),
+        indexerPublicDataProvider(
+          activeNetwork.INDEXER_URI,
+          activeNetwork.INDEXER_WS_URI,
+        ),
         providerCallback,
         logger,
       ),
-    [providerCallback, config.INDEXER_URI, config.INDEXER_WS_URI, logger],
+    [
+      providerCallback,
+      activeNetwork.INDEXER_URI,
+      activeNetwork.INDEXER_WS_URI,
+      logger,
+    ],
   );
 
   const shake = useCallback((): void => {
@@ -347,14 +365,18 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
 
   const proofProvider = useMemo(() => {
     if (walletAPI) {
-      return proofClient(
-        walletAPI.configuration.proverServerUri || 'http://localhost:6300',
-        zkConfigProvider,
-        providerCallback,
-      );
+      const proverServerUri =
+        walletAPI.configuration.proverServerUri ||
+        activeNetwork.PROOF_SERVER_URL;
+      return proofClient(proverServerUri, zkConfigProvider, providerCallback);
     }
     return noopProofClient();
-  }, [walletAPI, zkConfigProvider, providerCallback]);
+  }, [
+    walletAPI,
+    zkConfigProvider,
+    providerCallback,
+    activeNetwork.PROOF_SERVER_URL,
+  ]);
 
   const walletProvider: WalletProvider = useMemo(() => {
     if (walletAPI) {

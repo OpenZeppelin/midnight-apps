@@ -1,9 +1,28 @@
 {
   "LOGGING_LEVEL": "silent",
-  "NETWORK_ID": "TestNet",
-  "PUBLIC_URL": "http://127.0.0.1:8080",
-  "INDEXER_URI": "https://indexer.testnet-02.midnight.network/api/v1/graphql",
-  "INDEXER_WS_URI": "wss://indexer.testnet-02.midnight.network/api/v1/graphql/ws",
-  "LUNARSWAP_ADDRESS": "0200c6507ce8942998ecf07d57a0fa024de504c0a9d3df67cab6686f8dfb80bde20e",
-  "FAUCET_URL": "https://faucet.testnet-02.midnight.network"
+  "DEFAULT_NETWORK": "preprod",
+  "NETWORKS": {
+    "preprod": {
+      "name": "Preprod",
+      "available": true,
+      "INDEXER_URI": "https://indexer.preprod.midnight.network/api/v3/graphql",
+      "INDEXER_WS_URI": "wss://indexer.preprod.midnight.network/api/v3/graphql/ws",
+      "LUNARSWAP_ADDRESS": "cfb8666816888644102f411ffcd0fac4257d409a89215c2089ad89cae6e0858e",
+      "FAUCET_URL": "https://faucet.preprod.midnight.network",
+      "EXPLORER_URL": "https://preprod.midnightexplorer.com",
+      "RPC_URL": "https://rpc.preprod.midnight.network",
+      "PROOF_SERVER_URL": "https://lace-proof-pub.preprod.midnight.network"
+    },
+    "preview": {
+      "name": "Preview",
+      "available": false,
+      "INDEXER_URI": "https://indexer.preview.midnight.network/api/v3/graphql",
+      "INDEXER_WS_URI": "wss://indexer.preview.midnight.network/api/v3/graphql/ws",
+      "LUNARSWAP_ADDRESS": "",
+      "FAUCET_URL": "https://faucet.preview.midnight.network",
+      "EXPLORER_URL": "",
+      "RPC_URL": "https://rpc.preview.midnight.network",
+      "PROOF_SERVER_URL": "https://lace-proof-pub.preview.midnight.network"
+    }
+  }
 }

@@ -19,13 +19,11 @@ export function NetworkSelector() {
     availableNetworks,
     isNetworkSynced,
     syncWithWallet,
-    isMainnetEnabled,
   } = useNetwork();
   const { isConnected } = useWallet();
   const [isHydrated, setIsHydrated] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
 
-  // Mark as hydrated after initial render
   useEffect(() => {
     setIsHydrated(true);
   }, []);
@@ -33,14 +31,10 @@ export function NetworkSelector() {
   const handleNetworkChange = async (
     network: (typeof availableNetworks)[0],
   ) => {
-    // Don't allow switching to mainnet if it's disabled
-    if (network.type === 'mainnet' && !isMainnetEnabled) {
+    if (!network.available) {
       return;
     }
-
     setCurrentNetwork(network);
-
-    // If wallet is connected, try to sync with the new network
     if (isConnected) {
       await syncWithWallet();
     }
@@ -48,7 +42,6 @@ export function NetworkSelector() {
 
   const handleSyncClick = async () => {
     if (!isConnected || isSyncing) return;
-
     setIsSyncing(true);
     try {
       await syncWithWallet();
@@ -68,13 +61,7 @@ export function NetworkSelector() {
           className="h-9 rounded-full border-gray-300 dark:border-gray-700 bg-white/80 dark:bg-gray-800 text-sm font-medium"
         >
           <div className="flex items-center gap-2">
-            <div
-              className={`w-2 h-2 rounded-full ${
-                currentNetwork.type === 'mainnet'
-                  ? 'bg-green-500'
-                  : 'bg-yellow-500'
-              }`}
-            />
+            <div className="w-2 h-2 rounded-full bg-yellow-500" />
             {currentNetwork.name}
             {isHydrated && isConnected && (
               <div className="flex items-center">
@@ -121,38 +108,24 @@ export function NetworkSelector() {
             </div>
           )}
 
-          {availableNetworks
-            .filter((n) => n.type === 'mainnet')
-            .map((network) => (
-              <DropdownMenuItem
-                key={network.id}
-                className={`flex items-center justify-between cursor-pointer ${
-                  !isMainnetEnabled ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-                onClick={() => handleNetworkChange(network)}
-                disabled={!isMainnetEnabled}
-              >
-                <span>{network.name}</span>
-                {currentNetwork.id === network.id && (
-                  <Check className="h-4 w-4 text-green-500" />
-                )}
-              </DropdownMenuItem>
-            ))}
-
-          {availableNetworks
-            .filter((n) => n.type === 'testnet')
-            .map((network) => (
-              <DropdownMenuItem
-                key={network.id}
-                className="flex items-center justify-between cursor-pointer"
-                onClick={() => handleNetworkChange(network)}
-              >
-                <span>{network.name}</span>
-                {currentNetwork.id === network.id && (
-                  <Check className="h-4 w-4 text-green-500" />
-                )}
-              </DropdownMenuItem>
-            ))}
+          {availableNetworks.map((network) => (
+            <DropdownMenuItem
+              key={network.id}
+              className={`flex items-center justify-between cursor-pointer ${
+                !network.available ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+              onClick={() => handleNetworkChange(network)}
+              disabled={!network.available}
+            >
+              <span>
+                {network.name}
+                {!network.available ? ' (Coming Soon)' : ''}
+              </span>
+              {currentNetwork.id === network.id && network.available && (
+                <Check className="h-4 w-4 text-green-500" />
+              )}
+            </DropdownMenuItem>
+          ))}
         </div>
       </DropdownMenuContent>
     </DropdownMenu>

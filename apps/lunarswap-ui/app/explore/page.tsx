@@ -453,7 +453,7 @@ export default function ExplorePage() {
       <MoonDustBackground />
       <Header />
 
-      <main className="container mx-auto px-3 py-4 relative z-0 pt-20">
+      <main className="container mx-auto px-3 py-4 relative z-0 pt-[var(--header-offset)]">
         <div className="max-w-6xl mx-auto">
           {/* Simple Button Choices - Similar to swap page style */}
           <div className="flex items-center justify-between mb-6">

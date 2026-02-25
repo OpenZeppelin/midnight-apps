@@ -57,7 +57,7 @@ export default function PoolPage() {
       <MoonDustBackground />
       <Header />
 
-      <main className="container mx-auto px-3 py-4 relative z-0 pt-20">
+      <main className="container mx-auto px-3 py-4 relative z-0 pt-[var(--header-offset)]">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
             {/* Main Content - Left Side (70%) */}

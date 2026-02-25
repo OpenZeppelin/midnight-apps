@@ -49,9 +49,9 @@ export interface WalletConnectionOptions {
 export interface Network {
   id: string;
   name: string;
-  type: 'testnet' | 'mainnet';
   rpcUrl: string;
   explorerUrl: string;
+  available: boolean;
 }
 
 /**
@@ -72,23 +72,6 @@ export const detectWalletNetwork = async (
   return null;
 };
 
-/**
- * Map app network ID to wallet connector network ID.
- * Lace wallet networks: Preprod, Preview, Undeployed
- */
-function toWalletNetworkId(networkId: string): string {
-  const normalized = networkId.toLowerCase();
-  if (
-    normalized === 'testnet' ||
-    normalized === 'testnet-02' ||
-    normalized === 'preprod'
-  )
-    return 'preprod';
-  if (normalized === 'preview') return 'preview';
-  if (normalized === 'undeployed') return 'undeployed';
-  return networkId;
-}
-
 export interface ConnectToWalletOptions {
   networkId?: string;
 }
@@ -101,7 +84,7 @@ export const connectToWallet = (
   options: ConnectToWalletOptions = {},
 ): Promise<{ wallet: WalletConnectedAPI; configuration: Configuration }> => {
   const COMPATIBLE_CONNECTOR_API_VERSION = '4.x';
-  const networkId = toWalletNetworkId(options.networkId ?? 'preprod');
+  const networkId = options.networkId ?? 'preprod';
 
   return firstValueFrom(
     fnPipe(

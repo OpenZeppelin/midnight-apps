@@ -140,7 +140,7 @@ export default function PoolDetailPage() {
         <StarsBackground />
         <MoonDustBackground />
         <Header />
-        <main className="container mx-auto px-4 py-8 relative z-0 pt-24">
+        <main className="container mx-auto px-4 py-8 relative z-0 pt-[var(--header-offset)]">
           <div className="max-w-4xl mx-auto">
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-gray-200/50 dark:border-blue-900/30">
               <CardContent className="p-8 text-center">
@@ -165,7 +165,7 @@ export default function PoolDetailPage() {
         <StarsBackground />
         <MoonDustBackground />
         <Header />
-        <main className="container mx-auto px-4 py-8 relative z-0 pt-24">
+        <main className="container mx-auto px-4 py-8 relative z-0 pt-[var(--header-offset)]">
           <div className="max-w-4xl mx-auto">
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-gray-200/50 dark:border-blue-900/30">
               <CardContent className="p-8 text-center">
@@ -196,7 +196,7 @@ export default function PoolDetailPage() {
       <StarsBackground />
       <MoonDustBackground />
       <Header />
-      <main className="container mx-auto px-4 py-8 relative z-0 pt-24">
+      <main className="container mx-auto px-4 py-8 relative z-0 pt-[var(--header-offset)]">
         <div className="max-w-4xl mx-auto">
           {/* Breadcrumb Navigation */}
           <div className="mb-6">

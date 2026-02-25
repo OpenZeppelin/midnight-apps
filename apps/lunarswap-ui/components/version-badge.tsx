@@ -1,6 +1,6 @@
 'use client';
 
-import { Package } from 'lucide-react';
+import { AlertTriangle, Package } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,11 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { getVersionInfo } from '@/lib/version-info';
+import {
+  DEMO_DISCLAIMER,
+  getVersionInfo,
+  PROTOCOL_NOTICES,
+} from '@/lib/version-info';
 
 export function VersionBadge() {
   const [isOpen, setIsOpen] = useState(false);
@@ -75,6 +79,46 @@ export function VersionBadge() {
                 )}
               </div>
             </ScrollArea>
+          </div>
+
+          {/* Security & protocol notices */}
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-500" />
+              <Badge
+                variant="secondary"
+                className="bg-amber-500/10 text-amber-700 dark:text-amber-400"
+              >
+                Security & protocol notices
+              </Badge>
+            </h4>
+            <p className="text-xs text-muted-foreground">
+              Known limitations and planned revisions. Please read before
+              providing liquidity.
+            </p>
+            <div className="space-y-3">
+              <div className="rounded-lg border border-blue-200 dark:border-blue-800/50 bg-blue-50/50 dark:bg-blue-950/20 p-3 text-left">
+                <div className="font-medium text-sm text-blue-800 dark:text-blue-200 mb-1">
+                  {DEMO_DISCLAIMER.title}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {DEMO_DISCLAIMER.description}
+                </div>
+              </div>
+              {PROTOCOL_NOTICES.map((notice) => (
+                <div
+                  key={notice.id}
+                  className="rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50/50 dark:bg-amber-950/20 p-3 text-left"
+                >
+                  <div className="font-medium text-sm text-amber-800 dark:text-amber-200 mb-1">
+                    {notice.title}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {notice.description}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </DialogContent>

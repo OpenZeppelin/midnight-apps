@@ -31,6 +31,13 @@ import {
 } from '@openzeppelin/midnight-apps-contracts/dist/lunarswap/witnesses/Lunarswap';
 import type { Logger } from 'pino';
 import { combineLatest, from, map, type Observable, tap } from 'rxjs';
+// TODO: Switch back to contract callTx.getPairId/getIdentity/sortCoinByColor/sortQualifiedCoinByColor once https://github.com/LFDT-Minokawa/compact/issues/150 is resolved
+import {
+  getIdentity as getIdentityUtil,
+  getPairId as getPairIdUtil,
+  sortCoinByColor as sortCoinByColorUtil,
+  sortQualifiedCoinByColor as sortQualifiedCoinByColorUtil,
+} from './lunarswap-utils.js';
 import {
   type DeployedLunarswapContract,
   type LunarswapContract,
@@ -102,10 +109,26 @@ export interface ILunarswap {
     tokenA: ShieldedCoinInfo,
     tokenB: ShieldedCoinInfo,
   ): Promise<[QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo]>;
-  // getPairId(
-  //   tokenA: ShieldedCoinInfo,
-  //   tokenB: ShieldedCoinInfo,
-  // ): Promise<Uint8Array>;
+  getPairId(
+    tokenA: ShieldedCoinInfo,
+    tokenB: ShieldedCoinInfo,
+  ): Promise<Uint8Array>;
+  /** Pair/reserve identity hash (TS util; matches LunarswapLibrary getIdentity). */
+  getIdentity(
+    type0: Uint8Array,
+    type1: Uint8Array,
+    isPairId: boolean,
+  ): Uint8Array;
+  /** Sorts two coins by color (TS util; matches LunarswapLibrary sortCoinByColor). */
+  sortCoinByColor(
+    tokenA: ShieldedCoinInfo,
+    tokenB: ShieldedCoinInfo,
+  ): [ShieldedCoinInfo, ShieldedCoinInfo];
+  /** Sorts two qualified coins by color (TS util; matches LunarswapLibrary sortQualifiedCoinByColor). */
+  sortQualifiedCoinByColor(
+    coinA: QualifiedShieldedCoinInfo,
+    coinB: QualifiedShieldedCoinInfo,
+  ): [QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo];
   getLpTokenTotalSupply(
     tokenA: ShieldedCoinInfo,
     tokenB: ShieldedCoinInfo,
@@ -426,13 +449,34 @@ export class Lunarswap implements ILunarswap {
     return txData.private.result;
   }
 
-  // async getPairId(
-  //   tokenA: ShieldedCoinInfo,
-  //   tokenB: ShieldedCoinInfo,
-  // ): Promise<Uint8Array> {
-  //   const txData = await this.deployedContract.callTx.getPairId(tokenA, tokenB);
-  //   return txData.private.result;
-  // }
+  async getPairId(
+    tokenA: ShieldedCoinInfo,
+    tokenB: ShieldedCoinInfo,
+  ): Promise<Uint8Array> {
+    return Promise.resolve(getPairIdUtil(tokenA, tokenB));
+  }
+
+  getIdentity(
+    type0: Uint8Array,
+    type1: Uint8Array,
+    isPairId: boolean,
+  ): Uint8Array {
+    return getIdentityUtil(type0, type1, isPairId);
+  }
+
+  sortCoinByColor(
+    tokenA: ShieldedCoinInfo,
+    tokenB: ShieldedCoinInfo,
+  ): [ShieldedCoinInfo, ShieldedCoinInfo] {
+    return sortCoinByColorUtil(tokenA, tokenB);
+  }
+
+  sortQualifiedCoinByColor(
+    coinA: QualifiedShieldedCoinInfo,
+    coinB: QualifiedShieldedCoinInfo,
+  ): [QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo] {
+    return sortQualifiedCoinByColorUtil(coinA, coinB);
+  }
 
   async getLpTokenTotalSupply(
     tokenA: ShieldedCoinInfo,

@@ -28,9 +28,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { useLogger } from '@/hooks/use-logger';
 import type { ContractStatusInfo } from '@/lib/lunarswap-integration';
 import { proofClient } from '@/providers/proof';
-import { ZKConfigProviderWrapper } from '@/providers/zk-config';
+import { ZkConfigProviderWrapper } from '@/providers/zk-config';
 import { useWallet } from '../hooks/use-wallet';
-import { useRuntimeConfiguration } from '../lib/runtime-configuration';
+import { useActiveNetworkConfig } from '../lib/runtime-configuration';
 import { Button } from './ui/button';
 import {
   Dialog,
@@ -42,7 +42,7 @@ import {
 
 export function ContractStatusIndicator() {
   const midnightWallet = useWallet();
-  const runtimeConfig = useRuntimeConfiguration();
+  const activeNetwork = useActiveNetworkConfig();
   const _logger = useLogger();
   const [statusInfo, setStatusInfo] = useState<ContractStatusInfo>({
     status: 'not-configured',
@@ -51,11 +51,7 @@ export function ContractStatusIndicator() {
   const [isOpen, setIsOpen] = useState(false);
 
   const checkContractStatus = useCallback(async () => {
-    if (
-      !midnightWallet.walletAPI ||
-      !midnightWallet.isConnected ||
-      !runtimeConfig
-    ) {
+    if (!midnightWallet.walletAPI || !midnightWallet.isConnected) {
       setStatusInfo({
         status: 'not-configured',
         message: 'Please connect your wallet first',
@@ -74,19 +70,23 @@ export function ContractStatusIndicator() {
         walletProvider: midnightWallet.walletProvider,
       });
 
-      // Create proof provider
+      // Create ZK config provider (signature: baseURL, callback, fetchFunc)
+      const zkConfigProvider =
+        new ZkConfigProviderWrapper<LunarswapCircuitKeys>(
+          window.location.origin,
+          midnightWallet.callback,
+          fetch.bind(window),
+        );
+
+      // Create proof provider (signature: url, zkConfigProvider, callback)
+      const proverServerUri =
+        midnightWallet.walletAPI.configuration.proverServerUri ||
+        activeNetwork.PROOF_SERVER_URL;
       const proofProvider: ProofProvider<LunarswapCircuitKeys> = proofClient(
-        midnightWallet.walletAPI.uris.proverServerUri,
+        proverServerUri,
+        zkConfigProvider,
         midnightWallet.callback,
       );
-
-      // Create ZK config provider
-      const zkConfigProvider =
-        new ZKConfigProviderWrapper<LunarswapCircuitKeys>(
-          window.location.origin,
-          fetch.bind(window),
-          midnightWallet.callback,
-        );
 
       const providers: LunarswapProviders = {
         privateStateProvider,
@@ -110,7 +110,7 @@ export function ContractStatusIndicator() {
 
       const findPromise = findDeployedContract(providers, {
         privateStateId: LunarswapPrivateStateId,
-        contractAddress: runtimeConfig.LUNARSWAP_ADDRESS,
+        contractAddress: activeNetwork.LUNARSWAP_ADDRESS,
         contract,
       });
 
@@ -122,7 +122,7 @@ export function ContractStatusIndicator() {
       if (found) {
         setStatusInfo({
           status: 'connected',
-          contractAddress: runtimeConfig.LUNARSWAP_ADDRESS,
+          contractAddress: activeNetwork.LUNARSWAP_ADDRESS,
           message: 'Successfully connected to Lunarswap contract',
         });
       } else {
@@ -151,7 +151,8 @@ export function ContractStatusIndicator() {
     midnightWallet.publicDataProvider,
     midnightWallet.walletProvider,
     midnightWallet.midnightProvider,
-    runtimeConfig,
+    activeNetwork.LUNARSWAP_ADDRESS,
+    activeNetwork.PROOF_SERVER_URL,
     _logger,
   ]);
 
