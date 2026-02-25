@@ -1,12 +1,15 @@
-# Midnight DApps
+# Midnight Apps 
 
 [![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://opensource.org/licenses/MIT)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/midnight-apps/badge)](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/midnight-apps)
 
-A collection of starter-dapps on the Midnight Network
+A collection of sample (starter) apps on the Midnight Network
 
 ## Overview
-This monorepo contains experimental sample projects built on top of the Midnight Network using Compact. It includes contracts, utilities, and application.
+This monorepo contains experimental sample projects built on top of the Midnight Network using Compact. It includes contract, utility, and application code.
+
+Check out [LunarSwap](https://midnight.openzeppelin.com/lunarswap
+), a proof of concept DEX.
 
 ## Development Flow
 
@@ -30,42 +33,58 @@ compact --version
 ```
 
 ### Setup
-1. **Clone the Repository**:
+1. **Clone the Repository with Submodules**:
    ```bash
-   git clone <repository-url>
-   cd openzeppelin-midnight-apps
+   git clone --recurse-submodules <repository-url>
+   cd midnight-apps
    ```
 
-2. **Install Dependencies**:
+   If you already cloned without submodules, initialize them:
+   ```bash
+   git submodule update --init --recursive
+   ```
+
+2. **Build the compact-tools Submodule**:
+   ```bash
+cd compact-tools && yarn install && yarn build && cd -
+   ```
+   This builds the CLI tools (`compact-compiler`, `compact-builder`) required by the contracts.
+
+3. **Build the compact-contracts Submodule**:
+   ```bash
+   cd compact-contracts && yarn install && SKIP_ZK=true yarn compact && cd -
+   ```
+   This compiles the OpenZeppelin Compact contracts library.
+
+4. **Install Main Project Dependencies**:
    ```bash
    pnpm install
    ```
-   - This installs all workspace dependencies and runs the `prepare` script, which sets up Husky and builds `@openzeppelin/midnight-apps-compact`.
+   This installs all workspace dependencies and runs the `prepare` script, which sets up Husky.
 
-3. **Workspace Structure**:
-   - `contracts/*`: Compact Smart contract projects (e.g., `@openzeppelin/midnight-apps-access-contract`).
-   - `packages/*`: Utility packages (e.g., `@openzeppelin/midnight-apps-compact`).
-   - `apps/*`: Frontend applications (e.g., `@openzeppelin/midnight-apps-lunarswap-ui`).
+5. **Workspace Structure**:
+   - `compact-tools/`: Git submodule - CLI tools for compiling Compact contracts.
+   - `compact-contracts/`: Git submodule - OpenZeppelin Compact contracts library.
+   - `contracts/`: Compact smart contract projects for this repo.
+   - `packages/`: Utility packages (e.g., `@openzeppelin/midnight-apps-logger`).
+   - `apps/`: Frontend applications (e.g., `@openzeppelin/midnight-apps-lunarswap-ui`).
 
    See `pnpm-workspace.yaml` for the full list.
 
-4. **Build Contracts Packages**:
+6. **Build Contracts Packages**:
    ```bash
-   # Navigate to each contract package and run build
-   cd contracts/access && pnpm build 
-   cd ../math && pnpm build
-   cd ../structs && pnpm build
+   pnpm build:contracts
    ```
-   - **Note**: Running `pnpm build:contracts`, `pnpm compact`, `pnpm compact:fast`, `pnpm compact:version`, or `pnpm compact:language-version` from the root may cause repetitive output due to Turbo's logging behavior. It's recommended to compile contracts individually from within each package directory.
+   - **Note**: Running `pnpm build:contracts`, `pnpm compact`, or `pnpm compact:fast` from the root may cause repetitive output due to Turbo's logging behavior. It's recommended to compile contracts individually from within each package directory.
    - **Feature Request**: A logging output mode flag is being requested to fix Turbo animation log flooding. See [GitHub Issue #1188](https://github.com/midnightntwrk/compactc/issues/1188) for more details.
-   
+
 ### Tasks with Turbo
 Turbo manages tasks across the monorepo, defined in `turbo.json`. Key tasks:
 
 - **`compact`**:
   - Compiles `.compact` files using the Compact CLI.
   - Run: `pnpm compact` (from within individual packages).
-  - **Note**: Running from root with `pnpm compact`, `pnpm compact:fast`, `pnpm compact:version`, or `pnpm compact:language-version` may cause output repetition issues.
+  - **Note**: Running from root with `pnpm compact`, or `pnpm compact:fast` may cause output repetition issues.
   - Variants:
     - `pnpm compact:fast`: Compiles with `--skip-zk` flag for faster builds.
     - `pnpm compact:fmt`: Formats all `.compact` files using `compact format`.
@@ -78,7 +97,7 @@ Turbo manages tasks across the monorepo, defined in `turbo.json`. Key tasks:
   - **`build:apps`**
     - Builds apps projects.
     - Run: `pnpm build:apps`.
-    
+
 - **`test`**:
   - Runs tests with Vitest.
   - Run: `pnpm test`.
@@ -87,10 +106,10 @@ Turbo manages tasks across the monorepo, defined in `turbo.json`. Key tasks:
   - Checks TypeScript types without emitting files.
   - Run: `pnpm types`.
 
-- **`fmt`**, **`lint`**, **`lint:fix`**:
-  - `pnpm fmt`: Formats TypeScript/JavaScript code with Biome and `.compact` files with Compact CLI.
-  - `pnpm lint`: Lints code with Biome.
-  - `pnpm lint:fix`: Auto-fixes linting issues with Biome.
+- **`lint`**, **`lint:fix`**, **`lint:ci`**:
+  - `pnpm lint`: Checks formatting and linting of all TypeScript/JavaScript code with Biome, and `.compact` files with Compact CLI.
+  - `pnpm lint:fix`: Auto-fixes formatting and linting issues with Biome for all files, and formats `.compact` files with Compact CLI.
+  - `pnpm lint:ci`: CI-specific check that only checks changed files (compared to `main` branch) for faster CI runs. Doesn't fail on unmatched files.
 
 ### Commit Workflow
 Commits are linted with `commitlint` and staged files are processed with `lint-staged` and Biome.

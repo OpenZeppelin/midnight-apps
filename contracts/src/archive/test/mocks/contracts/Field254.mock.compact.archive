@@ -1,0 +1,80 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/test/Field254.mock.compact)
+
+pragma language_version >= 0.20.0;
+
+import CompactStandardLibrary;
+
+import "../interfaces/IUint256";
+
+import "../Field254" prefix Field254_;
+
+export { U256, DivResultU256 };
+
+export circuit fromField(a: Field): U256 {
+  return disclose(Field254_fromField(a));
+}
+
+export circuit toField(a: U256): Field {
+  return disclose(Field254_toField(a));
+}
+
+export circuit eq(a: Field, b: Field): Boolean {
+  return disclose(Field254_eq(a, b));
+}
+
+export circuit lt(a: Field, b: Field): Boolean {
+  return disclose(Field254_lt(a, b));
+}
+
+export circuit lte(a: Field, b: Field): Boolean {
+  return disclose(Field254_lte(a, b));
+}
+
+export circuit gt(a: Field, b: Field): Boolean {
+  return disclose(Field254_gt(a, b));
+}
+
+export circuit gte(a: Field, b: Field): Boolean {
+  return disclose(Field254_gte(a, b));
+}
+
+export circuit add(a: Field, b: Field): Field {
+  return disclose(Field254_add(a, b));
+}
+
+export circuit sub(a: Field, b: Field): Field {
+  return disclose(Field254_sub(a, b));
+}
+
+export circuit mul(a: Field, b: Field): Field {
+  return disclose(Field254_mul(a, b));
+}
+
+export circuit div(a: Field, b: Field): Field {
+  return disclose(Field254_div(a, b));
+}
+
+export circuit rem(a: Field, b: Field): Field {
+  return disclose(Field254_rem(a, b));
+}
+
+export circuit divRem(a: Field, b: Field): DivResultU256 {
+  return disclose(Field254_divRem(a, b));
+}
+
+export circuit sqrt(a: Field): Field {
+  return disclose(Field254_sqrt(a));
+}
+
+export circuit min(a: Field, b: Field): Field {
+  return disclose(Field254_min(a, b));
+}
+
+export circuit max(a: Field, b: Field): Field {
+  return disclose(Field254_max(a, b));
+}
+
+export circuit isZero(a: Field): Boolean {
+  return disclose(Field254_isZero(a));
+}

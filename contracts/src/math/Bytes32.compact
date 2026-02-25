@@ -1,0 +1,148 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/Bytes32.compact)
+
+pragma language_version >= 0.20.0;
+
+/**
+ * @title Bytes32 module
+ * @description A utility module providing conversions from Vector<32, Uint<8>> (32 bytes) to U256
+ * using little-endian (LE) byte ordering.
+ *
+ * @remarks
+ * Byte ordering convention (little-endian):
+ * - Element 0 is the least significant byte, element 31 is the most significant.
+ * - This mirrors the pattern of Bytes8 ↔ Uint<64> conversions.
+ *
+ * Supported circuits:
+ * - toU256(vec): Converts Vector<32, Uint<8>> to U256
+ * - toU256(bytes): Converts Bytes<32> to U256
+ * - pack(vec): Converts Vector<32, Uint<8>> to Bytes<32>
+ * - unpack(bytes): Converts Bytes<32> to Vector<32, Uint<8>>
+ *
+ * For the reverse conversion (U256 to Vector), see Uint256.toUnpackedBytes.
+ */
+module Bytes32 {
+  import { U128 } from "./types/TU128";
+  import { U256 } from "./types/TU256";
+  import { toUint64 } from "./Bytes8" prefix Bytes8_;
+
+  /**
+   * @description Unpacks a Bytes<32> into 32 individual bytes off-chain.
+   * This is the witness for the unpack circuit.
+   *
+   * @param bytes - The 32-byte array to unpack.
+   * @returns A vector of 32 bytes where element 0 is the LSB.
+   */
+  witness wit_unpackBytes32(bytes: Bytes<32>): Vector<32, Uint<8>>;
+
+  /**
+   * @title pack circuit
+   * @description Packs a Vector<32, Uint<8>> into a Bytes<32>.
+   *
+   * @remarks
+   * This circuit converts a 32-element vector of bytes to a 32-byte array
+   * using little-endian byte ordering.
+   *
+   * @circuitInfo k=14, rows=10231
+   *
+   * @param {Vector<32, Uint<8>>} vec - The vector of 32 bytes to convert.
+   *
+   * @returns {Bytes<32>} - The 32-byte array.
+   */
+  export pure circuit pack(vec: Vector<32, Uint<8>>): Bytes<32> {
+    return Bytes[...vec];
+  }
+
+  /**
+   * @title unpack circuit
+   * @description Unpacks a Bytes<32> into a Vector<32, Uint<8>>.
+   *
+   * @remarks
+   * This circuit converts a 32-byte array to a 32-element vector of bytes
+   * using little-endian byte ordering.
+   *
+   * @circuitInfo k=14, rows=10521
+   *
+   * @param {Bytes<32>} bytes - The 32-byte array to convert.
+   *
+   * @returns {Vector<32, Uint<8>>} - The 32-element vector of bytes.
+   */
+  export circuit unpack(bytes: Bytes<32>): Vector<32, Uint<8>> {
+    const vec = wit_unpackBytes32(bytes);
+    assert(pack(vec) == bytes, "Bytes32: unpack verification failed");
+    return vec;
+  }
+
+  /**
+   * @title limbToUint64 circuit
+   * @description Converts an 8-byte limb of the vector to a Uint<64> using pure arithmetic.
+   *
+   * @remarks
+   * This circuit converts an 8-byte limb to a 64-bit unsigned integer using pure arithmetic.
+   *
+   * @param {Vector<32, Uint<8>>} vec - The vector of 32 bytes.
+   * @param {Uint<2>} limbIndex - The limb index (0-3).
+   *
+   * @returns {Uint<64>} - The 64-bit unsigned integer.
+   */
+  pure circuit limbToUint64(vec: Vector<32, Uint<8>>, limbIndex: Uint<2>): Uint<64> {
+    const offset = limbIndex * 8;
+    const limb: Vector<8, Uint<8>> =
+            [vec[offset],
+             vec[offset + 1],
+             vec[offset + 2],
+             vec[offset + 3],
+             vec[offset + 4],
+             vec[offset + 5],
+             vec[offset + 6],
+             vec[offset + 7]];
+    return Bytes8_toUint64(limb);
+  }
+
+  /**
+   * @title toU256 circuit (from Vector)
+   * @description Converts a Vector<32, Uint<8>> to a U256 using pure arithmetic.
+   *
+   * @remarks
+   * This circuit converts a 32-element vector of bytes to a 256-bit unsigned integer
+   * using little-endian byte ordering. The vector is split into four 8-byte chunks,
+   * each packed into a Uint<64> limb (same formula as `Bytes8.toUint64`). The packing
+   * is inlined so this module has no prefix imports and can be used as a single-module
+   * dependency (e.g. from mock contracts).
+   *
+   * Limb packing order (little-endian):
+   * - v0-v7   → low.low   (least significant)
+   * - v8-v15  → low.high
+   * - v16-v23 → high.low
+   * - v24-v31 → high.high (most significant)
+   *
+   * @circuitInfo k=10, rows=739
+   *
+   * @param {Vector<32, Uint<8>>} vec - The vector of 32 bytes to convert.
+   *
+   * @returns {U256} - The 256-bit unsigned integer.
+   */
+  export pure circuit toU256(vec: Vector<32, Uint<8>>): U256 {
+    return U256 { low: U128 { low: limbToUint64(vec, 0), high: limbToUint64(vec, 1) },
+                  high: U128 { low: limbToUint64(vec, 2), high: limbToUint64(vec, 3) } };
+  }
+
+  /**
+   * @title toU256 circuit (from Bytes)
+   * @description Converts a Bytes<32> to a U256.
+   *
+   * @remarks
+   * This circuit converts a 32-byte array to a 256-bit unsigned integer.
+   * The conversion is done by first unpacking to a vector via `unpack`,
+   * then converting to U256.
+   *
+   * @circuitInfo k=14, rows=10269
+   *
+   * @param {Bytes<32>} bytes - The 32-byte array to convert.
+   *
+   * @returns {U256} - The 256-bit unsigned integer.
+   */
+  export circuit toU256(bytes: Bytes<32>): U256 {
+    return toU256(unpack(bytes));
+  }
+}

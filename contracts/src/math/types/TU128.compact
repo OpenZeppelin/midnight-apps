@@ -1,0 +1,35 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/types/TU128.compact)
+
+pragma language_version >= 0.20.0;
+
+/**
+ * @title TU128
+ * @dev Type definition module for the U128 struct, representing 128-bit unsigned integers.
+ *
+ * This module exists separately from Uint128 to avoid cyclic dependencies between
+ * Uint128 and Uint256 modules. By placing type definitions in separate modules,
+ * the dependency chain becomes:
+ *
+ * Import chain:
+ * - TU128 has no dependencies (base type)
+ * - TU256 imports U128 from TU128
+ * - Uint128 imports U128 from TU128 and U256 from TU256
+ * - Uint256 imports U128 from TU128 (via Uint128) and U256 from TU256
+ */
+module TU128 {
+  /**
+   * @description A struct representing a 128-bit unsigned integer as two 64-bit parts.
+   * The value is computed as: high * 2^64 + low
+   */
+  export struct U128 {
+    /**
+     * @description The least significant 64 bits (bits 0-63) of the 128-bit number
+     */
+    low: Uint<64>,
+    /**
+     * @description The most significant 64 bits (bits 64-127) of the 128-bit number
+     */
+    high: Uint<64>
+  }
+}

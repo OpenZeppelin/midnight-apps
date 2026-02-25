@@ -1,12 +1,15 @@
 {
-  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.9/schema.json",
   "files": {
-    "ignore": [
-      "CHANGELOG.md",
-      "pnpm-lock.yaml",
-      "tsconfig.base.json",
-      "tsconfig*.json",
-      "*.compact"
+    "includes": [
+      "**",
+      "!**/CHANGELOG.md",
+      "!**/pnpm-lock.yaml",
+      "!**/*.compact",
+      "!**/artifacts",
+      "!**/*.css",
+      "!**/dist",
+      "!**/.next"
     ]
   },
   "formatter": {
@@ -35,13 +38,27 @@
       },
       "style": {
         "noNonNullAssertion": "off",
-        "useShorthandArrayType": "error"
+        "useConsistentArrayType": {
+          "level": "error",
+          "options": {
+            "syntax": "shorthand"
+          }
+        }
       },
       "suspicious": {
         "noArrayIndexKey": "off",
         "noConfusingVoidType": "off",
-        "noConsoleLog": "error",
-        "noExplicitAny": "off"
+        "noExplicitAny": "off",
+        "noConsole": {
+          "level": "error",
+          "options": {
+            "allow": [
+              "log",
+              "warn",
+              "error"
+            ]
+          }
+        }
       }
     }
   },
@@ -52,12 +69,17 @@
       "semicolons": "always"
     }
   },
-  "organizeImports": {
-    "enabled": true
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
   },
   "vcs": {
     "enabled": true,
     "clientKind": "git",
-    "useIgnoreFile": true
+    "useIgnoreFile": false,
+    "defaultBranch": "main"
   }
 }
