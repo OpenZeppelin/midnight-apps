@@ -154,7 +154,9 @@ export { isPairExists, getPair, getPairReserves, getAllPairLength }
  * @title Library functions
  * @description Functions exported from the LunarswapLibrary contract.
  */
-//export { getIdentity, sortCoinByColor, sortQualifiedCoinByColor };
+// TODO: can't export those circuits as they are impure circuits but they do not have verifier
+// Related issue: https://github.com/LFDT-Minokawa/compact/issues/150
+// export { getPairId, getIdentity, sortCoinByColor, sortQualifiedCoinByColor };
 
 /**
  * @title Liquidity functions

@@ -13,7 +13,14 @@ import {
 import { Input } from '@/components/ui/input';
 import { useLogger } from '@/hooks/use-logger';
 import { useLunarswapContext } from '@/lib/lunarswap-context';
-import { popularTokens } from '@/lib/token-config';
+import {
+  userDeployedTokenToToken,
+  useShieldedTokenContext,
+} from '@/lib/shielded-token-context';
+import {
+  getAllTokens,
+  type Token as TokenConfigType,
+} from '@/lib/token-config';
 
 interface Token {
   symbol: string;
@@ -43,6 +50,10 @@ export function TokenSelectModal({
   const [availableTokens, setAvailableTokens] = useState<Token[]>([]);
   const [isLoading, _setIsLoading] = useState(false);
   const { allPairs } = useLunarswapContext();
+  const { userDeployedTokens } = useShieldedTokenContext();
+  const allTokensList = getAllTokens(
+    userDeployedTokens.map(userDeployedTokenToToken),
+  );
   const navigate = useNavigate();
   const _logger = useLogger();
 
@@ -80,8 +91,8 @@ export function TokenSelectModal({
       tokenSet.add(token1Color);
     }
 
-    // Filter popular tokens to only include those with pools
-    const available = popularTokens.filter((token) => {
+    // Filter all tokens to only include those with pools
+    const available = allTokensList.filter((token: TokenConfigType) => {
       const tokenType = token.type.replace(/^0x/i, '').toLowerCase();
       const tokenTypeWithoutPrefix = tokenType.replace(/^0200/, '');
 
@@ -106,7 +117,7 @@ export function TokenSelectModal({
     });
 
     setAvailableTokens(available);
-  }, [show, allPairs, customTokens]);
+  }, [show, allPairs, customTokens, allTokensList]);
 
   // Use custom tokens if provided, otherwise use the default logic
   const tokensToUse =

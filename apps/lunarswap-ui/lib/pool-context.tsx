@@ -1,6 +1,9 @@
 'use client';
 
-import type { Ledger, Pair } from '@openzeppelin/midnight-apps-lunarswap';
+import type {
+  Ledger,
+  Pair,
+} from '@openzeppelin/midnight-apps-contracts/dist/artifacts/lunarswap/Lunarswap/contract';
 import {
   createContext,
   type ReactNode,
@@ -39,7 +42,11 @@ interface PoolProviderProps {
 }
 
 export const PoolProvider = ({ children }: PoolProviderProps) => {
-  const { contractIntegration } = useLunarswapContext();
+  const {
+    lunarswap,
+    publicState,
+    allPairs: contextAllPairs,
+  } = useLunarswapContext();
   const _logger = useLogger();
   const [isLoading, setIsLoading] = useState(false);
   const [ledger, setLedger] = useState<Ledger | null>(null);
@@ -49,59 +56,55 @@ export const PoolProvider = ({ children }: PoolProviderProps) => {
 
   // Fetch pool data when contract is ready
   const refreshPoolData = useCallback(async () => {
-    if (!contractIntegration) {
+    if (!lunarswap) {
       return;
     }
 
     setIsLoading(true);
     try {
-      const poolLedger = await contractIntegration.getPublicState();
-      setLedger(poolLedger);
-
-      if (poolLedger) {
-        const pairs = contractIntegration.getAllPairs();
-        setAllPairs(pairs);
-      }
+      setLedger(publicState);
+      setAllPairs(contextAllPairs);
     } catch (error) {
       _logger?.error(
         `Failed to refresh pool data: ${error instanceof Error ? error.message : String(error)}`,
-        error,
       );
     } finally {
       setIsLoading(false);
     }
-  }, [contractIntegration, _logger]);
+  }, [lunarswap, publicState, contextAllPairs, _logger]);
 
   // Auto-refresh pool data when contract is initialized
   useEffect(() => {
-    if (contractIntegration) {
+    if (lunarswap) {
       refreshPoolData();
     }
-  }, [contractIntegration, refreshPoolData]);
+  }, [lunarswap, refreshPoolData]);
 
   // Check if a pair exists
   const checkPairExists = useCallback(
-    async (tokenA: string, tokenB: string): Promise<boolean> => {
-      if (!contractIntegration) {
+    async (_tokenA: string, _tokenB: string): Promise<boolean> => {
+      if (!lunarswap) {
         return false;
       }
-      return contractIntegration.isPairExists(tokenA, tokenB);
+      // TODO: Implement pair existence check
+      return false;
     },
-    [contractIntegration],
+    [lunarswap],
   );
 
   // Get pair reserves
   const getPairReserves = useCallback(
     async (
-      tokenA: string,
-      tokenB: string,
+      _tokenA: string,
+      _tokenB: string,
     ): Promise<[bigint, bigint] | null> => {
-      if (!contractIntegration) {
+      if (!lunarswap) {
         return null;
       }
-      return contractIntegration.getPairReserves(tokenA, tokenB);
+      // TODO: Implement get pair reserves
+      return null;
     },
-    [contractIntegration],
+    [lunarswap],
   );
 
   const contextValue: PoolData = {
@@ -120,18 +123,6 @@ export const PoolProvider = ({ children }: PoolProviderProps) => {
 
 // Export available token pairs for the demo
 export const getAvailableTokenPairs = () => {
-  const tokens = Object.values(DEMO_TOKENS);
   const pairs: Array<{ tokenA: string; tokenB: string; name: string }> = [];
-
-  for (let i = 0; i < tokens.length; i++) {
-    for (let j = i + 1; j < tokens.length; j++) {
-      pairs.push({
-        tokenA: tokens[i].symbol,
-        tokenB: tokens[j].symbol,
-        name: `${tokens[i].symbol}/${tokens[j].symbol}`,
-      });
-    }
-  }
-
   return pairs;
 };

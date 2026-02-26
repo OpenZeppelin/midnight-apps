@@ -3,8 +3,12 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import {
+  userDeployedTokenToToken,
+  useShieldedTokenContext,
+} from '@/lib/shielded-token-context';
 import type { Token as UiToken } from '@/lib/token-config';
-import { popularTokens } from '@/lib/token-config';
+import { getAllTokens } from '@/lib/token-config';
 import { SelectPairStep } from './steps/select-pair-step';
 import { SetDepositStep } from './steps/set-deposit-step';
 
@@ -39,6 +43,10 @@ export function NewPositionWizard({
   onClose,
   initialTokens,
 }: NewPositionWizardProps) {
+  const { userDeployedTokens } = useShieldedTokenContext();
+  const allTokensList = getAllTokens(
+    userDeployedTokens.map(userDeployedTokenToToken),
+  );
   const [currentStep, setCurrentStep] = useState<Step>('select-pair');
   const [pairData, setPairData] = useState<PairSelectionData>({
     tokenA: null,
@@ -51,11 +59,10 @@ export function NewPositionWizard({
   // Set initial tokens from navigation state
   useEffect(() => {
     if (initialTokens?.tokenA && initialTokens?.tokenB) {
-      // Find token data from popular tokens
-      const tokenAData = popularTokens.find(
+      const tokenAData = allTokensList.find(
         (t) => t.symbol === initialTokens.tokenA,
       );
-      const tokenBData = popularTokens.find(
+      const tokenBData = allTokensList.find(
         (t) => t.symbol === initialTokens.tokenB,
       );
 
@@ -67,7 +74,7 @@ export function NewPositionWizard({
         }));
       }
     }
-  }, [initialTokens]);
+  }, [initialTokens, allTokensList]);
 
   const handlePairSubmit = (data: PairSelectionData) => {
     // Validate that we have complete pair data

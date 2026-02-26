@@ -9,8 +9,8 @@ type Step = 'select-pair' | 'set-range';
 export function PoolCreationWizard() {
   const [currentStep, setCurrentStep] = useState<Step>('select-pair');
   const [pairData, setPairData] = useState({
-    tokenA: null,
-    tokenB: null,
+    tokenA: undefined,
+    tokenB: undefined,
     fee: 0.3, // Default fee tier
   });
 

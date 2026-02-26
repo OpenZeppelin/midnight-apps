@@ -2,7 +2,11 @@
 
 import { useMemo, useState } from 'react';
 import { TokenIcon } from '@/components/token-icon';
-import { popularTokens } from '@/lib/token-config';
+import {
+  userDeployedTokenToToken,
+  useShieldedTokenContext,
+} from '@/lib/shielded-token-context';
+import { getAllTokens } from '@/lib/token-config';
 
 interface Blob {
   className: string;
@@ -14,6 +18,11 @@ interface Blob {
 
 export function TokenCloud() {
   const [hoveredBlob, setHoveredBlob] = useState<number | null>(null);
+  const { userDeployedTokens } = useShieldedTokenContext();
+  const allTokensList = useMemo(
+    () => getAllTokens(userDeployedTokens.map(userDeployedTokenToToken)),
+    [userDeployedTokens],
+  );
 
   // Generate static positions for blobs
   const blobs: Blob[] = useMemo(() => {
@@ -35,7 +44,7 @@ export function TokenCloud() {
     const generatedBlobs: Blob[] = [];
 
     // Create one blob for each token, ensuring no duplicates
-    popularTokens.forEach((token, index) => {
+    allTokensList.forEach((token, index) => {
       const color = colors[index % colors.length]; // Cycle through colors
 
       generatedBlobs.push({
@@ -48,11 +57,11 @@ export function TokenCloud() {
     });
 
     return generatedBlobs;
-  }, []);
+  }, [allTokensList]);
 
   // Get token details for display
   const getTokenDetails = (symbol: string) => {
-    return popularTokens.find((token) => token.symbol === symbol);
+    return allTokensList.find((token) => token.symbol === symbol);
   };
 
   return (

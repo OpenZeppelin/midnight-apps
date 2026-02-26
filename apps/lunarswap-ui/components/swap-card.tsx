@@ -14,8 +14,12 @@ import { useWallet } from '@/hooks/use-wallet';
 import { useLunarswapContext } from '@/lib/lunarswap-context';
 import { useActiveNetworkConfig } from '@/lib/runtime-configuration';
 import {
+  userDeployedTokenToToken,
+  useShieldedTokenContext,
+} from '@/lib/shielded-token-context';
+import {
+  getAllTokens,
   getAvailableTokensForSelection,
-  popularTokens,
 } from '@/lib/token-config';
 import { cn } from '@/utils/cn';
 import { LiquidityProgress } from './pool/liquidity-progress';
@@ -55,7 +59,11 @@ export function SwapCard({
 }: SwapCardProps) {
   const midnightWallet = useWallet();
   const { status, allPairs, lunarswap } = useLunarswapContext();
+  const { userDeployedTokens } = useShieldedTokenContext();
   const activeNetwork = useActiveNetworkConfig();
+  const allTokensList = getAllTokens(
+    userDeployedTokens.map(userDeployedTokenToToken),
+  );
   const [isHydrated, setIsHydrated] = useState(false);
 
   const [showTokenModal, setShowTokenModal] = useState(false);
@@ -126,10 +134,10 @@ export function SwapCard({
   useEffect(() => {
     if (initialTokens?.fromToken && initialTokens?.toToken) {
       // Use popularTokens directly since we know they contain all available tokens
-      const fromTokenData = popularTokens.find(
+      const fromTokenData = allTokensList.find(
         (t) => t.symbol === initialTokens.fromToken,
       );
-      const toTokenData = popularTokens.find(
+      const toTokenData = allTokensList.find(
         (t) => t.symbol === initialTokens.toToken,
       );
 
@@ -140,7 +148,7 @@ export function SwapCard({
         setToToken(toTokenData);
       }
     }
-  }, [initialTokens]);
+  }, [initialTokens, allTokensList]);
 
   // Function to get available tokens for a specific selected token
   const getAvailableTokensForToken = useCallback(
@@ -228,9 +236,9 @@ export function SwapCard({
     // If we have initial tokens from navigation, show all popular tokens
     // This allows users to select any token pair from the landing page
     if (initialTokens?.fromToken && initialTokens?.toToken) {
-      setAvailableTokens(popularTokens);
-      setAvailableTokensForFrom(popularTokens);
-      setAvailableTokensForTo(popularTokens);
+      setAvailableTokens(allTokensList);
+      setAvailableTokensForFrom(allTokensList);
+      setAvailableTokensForTo(allTokensList);
       setIsLoadingTokens(false);
       return;
     }
@@ -245,7 +253,7 @@ export function SwapCard({
     }
 
     // Use the new function to get tokens from available pools
-    const available = getAvailableTokensForSelection(allPairs);
+    const available = getAvailableTokensForSelection(allPairs, allTokensList);
 
     // Only set available tokens if we have matches from pools
     if (available.length > 0) {
@@ -257,7 +265,7 @@ export function SwapCard({
     // No default token selection - let user choose
     // Clear loading state after token processing is complete
     setIsLoadingTokens(false);
-  }, [allPairs, initialTokens]);
+  }, [allPairs, initialTokens, allTokensList]);
 
   // Update contextual token lists when tokens change or when availableTokens are loaded
   useEffect(() => {

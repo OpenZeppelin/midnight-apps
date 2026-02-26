@@ -1,6 +1,6 @@
 // Type definitions for Midnight Lace wallet integration
 
-import type { DAppConnectorWalletAPI } from '@midnight-ntwrk/dapp-connector-api';
+import type { ConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
 
 export interface WalletState {
   status: 'disconnected' | 'connecting' | 'connected' | 'error';
@@ -16,7 +16,7 @@ export interface ServiceUriConfig {
 export interface MidnightLaceConnector {
   apiVersion: string;
   isEnabled(): Promise<boolean>;
-  enable(): Promise<DAppConnectorWalletAPI>;
+  enable(): Promise<ConnectedAPI>;
   serviceUriConfig(): Promise<ServiceUriConfig>;
 }
 

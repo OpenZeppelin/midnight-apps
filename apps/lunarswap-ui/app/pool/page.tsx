@@ -1,5 +1,6 @@
-import { Minus, Plus } from 'lucide-react';
+import { Coins, Minus, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { DeployTokenModal } from '@/components/deploy-token-modal';
 import { Header } from '@/components/header';
 import { MoonDustBackground } from '@/components/moon-dust-background';
 import { NewPositionWizard } from '@/components/pool/new-position-wizard';
@@ -7,6 +8,13 @@ import { RemoveLiquidityWizard } from '@/components/pool/remove-liquidity-wizard
 import { TopPoolsList } from '@/components/pool/top-pools-list';
 import { StarsBackground } from '@/components/stars-background';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { useWallet } from '@/hooks/use-wallet';
+import {
+  userDeployedTokenToToken,
+  useShieldedTokenContext,
+} from '@/lib/shielded-token-context';
+import { getAllTokens } from '@/lib/token-config';
 
 export const metadata = {
   title: 'Manage Liquidity & Positions',
@@ -17,6 +25,13 @@ export const metadata = {
 export default function PoolPage() {
   const [showNewPosition, setShowNewPosition] = useState(true); // Default to Add Liquidity
   const [showRemoveLiquidity, setShowRemoveLiquidity] = useState(false);
+  const [deployModalOpen, setDeployModalOpen] = useState(false);
+  const { isConnected } = useWallet();
+  const { userDeployedTokens } = useShieldedTokenContext();
+  const allTokensList = getAllTokens(
+    userDeployedTokens.map(userDeployedTokenToToken),
+  );
+  const hasNoTokens = isConnected && allTokensList.length === 0;
 
   useEffect(() => {
     document.title = 'Manage Liquidity & Positions';
@@ -105,7 +120,29 @@ export default function PoolPage() {
                 {/* Add Liquidity Wizard - Default */}
                 {showNewPosition && (
                   <div>
-                    <NewPositionWizard onClose={handleCloseWizards} />
+                    {hasNoTokens ? (
+                      <Card className="bg-transparent border border-gray-200/50 dark:border-blue-900/30 rounded-xl overflow-hidden">
+                        <CardContent className="p-8 text-center">
+                          <Coins className="h-14 w-14 text-gray-400 mx-auto mb-4" />
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                            No tokens available
+                          </h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                            You need tokens to create liquidity pools. Deploy a
+                            shielded token to get started.
+                          </p>
+                          <Button
+                            onClick={() => setDeployModalOpen(true)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white gap-2"
+                          >
+                            <Plus className="h-4 w-4" />
+                            Deploy Token
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ) : (
+                      <NewPositionWizard onClose={handleCloseWizards} />
+                    )}
                   </div>
                 )}
 
@@ -127,6 +164,11 @@ export default function PoolPage() {
           </div>
         </div>
       </main>
+
+      <DeployTokenModal
+        open={deployModalOpen}
+        onOpenChange={setDeployModalOpen}
+      />
     </div>
   );
 }

@@ -15,6 +15,7 @@ const navItems = [
   { href: '/trade', label: 'Trade' },
   { href: '/explore', label: 'Explore' },
   { href: '/pool', label: 'Pool' },
+  { href: '/tokens', label: 'Tokens' },
 ];
 
 export function Header() {

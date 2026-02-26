@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { DeployTokenModal } from '@/components/deploy-token-modal';
 import { Header } from '@/components/header';
 import { MoonDustBackground } from '@/components/moon-dust-background';
 import { SplitTokenIcon } from '@/components/pool/split-token-icon';
@@ -32,10 +33,15 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { useViewPreference } from '@/hooks/use-view-preference';
+import { useWallet } from '@/hooks/use-wallet';
 import { useLunarswapContext } from '@/lib/lunarswap-context';
 import {
+  userDeployedTokenToToken,
+  useShieldedTokenContext,
+} from '@/lib/shielded-token-context';
+import {
+  getAllTokens,
   getAvailableTokensForSelection,
-  popularTokens,
 } from '@/lib/token-config';
 import { getTokenSymbolByColor } from '@/lib/token-utils';
 
@@ -61,8 +67,13 @@ export default function ExplorePage() {
   }, []);
 
   const viewPreference = useViewPreference();
+  const { isConnected } = useWallet();
   const { isLoadingPublicState, hasLoadedDataOnce, allPairs } =
     useLunarswapContext();
+  const { userDeployedTokens } = useShieldedTokenContext();
+  const allTokensList = getAllTokens(
+    userDeployedTokens.map(userDeployedTokenToToken),
+  );
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedOption, setSelectedOption] = useState<ExploreOption>('tokens');
@@ -83,6 +94,7 @@ export default function ExplorePage() {
   // Token dialog state
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
   const [isTokenDialogOpen, setIsTokenDialogOpen] = useState(false);
+  const [deployModalOpen, setDeployModalOpen] = useState(false);
   const [copiedDialogField, setCopiedDialogField] = useState<string | null>(
     null,
   );
@@ -116,8 +128,8 @@ export default function ExplorePage() {
 
   const tokens =
     allPairs.length > 0
-      ? getAvailableTokensForSelection(allPairs)
-      : Object.values(popularTokens);
+      ? getAvailableTokensForSelection(allPairs, allTokensList)
+      : allTokensList;
   const filteredTokens = tokens.filter(
     (token) =>
       token.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -497,17 +509,28 @@ export default function ExplorePage() {
             </div>
 
             <div className="flex items-center space-x-3">
-              {/* Search Bar - Show for Tokens view */}
+              {/* Search Bar and Deploy Token - Show for Tokens view */}
               {selectedOption === 'tokens' && (
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder="Search tokens..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 w-48 h-9"
-                  />
-                </div>
+                <>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      placeholder="Search tokens..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10 w-48 h-9"
+                    />
+                  </div>
+                  {isConnected && (
+                    <Button
+                      onClick={() => setDeployModalOpen(true)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white gap-2 h-9 px-3 text-sm"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Deploy Token
+                    </Button>
+                  )}
+                </>
               )}
 
               {/* Search Bar and Add Liquidity Button - Show for Pools view */}
@@ -667,6 +690,11 @@ export default function ExplorePage() {
           )}
         </DialogContent>
       </Dialog>
+
+      <DeployTokenModal
+        open={deployModalOpen}
+        onOpenChange={setDeployModalOpen}
+      />
     </div>
   );
 }

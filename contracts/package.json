@@ -21,6 +21,11 @@
   "homepage": "",
   "type": "module",
   "exports": {
+    "./dist/artifacts/shielded-token/ShieldedFungibleToken/contract": {
+      "types": "./dist/artifacts/shielded-token/ShieldedFungibleToken/contract/index.d.ts",
+      "import": "./dist/artifacts/shielded-token/ShieldedFungibleToken/contract/index.js",
+      "default": "./dist/artifacts/shielded-token/ShieldedFungibleToken/contract/index.js"
+    },
     "./dist/artifacts/lunarswap/Lunarswap/contract": {
       "types": "./dist/artifacts/lunarswap/Lunarswap/contract/index.d.ts",
       "import": "./dist/artifacts/lunarswap/Lunarswap/contract/index.js",

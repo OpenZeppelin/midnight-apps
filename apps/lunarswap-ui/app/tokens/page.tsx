@@ -1,7 +1,9 @@
 import { Buffer } from 'buffer';
-import { Clock, Grid3X3, List, Search } from 'lucide-react';
+import { Clock, Coins, Grid3X3, List, Plus, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { DeployTokenModal } from '@/components/deploy-token-modal';
 import { Header } from '@/components/header';
+import { MintTokenModal } from '@/components/mint-token-modal';
 import { MoonDustBackground } from '@/components/moon-dust-background';
 import { StarsBackground } from '@/components/stars-background';
 import { TokenIcon } from '@/components/token-icon';
@@ -19,8 +21,12 @@ import { useViewPreference } from '@/hooks/use-view-preference';
 import { useWallet } from '@/hooks/use-wallet';
 import { useLunarswapContext } from '@/lib/lunarswap-context';
 import { useActiveNetworkConfig } from '@/lib/runtime-configuration';
+import {
+  userDeployedTokenToToken,
+  useShieldedTokenContext,
+} from '@/lib/shielded-token-context';
 import type { Token } from '@/lib/token-config';
-import { popularTokens } from '@/lib/token-config';
+import { getAllTokens } from '@/lib/token-config';
 
 export const metadata = {
   title: 'Explore & Manage Midnight Tokens',
@@ -37,12 +43,21 @@ function TokensContent() {
   const activeNetwork = useActiveNetworkConfig();
   const { isConnected } = useWallet();
   const { status, isLoading, allPairs } = useLunarswapContext();
+  const { userDeployedTokens } = useShieldedTokenContext();
+  const allTokensList = getAllTokens(
+    userDeployedTokens.map(userDeployedTokenToToken),
+  );
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>(
     viewPreference === 'horizontal' ? 'grid' : 'list',
   );
   const [availableTokens, setAvailableTokens] = useState<Token[]>([]);
+  const [deployModalOpen, setDeployModalOpen] = useState(false);
+  const [mintModalOpen, setMintModalOpen] = useState(false);
+  const [mintModalContractAddress, setMintModalContractAddress] = useState<
+    string | undefined
+  >(undefined);
 
   // Update view mode when view preference changes
   useEffect(() => {
@@ -65,8 +80,8 @@ function TokensContent() {
       tokenSet.add(token1Color);
     }
 
-    // Filter popular tokens to only include those with pools
-    const available = popularTokens.filter((token) => {
+    // Filter all tokens to only include those with pools
+    const available = allTokensList.filter((token) => {
       const tokenTypeSuffix = token.type.slice(-8);
       const hasMatch = Array.from(tokenSet).some(
         (color) => color.slice(-8) === tokenTypeSuffix,
@@ -77,14 +92,14 @@ function TokensContent() {
     // Only set available tokens if we have a successful connection and pools
     if (isConnected && status === 'connected') {
       if (available.length === 0 && allPairs.length > 0) {
-        setAvailableTokens(popularTokens);
+        setAvailableTokens(allTokensList);
       } else {
         setAvailableTokens(available);
       }
     } else {
       setAvailableTokens([]);
     }
-  }, [isConnected, status, allPairs]);
+  }, [isConnected, status, allPairs, allTokensList]);
 
   const tokens: Token[] =
     isConnected && status === 'connected' ? availableTokens : [];
@@ -199,8 +214,27 @@ function TokensContent() {
               </div>
             </div>
 
-            <div className="pt-2">
-              <Button variant="outline" size="sm" className="w-full" disabled>
+            <div className="pt-2 flex flex-wrap gap-2">
+              {userDeployedTokens.some((t) => t.address === token.address) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 min-w-0"
+                  onClick={() => {
+                    setMintModalContractAddress(token.address);
+                    setMintModalOpen(true);
+                  }}
+                >
+                  <Coins className="h-3 w-3 mr-2" />
+                  Mint
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 min-w-0"
+                disabled
+              >
                 <Clock className="h-3 w-3 mr-2" />
                 Explorer - Coming Soon
               </Button>
@@ -240,6 +274,21 @@ function TokensContent() {
                 </div>
               </div>
               <div className="flex items-center space-x-2">
+                {userDeployedTokens.some(
+                  (t) => t.address === token.address,
+                ) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setMintModalContractAddress(token.address);
+                      setMintModalOpen(true);
+                    }}
+                  >
+                    <Coins className="h-3 w-3 mr-2" />
+                    Mint
+                  </Button>
+                )}
                 <Button variant="outline" size="sm" disabled>
                   <Clock className="h-3 w-3 mr-2" />
                   Explorer - Coming Soon
@@ -344,7 +393,30 @@ function TokensContent() {
               />
             </div>
 
-            <div className="flex items-center space-x-2 flex-shrink-0">
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {isConnected && (
+                <>
+                  <Button
+                    size="sm"
+                    variant="default"
+                    onClick={() => setDeployModalOpen(true)}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Deploy Token
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setMintModalContractAddress(undefined);
+                      setMintModalOpen(true);
+                    }}
+                  >
+                    <Coins className="h-4 w-4 mr-2" />
+                    Mint Tokens
+                  </Button>
+                </>
+              )}
               <span className="text-sm text-muted-foreground">View:</span>
               <Button
                 size="sm"
@@ -362,6 +434,20 @@ function TokensContent() {
               </Button>
             </div>
           </div>
+
+          <DeployTokenModal
+            open={deployModalOpen}
+            onOpenChange={setDeployModalOpen}
+          />
+
+          <MintTokenModal
+            open={mintModalOpen}
+            onOpenChange={(open) => {
+              setMintModalOpen(open);
+              if (!open) setMintModalContractAddress(undefined);
+            }}
+            initialContractAddress={mintModalContractAddress}
+          />
 
           {/* Results count */}
           <div className="mb-4">
@@ -405,18 +491,25 @@ function TokensContent() {
               <p className="text-sm text-muted-foreground">
                 {searchQuery
                   ? 'Try adjusting your search query or clear the search to see all supported tokens.'
-                  : 'No tokens are currently supported in active liquidity pools.'}
+                  : 'Deploy a shielded token to get started, or wait for pools to be created.'}
               </p>
-              {searchQuery && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-4"
-                  onClick={() => setSearchQuery('')}
-                >
-                  Clear search
-                </Button>
-              )}
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
+                {!searchQuery && (
+                  <Button size="sm" onClick={() => setDeployModalOpen(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Deploy Token
+                  </Button>
+                )}
+                {searchQuery && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSearchQuery('')}
+                  >
+                    Clear search
+                  </Button>
+                )}
+              </div>
             </div>
           ) : viewMode === 'grid' ? (
             <GridView />

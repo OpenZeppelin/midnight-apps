@@ -41,48 +41,58 @@ export function getTokenColor(symbol: string): string {
 
 /**
  * Get a token by its color (type field)
+ * @param tokens - If provided, search in this list; otherwise use popularTokens only
  */
-export function getTokenByColor(color: string): Token | undefined {
-  // First try exact match
-  let token = popularTokens.find((token) => token.type === color);
-
-  // If no exact match, try to find by partial match (last 4 characters)
+export function getTokenByColor(
+  color: string,
+  tokens?: Token[],
+): Token | undefined {
+  const list = tokens ?? popularTokens;
+  let token = list.find((t) => t.type === color);
   if (!token) {
     const shortColor = color.slice(-4);
-    token = popularTokens.find((token) => token.type.endsWith(shortColor));
+    token = list.find((t) => t.type.endsWith(shortColor));
   }
-
-  // If still no match, try to find by the last 8 characters
   if (!token) {
     const shortColor = color.slice(-8);
-    token = popularTokens.find((token) => token.type.endsWith(shortColor));
+    token = list.find((t) => t.type.endsWith(shortColor));
   }
-
   return token;
 }
 
 /**
  * Get token symbol by color
  */
-export function getTokenSymbolByColor(color: string): string {
-  const token = getTokenByColor(color);
+export function getTokenSymbolByColor(color: string, tokens?: Token[]): string {
+  const token = getTokenByColor(color, tokens);
   return token ? token.symbol : color.slice(0, 4);
 }
 
 /**
  * Get token name by color
  */
-export function getTokenNameByColor(color: string): string {
-  const token = getTokenByColor(color);
+export function getTokenNameByColor(color: string, tokens?: Token[]): string {
+  const token = getTokenByColor(color, tokens);
   return token ? token.name : color.slice(0, 4);
 }
 
-// Get token details from DEMO_TOKENS
-export function getTokenDetails(symbol: string) {
-  return Object.values(popularTokens).find((token) => token.symbol === symbol);
+/**
+ * Get token details by symbol
+ * @param tokens - If provided, search in this list; otherwise use popularTokens only
+ */
+export function getTokenDetails(
+  symbol: string,
+  tokens?: Token[],
+): Token | undefined {
+  const list = tokens ?? popularTokens;
+  return list.find((token) => token.symbol === symbol);
 }
 
-// Get all available token symbols
-export function getAvailableTokenSymbols(): string[] {
-  return Object.values(popularTokens).map((token) => token.symbol);
+/**
+ * Get all available token symbols
+ * @param tokens - If provided, use this list; otherwise use popularTokens only
+ */
+export function getAvailableTokenSymbols(tokens?: Token[]): string[] {
+  const list = tokens ?? popularTokens;
+  return list.map((token) => token.symbol);
 }

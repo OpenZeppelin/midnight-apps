@@ -14,6 +14,7 @@ import {
   RuntimeConfigurationProvider,
   useRuntimeConfiguration,
 } from '@/lib/runtime-configuration';
+import { ShieldedTokenProvider } from '@/lib/shielded-token-context';
 import { VersionProvider } from '@/lib/version-context';
 import { MidnightWalletProvider } from '@/lib/wallet-context';
 import '../app/globals.css';
@@ -49,22 +50,24 @@ const App = () => {
         <VersionProvider>
           <AppWithLogger>
             <LunarswapProvider>
-              <NetworkProvider>
-                <BrowserRouter basename="/lunarswap">
-                  <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/trade" element={<TradePage />} />
-                    <Route path="/pool" element={<PoolPage />} />
-                    <Route path="/pool/new" element={<NewPositionPage />} />
-                    <Route path="/tokens" element={<TokensPage />} />
-                    <Route path="/explore" element={<ExplorePage />} />
-                    <Route
-                      path="/explore/pool/:id"
-                      element={<PoolDetailPage />}
-                    />
-                  </Routes>
-                </BrowserRouter>
-              </NetworkProvider>
+              <ShieldedTokenProvider>
+                <NetworkProvider>
+                  <BrowserRouter basename="/lunarswap">
+                    <Routes>
+                      <Route path="/" element={<Home />} />
+                      <Route path="/trade" element={<TradePage />} />
+                      <Route path="/pool" element={<PoolPage />} />
+                      <Route path="/pool/new" element={<NewPositionPage />} />
+                      <Route path="/tokens" element={<TokensPage />} />
+                      <Route path="/explore" element={<ExplorePage />} />
+                      <Route
+                        path="/explore/pool/:id"
+                        element={<PoolDetailPage />}
+                      />
+                    </Routes>
+                  </BrowserRouter>
+                </NetworkProvider>
+              </ShieldedTokenProvider>
             </LunarswapProvider>
           </AppWithLogger>
         </VersionProvider>

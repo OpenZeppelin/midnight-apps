@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { CardContent, CardFooter } from '@/components/ui/card';
 import type { Token as UiToken } from '@/lib/token-config';
-import { getTokenByName } from '../../../lib/token-config';
 import { Button } from '../../ui/button';
 import { TokenSelector } from '../token-selector';
 
@@ -21,10 +20,10 @@ interface SelectPairStepProps {
 
 export function SelectPairStep({ onSubmit, initialData }: SelectPairStepProps) {
   const [tokenA, setTokenA] = useState<UiToken | null>(
-    initialData?.tokenA || getTokenByName('tDUST') || null,
+    initialData?.tokenA ?? null,
   );
   const [tokenB, setTokenB] = useState<UiToken | null>(
-    initialData?.tokenB || null,
+    initialData?.tokenB ?? null,
   );
   const [fee] = useState<number>(0.3); // Fixed fee at 0.3%
   const [validationState, setValidationState] = useState<{

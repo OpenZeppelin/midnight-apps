@@ -3,10 +3,11 @@ import type React from 'react';
 import './globals.css';
 import { ThemeProvider } from 'next-themes';
 import pino from 'pino';
-import { Toaster } from '@/components/ui/hot-toast';
+import { Toaster } from '@/components/ui/sonner';
 import { LunarswapProvider } from '@/lib/lunarswap-context';
 import { NetworkProvider } from '@/lib/network-context';
 import { RuntimeConfigurationProvider } from '@/lib/runtime-configuration';
+import { ShieldedTokenProvider } from '@/lib/shielded-token-context';
 import { VersionProvider } from '@/lib/version-context';
 import { MidnightWalletProvider } from '@/lib/wallet-context';
 
@@ -34,7 +35,9 @@ export default function RootLayout({
             <VersionProvider>
               <MidnightWalletProvider logger={logger}>
                 <LunarswapProvider>
-                  <NetworkProvider>{children}</NetworkProvider>
+                  <ShieldedTokenProvider>
+                    <NetworkProvider>{children}</NetworkProvider>
+                  </ShieldedTokenProvider>
                 </LunarswapProvider>
               </MidnightWalletProvider>
             </VersionProvider>

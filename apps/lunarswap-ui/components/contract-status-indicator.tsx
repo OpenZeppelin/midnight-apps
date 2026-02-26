@@ -82,11 +82,11 @@ export function ContractStatusIndicator() {
       const proverServerUri =
         midnightWallet.walletAPI.configuration.proverServerUri ||
         activeNetwork.PROOF_SERVER_URL;
-      const proofProvider: ProofProvider<LunarswapCircuitKeys> = proofClient(
+      const proofProvider: ProofProvider = proofClient(
         proverServerUri,
         zkConfigProvider,
         midnightWallet.callback,
-      );
+      ) as ProofProvider;
 
       const providers: LunarswapProviders = {
         privateStateProvider,
@@ -108,11 +108,14 @@ export function ContractStatusIndicator() {
         );
       });
 
-      const findPromise = findDeployedContract(providers, {
-        privateStateId: LunarswapPrivateStateId,
-        contractAddress: activeNetwork.LUNARSWAP_ADDRESS,
-        contract,
-      });
+      const findPromise = findDeployedContract(
+        providers as any,
+        {
+          privateStateId: LunarswapPrivateStateId,
+          contractAddress: activeNetwork.LUNARSWAP_ADDRESS,
+          contract,
+        } as any,
+      );
 
       const found = (await Promise.race([
         findPromise,
@@ -134,7 +137,6 @@ export function ContractStatusIndicator() {
     } catch (error) {
       _logger?.error(
         `[ContractStatusIndicator] Contract status check failed: ${error instanceof Error ? error.message : String(error)}`,
-        error,
       );
       setStatusInfo({
         status: 'error',
