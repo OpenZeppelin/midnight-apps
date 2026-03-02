@@ -7,16 +7,19 @@ import CompactStandardLibrary;
 
 import { DivResultU128 } from "../../../Uint128";
 
-import { U128 } from "../../../types/TU128";
-
-import { U256 } from "../../../types/TU256";
+import { U128, U256 } from "../../../Types";
 
 import "../../../Uint128" prefix Uint128_;
 
 export { DivResultU128, U128, U256 };
 
-// Helper for test suite: hardcoded to true in every circuit to enable circuit metadata reporting; only increases circuit size by 3 rows per exposed circuit.
+// Helper for test suite: hardcoded to true in every circuit to enable circuit metadata reporting;
+// only increases circuit size by 3 rows per exposed circuit.
 ledger toImpure: Boolean;
+
+////////////////////////////////////////////////////////////////
+// Constants
+////////////////////////////////////////////////////////////////
 
 export circuit MODULUS(): Uint<128> {
   toImpure = true;
@@ -38,6 +41,10 @@ export circuit MAX_UINT128(): Uint<128> {
   return Uint128_MAX_UINT128();
 }
 
+////////////////////////////////////////////////////////////////
+// Conversions
+////////////////////////////////////////////////////////////////
+
 export circuit toU128(value: Uint<128>): U128 {
   toImpure = true;
   return disclose(Uint128_toU128(value));
@@ -48,15 +55,9 @@ export circuit toUint128(value: U128): Uint<128> {
   return disclose(Uint128_toUint128(value));
 }
 
-export circuit isZero(value: Uint<128>): Boolean {
-  toImpure = true;
-  return Uint128_isZero(value);
-}
-
-export circuit isZeroU128(value: U128): Boolean {
-  toImpure = true;
-  return Uint128_isZero(value);
-}
+////////////////////////////////////////////////////////////////
+// Comparisons
+////////////////////////////////////////////////////////////////
 
 export circuit eq(a: Uint<128>, b: Uint<128>): Boolean {
   toImpure = true;
@@ -108,6 +109,10 @@ export circuit gteU128(a: U128, b: U128): Boolean {
   return disclose(Uint128_gte(a, b));
 }
 
+////////////////////////////////////////////////////////////////
+// Arithmetic
+////////////////////////////////////////////////////////////////
+
 export circuit add(a: Uint<128>, b: Uint<128>): U256 {
   toImpure = true;
   return disclose(Uint128_add(a, b));
@@ -158,6 +163,10 @@ export circuit mulCheckedU128(a: U128, b: U128): Uint<128> {
   return disclose(Uint128_mulChecked(a, b));
 }
 
+////////////////////////////////////////////////////////////////
+// Division
+////////////////////////////////////////////////////////////////
+
 export circuit div(a: Uint<128>, b: Uint<128>): Uint<128> {
   toImpure = true;
   return disclose(Uint128_div(a, b));
@@ -188,6 +197,10 @@ export circuit divRemU128(a: U128, b: U128): DivResultU128 {
   return disclose(Uint128_divRem(a, b));
 }
 
+////////////////////////////////////////////////////////////////
+// Square Root
+////////////////////////////////////////////////////////////////
+
 export circuit sqrt(radicand: Uint<128>): Uint<64> {
   toImpure = true;
   return disclose(Uint128_sqrt(radicand));
@@ -196,6 +209,30 @@ export circuit sqrt(radicand: Uint<128>): Uint<64> {
 export circuit sqrtU128(radicand: U128): Uint<64> {
   toImpure = true;
   return disclose(Uint128_sqrt(radicand));
+}
+
+////////////////////////////////////////////////////////////////
+// Utilities
+////////////////////////////////////////////////////////////////
+
+export circuit isZero(value: Uint<128>): Boolean {
+  toImpure = true;
+  return Uint128_isZero(value);
+}
+
+export circuit isZeroU128(value: U128): Boolean {
+  toImpure = true;
+  return Uint128_isZero(value);
+}
+
+export circuit isMultiple(value: Uint<128>, b: Uint<128>): Boolean {
+  toImpure = true;
+  return disclose(Uint128_isMultiple(value, b));
+}
+
+export circuit isMultipleU128(value: U128, b: U128): Boolean {
+  toImpure = true;
+  return disclose(Uint128_isMultiple(value, b));
 }
 
 export circuit min(a: Uint<128>, b: Uint<128>): Uint<128> {
@@ -216,14 +253,4 @@ export circuit max(a: Uint<128>, b: Uint<128>): Uint<128> {
 export circuit maxU128(a: U128, b: U128): U128 {
   toImpure = true;
   return disclose(Uint128_max(a, b));
-}
-
-export circuit isMultiple(value: Uint<128>, b: Uint<128>): Boolean {
-  toImpure = true;
-  return disclose(Uint128_isMultiple(value, b));
-}
-
-export circuit isMultipleU128(value: U128, b: U128): Boolean {
-  toImpure = true;
-  return disclose(Uint128_isMultiple(value, b));
 }

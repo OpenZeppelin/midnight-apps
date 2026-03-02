@@ -5,26 +5,54 @@ pragma language_version >= 0.20.0;
 
 /**
  * @title Uint128
- * @dev Mathematical operations for 128-bit unsigned integers using the U128 struct,
+ * @description Mathematical operations for 128-bit unsigned integers using the U128 struct,
  * which represents numbers as high * 2⁶⁴ + low, where high and low are 64-bit unsigned
  * integers (Uint<64>) in [0, 2⁶⁴ - 1]. Operations are provided in dual forms: one for
  * Uint<128> inputs with conversions to/from U128, and another for direct U128 inputs.
  *
+ * @remarks
  * Supported Operations:
- * - Conversions: toU128(), toUint128()
- * - Comparisons: eq(), lt(), lte(), gt(), gte() (and U128 variants)
- * - Arithmetic: add(), sub(), mul(), addChecked(), mulChecked() (and U128 variants)
- * - Division: div(), rem(), divRem() (and U128 variants)
- * - Square Root: sqrt(), sqrtU128()
- * - Utility: min(), max(), isMultiple() (and U128 variants)
+ * - Constants:
+ *   - DivResultU128: Struct with quotient and remainder from division.
+ *   - MODULUS(): Returns 2⁶⁴.
+ *   - ZERO_U128(): Returns zero U128 struct.
+ *   - MAX_U128(): Returns maximum U128 (2¹²⁸ - 1).
+ *   - MAX_UINT128(): Returns 2¹²⁸ - 1.
+ * - Conversion:
+ *   - toU128(value): Converts Uint<128> to U128 struct.
+ *   - toUint128(value): Converts U128 struct to Uint<128>.
+ * - Comparison:
+ *   - eq(a, b): Compares two values for equality (Uint<128> and U128 variants).
+ *   - lt(a, b): Checks if one value is less than another (Uint<128> and U128 variants).
+ *   - lte(a, b): Checks if one value is less than or equal to another (Uint<128> and U128 variants).
+ *   - gt(a, b): Checks if one value is greater than another (Uint<128> and U128 variants).
+ *   - gte(a, b): Checks if one value is greater than or equal to another (Uint<128> and U128 variants).
+ * - Arithmetic:
+ *   - add(a, b): Adds two values, returning a `U256` result to handle potential overflow (Uint<128> and U128 variants).
+ *   - addChecked(a, b): Adds two values with overflow checking, returning a `Uint<128>` result (Uint<128> and U128 variants).
+ *   - sub(a, b): Subtracts one value from another, checking for underflow (Uint<128> and U128 variants).
+ *   - mul(a, b): Multiplies two values, returning a `U256` result (Uint<128> and U128 variants).
+ *   - mulChecked(a, b): Multiplies two values with overflow checking, returning a `Uint<128>` result (Uint<128> and U128 variants).
+ * - Division:
+ *   - div(a, b): Computes the quotient of dividing one value by another (Uint<128> and U128 variants).
+ *   - rem(a, b): Computes the remainder of dividing one value by another (Uint<128> and U128 variants).
+ *   - divRem(a, b): Computes both quotient and remainder of a division (Uint<128> and U128 variants).
+ * - Square Root:
+ *   - sqrt(radicand): Computes the floor of the square root (Uint<128> and U128 variants).
+ * - Utility:
+ *   - isZero(a): Checks if a value is zero (Uint<128> and U128 variants).
+ *   - isMultiple(a, b): Checks if one value is a multiple of another (Uint<128> and U128 variants).
+ *   - min(a, b): Returns the smaller of two values (Uint<128> and U128 variants).
+ *   - max(a, b): Returns the larger of two values (Uint<128> and U128 variants).
  */
 module Uint128 {
-  import { MAX_UINT8, MAX_UINT16, MAX_UINT32, MAX_UINT64 } from Uint64;
+  import { U128, U256 } from Types;
 
-  // U128 and U256 types are imported from dedicated type modules to avoid
-  // cyclic dependencies between Uint128 and Uint256. See TU128/TU256 documentation.
-  import { U128 } from "./types/TU128";
-  import { U256 } from "./types/TU256";
+  import { MAX_UINT64 } from Uint64 prefix Uint64_;
+
+  ////////////////////////////////////////////////////////////////
+  // Constants
+  ////////////////////////////////////////////////////////////////
 
   /**
    * @description A struct representing the result of a division operation on U128 values.
@@ -101,7 +129,7 @@ module Uint128 {
    * @returns {U128} A U128 struct representing 2¹²⁸ - 1.
    */
   export pure circuit MAX_U128(): U128 {
-    return U128 { low: MAX_UINT64(), high: MAX_UINT64() };
+    return U128 { low: Uint64_MAX_UINT64(), high: Uint64_MAX_UINT64() };
   }
 
   /**
@@ -116,6 +144,10 @@ module Uint128 {
   export pure circuit MAX_UINT128(): Uint<128> {
     return 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
   }
+
+  ////////////////////////////////////////////////////////////////
+  // Conversions
+  ////////////////////////////////////////////////////////////////
 
   /**
    * @title To U128 circuit
@@ -171,33 +203,9 @@ module Uint128 {
     return result as Uint<128>;
   }
 
-  /**
-   * @title Is Zero circuit
-   * @description Checks if a Uint<128> value equals zero.
-   *
-   * @circuitInfo k=8, rows=177
-   *
-   * @param {Uint<128>} a - The Uint<128> value to check.
-   *
-   * @returns {Boolean} True if a equals zero, false otherwise.
-   */
-  export pure circuit isZero(a: Uint<128>): Boolean {
-    return a == 0;
-  }
-
-  /**
-   * @title Is Zero U128 circuit
-   * @description Checks if a U128 value equals zero.
-   *
-   * @circuitInfo k=8, rows=183
-   *
-   * @param {U128} a - The U128 value to check.
-   *
-   * @returns {Boolean} True if a equals zero (a.low = a.high = 0), false otherwise.
-   */
-  export pure circuit isZero(a: U128): Boolean {
-    return a.low == 0 && a.high == 0;
-  }
+  ////////////////////////////////////////////////////////////////
+  // Comparisons
+  ////////////////////////////////////////////////////////////////
 
   /**
    * @title Equality circuit
@@ -347,6 +355,10 @@ module Uint128 {
   export pure circuit gte(a: U128, b: U128): Boolean {
     return gt(a, b) || eq(a, b);
   }
+
+  ////////////////////////////////////////////////////////////////
+  // Arithmetic
+  ////////////////////////////////////////////////////////////////
 
   /**
    * @title Add circuit
@@ -751,6 +763,10 @@ module Uint128 {
     return toUint128(result);
   }
 
+  ////////////////////////////////////////////////////////////////
+  // Division
+  ////////////////////////////////////////////////////////////////
+
   /**
    * @title Division U128 circuit (Optimized)
    * @description Divides a U128 value by another, returning quotient and remainder.
@@ -962,6 +978,10 @@ module Uint128 {
     return _div(a, b);
   }
 
+  ////////////////////////////////////////////////////////////////
+  // Square Root
+  ////////////////////////////////////////////////////////////////
+
   /**
   * @title Floor Square Root U128 circuit (Optimized)
   * @description Computes the floor of the square root of a U128 value.
@@ -1110,64 +1130,36 @@ module Uint128 {
     return _sqrt(radicand);
   }
 
+  ////////////////////////////////////////////////////////////////
+  // Utilities
+  ////////////////////////////////////////////////////////////////
+
   /**
-   * @title Min circuit
-   * @description Returns the minimum of two Uint<128> values.
+   * @title Is Zero circuit
+   * @description Checks if a Uint<128> value equals zero.
    *
-   * @circuitInfo k=9, rows=360
+   * @circuitInfo k=8, rows=177
    *
-   * @param {Uint<128>} a - The first Uint<128> value.
-   * @param {Uint<128>} b - The second Uint<128> value.
+   * @param {Uint<128>} a - The Uint<128> value to check.
    *
-   * @returns {Uint<128>} The smaller of a and b.
+   * @returns {Boolean} True if a equals zero, false otherwise.
    */
-  export pure circuit min(a: Uint<128>, b: Uint<128>): Uint<128> {
-    return lte(a, b) ? a : b;
+  export pure circuit isZero(a: Uint<128>): Boolean {
+    return a == 0;
   }
 
   /**
-   * @title Min U128 circuit
-   * @description Returns the minimum of two U128 values.
+   * @title Is Zero U128 circuit
+   * @description Checks if a U128 value equals zero.
    *
-   * @circuitInfo k=9, rows=427
+   * @circuitInfo k=8, rows=183
    *
-   * @param {U128} a - The first U128 value.
-   * @param {U128} b - The second U128 value.
+   * @param {U128} a - The U128 value to check.
    *
-   * @returns {U128} The smaller of a and b.
+   * @returns {Boolean} True if a equals zero (a.low = a.high = 0), false otherwise.
    */
-  export pure circuit min(a: U128, b: U128): U128 {
-    return lte(a, b) ? a : b;
-  }
-
-  /**
-   * @title Max circuit
-   * @description Returns the maximum of two Uint<128> values.
-   *
-   * @circuitInfo k=9, rows=360
-   *
-   * @param {Uint<128>} a - The first Uint<128> value.
-   * @param {Uint<128>} b - The second Uint<128> value.
-   *
-   * @returns {Uint<128>} The larger of a and b.
-   */
-  export pure circuit max(a: Uint<128>, b: Uint<128>): Uint<128> {
-    return gte(a, b) ? a : b;
-  }
-
-  /**
-   * @title Max U128 circuit
-   * @description Returns the maximum of two U128 values.
-   *
-   * @circuitInfo k=9, rows=427
-   *
-   * @param {U128} a - The first U128 value.
-   * @param {U128} b - The second U128 value.
-   *
-   * @returns {U128} The larger of a and b.
-   */
-  export pure circuit max(a: U128, b: U128): U128 {
-    return gte(a, b) ? a : b;
+  export pure circuit isZero(a: U128): Boolean {
+    return a.low == 0 && a.high == 0;
   }
 
   /**
@@ -1241,5 +1233,65 @@ module Uint128 {
    */
   export circuit isMultiple(a: U128, b: U128): Boolean {
     return _isMultiple(a, b);
+  }
+
+  /**
+   * @title Min circuit
+   * @description Returns the minimum of two Uint<128> values.
+   *
+   * @circuitInfo k=9, rows=360
+   *
+   * @param {Uint<128>} a - The first Uint<128> value.
+   * @param {Uint<128>} b - The second Uint<128> value.
+   *
+   * @returns {Uint<128>} The smaller of a and b.
+   */
+  export pure circuit min(a: Uint<128>, b: Uint<128>): Uint<128> {
+    return lte(a, b) ? a : b;
+  }
+
+  /**
+   * @title Min U128 circuit
+   * @description Returns the minimum of two U128 values.
+   *
+   * @circuitInfo k=9, rows=427
+   *
+   * @param {U128} a - The first U128 value.
+   * @param {U128} b - The second U128 value.
+   *
+   * @returns {U128} The smaller of a and b.
+   */
+  export pure circuit min(a: U128, b: U128): U128 {
+    return lte(a, b) ? a : b;
+  }
+
+  /**
+   * @title Max circuit
+   * @description Returns the maximum of two Uint<128> values.
+   *
+   * @circuitInfo k=9, rows=360
+   *
+   * @param {Uint<128>} a - The first Uint<128> value.
+   * @param {Uint<128>} b - The second Uint<128> value.
+   *
+   * @returns {Uint<128>} The larger of a and b.
+   */
+  export pure circuit max(a: Uint<128>, b: Uint<128>): Uint<128> {
+    return gte(a, b) ? a : b;
+  }
+
+  /**
+   * @title Max U128 circuit
+   * @description Returns the maximum of two U128 values.
+   *
+   * @circuitInfo k=9, rows=427
+   *
+   * @param {U128} a - The first U128 value.
+   * @param {U128} b - The second U128 value.
+   *
+   * @returns {U128} The larger of a and b.
+   */
+  export pure circuit max(a: U128, b: U128): U128 {
+    return gte(a, b) ? a : b;
   }
 }
