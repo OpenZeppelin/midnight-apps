@@ -34,8 +34,6 @@ pragma language_version >= 0.20.0;
  *   - isZero(a): Checks if a Field value is zero.
  */
 module Field255 {
-  import { upgradeFromTransient } from CompactStandardLibrary;
-
   import { U256 } from Types;
 
   import { toU256, eq, lt, lte, gt, gte, isZero } from Bytes32 prefix Bytes32_;
