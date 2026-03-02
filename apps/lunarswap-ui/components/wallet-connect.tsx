@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/hooks/use-wallet';
+import { getLaceMidnightProvider } from '@/utils/wallet-utils';
 import { AccountPanel } from './account-panel';
 import { Identicon } from './identicon';
 
@@ -43,9 +44,9 @@ export function WalletConnect({
       userAgent.includes('chromium');
 
     if (isChromium) {
-      // Check if Midnight Lace wallet is available
+      // Check if Midnight Lace wallet is available (API 4.x uses UUID-based discovery, not mnLace)
       const checkWalletAvailability = () => {
-        if (typeof window !== 'undefined' && window.midnight?.mnLace) {
+        if (typeof window !== 'undefined' && getLaceMidnightProvider()) {
           setBrowserStatus('supported');
         } else {
           setBrowserStatus('no-wallet');
@@ -67,8 +68,24 @@ export function WalletConnect({
   const handleConnect = async () => {
     try {
       await connect(true);
-    } catch (_error) {
-      toast.error('Failed to connect to wallet. Please try again.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      console.error('[WalletConnect] Connect failed:', error);
+      if (
+        message.includes('Incompatible version') &&
+        message.includes("Require '4.x'")
+      ) {
+        toast.error(
+          'Midnight Lace wallet is outdated. Please update the Lace extension to the latest version (requires connector API 4.x).',
+          { duration: 8000 },
+        );
+      } else {
+        toast.error(
+          message.length > 80
+            ? `Failed to connect to wallet: ${message.slice(0, 80)}…`
+            : message || 'Failed to connect to wallet. Please try again.',
+        );
+      }
     }
   };
 

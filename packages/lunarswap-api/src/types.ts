@@ -7,8 +7,8 @@ import type {
   Contract,
   Ledger,
   Witnesses,
-} from '@openzeppelin/midnight-apps-contracts/dist/artifacts/lunarswap/Lunarswap/contract';
-import type { LunarswapPrivateState } from '@openzeppelin/midnight-apps-contracts/dist/lunarswap/witnesses/Lunarswap';
+} from '@openzeppelin/midnight-apps-contracts/lunarswap/contract';
+import type { LunarswapPrivateState } from '@openzeppelin/midnight-apps-contracts/lunarswap/witnesses';
 
 // Define EmptyState locally
 export type EmptyState = Record<string, never>;

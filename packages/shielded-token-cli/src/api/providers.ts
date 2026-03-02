@@ -20,13 +20,22 @@ export const configureProviders = (
     );
   const env = walletProvider.env;
 
+  // 3.2.0-rc.1 config: accountId + privateStoragePasswordProvider (required).
+  // Type assertion used so this compiles when an older provider's types are resolved.
+  const privateStateConfig = {
+    privateStateStoreName: config.privateStateStoreName,
+    accountId: walletProvider.getCoinPublicKey(),
+    // Provider requires password with ≥3 character classes (upper, lower, digit, special).
+    privateStoragePasswordProvider: () =>
+      `${walletProvider.getEncryptionPublicKey() as string}A!`,
+  } as Parameters<
+    typeof levelPrivateStateProvider<typeof ShieldedFungibleTokenPrivateStateId>
+  >[0];
+
   return {
     privateStateProvider: levelPrivateStateProvider<
       typeof ShieldedFungibleTokenPrivateStateId
-    >({
-      privateStateStoreName: config.privateStateStoreName,
-      walletProvider,
-    }),
+    >(privateStateConfig),
     publicDataProvider: indexerPublicDataProvider(env.indexer, env.indexerWS),
     zkConfigProvider,
     proofProvider: httpClientProofProvider(env.proofServer, zkConfigProvider),

@@ -21,32 +21,22 @@
   "homepage": "",
   "type": "module",
   "exports": {
-    "./dist/artifacts/shielded-token/ShieldedFungibleToken/contract": {
-      "types": "./dist/artifacts/shielded-token/ShieldedFungibleToken/contract/index.d.ts",
-      "import": "./dist/artifacts/shielded-token/ShieldedFungibleToken/contract/index.js",
-      "default": "./dist/artifacts/shielded-token/ShieldedFungibleToken/contract/index.js"
-    },
-    "./dist/artifacts/lunarswap/Lunarswap/contract": {
+    "./lunarswap/contract": {
       "types": "./dist/artifacts/lunarswap/Lunarswap/contract/index.d.ts",
       "import": "./dist/artifacts/lunarswap/Lunarswap/contract/index.js",
       "default": "./dist/artifacts/lunarswap/Lunarswap/contract/index.js"
     },
-    "./dist/*": "./dist/*",
-    "./math/witnesses/*": {
-      "types": "./src/math/witnesses/*.ts",
-      "import": "./dist/math/witnesses/*.js",
-      "default": "./dist/math/witnesses/*.js"
+    "./lunarswap/witnesses": {
+      "types": "./dist/lunarswap/witnesses/Lunarswap.d.ts",
+      "import": "./dist/lunarswap/witnesses/Lunarswap.js",
+      "default": "./dist/lunarswap/witnesses/Lunarswap.js"
     },
-    "./math/utils/*": {
-      "types": "./src/math/utils/*.ts",
-      "import": "./dist/math/utils/*.js",
-      "default": "./dist/math/utils/*.js"
+    "./shielded-token/contract": {
+      "types": "./dist/artifacts/shielded-token/ShieldedFungibleToken/contract/index.d.ts",
+      "import": "./dist/artifacts/shielded-token/ShieldedFungibleToken/contract/index.js",
+      "default": "./dist/artifacts/shielded-token/ShieldedFungibleToken/contract/index.js"
     },
-    "./lunarswap/witnesses/*": {
-      "types": "./src/lunarswap/witnesses/*.ts",
-      "import": "./dist/lunarswap/witnesses/*.js",
-      "default": "./dist/lunarswap/witnesses/*.js"
-    }
+    "./dist/*": "./dist/*"
   },
   "config": {
     "compactVersion": "+0.29.0",
@@ -92,7 +82,7 @@
     "vitest": "^4.0.14"
   },
   "dependencies": {
-    "@midnight-ntwrk/midnight-js-network-id": "3.1.0",
+    "@midnight-ntwrk/midnight-js-network-id": "3.2.0-rc.1",
     "@midnight-ntwrk/wallet-sdk-address-format": "3.0.0",
     "@midnight-ntwrk/zswap": "4.0.0",
     "@midnight-ntwrk/compact-runtime": "0.14.0"

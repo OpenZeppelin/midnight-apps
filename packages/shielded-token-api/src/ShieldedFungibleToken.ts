@@ -10,10 +10,10 @@ import type {
   ShieldedCoinInfo,
   Witnesses,
   ZswapCoinPublicKey,
-} from '@openzeppelin/midnight-apps-contracts/dist/artifacts/shielded-token/ShieldedFungibleToken/contract';
+} from '@openzeppelin/midnight-apps-contracts/shielded-token/contract';
 import {
   Contract,
-} from '@openzeppelin/midnight-apps-contracts/dist/artifacts/shielded-token/ShieldedFungibleToken/contract';
+} from '@openzeppelin/midnight-apps-contracts/shielded-token/contract';
 import type { Logger } from 'pino';
 import type {
   DeployedShieldedFungibleTokenContract,
@@ -71,11 +71,7 @@ export class ShieldedFungibleToken {
   ): Promise<ShieldedFungibleToken> {
     logger?.info('Deploying ShieldedFungibleToken contract...');
 
-    await providers.privateStateProvider.set(
-      ShieldedFungibleTokenPrivateStateId,
-      ShieldedFungibleToken.getPrivateState(),
-    );
-
+    // deployContract sets contract address and initial private state internally (midnight-js 3.1.0)
     const deployedContract =
       await deployContract<ShieldedFungibleTokenContract>(providers, {
         compiledContract: createCompiledContract(zkConfigPath),
@@ -96,11 +92,7 @@ export class ShieldedFungibleToken {
   ): Promise<ShieldedFungibleToken> {
     logger?.info('Joining ShieldedFungibleToken contract...');
 
-    await providers.privateStateProvider.set(
-      ShieldedFungibleTokenPrivateStateId,
-      ShieldedFungibleToken.getPrivateState(),
-    );
-
+    // findDeployedContract sets contract address and initial private state internally (midnight-js 3.1.0)
     const contractAddressHex = bytesToHex(contractAddress.bytes);
 
     const deployedContract =

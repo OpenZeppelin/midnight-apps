@@ -3,6 +3,31 @@ import type {
   InitialAPI,
   WalletConnectedAPI,
 } from '@midnight-ntwrk/dapp-connector-api';
+
+const LACE_RDNS = 'io.lace.wallet';
+const LACE_NAME = 'lace';
+
+/**
+ * Get the Lace Midnight provider from window.midnight using UUID-based discovery.
+ * In API 4.x, Lace injects under a UUID key, not window.midnight.mnLace.
+ */
+export function getLaceMidnightProvider(): InitialAPI | undefined {
+  if (
+    typeof window === 'undefined' ||
+    !window.midnight ||
+    typeof window.midnight !== 'object'
+  ) {
+    return undefined;
+  }
+  const providers = Object.values(window.midnight) as InitialAPI[];
+  return providers.find(
+    (p) =>
+      p &&
+      typeof p === 'object' &&
+      (p.rdns === LACE_RDNS || p.name?.toLowerCase() === LACE_NAME),
+  );
+}
+
 import { pipe as fnPipe } from 'fp-ts/function';
 import type { Logger } from 'pino';
 import {
@@ -89,7 +114,7 @@ export const connectToWallet = (
   return firstValueFrom(
     fnPipe(
       interval(100),
-      map(() => window.midnight?.mnLace),
+      map(() => getLaceMidnightProvider()),
       tap((connectorAPI) => {
         logger.info(connectorAPI, 'Check for wallet connector API');
       }),

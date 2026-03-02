@@ -16,11 +16,11 @@ import {
   type QualifiedShieldedCoinInfo,
   type ShieldedCoinInfo,
   type ZswapCoinPublicKey,
-} from '@openzeppelin/midnight-apps-contracts/dist/artifacts/lunarswap/Lunarswap/contract';
+} from '@openzeppelin/midnight-apps-contracts/lunarswap/contract';
 import {
   LunarswapPrivateState,
   LunarswapWitnesses,
-} from '@openzeppelin/midnight-apps-contracts/dist/lunarswap/witnesses/Lunarswap';
+} from '@openzeppelin/midnight-apps-contracts/lunarswap/witnesses';
 import {
   getPairId as getPairIdUtil,
   getReserveId as getReserveIdUtil,

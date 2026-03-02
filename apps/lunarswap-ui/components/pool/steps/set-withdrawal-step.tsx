@@ -218,7 +218,13 @@ export function SetWithdrawalStep({ positionData }: SetWithdrawalStepProps) {
         slippageTolerance,
       );
 
-      // Call the actual removeLiquidity method
+      // Call the actual removeLiquidity method (recipient must be Bech32m string)
+      const recipientAddress = String(walletAPI.coinPublicKey ?? '').trim();
+      if (!recipientAddress || recipientAddress.length < 6) {
+        throw new Error(
+          'Wallet shielded address not available or invalid. Please ensure your wallet is connected.',
+        );
+      }
       await lunarswap.removeLiquidity(
         token0Type,
         token1Type,
@@ -226,7 +232,7 @@ export function SetWithdrawalStep({ positionData }: SetWithdrawalStepProps) {
         lpTokenAmount,
         amountAMin,
         amountBMin,
-        walletAPI.coinPublicKey,
+        recipientAddress,
       );
 
       toast.success(

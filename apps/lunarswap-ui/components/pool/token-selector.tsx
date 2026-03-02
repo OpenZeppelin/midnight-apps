@@ -24,6 +24,8 @@ interface TokenSelectorProps {
   onSelectToken: (token: UiToken) => void;
   placeholder?: string;
   showTokenIcon?: boolean;
+  /** When set, use this list instead of only user-deployed tokens (e.g. deployed + wallet tokens). */
+  tokens?: UiToken[] | null;
 }
 
 export function TokenSelector({
@@ -31,14 +33,16 @@ export function TokenSelector({
   onSelectToken,
   placeholder = 'Select a token',
   showTokenIcon = true,
+  tokens: tokensProp,
 }: TokenSelectorProps) {
   const [open, setOpen] = useState(false);
   const [deployModalOpen, setDeployModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { userDeployedTokens } = useShieldedTokenContext();
-  const availableTokens = getAllTokens(
+  const defaultTokens = getAllTokens(
     userDeployedTokens.map(userDeployedTokenToToken),
   );
+  const availableTokens = tokensProp != null ? tokensProp : defaultTokens;
 
   const filteredTokens = availableTokens.filter(
     (token) =>
@@ -106,7 +110,7 @@ export function TokenSelector({
           <div className="space-y-1 max-h-[300px] overflow-y-auto pr-1">
             {filteredTokens.map((token) => (
               <button
-                key={token.symbol}
+                key={token.type ?? token.symbol}
                 type="button"
                 className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                 onClick={() => handleSelectToken(token)}

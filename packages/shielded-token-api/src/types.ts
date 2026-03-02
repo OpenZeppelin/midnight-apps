@@ -6,7 +6,7 @@ import shieldedTokenContractInfo from '@openzeppelin/midnight-apps-contracts/dis
 import type {
   Contract,
   Witnesses,
-} from '@openzeppelin/midnight-apps-contracts/dist/artifacts/shielded-token/ShieldedFungibleToken/contract';
+} from '@openzeppelin/midnight-apps-contracts/shielded-token/contract';
 
 export type ShieldedFungibleTokenPrivateState = Record<string, never>;
 

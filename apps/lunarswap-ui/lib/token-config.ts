@@ -147,3 +147,23 @@ export function getAvailableTokensForSelection(
 ): Token[] {
   return getTokensFromPools(pools, tokens);
 }
+
+/**
+ * Build tokens list from user's shielded balances (color -> balance).
+ * Used so the user can select Token A / B from their wallet in the add-liquidity flow.
+ */
+export function getTokensFromShieldedBalances(
+  balances: Record<string, bigint>,
+): Token[] {
+  return Object.entries(balances).map(([colorHex, _balance]) => {
+    const normalized = colorHex.replace(/^0x/i, '').toLowerCase();
+    const short = normalized.length >= 8 ? normalized.slice(0, 8) : normalized;
+    return {
+      symbol: `Wallet (${short}…)`,
+      name: 'From wallet',
+      type: normalized as RawTokenType,
+      address: '',
+      shielded: true,
+    };
+  });
+}

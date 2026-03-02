@@ -7,7 +7,7 @@
       "available": true,
       "INDEXER_URI": "https://indexer.preprod.midnight.network/api/v3/graphql",
       "INDEXER_WS_URI": "wss://indexer.preprod.midnight.network/api/v3/graphql/ws",
-      "LUNARSWAP_ADDRESS": "cfb8666816888644102f411ffcd0fac4257d409a89215c2089ad89cae6e0858e",
+      "LUNARSWAP_ADDRESS": "d12d03759189640df774cdba30e18e8680f5285933a2bc0b64c2b88047f6b9c0",
       "FAUCET_URL": "https://faucet.preprod.midnight.network",
       "EXPLORER_URL": "https://preprod.midnightexplorer.com",
       "RPC_URL": "https://rpc.preprod.midnight.network",

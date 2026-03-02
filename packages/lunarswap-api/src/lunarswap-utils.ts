@@ -20,7 +20,7 @@ import {
 import type {
   QualifiedShieldedCoinInfo,
   ShieldedCoinInfo,
-} from '@openzeppelin/midnight-apps-contracts/dist/artifacts/lunarswap/Lunarswap/contract';
+} from '@openzeppelin/midnight-apps-contracts/lunarswap/contract';
 
 const IDENTITY_DOMAIN_PAIR = 'pair-id';
 const IDENTITY_DOMAIN_RESERVE = 'reserve-id';

@@ -18,17 +18,17 @@ import type {
   QualifiedShieldedCoinInfo,
   ShieldedCoinInfo,
   ZswapCoinPublicKey,
-} from '@openzeppelin/midnight-apps-contracts/dist/artifacts/lunarswap/Lunarswap/contract';
+} from '@openzeppelin/midnight-apps-contracts/lunarswap/contract';
 import {
   Contract,
   type Ledger,
   ledger,
   type Pair,
-} from '@openzeppelin/midnight-apps-contracts/dist/artifacts/lunarswap/Lunarswap/contract';
+} from '@openzeppelin/midnight-apps-contracts/lunarswap/contract';
 import {
   LunarswapPrivateState,
   LunarswapWitnesses,
-} from '@openzeppelin/midnight-apps-contracts/dist/lunarswap/witnesses/Lunarswap';
+} from '@openzeppelin/midnight-apps-contracts/lunarswap/witnesses';
 import type { Logger } from 'pino';
 import { combineLatest, from, map, type Observable, tap } from 'rxjs';
 // TODO: Switch back to contract callTx.getPairId/getIdentity/sortCoinByColor/sortQualifiedCoinByColor once https://github.com/LFDT-Minokawa/compact/issues/150 is resolved
@@ -195,7 +195,7 @@ export class Lunarswap implements ILunarswap {
       {
         compiledContract: CompiledLunarswapContract,
         privateStateId: LunarswapPrivateStateId,
-        initialPrivateState: await Lunarswap.getPrivateState(providers),
+        initialPrivateState: LunarswapPrivateState.generate(),
         args: [
           Lunarswap.LP_TOKEN_NAME, // lpTokenName
           Lunarswap.LP_TOKEN_SYMBOL, // lpTokenSymbol
@@ -217,11 +217,6 @@ export class Lunarswap implements ILunarswap {
   ): Promise<Lunarswap> {
     logger?.info('Joining Lunarswap contract...');
 
-    await providers.privateStateProvider.set(
-      'lunarswapPrivateState',
-      LunarswapPrivateState.generate(),
-    );
-
     const contractAddressHex = Buffer.from(contractAddress.bytes).toString(
       'hex',
     );
@@ -232,7 +227,7 @@ export class Lunarswap implements ILunarswap {
         contractAddress: contractAddressHex,
         compiledContract: createCompiledContract(zkConfigPath),
         privateStateId: LunarswapPrivateStateId,
-        initialPrivateState: await Lunarswap.getPrivateState(providers),
+        initialPrivateState: LunarswapPrivateState.generate(),
       },
     );
     logger?.info('Lunarswap contract joined');

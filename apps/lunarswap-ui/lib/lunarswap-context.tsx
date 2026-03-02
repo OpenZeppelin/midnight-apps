@@ -3,7 +3,7 @@
 import type {
   Ledger,
   Pair,
-} from '@openzeppelin/midnight-apps-contracts/dist/artifacts/lunarswap/Lunarswap/contract';
+} from '@openzeppelin/midnight-apps-contracts/lunarswap/contract';
 import {
   createContext,
   type ReactNode,

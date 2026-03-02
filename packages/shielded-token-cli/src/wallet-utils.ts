@@ -56,13 +56,25 @@ const isProgressStrictlyComplete = (progress: unknown): boolean => {
   return (candidate.isStrictlyComplete as () => boolean)();
 };
 
+const DEFAULT_SYNC_TIMEOUT_MS = 180_000; // 3 min for preprod/indexer latency
+
 export const syncWallet = (
   logger: Logger,
   wallet: WalletFacade,
   throttleTime = 2_000,
-  timeout = 90_000,
+  timeout = DEFAULT_SYNC_TIMEOUT_MS,
 ) => {
-  logger.info('Syncing wallet...');
+  const effectiveTimeout =
+    process.env.WALLET_SYNC_TIMEOUT_MS !== undefined &&
+    process.env.WALLET_SYNC_TIMEOUT_MS !== ''
+      ? Number(process.env.WALLET_SYNC_TIMEOUT_MS)
+      : timeout;
+  if (Number.isNaN(effectiveTimeout) || effectiveTimeout <= 0) {
+    throw new Error(
+      `Invalid WALLET_SYNC_TIMEOUT_MS: ${process.env.WALLET_SYNC_TIMEOUT_MS}. Must be a positive number.`,
+    );
+  }
+  logger.info(`Syncing wallet... (timeout: ${effectiveTimeout}ms)`);
 
   return Rx.firstValueFrom(
     wallet.state().pipe(
@@ -99,10 +111,11 @@ export const syncWallet = (
         );
       }),
       Rx.timeout({
-        each: timeout,
+        each: effectiveTimeout,
         with: () =>
           Rx.throwError(
-            () => new Error(`Wallet sync timeout after ${timeout}ms`),
+            () =>
+              new Error(`Wallet sync timeout after ${effectiveTimeout}ms`),
           ),
       }),
     ),

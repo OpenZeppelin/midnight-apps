@@ -1,4 +1,4 @@
-import type { ShieldedCoinInfo } from '@openzeppelin/midnight-apps-contracts/dist/artifacts/lunarswap/Lunarswap/contract';
+import type { ShieldedCoinInfo } from '@openzeppelin/midnight-apps-contracts/lunarswap/contract';
 import type { Lunarswap } from '@openzeppelin/midnight-apps-lunarswap-api';
 import type { Logger } from 'pino';
 

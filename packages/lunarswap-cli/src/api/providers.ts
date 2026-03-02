@@ -20,13 +20,21 @@ export const configureProviders = (
     );
   const env = walletProvider.env;
 
+  // 3.2.0-rc.1 config: accountId + privateStoragePasswordProvider (required).
+  const privateStateConfig = {
+    privateStateStoreName: config.privateStateStoreName,
+    accountId: walletProvider.getCoinPublicKey(),
+    privateStoragePasswordProvider: () =>
+      `${walletProvider.getEncryptionPublicKey() as string}A!`,
+  } as Parameters<
+    typeof levelPrivateStateProvider<typeof LunarswapPrivateStateId>
+  >[0];
+
   return {
-    privateStateProvider: levelPrivateStateProvider<
-      typeof LunarswapPrivateStateId
-    >({
-      privateStateStoreName: config.privateStateStoreName,
-      walletProvider,
-    }),
+    privateStateProvider:
+      levelPrivateStateProvider<typeof LunarswapPrivateStateId>(
+        privateStateConfig,
+      ),
     publicDataProvider: indexerPublicDataProvider(env.indexer, env.indexerWS),
     zkConfigProvider,
     proofProvider: httpClientProofProvider(env.proofServer, zkConfigProvider),

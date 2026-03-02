@@ -21,7 +21,7 @@ import type {
   ZKConfigProvider,
 } from '@midnight-ntwrk/midnight-js-types';
 import type { Address } from '@midnight-ntwrk/wallet-api';
-import type { LunarswapPrivateState } from '@openzeppelin/midnight-apps-contracts/dist/lunarswap/witnesses/Lunarswap';
+import type { LunarswapPrivateState } from '@openzeppelin/midnight-apps-contracts/lunarswap/witnesses';
 import type {
   LunarswapCircuitKeys,
   LunarswapPrivateStateId,
@@ -41,7 +41,7 @@ import { PrivateDataProviderWrapper } from '@/providers/private';
 import { noopProofClient, proofClient } from '@/providers/proof';
 import { PublicDataProviderWrapper } from '@/providers/public';
 import { ZkConfigProviderWrapper } from '@/providers/zk-config';
-import { connectToWallet } from '@/utils/wallet-utils';
+import { connectToWallet, getLaceMidnightProvider } from '@/utils/wallet-utils';
 import {
   useActiveNetworkConfig,
   useRuntimeConfiguration,
@@ -430,41 +430,33 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
     typeof LunarswapPrivateStateId,
     LunarswapPrivateState
   > = useMemo(() => {
-    // levelPrivateStateProvider requires either walletProvider or privateStoragePasswordProvider
-    // Use walletProvider when wallet is connected, otherwise use a password provider
-    const providerConfig: {
-      privateStateStoreName: string;
-      walletProvider?: WalletProvider;
-      privateStoragePasswordProvider?: () => Promise<string>;
-    } = {
-      privateStateStoreName: 'lunarswap-private-state',
-    };
+    // 3.2.0-rc.1: levelPrivateStateProvider requires accountId + privateStoragePasswordProvider (no walletProvider).
+    const accountId = walletAPI
+      ? String(walletAPI.coinPublicKey)
+      : 'lunarswap-disconnected';
+    const privateStoragePasswordProvider = walletAPI
+      ? () => `${String(walletAPI.encryptionPublicKey)}A!`
+      : () => {
+          const stored = localStorage.getItem('lunarswap-storage-password');
+          if (stored) return stored;
+          const defaultPassword = 'lunarswap-default-passwordA1!';
+          localStorage.setItem('lunarswap-storage-password', defaultPassword);
+          return defaultPassword;
+        };
 
-    // Only use walletProvider if wallet is connected (walletAPI exists)
-    if (walletAPI) {
-      providerConfig.walletProvider = walletProvider;
-    } else {
-      // Use password provider when wallet is not connected
-      // This allows the app to initialize even without a connected wallet
-      providerConfig.privateStoragePasswordProvider = async () => {
-        // Use a consistent password based on localStorage or a default
-        const storedPassword = localStorage.getItem(
-          'lunarswap-storage-password',
-        );
-        if (storedPassword) {
-          return storedPassword;
-        }
-        const defaultPassword = 'lunarswap-default-password';
-        localStorage.setItem('lunarswap-storage-password', defaultPassword);
-        return defaultPassword;
-      };
-    }
+    const providerConfig = {
+      privateStateStoreName: 'lunarswap-private-state',
+      accountId,
+      privateStoragePasswordProvider,
+    } as Parameters<
+      typeof levelPrivateStateProvider<typeof LunarswapPrivateStateId>
+    >[0];
 
     return new PrivateDataProviderWrapper(
       levelPrivateStateProvider(providerConfig),
       logger,
     );
-  }, [walletAPI, walletProvider, logger]);
+  }, [walletAPI, logger]);
 
   const midnightProvider: MidnightProvider = useMemo(() => {
     if (walletAPI) {
@@ -582,12 +574,10 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
 
   //const connectMemo = useCallback(connect, []);
 
-  // Check if wallet is available before auto-connecting
+  // Check if wallet is available before auto-connecting (API 4.x: Lace uses UUID key, not mnLace)
   const isWalletAvailable = useMemo(() => {
     if (typeof window === 'undefined') return false;
-    return !!(
-      window.midnight?.mnLace || typeof window.midnight !== 'undefined'
-    );
+    return !!getLaceMidnightProvider();
   }, []);
 
   useEffect(() => {

@@ -25,12 +25,12 @@ globalThis.WebSocket = WebSocket;
 const GENESIS_MINT_WALLET_SEED =
   '0000000000000000000000000000000000000000000000000000000000000001';
 
-const WALLET_LOOP_QUESTION = `
+const getWalletLoopQuestion = (): string => `
 You can do one of the following:
   1. Build a fresh wallet
   2. Build wallet from a seed (hex or BIP39 mnemonic)
   3. Exit
-Which would you like to do? `;
+${process.env.TEST_RECOVERY_PHRASE ? '  4. Recover from TEST_RECOVERY_PHRASE (env)\n' : ''}Which would you like to do? `;
 
 /** Converts BIP39 mnemonic or hex seed to the hex format expected by FluentWalletBuilder. */
 function normalizeSeed(input: string): string {
@@ -62,7 +62,7 @@ const buildWallet = async (
     return GENESIS_MINT_WALLET_SEED;
   }
   while (true) {
-    const choice = await rli.question(WALLET_LOOP_QUESTION);
+    const choice = (await rli.question(getWalletLoopQuestion())).trim();
     switch (choice) {
       case '1':
         return toHex(randomBytes(32));
@@ -80,6 +80,19 @@ const buildWallet = async (
       case '3':
         logger.info('Exiting...');
         return undefined;
+      case '4':
+        if (process.env.TEST_RECOVERY_PHRASE) {
+          try {
+            return normalizeSeed(process.env.TEST_RECOVERY_PHRASE);
+          } catch (e) {
+            logger.error(
+              e instanceof Error ? e.message : 'Invalid TEST_RECOVERY_PHRASE',
+            );
+            continue;
+          }
+        }
+        logger.error('TEST_RECOVERY_PHRASE is not set');
+        continue;
       default:
         logger.error(`Invalid choice: ${choice}`);
     }

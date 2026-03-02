@@ -11,11 +11,13 @@ import { toast } from 'sonner';
 import { CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useLogger } from '@/hooks/use-logger';
+import { useWalletRx } from '@/hooks/use-wallet-rx';
 import { useActiveNetworkConfig } from '@/lib/runtime-configuration';
 import type { Token as UiToken } from '@/lib/token-config';
 import { useWallet } from '../../../hooks/use-wallet';
 import { useLunarswapContext } from '../../../lib/lunarswap-context';
 import { createContractIntegration } from '../../../lib/lunarswap-integration';
+import { serializeError } from '../../../utils/error-utils';
 import { Button } from '../../ui/button';
 import { LiquidityProgress } from '../liquidity-progress';
 import { SplitTokenIcon } from '../split-token-icon';
@@ -32,9 +34,24 @@ interface SetDepositStepProps {
   pairData: PairData;
 }
 
+function getBalanceForType(
+  balances: Record<string, bigint> | undefined,
+  tokenType: string,
+): bigint | undefined {
+  if (!balances) return undefined;
+  const normalized = tokenType.replace(/^0x/i, '').toLowerCase();
+  return (
+    balances[tokenType] ??
+    balances[normalized] ??
+    balances[`0x${normalized}`] ??
+    undefined
+  );
+}
+
 export function SetDepositStep({ pairData }: SetDepositStepProps) {
   const _logger = useLogger();
   const activeNetwork = useActiveNetworkConfig();
+  const { state: walletState } = useWalletRx();
   const { isConnected, address, providers, walletAPI, callback } = useWallet();
   const { lunarswap, status, pauseRefresh, resumeRefresh } =
     useLunarswapContext();
@@ -187,7 +204,7 @@ export function SetDepositStep({ pairData }: SetDepositStepProps) {
       // Ensure coinPublicKey is available
       if (!walletAPI.coinPublicKey) {
         throw new Error(
-          'Wallet coin public key not available. Please ensure your wallet is properly connected.',
+          'Wallet shielded address not available or invalid. Please ensure your wallet is connected and shows a valid address.',
         );
       }
 
@@ -242,10 +259,19 @@ export function SetDepositStep({ pairData }: SetDepositStepProps) {
 
       // Transaction completed successfully - progress dialog will close via onComplete callback
     } catch (error) {
+      const fullErrorText = serializeError(error);
       _logger?.error(
-        { error },
+        {
+          error,
+          fullError: fullErrorText,
+          message: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+        },
         `[AddLiquidity] Error: ${error instanceof Error ? error.message : String(error)}`,
       );
+      // In development, log full error to console so it's visible without truncation
+      // Always log full error to console so it's visible in browser DevTools (no truncation)
+      console.error('[AddLiquidity] Full error:', fullErrorText, error);
 
       // Provide more specific error messages
       if (error instanceof Error) {
@@ -254,6 +280,13 @@ export function SetDepositStep({ pairData }: SetDepositStepProps) {
         } else if (error.message.includes('Slippage')) {
           toast.error(
             'Transaction failed due to high slippage. Try adjusting amounts.',
+          );
+        } else if (
+          error.message.includes('too short') ||
+          error.message.includes('at least 6 characters')
+        ) {
+          toast.error(
+            'Invalid recipient address from wallet. Try disconnecting and reconnecting Midnight Lace, then try again.',
           );
         } else if (
           error.message.includes('network') ||
@@ -311,6 +344,16 @@ export function SetDepositStep({ pairData }: SetDepositStepProps) {
   // Use the token objects directly from pairData with validation
   const tokenADetails = pairData?.tokenA;
   const tokenBDetails = pairData?.tokenB;
+  const balanceA = getBalanceForType(
+    walletState?.shieldedBalances,
+    tokenADetails?.type ?? '',
+  );
+  const balanceB = getBalanceForType(
+    walletState?.shieldedBalances,
+    tokenBDetails?.type ?? '',
+  );
+  const hasBalanceA = balanceA != null && balanceA > 0n;
+  const hasBalanceB = balanceB != null && balanceB > 0n;
 
   // Validate token details exist
   if (!tokenADetails || !tokenBDetails) {
@@ -399,36 +442,72 @@ export function SetDepositStep({ pairData }: SetDepositStepProps) {
 
           <div className="space-y-3">
             <div className="p-3 bg-gray-50/50 dark:bg-gray-800/30 backdrop-blur-sm rounded">
-              <Input
-                type="text"
-                value={amountA}
-                onChange={(e) => setAmountA(e.target.value)}
-                className="text-xl font-medium border-0 bg-transparent p-0 h-auto focus-visible:ring-0"
-                placeholder="0"
-              />
+              <div className="flex items-center gap-2">
+                <Input
+                  type="text"
+                  value={amountA}
+                  onChange={(e) => setAmountA(e.target.value)}
+                  className="text-xl font-medium border-0 bg-transparent p-0 h-auto focus-visible:ring-0 flex-1"
+                  placeholder="0"
+                />
+                {hasBalanceA && balanceA != null && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0 text-xs"
+                    onClick={() => setAmountA(balanceA.toString())}
+                  >
+                    Max
+                  </Button>
+                )}
+              </div>
               <div className="flex justify-between mt-1">
                 <div className="flex items-center">
                   <span className="text-xs font-medium">
                     {tokenADetails.symbol || 'Unknown Token'}
                   </span>
                 </div>
+                {hasBalanceA && balanceA != null && (
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    Balance: {balanceA.toString()}
+                  </span>
+                )}
               </div>
             </div>
 
             <div className="p-3 bg-gray-50/50 dark:bg-gray-800/30 backdrop-blur-sm rounded">
-              <Input
-                type="text"
-                value={amountB}
-                onChange={(e) => setAmountB(e.target.value)}
-                className="text-xl font-medium border-0 bg-transparent p-0 h-auto focus-visible:ring-0"
-                placeholder="0"
-              />
+              <div className="flex items-center gap-2">
+                <Input
+                  type="text"
+                  value={amountB}
+                  onChange={(e) => setAmountB(e.target.value)}
+                  className="text-xl font-medium border-0 bg-transparent p-0 h-auto focus-visible:ring-0 flex-1"
+                  placeholder="0"
+                />
+                {hasBalanceB && balanceB != null && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0 text-xs"
+                    onClick={() => setAmountB(balanceB.toString())}
+                  >
+                    Max
+                  </Button>
+                )}
+              </div>
               <div className="flex justify-between mt-1">
                 <div className="flex items-center">
                   <span className="text-xs font-medium">
                     {tokenBDetails.symbol || 'Unknown Token'}
                   </span>
                 </div>
+                {hasBalanceB && balanceB != null && (
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    Balance: {balanceB.toString()}
+                  </span>
+                )}
               </div>
             </div>
           </div>

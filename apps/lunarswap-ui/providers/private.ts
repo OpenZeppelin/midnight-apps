@@ -54,4 +54,47 @@ export class PrivateDataProviderWrapper<
     this.logger.trace('Clearing signing keys');
     return this.wrapped.clearSigningKeys();
   }
+
+  setContractAddress(address: string): void {
+    this.logger.trace(`Setting contract address: ${address}`);
+    this.wrapped.setContractAddress(address);
+  }
+
+  exportPrivateStates(
+    options?: Parameters<
+      PrivateStateProvider<PSI, PS>['exportPrivateStates']
+    >[0],
+  ): ReturnType<PrivateStateProvider<PSI, PS>['exportPrivateStates']> {
+    this.logger.trace('Exporting private states');
+    return this.wrapped.exportPrivateStates(options);
+  }
+
+  importPrivateStates(
+    exportData: Parameters<
+      PrivateStateProvider<PSI, PS>['importPrivateStates']
+    >[0],
+    options?: Parameters<
+      PrivateStateProvider<PSI, PS>['importPrivateStates']
+    >[1],
+  ): ReturnType<PrivateStateProvider<PSI, PS>['importPrivateStates']> {
+    this.logger.trace('Importing private states');
+    return this.wrapped.importPrivateStates(exportData, options);
+  }
+
+  exportSigningKeys(
+    options?: Parameters<PrivateStateProvider<PSI, PS>['exportSigningKeys']>[0],
+  ): ReturnType<PrivateStateProvider<PSI, PS>['exportSigningKeys']> {
+    this.logger.trace('Exporting signing keys');
+    return this.wrapped.exportSigningKeys(options);
+  }
+
+  importSigningKeys(
+    exportData: Parameters<
+      PrivateStateProvider<PSI, PS>['importSigningKeys']
+    >[0],
+    options?: Parameters<PrivateStateProvider<PSI, PS>['importSigningKeys']>[1],
+  ): ReturnType<PrivateStateProvider<PSI, PS>['importSigningKeys']> {
+    this.logger.trace('Importing signing keys');
+    return this.wrapped.importSigningKeys(exportData, options);
+  }
 }

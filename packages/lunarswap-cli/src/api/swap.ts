@@ -3,7 +3,7 @@ import type {
   Either,
   ShieldedCoinInfo,
   ZswapCoinPublicKey,
-} from '@openzeppelin/midnight-apps-contracts/dist/artifacts/lunarswap/Lunarswap/contract';
+} from '@openzeppelin/midnight-apps-contracts/lunarswap/contract';
 import type { Lunarswap } from '@openzeppelin/midnight-apps-lunarswap-api';
 import type { Logger } from 'pino';
 

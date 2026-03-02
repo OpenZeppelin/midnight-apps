@@ -6,11 +6,11 @@ import type {
   PrivateStateProvider,
   ProofProvider,
 } from '@midnight-ntwrk/midnight-js-types';
-import { Contract } from '@openzeppelin/midnight-apps-contracts/dist/artifacts/lunarswap/Lunarswap/contract';
+import { Contract } from '@openzeppelin/midnight-apps-contracts/lunarswap/contract';
 import {
   type LunarswapPrivateState,
   LunarswapWitnesses,
-} from '@openzeppelin/midnight-apps-contracts/dist/lunarswap/witnesses/Lunarswap';
+} from '@openzeppelin/midnight-apps-contracts/lunarswap/witnesses';
 import type {
   LunarswapCircuitKeys,
   LunarswapContract,
@@ -61,14 +61,20 @@ export function ContractStatusIndicator() {
 
     setIsLoading(true);
     try {
-      // Create private state provider
+      // Create private state provider (3.2.0-rc.1: accountId + privateStoragePasswordProvider)
+      const walletAPI = midnightWallet.walletAPI;
+      const privateStateConfig = {
+        privateStateStoreName: 'lunarswap-private-state',
+        accountId: String(walletAPI.coinPublicKey),
+        privateStoragePasswordProvider: () =>
+          `${String(walletAPI.encryptionPublicKey)}A!`,
+      } as Parameters<
+        typeof levelPrivateStateProvider<typeof LunarswapPrivateStateId>
+      >[0];
       const privateStateProvider: PrivateStateProvider<
         typeof LunarswapPrivateStateId,
         LunarswapPrivateState
-      > = levelPrivateStateProvider({
-        privateStateStoreName: 'lunarswap-private-state',
-        walletProvider: midnightWallet.walletProvider,
-      });
+      > = levelPrivateStateProvider(privateStateConfig);
 
       // Create ZK config provider (signature: baseURL, callback, fetchFunc)
       const zkConfigProvider =

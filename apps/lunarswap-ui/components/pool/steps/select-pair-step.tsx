@@ -1,8 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CardContent, CardFooter } from '@/components/ui/card';
-import type { Token as UiToken } from '@/lib/token-config';
+import { useWalletRx } from '@/hooks/use-wallet-rx';
+import {
+  userDeployedTokenToToken,
+  useShieldedTokenContext,
+} from '@/lib/shielded-token-context';
+import {
+  getAllTokens,
+  getTokensFromShieldedBalances,
+  type Token as UiToken,
+} from '@/lib/token-config';
 import { Button } from '../../ui/button';
 import { TokenSelector } from '../token-selector';
 
@@ -18,7 +27,13 @@ interface SelectPairStepProps {
   initialData?: Partial<PairSelectionData>;
 }
 
+function normalizeType(t: string): string {
+  return t.replace(/^0x/i, '').toLowerCase();
+}
+
 export function SelectPairStep({ onSubmit, initialData }: SelectPairStepProps) {
+  const { state: walletState } = useWalletRx();
+  const { userDeployedTokens } = useShieldedTokenContext();
   const [tokenA, setTokenA] = useState<UiToken | null>(
     initialData?.tokenA ?? null,
   );
@@ -42,23 +57,46 @@ export function SelectPairStep({ onSubmit, initialData }: SelectPairStepProps) {
     symbolsDifferent: true,
   });
 
+  const baseTokens = useMemo(
+    () => getAllTokens(userDeployedTokens.map(userDeployedTokenToToken)),
+    [userDeployedTokens],
+  );
+  const walletTokens = useMemo(
+    () =>
+      walletState?.shieldedBalances
+        ? getTokensFromShieldedBalances(walletState.shieldedBalances)
+        : [],
+    [walletState?.shieldedBalances],
+  );
+  const baseTypes = useMemo(
+    () => new Set(baseTokens.map((t) => normalizeType(t.type))),
+    [baseTokens],
+  );
+  const combinedTokens = useMemo(() => {
+    const fromWallet = walletTokens.filter(
+      (t) => !baseTypes.has(normalizeType(t.type)),
+    );
+    return [...baseTokens, ...fromWallet];
+  }, [baseTokens, walletTokens, baseTypes]);
+
   // Validate tokens whenever they change
   useEffect(() => {
-    const tokenASymbol = tokenA?.symbol || null;
-    const tokenBSymbol = tokenB?.symbol || null;
+    const tokenASymbol = tokenA?.symbol ?? null;
+    const tokenBSymbol = tokenB?.symbol ?? null;
     const tokenAExists = !!tokenA;
     const tokenBExists = !!tokenB;
-    const symbolsDifferent = tokenASymbol !== tokenBSymbol;
-
-    const isValid = tokenAExists && tokenBExists && symbolsDifferent;
+    const sameType =
+      tokenA && tokenB
+        ? normalizeType(tokenA.type) === normalizeType(tokenB.type)
+        : false;
 
     setValidationState({
       tokenA: tokenASymbol,
       tokenB: tokenBSymbol,
-      isValid,
+      isValid: tokenAExists && tokenBExists && !sameType,
       tokenAExists,
       tokenBExists,
-      symbolsDifferent,
+      symbolsDifferent: !sameType,
     });
   }, [tokenA, tokenB]);
 
@@ -67,26 +105,20 @@ export function SelectPairStep({ onSubmit, initialData }: SelectPairStepProps) {
   };
 
   const handleTokenBSelect = (token: UiToken) => {
-    // If the selected token is the same as tokenA, reset tokenA to null
-    if (tokenA && token.symbol === tokenA.symbol) {
+    if (tokenA && normalizeType(token.type) === normalizeType(tokenA.type)) {
       setTokenA(null);
     }
     setTokenB(token);
   };
 
   const handleSubmit = () => {
-    if (!tokenA || !tokenB) {
-      return;
-    }
-
-    const pairData: PairSelectionData = {
+    if (!tokenA || !tokenB) return;
+    onSubmit({
       tokenA,
       tokenB,
       fee,
       version: 'v1',
-    };
-
-    onSubmit(pairData);
+    });
   };
 
   return (
@@ -95,11 +127,12 @@ export function SelectPairStep({ onSubmit, initialData }: SelectPairStepProps) {
         <div className="mb-4">
           <h3 className="text-base font-medium mb-2">Select token pair</h3>
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-            Choose the tokens you want to provide liquidity for.
+            Choose Token A and Token B from your deployed tokens or from your
+            wallet balances. You can add liquidity even if the pair is not on
+            the contract yet.
           </p>
 
           <div className="space-y-3">
-            {/* Token selectors on the same line */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <div className="block text-xs font-medium mb-1">Token A</div>
@@ -107,6 +140,7 @@ export function SelectPairStep({ onSubmit, initialData }: SelectPairStepProps) {
                   selectedToken={tokenA}
                   onSelectToken={handleTokenASelect}
                   showTokenIcon={false}
+                  tokens={combinedTokens}
                 />
               </div>
 
@@ -116,11 +150,11 @@ export function SelectPairStep({ onSubmit, initialData }: SelectPairStepProps) {
                   selectedToken={tokenB}
                   onSelectToken={handleTokenBSelect}
                   showTokenIcon={false}
+                  tokens={combinedTokens}
                 />
               </div>
             </div>
 
-            {/* Fixed fee display */}
             <div>
               <div className="block text-xs font-medium mb-1">Fee Tier</div>
               <div className="p-2 bg-gray-50 dark:bg-gray-800/50 rounded border border-gray-200 dark:border-gray-700">
@@ -134,7 +168,6 @@ export function SelectPairStep({ onSubmit, initialData }: SelectPairStepProps) {
             </div>
           </div>
 
-          {/* Validation Messages */}
           {validationState.tokenA &&
             validationState.tokenB &&
             !validationState.symbolsDifferent && (

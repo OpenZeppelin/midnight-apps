@@ -1,14 +1,10 @@
 import type { RawTokenType } from '@midnight-ntwrk/ledger-v7';
 import {
   createShieldedCoinInfo,
+  encodeCoinPublicKey,
   encodeShieldedCoinInfo,
 } from '@midnight-ntwrk/ledger-v7';
 import type { FinalizedCallTxData } from '@midnight-ntwrk/midnight-js-contracts';
-import { getNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
-import {
-  MidnightBech32m,
-  ShieldedCoinPublicKey,
-} from '@midnight-ntwrk/wallet-sdk-address-format';
 import type {
   Contract,
   ContractAddress,
@@ -18,14 +14,15 @@ import type {
   ShieldedCoinInfo,
   Witnesses,
   ZswapCoinPublicKey,
-} from '@openzeppelin/midnight-apps-contracts/dist/artifacts/lunarswap/Lunarswap/contract';
-import type { LunarswapPrivateState } from '@openzeppelin/midnight-apps-contracts/dist/lunarswap/witnesses/Lunarswap';
+} from '@openzeppelin/midnight-apps-contracts/lunarswap/contract';
+import type { LunarswapPrivateState } from '@openzeppelin/midnight-apps-contracts/lunarswap/witnesses';
 import {
   Lunarswap,
   type LunarswapProviders,
 } from '@openzeppelin/midnight-apps-lunarswap-api';
 import { Buffer } from 'buffer';
 import type { Logger } from 'pino';
+import { serializeError } from '../utils/error-utils';
 import { LunarswapSimulator } from './LunarswapSimulator';
 import type { ProviderCallbackAction, WalletAPI } from './wallet-context';
 
@@ -376,21 +373,79 @@ export class LunarswapIntegration {
     minAmountB: bigint,
     recipientCoinPublicKey: string,
   ): Promise<FinalizedCallTxData<LunarswapContract, 'addLiquidity'>> {
+    this._logger?.info(
+      {
+        tokenA: String(tokenA).slice(0, 16),
+        tokenB: String(tokenB).slice(0, 16),
+        amountA: amountA.toString(),
+        amountB: amountB.toString(),
+        minAmountA: minAmountA.toString(),
+        minAmountB: minAmountB.toString(),
+        recipientCoinPublicKeyLength: recipientCoinPublicKey?.length ?? 0,
+        recipientCoinPublicKeyPreview: recipientCoinPublicKey
+          ? `${String(recipientCoinPublicKey).slice(0, 12)}...${String(recipientCoinPublicKey).slice(-6)}`
+          : '(empty)',
+      },
+      '[addLiquidity] called with args',
+    );
+
     const lunarswap = await this.ensureReady();
+    this._logger?.info('[addLiquidity] ensureReady done, building recipient');
 
     const tokenAInfo = LunarswapIntegration.toCoinInfo(tokenA, amountA);
     const tokenBInfo = LunarswapIntegration.toCoinInfo(tokenB, amountB);
-    const recipientAddress = LunarswapIntegration.createRecipient(
-      recipientCoinPublicKey,
-    );
+    let recipientAddress: Either<ZswapCoinPublicKey, ContractAddress>;
+    try {
+      recipientAddress = LunarswapIntegration.createRecipient(
+        recipientCoinPublicKey,
+        this._logger,
+      );
+      this._logger?.info(
+        {
+          recipientBytesLength: recipientAddress.left?.bytes?.length ?? 0,
+        },
+        '[addLiquidity] createRecipient done',
+      );
+    } catch (recipientErr) {
+      this._logger?.error(
+        {
+          error: recipientErr,
+          message:
+            recipientErr instanceof Error
+              ? recipientErr.message
+              : String(recipientErr),
+          stack: recipientErr instanceof Error ? recipientErr.stack : undefined,
+          recipientCoinPublicKeyLength: recipientCoinPublicKey?.length ?? 0,
+        },
+        '[addLiquidity] createRecipient failed',
+      );
+      throw recipientErr;
+    }
 
-    return await lunarswap.addLiquidity(
-      tokenAInfo,
-      tokenBInfo,
-      minAmountA,
-      minAmountB,
-      recipientAddress,
-    );
+    this._logger?.info('[addLiquidity] calling lunarswap.addLiquidity');
+    try {
+      const result = await lunarswap.addLiquidity(
+        tokenAInfo,
+        tokenBInfo,
+        minAmountA,
+        minAmountB,
+        recipientAddress,
+      );
+      this._logger?.info('[addLiquidity] lunarswap.addLiquidity succeeded');
+      return result;
+    } catch (txErr) {
+      const fullErrorText = serializeError(txErr);
+      this._logger?.error(
+        {
+          error: txErr,
+          fullError: fullErrorText,
+          message: txErr instanceof Error ? txErr.message : String(txErr),
+          stack: txErr instanceof Error ? txErr.stack : undefined,
+        },
+        '[addLiquidity] lunarswap.addLiquidity failed',
+      );
+      throw txErr;
+    }
   }
 
   /**
@@ -485,26 +540,52 @@ export class LunarswapIntegration {
   }
 
   /**
-   * Create recipient address
+   * Create recipient address from the wallet's coin public key.
    */
   static createRecipient(
     recipientCoinPublicKey: string,
+    logger?: Logger,
   ): Either<ZswapCoinPublicKey, ContractAddress> {
-    if (!recipientCoinPublicKey || recipientCoinPublicKey.length === 0) {
+    const raw = (recipientCoinPublicKey ?? '').trim();
+    const log = (msg: string, data?: Record<string, unknown>) => {
+      logger?.info(data ?? {}, `[createRecipient] ${msg}`);
+    };
+
+    log('input', {
+      length: raw.length,
+      preview:
+        raw.length > 0
+          ? `${raw.slice(0, 12)}...${raw.slice(-6)} (length ${raw.length})`
+          : '(empty)',
+    });
+
+    if (!raw || raw.length === 0) {
+      logger?.error({}, '[createRecipient] recipient address is empty');
       throw new Error('Recipient address cannot be empty');
     }
 
-    const bech32mCoinPublicKey = MidnightBech32m.parse(recipientCoinPublicKey);
-    const coinPublicKey = ShieldedCoinPublicKey.codec.decode(
-      getNetworkId(),
-      bech32mCoinPublicKey,
-    );
+    try {
+      log('calling encodeCoinPublicKey');
+      const bytes = encodeCoinPublicKey(recipientCoinPublicKey);
+      log('encodeCoinPublicKey done', { bytesLength: bytes?.length ?? 0 });
 
-    return {
-      is_left: true,
-      left: { bytes: coinPublicKey.data },
-      right: { bytes: new Uint8Array(32) },
-    };
+      return {
+        is_left: true,
+        left: { bytes },
+        right: { bytes: new Uint8Array(32) },
+      };
+    } catch (err) {
+      logger?.error(
+        {
+          error: err,
+          message: err instanceof Error ? err.message : String(err),
+          stack: err instanceof Error ? err.stack : undefined,
+          inputLength: raw.length,
+        },
+        '[createRecipient] encodeCoinPublicKey failed',
+      );
+      throw err;
+    }
   }
 }
 
