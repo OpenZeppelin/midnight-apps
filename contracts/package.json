@@ -20,12 +20,6 @@
   },
   "homepage": "",
   "type": "module",
-  "exports": {
-    "./math/witnesses/*": {
-      "types": "./dist/math/witnesses/*.d.ts",
-      "default": "./dist/math/witnesses/*.js"
-    }
-  },
   "config": {
     "compactVersion": "+0.28.0",
     "artifactsOutDir": "src/artifacts",
