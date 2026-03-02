@@ -38,6 +38,11 @@ module Pack<#N> {
    * This pure circuit converts an N-element vector of bytes to an N-byte array
    * using little-endian byte ordering.
    *
+   * @circuitInfo depends on N:
+   * - Pack<8>: k=12, rows=2412
+   * - Pack<16>: k=13, rows=5118
+   * - Pack<32>: k=14, rows=10231
+   *
    * @param vec - The vector of N bytes to convert.
    * @returns The byte array of length N.
    */
@@ -52,6 +57,11 @@ module Pack<#N> {
    * @remarks
    * Calls the wit_unpackBytes witness off-chain, then verifies in-circuit that
    * pack(vec) equals the input bytes.
+   *
+   * @circuitInfo depends on N:
+   * - Pack<8>: k=12, rows=2486
+   * - Pack<16>: k=13, rows=5262
+   * - Pack<32>: k=14, rows=10521
    *
    * @param bytes - The byte array to unpack.
    * @returns The vector of N bytes (element 0 is the LSB).

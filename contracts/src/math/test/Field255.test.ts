@@ -142,6 +142,19 @@ describe('Field255', () => {
         const u256 = field255Simulator.toU256(MAX_FIELD);
         expect(fromU256(u256)).toBe(MAX_FIELD);
       });
+
+      test('should fail when witness returns bad unpack result', () => {
+        field255Simulator.overrideWitness(
+          'wit_unpackBytes',
+          (context, _bytes) => [
+            context.privateState,
+            new Array<bigint>(32).fill(0n),
+          ],
+        );
+        expect(() => field255Simulator.toU256(1n)).toThrow(
+          'failed assert: Pack: unpack verification failed',
+        );
+      });
     });
   });
 
@@ -244,6 +257,19 @@ describe('Field255', () => {
           expect(field255Simulator.gt(a, b)).toBe(field255Simulator.lt(b, a));
         }
       });
+
+      test('should fail when witness returns bad unpack result', () => {
+        field255Simulator.overrideWitness(
+          'wit_unpackBytes',
+          (context, _bytes) => [
+            context.privateState,
+            new Array<bigint>(32).fill(0n),
+          ],
+        );
+        expect(() => field255Simulator.lt(1n, 2n)).toThrow(
+          'failed assert: Pack: unpack verification failed',
+        );
+      });
     });
 
     describe('lte', () => {
@@ -291,6 +317,19 @@ describe('Field255', () => {
           expect(field255Simulator.gte(a, b)).toBe(field255Simulator.lte(b, a));
         }
       });
+
+      test('should fail when witness returns bad unpack result', () => {
+        field255Simulator.overrideWitness(
+          'wit_unpackBytes',
+          (context, _bytes) => [
+            context.privateState,
+            new Array<bigint>(32).fill(0n),
+          ],
+        );
+        expect(() => field255Simulator.lte(1n, 2n)).toThrow(
+          'failed assert: Pack: unpack verification failed',
+        );
+      });
     });
 
     describe('gt', () => {
@@ -325,6 +364,19 @@ describe('Field255', () => {
           }
         }
       });
+
+      test('should fail when witness returns bad unpack result', () => {
+        field255Simulator.overrideWitness(
+          'wit_unpackBytes',
+          (context, _bytes) => [
+            context.privateState,
+            new Array<bigint>(32).fill(0n),
+          ],
+        );
+        expect(() => field255Simulator.gt(2n, 1n)).toThrow(
+          'failed assert: Pack: unpack verification failed',
+        );
+      });
     });
 
     describe('gte', () => {
@@ -358,6 +410,19 @@ describe('Field255', () => {
             expect(field255Simulator.gte(a, b)).toBe(a >= b);
           }
         }
+      });
+
+      test('should fail when witness returns bad unpack result', () => {
+        field255Simulator.overrideWitness(
+          'wit_unpackBytes',
+          (context, _bytes) => [
+            context.privateState,
+            new Array<bigint>(32).fill(0n),
+          ],
+        );
+        expect(() => field255Simulator.gte(2n, 1n)).toThrow(
+          'failed assert: Pack: unpack verification failed',
+        );
       });
     });
   });

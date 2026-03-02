@@ -261,7 +261,7 @@ module Uint128 {
    * @param {Uint<128>} a - The first Uint<128> value.
    * @param {Uint<128>} b - The second Uint<128> value.
    *
-   * @returns {Boolean}
+   * @returns {Boolean} True if a is less than or equal to b, false otherwise.
    */
   export pure circuit lte(a: Uint<128>, b: Uint<128>): Boolean {
     return a <= b;
@@ -273,9 +273,10 @@ module Uint128 {
    *
    * @circuitInfo k=9, rows=392
    *
-   * @param a The first U128 value.
-   * @param b The second U128 value.
-   * @returns Boolean True if a is less than b, false otherwise.
+   * @param {U128} a - The first U128 value.
+   * @param {U128} b - The second U128 value.
+   *
+   * @returns {Boolean} True if a is less than b, false otherwise.
    */
   export pure circuit lt(a: U128, b: U128): Boolean {
     return a.high < b.high || (a.high == b.high && a.low < b.low);
@@ -285,7 +286,7 @@ module Uint128 {
    * @title Less Than or Equal U128 circuit
    * @description Checks if one U128 value is less than or equal to another.
    *
-   * @circuitInfo k=9, rows=400
+   * @circuitInfo k=9, rows=395
    *
    * @param {U128} a - The first U128 value.
    * @param {U128} b - The second U128 value.
@@ -293,7 +294,7 @@ module Uint128 {
    * @returns {Boolean} True if a is less than or equal to b, false otherwise.
    */
   export pure circuit lte(a: U128, b: U128): Boolean {
-    return lt(a, b) || eq(a, b);
+    return !lt(b, a);
   }
 
   /**
@@ -338,14 +339,14 @@ module Uint128 {
    * @returns {Boolean} True if a is greater than b, false otherwise.
    */
   export pure circuit gt(a: U128, b: U128): Boolean {
-    return a.high > b.high || (a.high == b.high && a.low > b.low);
+    return lt(b, a);
   }
 
   /**
    * @title Greater Than or Equal U128 circuit
    * @description Checks if one U128 value is greater than or equal to another.
    *
-   * @circuitInfo k=9, rows=400
+   * @circuitInfo k=9, rows=395
    *
    * @param {U128} a - The first U128 value.
    * @param {U128} b - The second U128 value.
@@ -353,7 +354,7 @@ module Uint128 {
    * @returns {Boolean} True if a is greater than or equal to b, false otherwise.
    */
   export pure circuit gte(a: U128, b: U128): Boolean {
-    return gt(a, b) || eq(a, b);
+    return !lt(a, b);
   }
 
   ////////////////////////////////////////////////////////////////
@@ -532,7 +533,7 @@ module Uint128 {
    * 4. Low Part: low_diff = a_l - b_l (if no borrow), else a_l + 2⁶⁴ - b_l
    * 5. Return U128 {low: low_diff, high: high_diff}
    *
-   * @circuitInfo k=10, rows=579
+   * @circuitInfo k=10, rows=561
    *
    * @throws {Error} "Uint128: subtraction underflow" if a < b.
    *
@@ -543,7 +544,7 @@ module Uint128 {
    */
   export pure circuit sub(a: U128, b: U128): U128 {
     // General case
-    assert(gt(a, b) || eq(a, b), "Uint128: subtraction underflow");
+    assert(!lt(a, b), "Uint128: subtraction underflow");
 
     const borrow = a.low < b.low ? 1 as Uint<64> : 0 as Uint<64>;
     const highWithBorrow = b.high + borrow;

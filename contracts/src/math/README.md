@@ -19,8 +19,11 @@ This package provides mathematical contract operations for the Midnight Network,
 
 ```mermaid
 graph TD
+    subgraph "<b>Utility</b>"
+        Pack["Pack&lt;N&gt;<br/>(Generic)"]
+    end
+
     subgraph "<b>8 / 64-bit</b>"
-        Vector8
         Bytes8
         Uint64
     end
@@ -30,14 +33,14 @@ graph TD
     end
 
     subgraph "<b>256-bit / 32-byte</b>"
-        Vector32
         Uint256
         Bytes32
         Field255
     end
 
-    Vector8 --> Bytes8
-    Vector8 --> Uint64
+    Pack --> Bytes8
+    Pack --> Bytes32
+    Bytes8 --> Uint64
     Uint64 --> Uint128
     Uint64 --> Uint256
     Uint128 --> Uint256
@@ -62,30 +65,20 @@ graph TD
 
 ### Key Components
 
-#### Core Contracts
-- `Uint64.compact` - 64-bit mathematical operations
-- `Uint128.compact` - 128-bit mathematical operations
-- `Uint256.compact` - 256-bit mathematical operations
-- `Bytes32.compact` - Byte array operations
-- `Field255.compact` - Field arithmetic operations
-- `Vector8.compact` - Vector<8, Uint<8>> to Uint<64> / Bytes<8> conversions
-- `Vector32.compact` - Vector<32, Uint<8>> to U256 / Bytes<32> conversions
-- `Bytes8.compact` - Bytes<8> to Uint<64> / Vector<8, Uint<8>> conversions
+#### Core Modules
 
-#### Utility Functions
-- `sqrtBigint()` - Efficient square root calculation using Newton-Raphson method
-- `consts.ts` - Mathematical constants
+**Arithmetic Operations:**
+- `Uint64.compact` - 64-bit unsigned integer arithmetic with division, multiplication, square root, and utility functions
+- `Uint128.compact` - 128-bit unsigned integer operations using limb-based U128 struct representation
+- `Uint256.compact` - 256-bit unsigned integer operations using nested U128 limbs for efficient comparisons
 
-#### Witness Implementations
-- Off-chain computation for division and square root operations
-- Type-safe witness contexts
-- Private state management
+**Byte & Field Operations:**
+- `Bytes8.compact` - Conversions between Bytes<8>, Vector<8, Uint<8>>, and Uint<64> (little-endian)
+- `Bytes32.compact` - Conversions and comparisons for Bytes<32> using U256 representation
+- `Field255.compact` - BLS12-381 scalar field arithmetic operations using Bytes<32> as intermediate
 
-## Installation
-
-```bash
-pnpm add @openzeppelin/midnight-apps-contracts
-```
+**Utility Modules:**
+- `Pack<N>.compact` - Generic packing/unpacking for Vector<N, Uint<8>> ↔ Bytes<N> (parameterized by size N)
 
 ## Usage
 
@@ -246,302 +239,3 @@ const createWitnesses = (): Witnesses<MyPrivateState> => ({
   },
 });
 ```
-
-### Available Witness Functions
-
-| Function | Module | Description | Input | Output |
-|----------|--------|-------------|-------|--------|
-| `wit_sqrtU64` | Uint64 | Square root of 64-bit integer | `bigint` | `bigint` |
-| `wit_divU64` | Uint64 | Division with remainder | `bigint, bigint` | `DivResultU64` |
-| `wit_sqrtU128` | Uint128 | Square root of U128 struct | `U128` | `bigint` |
-| `wit_divU128` | Uint128 | Division of U128 structs | `U128, U128` | `DivResultU128` |
-| `wit_divUint128` | Uint128/Uint256 | Division of Uint<128> values | `bigint, bigint` | `DivResultU128` |
-| `wit_unpackBytes` | Pack / Bytes8 / Bytes32 | Unpack bytes to byte vector | `Uint8Array` | `bigint[]` |
-
-### Types
-
-The library exports helper types for working with large integers:
-
-```typescript
-import type {
-  U128,
-  U256,
-  DivResultU64,
-  DivResultU128,
-  DivResultU256
-} from '@openzeppelin/midnight-apps-contracts/math/witnesses/types';
-
-// U128: { low: bigint, high: bigint }
-// U256: { low: U128, high: U128 }
-// DivResultU64: { quotient: bigint, remainder: bigint }
-// DivResultU128: { quotient: U128, remainder: U128 }
-// DivResultU256: { quotient: U256, remainder: U256 }
-```
-
-### Conversion Helpers
-
-```typescript
-import {
-  toU128,
-  toBigint,
-  toU256
-} from '@openzeppelin/midnight-apps-contracts/math/witnesses/types';
-
-// Convert bigint to U128 struct
-const u128Value = toU128(1000n);
-
-// Convert U128 struct back to bigint
-const bigintValue = toBigint(u128Value);
-
-// Convert bigint to U256 struct
-const u256Value = toU256(1000n);
-```
-
-## API Reference
-
-### Witness Functions
-
-These are pure functions that perform the computation without any context or private state handling. They are designed to be wrapped with your contract's context handling.
-
-#### `wit_sqrtU64(radicand: bigint): bigint`
-Computes the square root of a 64-bit unsigned integer.
-
-#### `wit_divU64(dividend: bigint, divisor: bigint): DivResultU64`
-Computes division with quotient and remainder for 64-bit unsigned integers.
-
-#### `wit_sqrtU128(radicand: U128): bigint`
-Computes the square root of a 128-bit unsigned integer (U128 struct).
-
-#### `wit_divU128(a: U128, b: U128): DivResultU128`
-Computes division with quotient and remainder for U128 structs.
-
-#### `wit_divUint128(a: bigint, b: bigint): DivResultU128`
-Computes division with quotient and remainder for Uint<128> values (bigint), returning U128 structs.
-
-### Types
-
-#### `U128`
-Represents a 128-bit unsigned integer as two 64-bit components:
-```typescript
-type U128 = { low: bigint; high: bigint };
-```
-
-#### `U256`
-Represents a 256-bit unsigned integer as two U128 components:
-```typescript
-type U256 = { low: U128; high: U128 };
-```
-
-#### `DivResultU64`
-Division result for 64-bit operations:
-```typescript
-type DivResultU64 = { quotient: bigint; remainder: bigint };
-```
-
-#### `DivResultU128`
-Division result for 128-bit operations:
-```typescript
-type DivResultU128 = { quotient: U128; remainder: U128 };
-```
-
-#### `DivResultU256`
-Division result for 256-bit operations:
-```typescript
-type DivResultU256 = { quotient: U256; remainder: U256 };
-```
-
-### Conversion Helpers
-
-#### `toU128(value: bigint): U128`
-Converts a bigint to a U128 struct.
-
-#### `toBigint(value: U128): bigint`
-Converts a U128 struct back to a bigint.
-
-#### `toU256(value: bigint): U256`
-Converts a bigint to a U256 struct.
-
-## Development
-
-### Prerequisites
-- Node.js 18+
-- pnpm 10.4.1+
-- TypeScript 5.8+
-
-### Setup
-```bash
-pnpm install
-```
-
-### Available Scripts
-
-```bash
-# Build the package
-pnpm build
-
-# Run tests
-pnpm test
-
-# Type checking
-pnpm types
-
-# Format code
-pnpm fmt
-
-# Lint code
-pnpm lint
-
-# Fix linting issues
-pnpm lint:fix
-
-# Pre-commit checks
-pnpm precommit
-```
-
-### Testing
-
-The package includes comprehensive tests for all mathematical operations:
-
-```bash
-# Run all tests
-pnpm test
-
-# Run tests with console trace
-pnpm test --printConsoleTrace
-```
-
-## Architecture
-
-### Contract Structure
-```
-src/math/
-├── Uint64.compact           # 64-bit mathematical operations
-├── Uint128.compact          # 128-bit mathematical operations
-├── Uint256.compact          # 256-bit mathematical operations
-├── Bytes32.compact          # Byte array operations
-├── Field255.compact         # Field arithmetic operations
-├── Vector8.compact          # Vector<8> to Uint64 / Bytes<8>
-├── Vector32.compact         # Vector<32> to U256 / Bytes<32>
-├── Bytes8.compact           # Bytes<8> to Uint64 / Vector<8>
-├── types/                   # Compact type definitions
-│   └── Types.compact        # U128 and U256 struct types
-├── witnesses/               # Pure witness function implementations
-│   ├── types.ts             # Shared types (U128, U256, DivResult*)
-│   ├── wit_sqrtU64.ts       # Square root for Uint64
-│   ├── wit_divU64.ts        # Division for Uint64
-│   ├── wit_sqrtU128.ts      # Square root for Uint128
-│   ├── wit_divU128.ts       # Division for Uint128
-│   ├── wit_divUint128.ts    # Division for Uint<128> (shared)
-│   └── wit_unpackBytes.ts   # Unpack Bytes to Vector (Pack module)
-├── utils/                   # Utility functions
-│   ├── sqrtBigint.ts        # Newton-Raphson square root
-│   └── consts.ts            # Mathematical constants
-└── test/                    # Test files and mocks
-```
-
-## Circuit Information
-
-The following table shows the constraint counts and circuit sizes for each mathematical operation:
-
-### Uint64 Operations
-| Operation | Circuit Name | K (Constraint Degree) | Rows |
-|-----------|--------------|----------------------|------|
-| Division | `div` | 10 | 240 |
-| Division with Remainder | `divRem` | 10 | 277 |
-| Remainder | `rem` | 10 | 240 |
-| Square Root | `sqrt` | 10 | 122 |
-| Is Multiple | `isMultiple` | 10 | 243 |
-
-### Uint128 Operations
-| Operation | Circuit Name | K (Constraint Degree) | Rows |
-|-----------|--------------|----------------------|------|
-| Addition | `add` | 10 | 575 |
-| Addition (U128) | `addU128` | 10 | 451 |
-| Division | `div` | 12 | 2,778 |
-| Division with Remainder | `divRem` | 12 | 2,819 |
-| Division (U128) | `divU128` | 12 | 2,641 |
-| Division with Remainder (U128) | `divRemU128` | 12 | 2,695 |
-| Multiplication | `mul` | 11 | 1,874 |
-| Multiplication (U128) | `mulU128` | 11 | 1,750 |
-| Multiplication (Checked) | `mulChecked` | 11 | 1,876 |
-| Multiplication (Checked U128) | `mulCheckedU128` | 11 | 1,752 |
-| Remainder | `rem` | 12 | 2,778 |
-| Is Multiple | `isMultiple` | 12 | 2,759 |
-| Is Multiple (U128) | `isMultipleU128` | 12 | 2,635 |
-
-### Uint256 Operations
-
-| Operation | Circuit Name | K (Constraint Degree) | Rows |
-|-----------|--------------|----------------------|------|
-| Addition | `add` | 11 | 1,305 |
-| Subtraction | `sub` | 11 | 1,271 |
-| Division | `div` | 14 | 10,912 |
-| Division with Remainder | `divRem` | 14 | 11,020 |
-| Multiplication | `mul` | 14 | 9,249 |
-| Remainder | `rem` | 14 | 10,912 |
-| Square Root | `sqrt` | 14 | 11,693 |
-| Is Multiple | `isMultiple` | 14 | 10,897 |
-| From U256 | `fromU256` | 10 | 816 |
-| To U256 | `toU256` | 10 | 739 |
-
-### Field255 Operations
-| Operation | Circuit Name | K (Constraint Degree) | Rows |
-|-----------|--------------|----------------------|------|
-| Addition | `add` | 12 | 3,008 |
-| Multiplication | `mul` | 14 | 10,956 |
-| Division | `div` | 14 | 12,623 |
-| Division with Remainder | `divRem` | 14 | 12,101 |
-| Equality | `eq` | 11 | 1,410 |
-| Greater Than | `gt` | 11 | 1,495 |
-| Greater Than or Equal | `gte` | 11 | 1,518 |
-| Less Than | `lt` | 11 | 1,495 |
-| Less Than or Equal | `lte` | 11 | 1,518 |
-| Is Zero | `isZero` | 10 | 724 |
-| From Field | `fromField` | 10 | 739 |
-| Maximum | `max` | 12 | 2,208 |
-| Minimum | `min` | 12 | 2,208 |
-
-### Bytes32 Operations
-| Operation | Circuit Name | K (Constraint Degree) | Rows |
-|-----------|--------------|----------------------|------|
-| Greater Than | `gt` | 12 | 2,639 |
-| Greater Than or Equal | `gte` | 12 | 2,643 |
-| Less Than | `lt` | 12 | 2,639 |
-| Less Than or Equal | `lte` | 12 | 2,643 |
-
-### Circuit Complexity Notes
-
-- **K (Constraint Degree)**: Represents the maximum degree of constraints in the circuit
-- **Rows**: Number of constraint rows in the circuit
-- **Higher K values** indicate more complex constraints but potentially better performance
-- **More rows** generally mean larger proof sizes and longer verification times
-- **U64 operations** are the most efficient with the lowest constraint counts
-- **U256 operations** require the most constraints due to larger bit widths
-- **Field operations** have moderate complexity but provide field arithmetic guarantees
-
-### Key Design Principles
-
-1. **Type Safety**: All operations are fully typed with TypeScript
-2. **Overflow Protection**: Built-in protection against integer overflow
-3. **Efficiency**: Optimized algorithms for large number operations
-4. **Witness Pattern**: Off-chain computation for complex operations
-5. **Modularity**: Separate contracts for different integer sizes
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Run the test suite
-6. Submit a pull request
-
-## License
-
-ISC License - see package.json for details.
-
-## Related Packages
-
-- `@openzeppelin/midnight-apps-compact` - Core Compact framework
-- `@midnight-ntwrk/compact-runtime` - Runtime utilities
-- `@midnight-ntwrk/zswap` - ZK-SNARK operations

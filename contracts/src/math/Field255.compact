@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/Field.compact)
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/Field255.compact)
 
 pragma language_version >= 0.20.0;
 
@@ -36,7 +36,7 @@ pragma language_version >= 0.20.0;
 module Field255 {
   import { U256 } from Types;
 
-  import { toU256, eq, lt, lte, gt, gte, isZero } from Bytes32 prefix Bytes32_;
+  import { toU256, lt } from Bytes32 prefix Bytes32_;
 
   ////////////////////////////////////////////////////////////////
   // Constants & Conversions
@@ -45,6 +45,8 @@ module Field255 {
   /**
    * @title MAX_FIELD circuit
    * @description Returns the maximum Field value.
+   *
+   * @circuitInfo k=5, rows=25
    *
    * @returns {Field} The maximum Field value.
    */
@@ -61,10 +63,9 @@ module Field255 {
    * @description Converts a Field value to Bytes<32> representation.
    *
    * @remarks
-   * This circuit uses Compact's native Field → Bytes<32> conversion via upgradeFromTransient.
-   * The conversion preserves all bits of the Field value in little-endian byte order.
+   * This circuit uses Compact's Field → Bytes<32> casting
    *
-   * @circuitInfo k=10, rows=128
+   * @circuitInfo k=9, rows=409
    *
    * @param {Field} value - The Field value to convert.
    *
@@ -82,7 +83,7 @@ module Field255 {
    * This circuit converts a Field element to a U256 struct by first converting
    * to Bytes<32> and then using the Bytes32 module's toU256 function.
    *
-   * @circuitInfo k=14, rows=15000
+   * @circuitInfo k=14, rows=10353
    *
    * @param {Field} value - The Field value to convert.
    *
@@ -101,11 +102,7 @@ module Field255 {
    * @title eq circuit
    * @description Compares two Field values for equality.
    *
-   * @remarks
-   * This circuit compares two Field elements by converting them to Bytes<32>
-   * and using the Bytes32 equality comparison.
-   *
-   * @circuitInfo k=10, rows=256
+   * @circuitInfo k=6, rows=50
    *
    * @param {Field} a - The first Field value to compare.
    * @param {Field} b - The second Field value to compare.
@@ -124,7 +121,7 @@ module Field255 {
    * This circuit compares two Field elements by converting them to Bytes<32>
    * and using the Bytes32 less-than comparison, which internally uses U256 comparison.
    *
-   * @circuitInfo k=14, rows=30000
+   * @circuitInfo k=15, rows=20757
    *
    * @param {Field} a - The first Field value to compare.
    * @param {Field} b - The second Field value to compare.
@@ -141,11 +138,7 @@ module Field255 {
    * @title lte circuit
    * @description Compares two Field values to check if a <= b.
    *
-   * @remarks
-   * This circuit compares two Field elements by converting them to Bytes<32>
-   * and using the Bytes32 less-than-or-equal comparison.
-   *
-   * @circuitInfo k=14, rows=30000
+   * @circuitInfo k=15, rows=20760
    *
    * @param {Field} a - The first Field value to compare.
    * @param {Field} b - The second Field value to compare.
@@ -153,18 +146,14 @@ module Field255 {
    * @returns {Boolean} True if a <= b, false otherwise.
    */
   export circuit lte(a: Field, b: Field): Boolean {
-    return lt(a, b) || eq(a, b);
+    return !lt(b, a);
   }
 
   /**
    * @title gt circuit
    * @description Compares two Field values to check if a > b.
    *
-   * @remarks
-   * This circuit compares two Field elements by converting them to Bytes<32>
-   * and using the Bytes32 greater-than comparison.
-   *
-   * @circuitInfo k=14, rows=30000
+   * @circuitInfo k=15, rows=20757
    *
    * @param {Field} a - The first Field value to compare.
    * @param {Field} b - The second Field value to compare.
@@ -179,11 +168,7 @@ module Field255 {
    * @title gte circuit
    * @description Compares two Field values to check if a >= b.
    *
-   * @remarks
-   * This circuit compares two Field elements by converting them to Bytes<32>
-   * and using the Bytes32 greater-than-or-equal comparison.
-   *
-   * @circuitInfo k=14, rows=30000
+   * @circuitInfo k=15, rows=20760
    *
    * @param {Field} a - The first Field value to compare.
    * @param {Field} b - The second Field value to compare.
@@ -191,7 +176,7 @@ module Field255 {
    * @returns {Boolean} True if a >= b, false otherwise.
    */
   export circuit gte(a: Field, b: Field): Boolean {
-    return gt(a, b) || eq(a, b);
+    return !lt(a, b);
   }
 
   ////////////////////////////////////////////////////////////////
@@ -202,11 +187,7 @@ module Field255 {
    * @title isZero circuit
    * @description Checks if a Field value equals zero.
    *
-   * @remarks
-   * This circuit checks if a Field element equals zero by converting it to Bytes<32>
-   * and using the Bytes32 isZero function.
-   *
-   * @circuitInfo k=10, rows=256
+   * @circuitInfo k=6, rows=49
    *
    * @param {Field} a - The Field value to check.
    *

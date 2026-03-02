@@ -294,6 +294,22 @@ describe('Bytes32', () => {
           );
         }
       });
+
+      test('should fail when witness returns bad unpack result', () => {
+        bytes32Simulator.overrideWitness(
+          'wit_unpackBytes',
+          (context, _bytes) => [
+            context.privateState,
+            new Array<bigint>(32).fill(0n),
+          ],
+        );
+        const a = new Uint8Array(32);
+        a[0] = 1;
+        const b = new Uint8Array(32);
+        expect(() => bytes32Simulator.lt(a, b)).toThrow(
+          'failed assert: Pack: unpack verification failed',
+        );
+      });
     });
 
     describe('lte', () => {
@@ -328,6 +344,22 @@ describe('Bytes32', () => {
           );
         }
       });
+
+      test('should fail when witness returns bad unpack result', () => {
+        bytes32Simulator.overrideWitness(
+          'wit_unpackBytes',
+          (context, _bytes) => [
+            context.privateState,
+            new Array<bigint>(32).fill(0n),
+          ],
+        );
+        const a = new Uint8Array(32);
+        a[0] = 1;
+        const b = new Uint8Array(32);
+        expect(() => bytes32Simulator.lte(a, b)).toThrow(
+          'failed assert: Pack: unpack verification failed',
+        );
+      });
     });
 
     describe('gt', () => {
@@ -346,6 +378,22 @@ describe('Bytes32', () => {
 
       test('should return true for one compared to zero', () => {
         expect(bytes32Simulator.gt(toBytes(1n), toBytes(0n))).toBe(true);
+      });
+
+      test('should fail when witness returns bad unpack result', () => {
+        bytes32Simulator.overrideWitness(
+          'wit_unpackBytes',
+          (context, _bytes) => [
+            context.privateState,
+            new Array<bigint>(32).fill(0n),
+          ],
+        );
+        const a = new Uint8Array(32);
+        a[0] = 1;
+        const b = new Uint8Array(32);
+        expect(() => bytes32Simulator.gt(a, b)).toThrow(
+          'failed assert: Pack: unpack verification failed',
+        );
       });
     });
 
@@ -366,6 +414,22 @@ describe('Bytes32', () => {
       test('should return true for zero compared to zero', () => {
         const z = toBytes(0n);
         expect(bytes32Simulator.gte(z, z)).toBe(true);
+      });
+
+      test('should fail when witness returns bad unpack result', () => {
+        bytes32Simulator.overrideWitness(
+          'wit_unpackBytes',
+          (context, _bytes) => [
+            context.privateState,
+            new Array<bigint>(32).fill(0n),
+          ],
+        );
+        const a = new Uint8Array(32);
+        a[0] = 1;
+        const b = new Uint8Array(32);
+        expect(() => bytes32Simulator.gte(a, b)).toThrow(
+          'failed assert: Pack: unpack verification failed',
+        );
       });
     });
   });
