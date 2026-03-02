@@ -10,7 +10,7 @@ pragma language_version >= 0.20.0;
  *
  * @remarks
  * This module has no dependencies and exists so that BytesN and UintN modules can import
- * pack/unpack without creating cyclic dependencies (e.g. Bytes32 needs Uint256.lt for
+ * pack/unpack without creating cyclic dependencies (e.g. Bytes32 needs Uint256_lt for
  * comparisons while Uint256 needs pack for toBytes).
  *
  * Instantiate with a size parameter, e.g. Pack<8>, Pack<16>, Pack<32>.
