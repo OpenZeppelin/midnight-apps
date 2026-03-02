@@ -39,8 +39,6 @@ module Field255 {
   import { U256 } from Types;
 
   import { toU256, eq, lt, lte, gt, gte, isZero } from Bytes32 prefix Bytes32_;
-  import { toBytes } from Uint256 prefix Uint256_;
-  import { toU128 } from Uint128 prefix Uint128_;
 
   ////////////////////////////////////////////////////////////////
   // Constants & Conversions
