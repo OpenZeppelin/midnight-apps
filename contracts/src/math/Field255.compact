@@ -4,8 +4,8 @@
 pragma language_version >= 0.20.0;
 
 /**
- * @title Field
- * @description A utility module providing mathematical operations for Field elements
+ * @title Field255
+ * @description A utility module providing mathematical operations for BLS12-381 scalar Field elements
  * using Bytes<32> as the intermediate representation.
  *
  * @remarks
@@ -45,6 +45,10 @@ module Field255 {
   /**
    * @title MAX_FIELD circuit
    * @description Returns the maximum Field value.
+   *
+   * @remarks
+   * This is the maximum value in the BLS12-381 scalar field: Max Field = r - 1
+   * where r = 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001
    *
    * @circuitInfo k=5, rows=25
    *

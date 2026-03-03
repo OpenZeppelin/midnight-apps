@@ -34,6 +34,8 @@ const fromU256 = (u: U256): bigint =>
 const toBytes = (value: bigint): Uint8Array =>
   bytes32Simulator.pack(toVec32(value));
 
+// TODO: Create reusable test fixture for math modules - https://github.com/OpenZeppelin/midnight-apps/issues/297
+
 describe('Bytes32', () => {
   beforeEach(setup);
 
