@@ -1,9 +1,9 @@
-# Midnight Apps
-
 [![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://opensource.org/licenses/MIT)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/midnight-apps/badge)](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/midnight-apps)
 [![Compact Compiler](https://img.shields.io/badge/Compact%20Compiler-0.28.0-1abc9c.svg)](https://docs.midnight.network/relnotes/compact/)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+
+# OpenZeppelin Apps for Midnight
 
 **A collection of sample (starter) apps** on the [Midnight](midnight.network).
 
