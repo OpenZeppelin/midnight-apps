@@ -60,6 +60,10 @@ export class Uint64Simulator extends Uint64SimulatorBase {
     super([], options);
   }
 
+  ////////////////////////////////////////////////////////////////
+  // Constants
+  ////////////////////////////////////////////////////////////////
+
   public MAX_UINT8(): bigint {
     return this.circuits.impure.MAX_UINT8();
   }
@@ -75,6 +79,10 @@ export class Uint64Simulator extends Uint64SimulatorBase {
   public MAX_UINT64(): bigint {
     return this.circuits.impure.MAX_UINT64();
   }
+
+  ////////////////////////////////////////////////////////////////
+  // Conversions
+  ////////////////////////////////////////////////////////////////
 
   public toBytes(value: bigint): Uint8Array {
     return this.circuits.impure.toBytes(value);
@@ -94,6 +102,10 @@ export class Uint64Simulator extends Uint64SimulatorBase {
       bigint,
     ];
   }
+
+  ////////////////////////////////////////////////////////////////
+  // Arithmetic
+  ////////////////////////////////////////////////////////////////
 
   public add(a: bigint, b: bigint): bigint {
     return this.circuits.impure.add(a, b);
@@ -115,6 +127,10 @@ export class Uint64Simulator extends Uint64SimulatorBase {
     return this.circuits.impure.mulChecked(a, b);
   }
 
+  ////////////////////////////////////////////////////////////////
+  // Division
+  ////////////////////////////////////////////////////////////////
+
   public div(a: bigint, b: bigint): bigint {
     return this.circuits.impure.div(a, b);
   }
@@ -127,9 +143,17 @@ export class Uint64Simulator extends Uint64SimulatorBase {
     return this.circuits.impure.divRem(a, b);
   }
 
+  ////////////////////////////////////////////////////////////////
+  // Square Root
+  ////////////////////////////////////////////////////////////////
+
   public sqrt(radical: bigint): bigint {
     return this.circuits.impure.sqrt(radical);
   }
+
+  ////////////////////////////////////////////////////////////////
+  // Utilities
+  ////////////////////////////////////////////////////////////////
 
   public isMultiple(a: bigint, b: bigint): boolean {
     return this.circuits.impure.isMultiple(a, b);

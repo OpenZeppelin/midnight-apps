@@ -12,25 +12,29 @@ pragma language_version >= 0.20.0;
  *
  * @remarks
  * Supported Operations:
- * - Comparisons:
- *   - eq(): Checks if two 256-bit numbers are equal.
- *   - lt(): Checks if one 256-bit number is less than another.
- *   - lte(): Checks if one 256-bit number is less than or equal to another.
- *   - gt(): Checks if one 256-bit number is greater than another.
- *   - gte(): Checks if one 256-bit number is greater than or equal to another.
+ * - Constants:
+ *   - ZERO_U256(): Returns a U256 struct representing zero.
+ *   - MAX_U256(): Returns maximum U256 (2^256 - 1).
  * - Conversions:
- *   - toBytes(value): Converts U256 to Bytes<32> (little-endian)
- *   - toUnpackedBytes(value): Converts U256 to Vector<32, Uint<8>> (little-endian)
+ *   - toBytes(value): Converts U256 to Bytes<32> (little-endian).
+ *   - toUnpackedBytes(value): Converts U256 to Vector<32, Uint<8>> (little-endian).
+ * - Comparisons:
+ *   - eq(a, b): Checks if two U256 values are equal.
+ *   - lt(a, b): Checks if one U256 value is less than another.
+ *   - lte(a, b): Checks if one U256 value is less than or equal to another.
+ *   - gt(a, b): Checks if one U256 value is greater than another.
+ *   - gte(a, b): Checks if one U256 value is greater than or equal to another.
  */
 module Uint256 {
-  import { toUnpackedBytes } from Uint64 prefix Uint64_;
-  import { MAX_U128, eq, lt, gt } from Uint128 prefix Uint128_;
-  import { pack } from Bytes32 prefix Bytes32_;
+  import { U128, U256 } from Types;
 
-  // U256 type is imported from the types module to avoid cyclic dependencies
-  // between Uint128 and Uint256 modules. See TU256 module documentation.
-  import "./types/TU128";
-  import "./types/TU256";
+  import { pack } from Pack<32> prefix Pack32_;
+  import { toUnpackedBytes } from Uint64 prefix Uint64_;
+  import { MAX_U128, eq, lt } from Uint128 prefix Uint128_;
+
+  ////////////////////////////////////////////////////////////////
+  // Constants
+  ////////////////////////////////////////////////////////////////
 
   /**
    * @title ZERO_U256 circuit
@@ -62,12 +66,15 @@ module Uint256 {
     return U256 { low: Uint128_MAX_U128(), high: Uint128_MAX_U128() };
   }
 
+  ////////////////////////////////////////////////////////////////
+  // Conversions
+  ////////////////////////////////////////////////////////////////
+
   /**
    * @title toBytes circuit
    * @description Converts a U256 to a Bytes<32> using little-endian byte ordering.
    *
    * @remarks
-   * This circuit converts a 256-bit unsigned integer to a 32-byte array.
    * The conversion is done by first converting the U256 to unpacked bytes via
    * `toUnpackedBytes`, then casting the vector to `Bytes<32>`.
    *
@@ -79,7 +86,7 @@ module Uint256 {
    */
   export circuit toBytes(value: U256): Bytes<32> {
     const vector = toUnpackedBytes(value);
-    return Bytes32_pack(vector);
+    return Pack32_pack(vector);
   }
 
   /**
@@ -88,7 +95,7 @@ module Uint256 {
    *
    * @remarks
    * This circuit converts a 256-bit unsigned integer into a 32-element vector of bytes.
-   * Each 64-bit limb of the U256 is converted via `Uint64.toUnpackedBytes`, then the bytes
+   * Each 64-bit limb of the U256 is converted via `Uint64_toUnpackedBytes`, then the bytes
    * are assembled into the final vector.
    *
    * Limb ordering (little-endian):
@@ -113,21 +120,16 @@ module Uint256 {
     return [...lowLow, ...lowHigh, ...highLow, ...highHigh];
   }
 
+  ////////////////////////////////////////////////////////////////
+  // Comparisons
+  ////////////////////////////////////////////////////////////////
+
   /**
    * @title eq circuit
    * @description Compares two U256 values to check if a == b.
    *
    * @remarks
-   * This circuit compares two 256-bit numbers A = a.high * 2^128 + a.low and
-   * B = b.high * 2^128 + b.low, where a.high, a.low, b.high, b.low are in [0, 2^128 - 1],
-   * to determine if A == B. It performs a field-wise comparison of the high and low parts,
-   * returning true if A == B, false otherwise. No arithmetic operations are performed,
-   * only comparisons and logical operations (AND).
-   *
-   * The circuit checks if A == B by evaluating:
-   * - A.high == B.high (using Uint128_eqU128).
-   * - A.low == B.low (using Uint128_eqU128).
-   * The result is true only if both conditions hold.
+   * Compares high and low U128 parts separately.
    *
    * @circuitInfo k=10, rows=644
    *
@@ -145,13 +147,7 @@ module Uint256 {
    * @description Compares two U256 values to check if a < b.
    *
    * @remarks
-   * Theoretical Description:
-   * This circuit compares two 256-bit numbers A = a.high * 2^128 + a.low and
-   * B = b.high * 2^128 + b.low, where a.high, a.low, b.high,
-   * b.low are in [0, 2^128 - 1], to determine if A < B. It performs a lexicographical
-   * comparison by checking the high parts first, then the low parts if the high parts are
-   * equal, returning true if A < B, false otherwise. No arithmetic operations are performed,
-   * only comparisons and logical operations (OR, AND).
+   * Checks high limbs first; if equal, falls back to low limbs.
    *
    * @circuitInfo k=10, rows=770
    *
@@ -168,15 +164,7 @@ module Uint256 {
    * @title lte circuit
    * @description Compares two U256 values to check if a <= b.
    *
-   * @remarks
-   * Theoretical Description:
-   * This circuit compares two 256-bit numbers A = a.high * 2^128 + a.low and
-   * B = b.high * 2^128 + b.low, where a.high, a.low, b.high, b.low are in [0, 2^128 - 1],
-   * to determine if A <= B. It performs a lexicographical comparison by checking the high
-   * parts first, then the low parts if the high parts are equal, returning true if A <= B,
-   * false otherwise.
-   *
-   * @circuitInfo k=10, rows=781
+   * @circuitInfo k=10, rows=773
    *
    * @param {U256} a - The first U256 value.
    * @param {U256} b - The second U256 value.
@@ -184,21 +172,12 @@ module Uint256 {
    * @returns {Boolean} True if a <= b, false otherwise.
    */
   export pure circuit lte(a: U256, b: U256): Boolean {
-    return lt(a, b) || eq(a, b);
+    return !lt(b, a);
   }
 
   /**
    * @title gt circuit
    * @description Compares two U256 values to check if a > b.
-   *
-   * @remarks
-   * Theoretical Description:
-   * This circuit compares two 256-bit numbers A = a.high * 2^128 + a.low and
-   * B = b.high * 2^128 + b.low, where a.high, a.low, b.high,
-   * b.low are in [0, 2^128 - 1], to determine if A > B. It performs a lexicographical
-   * comparison by checking the high parts first, then the low parts if the high parts are
-   * equal, returning true if A > B, false otherwise. No arithmetic operations are performed,
-   * only comparisons and logical operations (OR, AND).
    *
    * @circuitInfo k=10, rows=770
    *
@@ -208,22 +187,14 @@ module Uint256 {
    * @returns {Boolean} True if a > b, false otherwise.
    */
   export pure circuit gt(a: U256, b: U256): Boolean {
-    return Uint128_gt(a.high, b.high) || (Uint128_eq(a.high, b.high) && Uint128_gt(a.low, b.low));
+    return lt(b, a);
   }
 
   /**
    * @title gte circuit
    * @description Compares two U256 values to check if a >= b.
    *
-   * @remarks
-   * Theoretical Description:
-   * This circuit compares two 256-bit numbers A = a.high * 2^128 + a.low and
-   * B = b.high * 2^128 + b.low, where a.high, a.low, b.high, b.low are in [0, 2^128 - 1],
-   * to determine if A >= B. It performs a lexicographical comparison by checking the high
-   * parts first, then the low parts if the high parts are equal, returning true if A >= B,
-   * false otherwise.
-   *
-   * @circuitInfo k=10, rows=781
+   * @circuitInfo k=10, rows=773
    *
    * @param {U256} a - The first U256 value.
    * @param {U256} b - The second U256 value.
@@ -231,6 +202,6 @@ module Uint256 {
    * @returns {Boolean} True if a >= b, false otherwise.
    */
   export pure circuit gte(a: U256, b: U256): Boolean {
-    return gt(a, b) || eq(a, b);
+    return !lt(a, b);
   }
 }
