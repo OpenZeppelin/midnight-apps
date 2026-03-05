@@ -78,29 +78,29 @@ importers:
         specifier: 7.0.0
         version: 7.0.0
       '@midnight-ntwrk/midnight-js-contracts':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@midnight-ntwrk/midnight-js-fetch-zk-config-provider':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@midnight-ntwrk/midnight-js-http-client-proof-provider':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@midnight-ntwrk/midnight-js-indexer-public-data-provider':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@midnight-ntwrk/midnight-js-level-private-state-provider':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@midnight-ntwrk/midnight-js-network-id':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@midnight-ntwrk/midnight-js-testing':
         specifier: 2.0.2
         version: 2.0.2
       '@midnight-ntwrk/midnight-js-types':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@midnight-ntwrk/onchain-runtime-v2':
         specifier: 2.0.1
         version: 2.0.1
@@ -373,8 +373,8 @@ importers:
         specifier: 0.14.0
         version: 0.14.0
       '@midnight-ntwrk/midnight-js-network-id':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@midnight-ntwrk/wallet-sdk-address-format':
         specifier: 3.0.0
         version: 3.0.0
@@ -446,11 +446,11 @@ importers:
         specifier: 7.0.0
         version: 7.0.0
       '@midnight-ntwrk/midnight-js-contracts':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@midnight-ntwrk/midnight-js-types':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@openzeppelin/midnight-apps-contracts':
         specifier: workspace:*
         version: link:../../contracts
@@ -483,29 +483,29 @@ importers:
         specifier: 7.0.0
         version: 7.0.0
       '@midnight-ntwrk/midnight-js-contracts':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@midnight-ntwrk/midnight-js-http-client-proof-provider':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@midnight-ntwrk/midnight-js-indexer-public-data-provider':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@midnight-ntwrk/midnight-js-level-private-state-provider':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@midnight-ntwrk/midnight-js-network-id':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@midnight-ntwrk/midnight-js-node-zk-config-provider':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@midnight-ntwrk/midnight-js-types':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@midnight-ntwrk/midnight-js-utils':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@midnight-ntwrk/testkit-js':
         specifier: 3.0.0
         version: 3.0.0(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -619,11 +619,11 @@ importers:
         specifier: 2.4.0
         version: 2.4.0
       '@midnight-ntwrk/midnight-js-contracts':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@midnight-ntwrk/midnight-js-types':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@openzeppelin/midnight-apps-contracts':
         specifier: workspace:*
         version: link:../../contracts
@@ -653,29 +653,29 @@ importers:
         specifier: 7.0.0
         version: 7.0.0
       '@midnight-ntwrk/midnight-js-contracts':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@midnight-ntwrk/midnight-js-http-client-proof-provider':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@midnight-ntwrk/midnight-js-indexer-public-data-provider':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@midnight-ntwrk/midnight-js-level-private-state-provider':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@midnight-ntwrk/midnight-js-network-id':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@midnight-ntwrk/midnight-js-node-zk-config-provider':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@midnight-ntwrk/midnight-js-types':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@midnight-ntwrk/midnight-js-utils':
-        specifier: 3.2.0-rc.2
-        version: 3.2.0-rc.2
+        specifier: 3.2.0-rc.3
+        version: 3.2.0-rc.3
       '@midnight-ntwrk/testkit-js':
         specifier: 3.0.0
         version: 3.0.0(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1532,29 +1532,29 @@ packages:
   '@midnight-ntwrk/midnight-js-contracts@3.0.0':
     resolution: {integrity: sha512-CyVKaFIAqZOt5iWTpfW3LFKrotCBERrtCUv2c4spNIyFugKjoO5Q6JeqWq60bLmj+8PE+sXJww6I8Yf82gvhEw==}
 
-  '@midnight-ntwrk/midnight-js-contracts@3.2.0-rc.2':
-    resolution: {integrity: sha512-suj6Z7or5cE/qwj8Yv3EPs+X+lnMLsL/ijV6kY7n9fCpe1buJ8xLWNcszSJFz0Jljv+A4KwDzRYEYUZwxPHVUw==}
+  '@midnight-ntwrk/midnight-js-contracts@3.2.0-rc.3':
+    resolution: {integrity: sha512-JXn4QuSI/PXD4NUGYmvhLlZBCWQcGkRL4AHJapdqhdDVC9Wq2NtjgMmLnMfqGQ4P9RJGUSLglluoB/MFCE23mQ==}
 
-  '@midnight-ntwrk/midnight-js-fetch-zk-config-provider@3.2.0-rc.2':
-    resolution: {integrity: sha512-ix/tpker89fB0hjXgvAC52PFTD+3WqfjHukC5oDpZM1PpM+n/Lv9z6BrjsH/4W3bBrfw+IL9fywqp02+849OEw==}
+  '@midnight-ntwrk/midnight-js-fetch-zk-config-provider@3.2.0-rc.3':
+    resolution: {integrity: sha512-YqqLPwvdxZfSEeO2JEpjMi6OK7+tq4eS/GXB1PdvXUFAw/ExlZ4Qq0/uQ2yoJ2u8ufw0gKpzLELZBmY1CLrQFA==}
 
   '@midnight-ntwrk/midnight-js-http-client-proof-provider@3.0.0':
     resolution: {integrity: sha512-UJiF9V/JiuMc8ezK1i4+uiqcfq4sZKjHubio9LoiGefasQ34QKEMPgcOhcumQL0dlqaCG3IYrX76HfxElfUoMA==}
 
-  '@midnight-ntwrk/midnight-js-http-client-proof-provider@3.2.0-rc.2':
-    resolution: {integrity: sha512-W6YhwAJxpnXGwYxdv7bwZNij36roX/XWB09VfiNYoEZdrR3O4+LbKThYA8Vc3aC8Dvd7iT77Ldv/t9YhcYQeUQ==}
+  '@midnight-ntwrk/midnight-js-http-client-proof-provider@3.2.0-rc.3':
+    resolution: {integrity: sha512-8k6ZpURxcvnTpZ3Vr7TyVtWp6iM/yCsweFgjnIcDf2rTzHJoovf+Vzce/YbeIBtmUC4ffXTdsYm41OAA+vDwWg==}
 
   '@midnight-ntwrk/midnight-js-indexer-public-data-provider@3.0.0':
     resolution: {integrity: sha512-bQqCZrEMgNzzMFI+KK8CsKY9reN91EFRkoiihuHvxW+FMVsxwnv8+jmOmzRiRKbGX45FspTmLPwSR+Bn7mw6xQ==}
 
-  '@midnight-ntwrk/midnight-js-indexer-public-data-provider@3.2.0-rc.2':
-    resolution: {integrity: sha512-2ncDU+bg5KAx0ejcXz401NvJenoy8LDU0FT8hokzv1RCDeldnpJXWoBWY9INEa0WMaBntwmY9GJSAkgSYXVBRg==}
+  '@midnight-ntwrk/midnight-js-indexer-public-data-provider@3.2.0-rc.3':
+    resolution: {integrity: sha512-iMu1ORWjU1rl6LJIoHjFWVL6OriW36T+2YxV3sj3RWedzRMNEW8sMBDFamiizxjDZrVQXL2HinpgOwh7Xnv0pA==}
 
   '@midnight-ntwrk/midnight-js-level-private-state-provider@3.0.0':
     resolution: {integrity: sha512-vJj1rU27urMwWbmFyY2KU00FORv2Df6qDCEFf4bMisjTBAEsid+kUvNLXd1sGSsXB/Cv5YtAANDBF7vy+E+pMg==}
 
-  '@midnight-ntwrk/midnight-js-level-private-state-provider@3.2.0-rc.2':
-    resolution: {integrity: sha512-poKyvN8Qv+/t/UbTkehybzWc4aCDu12fcTjK802vPXks/oVStG4JGdo8QQSbiDeZg4EJWXh+gdOi/D97jT8zwA==}
+  '@midnight-ntwrk/midnight-js-level-private-state-provider@3.2.0-rc.3':
+    resolution: {integrity: sha512-QK+KPrOCe3pWCg8mjCA++Jsl7MLdv0d1fdqfUb3YJgYbzdQGHPpVtlEfJpaanFgkbGOml2Ub7eiEFocQRNwdOg==}
 
   '@midnight-ntwrk/midnight-js-network-id@2.0.2':
     resolution: {integrity: sha512-ogBBC5Ox2B2QZo4XxXYr3AxwgUeC4LEmLasLInjMk0p0m//8iI6NmH4/5f0pEOxDtGSuA+piuSonxuQMLM6GUg==}
@@ -1562,14 +1562,14 @@ packages:
   '@midnight-ntwrk/midnight-js-network-id@3.0.0':
     resolution: {integrity: sha512-IaAi14qzUgaPZcsvcIbniY+WUjwcYWVGK5kNNOm/xIPY/agx4DlshPYoRuhxbWdkCNvcOnlpKTw8MUL1y/ccRA==}
 
-  '@midnight-ntwrk/midnight-js-network-id@3.2.0-rc.2':
-    resolution: {integrity: sha512-Ulh1r8qT2nz80FEdH8yuxxLXdQX/X/wgOZcSqGnENESl2aHzN2rNkJEA8AfFbzlTbitPTz+h8mYyyRN87gRMCg==}
+  '@midnight-ntwrk/midnight-js-network-id@3.2.0-rc.3':
+    resolution: {integrity: sha512-OVzgpuNs/h8pHlp9nCrWQSalSGMqvmT5cOB3Edud/EKSJyoUez5k0rp4Iq40WcBg0OkF0nDlsrAIM/WWykghrQ==}
 
   '@midnight-ntwrk/midnight-js-node-zk-config-provider@3.0.0':
     resolution: {integrity: sha512-YyixnXRD01iW0aM/yWjJb3XUK1sRyWjXQO2r5/BEbceLP0JAk7t4NmRSmFskt/cGrvRMuySHdZy9wPuyzteEtg==}
 
-  '@midnight-ntwrk/midnight-js-node-zk-config-provider@3.2.0-rc.2':
-    resolution: {integrity: sha512-odVzAujHaZLI9pW6SAH1D18pGY4Lefdlqm+q7MIRj8w5BH4ODOdoRrk7uKYOjowA5gnamGuMCbjAkdrKU1nBvw==}
+  '@midnight-ntwrk/midnight-js-node-zk-config-provider@3.2.0-rc.3':
+    resolution: {integrity: sha512-I5B4bhHrHGB/5cUsknInIv29oZGgaqdW04o3lgm4XsK/Yt+Su94uAdBLmy81ZpRiDfvbflZFe/GnHHBLUtOzPg==}
 
   '@midnight-ntwrk/midnight-js-testing@2.0.2':
     resolution: {integrity: sha512-3Rt+xMAiOc6VjC4kt+IbNwcyElnhl+hmKDXrqUvhErFcoNiKP/PE8oCNOgbInGYELWVrNNwqU9kZrQXcmRHB9Q==}
@@ -1580,14 +1580,14 @@ packages:
   '@midnight-ntwrk/midnight-js-types@3.0.0':
     resolution: {integrity: sha512-NP4aG3c44/x+s3E0QtfWhukzZbkahyvfKmrA5hRYCnrTEGE7TqEF1BBW1T86HG59go0nnKjWfo5VFQ62qRzCyw==}
 
-  '@midnight-ntwrk/midnight-js-types@3.2.0-rc.2':
-    resolution: {integrity: sha512-VcALgAqFvmgZlalAPpTN2p7J0LZB8hnT/eLq3wgvJ92Rz1hYBhZD9NtvZN3kM7bMg79rcw3liRMEImcp5SeOWw==}
+  '@midnight-ntwrk/midnight-js-types@3.2.0-rc.3':
+    resolution: {integrity: sha512-IbJus5SKqg+Jm6X1Yv2kO534vAPEhgrg12FZaq4Udu4EaslDJyOxsIto/Hlh2AoFbRVJ2Pnk/YoyxcgPUh6vxg==}
 
   '@midnight-ntwrk/midnight-js-utils@3.0.0':
     resolution: {integrity: sha512-SXgJPJVEs3aghQuJoUkL25MZQsBeZhwYRCPLBICrPOEvRROWggHr04uMt15ytAtj2mHGtInVARlUXRh9TAUwPg==}
 
-  '@midnight-ntwrk/midnight-js-utils@3.2.0-rc.2':
-    resolution: {integrity: sha512-xVt9zVh6qXmyOinyC3uclPLDx9M1rTDvwhC/pCXAsIss0ZeaL3Gp6+f2xAR6UVSHE2UHs4fxxRuY8KnsRrDyGA==}
+  '@midnight-ntwrk/midnight-js-utils@3.2.0-rc.3':
+    resolution: {integrity: sha512-iCiwwC9YLXuHgr2feEiTFBXP6mowCIFzAnrLZ5LRN/bQQC8cRyE06e1yaLyTCKpdxi5gxvjfOaCZHf7cmb562A==}
 
   '@midnight-ntwrk/onchain-runtime-v2@2.0.1':
     resolution: {integrity: sha512-nVtDyPaWD14thZuSz/MVUNNkv4HO2nYf3E3QbaRCE4UR+jKnUrd0s/BN0fLpnrYFlcMNHS7/sZqAeosV80tsOQ==}
@@ -6993,16 +6993,16 @@ snapshots:
       '@midnight-ntwrk/midnight-js-types': 3.0.0
       '@midnight-ntwrk/midnight-js-utils': 3.0.0
 
-  '@midnight-ntwrk/midnight-js-contracts@3.2.0-rc.2':
+  '@midnight-ntwrk/midnight-js-contracts@3.2.0-rc.3':
     dependencies:
       '@midnight-ntwrk/compact-js': 2.4.0
-      '@midnight-ntwrk/midnight-js-network-id': 3.2.0-rc.2
-      '@midnight-ntwrk/midnight-js-types': 3.2.0-rc.2
-      '@midnight-ntwrk/midnight-js-utils': 3.2.0-rc.2
+      '@midnight-ntwrk/midnight-js-network-id': 3.2.0-rc.3
+      '@midnight-ntwrk/midnight-js-types': 3.2.0-rc.3
+      '@midnight-ntwrk/midnight-js-utils': 3.2.0-rc.3
 
-  '@midnight-ntwrk/midnight-js-fetch-zk-config-provider@3.2.0-rc.2':
+  '@midnight-ntwrk/midnight-js-fetch-zk-config-provider@3.2.0-rc.3':
     dependencies:
-      '@midnight-ntwrk/midnight-js-types': 3.2.0-rc.2
+      '@midnight-ntwrk/midnight-js-types': 3.2.0-rc.3
       cross-fetch: 4.1.0
     transitivePeerDependencies:
       - encoding
@@ -7019,12 +7019,12 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@midnight-ntwrk/midnight-js-http-client-proof-provider@3.2.0-rc.2':
+  '@midnight-ntwrk/midnight-js-http-client-proof-provider@3.2.0-rc.3':
     dependencies:
-      '@midnight-ntwrk/midnight-js-contracts': 3.2.0-rc.2
-      '@midnight-ntwrk/midnight-js-network-id': 3.2.0-rc.2
-      '@midnight-ntwrk/midnight-js-types': 3.2.0-rc.2
-      '@midnight-ntwrk/midnight-js-utils': 3.2.0-rc.2
+      '@midnight-ntwrk/midnight-js-contracts': 3.2.0-rc.3
+      '@midnight-ntwrk/midnight-js-network-id': 3.2.0-rc.3
+      '@midnight-ntwrk/midnight-js-types': 3.2.0-rc.3
+      '@midnight-ntwrk/midnight-js-utils': 3.2.0-rc.3
       cross-fetch: 4.1.0
       fetch-retry: 6.0.0
       lodash: 4.17.23
@@ -7056,12 +7056,12 @@ snapshots:
       - subscriptions-transport-ws
       - utf-8-validate
 
-  '@midnight-ntwrk/midnight-js-indexer-public-data-provider@3.2.0-rc.2(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@midnight-ntwrk/midnight-js-indexer-public-data-provider@3.2.0-rc.3(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@apollo/client': 3.14.0(@types/react@18.3.28)(graphql-ws@6.0.7(graphql@16.12.0)(ws@8.19.0))(graphql@16.12.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@midnight-ntwrk/midnight-js-network-id': 3.2.0-rc.2
-      '@midnight-ntwrk/midnight-js-types': 3.2.0-rc.2
-      '@midnight-ntwrk/midnight-js-utils': 3.2.0-rc.2
+      '@midnight-ntwrk/midnight-js-network-id': 3.2.0-rc.3
+      '@midnight-ntwrk/midnight-js-types': 3.2.0-rc.3
+      '@midnight-ntwrk/midnight-js-utils': 3.2.0-rc.3
       buffer: 6.0.3
       cross-fetch: 4.1.0
       graphql: 16.12.0
@@ -7092,9 +7092,9 @@ snapshots:
       lodash: 4.17.23
       superjson: 2.2.6
 
-  '@midnight-ntwrk/midnight-js-level-private-state-provider@3.2.0-rc.2':
+  '@midnight-ntwrk/midnight-js-level-private-state-provider@3.2.0-rc.3':
     dependencies:
-      '@midnight-ntwrk/midnight-js-types': 3.2.0-rc.2
+      '@midnight-ntwrk/midnight-js-types': 3.2.0-rc.3
       abstract-level: 3.1.1
       buffer: 6.0.3
       fp-ts: 2.16.11
@@ -7106,15 +7106,15 @@ snapshots:
 
   '@midnight-ntwrk/midnight-js-network-id@3.0.0': {}
 
-  '@midnight-ntwrk/midnight-js-network-id@3.2.0-rc.2': {}
+  '@midnight-ntwrk/midnight-js-network-id@3.2.0-rc.3': {}
 
   '@midnight-ntwrk/midnight-js-node-zk-config-provider@3.0.0':
     dependencies:
       '@midnight-ntwrk/midnight-js-types': 3.0.0
 
-  '@midnight-ntwrk/midnight-js-node-zk-config-provider@3.2.0-rc.2':
+  '@midnight-ntwrk/midnight-js-node-zk-config-provider@3.2.0-rc.3':
     dependencies:
-      '@midnight-ntwrk/midnight-js-types': 3.2.0-rc.2
+      '@midnight-ntwrk/midnight-js-types': 3.2.0-rc.3
 
   '@midnight-ntwrk/midnight-js-testing@2.0.2':
     dependencies:
@@ -7131,7 +7131,7 @@ snapshots:
       '@midnight-ntwrk/platform-js': 2.2.0
       rxjs: 7.8.2
 
-  '@midnight-ntwrk/midnight-js-types@3.2.0-rc.2':
+  '@midnight-ntwrk/midnight-js-types@3.2.0-rc.3':
     dependencies:
       '@midnight-ntwrk/compact-js': 2.4.0
       '@midnight-ntwrk/platform-js': 2.2.0
@@ -7142,9 +7142,9 @@ snapshots:
       '@midnight-ntwrk/midnight-js-network-id': 3.0.0
       '@scure/base': 2.0.0
 
-  '@midnight-ntwrk/midnight-js-utils@3.2.0-rc.2':
+  '@midnight-ntwrk/midnight-js-utils@3.2.0-rc.3':
     dependencies:
-      '@midnight-ntwrk/midnight-js-network-id': 3.2.0-rc.2
+      '@midnight-ntwrk/midnight-js-network-id': 3.2.0-rc.3
       '@scure/base': 2.0.0
 
   '@midnight-ntwrk/onchain-runtime-v2@2.0.1': {}

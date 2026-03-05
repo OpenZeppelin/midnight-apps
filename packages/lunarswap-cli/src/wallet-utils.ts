@@ -60,7 +60,7 @@ export const syncWallet = (
   logger: Logger,
   wallet: WalletFacade,
   throttleTime = 2_000,
-  timeout = 90_000,
+  timeout = 300_000,
 ) => {
   logger.info('Syncing wallet...');
 

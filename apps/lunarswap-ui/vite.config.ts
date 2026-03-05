@@ -1,5 +1,4 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
 import { join, resolve } from 'node:path';
 import { viteCommonjs } from '@originjs/vite-plugin-commonjs';
 import react from '@vitejs/plugin-react';
@@ -7,8 +6,6 @@ import { defineConfig, type Plugin } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import topLevelAwait from 'vite-plugin-top-level-await';
 import wasm from 'vite-plugin-wasm';
-
-const require = createRequire(import.meta.url);
 
 /**
  * Vite/Rollup plugin that patches crypto-browserify's CJS output to include
@@ -64,6 +61,96 @@ function zkArtifact404(): Plugin {
   };
 }
 
+/**
+ * Patches getKeyMaterial to log which circuits are missing key material
+ * instead of silently swallowing errors.
+ */
+function patchGetKeyMaterial(): Plugin {
+  return {
+    name: 'patch-get-key-material',
+    transform(code, id) {
+      if (
+        !id.includes('midnight-js-http-client-proof-provider') ||
+        !code.includes('getKeyMaterial')
+      ) {
+        return null;
+      }
+      const original = `const getKeyMaterial = async (zkConfigProvider, keyLocation) => {
+    try {
+        const zkConfig = await zkConfigProvider.get(keyLocation);
+        return zkConfigToProvingKeyMaterial(zkConfig);
+    }
+    catch {
+        return undefined;
+    }
+};`;
+      const patched = `const getKeyMaterial = async (zkConfigProvider, keyLocation) => {
+    try {
+        const zkConfig = await zkConfigProvider.get(keyLocation);
+        const material = zkConfigToProvingKeyMaterial(zkConfig);
+        console.debug('[getKeyMaterial] OK for "' + keyLocation + '" — ir:', !!material?.ir, ', proverKey:', !!material?.proverKey);
+        return material;
+    }
+    catch (err) {
+        console.error('[getKeyMaterial] MISSING key material for "' + keyLocation + '":', err?.message || err);
+        throw new Error('[getKeyMaterial] Missing key material for "' + keyLocation + '": ' + (err?.message || err));
+    }
+};`;
+      if (!code.includes(original)) return null;
+      return { code: code.replace(original, patched), map: null };
+    },
+  };
+}
+
+/**
+ * Patches FetchZkConfigProvider.sendRequest to validate responses:
+ * 1. Rejects text/html content-type (catches SPA fallback serving index.html)
+ * 2. Validates ZKIR magic bytes header (midnight:ir-source)
+ */
+function patchZkConfigProvider(): Plugin {
+  const PATCH = `
+    var _origSendRequest = FetchZkConfigProvider.prototype.sendRequest;
+    FetchZkConfigProvider.prototype.sendRequest = async function(url, circuitId, ext, responseType) {
+      var fullUrl = this.baseURL + '/' + url + '/' + circuitId + ext;
+      var response = await this.fetchFunc(fullUrl, { method: 'GET' });
+      if (!response.ok) throw new Error(response.statusText);
+
+      // 1. Content-Type check: reject text/html (SPA fallback)
+      var ct = (response.headers.get('content-type') || '').toLowerCase();
+      if (responseType === 'arraybuffer' && ct.includes('text/html')) {
+        throw new Error('Expected binary ZK artifact for ' + circuitId + ', got text/html (possible SPA fallback)');
+      }
+
+      if (responseType === 'text') return await response.text();
+
+      var arrayBuffer = await response.arrayBuffer();
+      var bytes = new Uint8Array(arrayBuffer);
+
+      // 2. Magic bytes check for ZKIR files
+      if (ext === '.bzkir' && bytes.length > 20) {
+        var header = new TextDecoder().decode(bytes.subarray(0, 20));
+        if (!header.startsWith('midnight:ir-source')) {
+          throw new Error('Invalid ZKIR data for ' + circuitId + ': expected midnight:ir-source header, got: ' + JSON.stringify(header));
+        }
+      }
+
+      return bytes;
+    };
+  `;
+  return {
+    name: 'patch-zk-config-provider',
+    transform(code, id) {
+      if (
+        !id.includes('midnight-js-fetch-zk-config-provider') ||
+        !code.includes('FetchZkConfigProvider')
+      ) {
+        return null;
+      }
+      return { code: code + PATCH, map: null };
+    },
+  };
+}
+
 function patchCryptoTimingSafeEqual(): Plugin {
   return {
     name: 'patch-crypto-timingSafeEqual',
@@ -115,6 +202,8 @@ export default defineConfig({
     }),
     // zkArtifact404(),
     // patchProofProviderPayload(),
+    patchGetKeyMaterial(),
+    patchZkConfigProvider(),
     patchCryptoTimingSafeEqual(),
     wasm(),
     react(),
@@ -161,6 +250,73 @@ export default defineConfig({
         //   },
         // },
         {
+          name: 'patch-get-key-material-esbuild',
+          setup(build) {
+            build.onLoad(
+              {
+                filter:
+                  /midnight-js-http-client-proof-provider.*index\.(mjs|cjs|js)$/,
+              },
+              (args) => {
+                let contents = readFileSync(args.path, 'utf8');
+                if (!contents.includes('getKeyMaterial')) return null;
+                contents = contents.replace(
+                  /catch\s*\{\s*\n?\s*return undefined;\s*\n?\s*\}/,
+                  `catch (err) {
+        console.error('[getKeyMaterial] MISSING key material for "' + keyLocation + '":', err?.message || err);
+        throw new Error('[getKeyMaterial] Missing key material for "' + keyLocation + '": ' + (err?.message || err));
+    }`,
+                );
+                // Also add success logging
+                contents = contents.replace(
+                  'return zkConfigToProvingKeyMaterial(zkConfig);',
+                  `var material = zkConfigToProvingKeyMaterial(zkConfig);
+        console.debug('[getKeyMaterial] OK for "' + keyLocation + '" — ir:', !!material?.ir, ', proverKey:', !!material?.proverKey);
+        return material;`,
+                );
+                return { contents, loader: 'js' };
+              },
+            );
+          },
+        },
+        {
+          name: 'patch-zk-config-provider-esbuild',
+          setup(build) {
+            build.onLoad(
+              {
+                filter:
+                  /midnight-js-fetch-zk-config-provider.*index\.(mjs|cjs|js)$/,
+              },
+              (args) => {
+                let contents = readFileSync(args.path, 'utf8');
+                if (!contents.includes('FetchZkConfigProvider')) return null;
+                contents += `
+    var _origSendRequest = FetchZkConfigProvider.prototype.sendRequest;
+    FetchZkConfigProvider.prototype.sendRequest = async function(url, circuitId, ext, responseType) {
+      var fullUrl = this.baseURL + '/' + url + '/' + circuitId + ext;
+      var response = await this.fetchFunc(fullUrl, { method: 'GET' });
+      if (!response.ok) throw new Error(response.statusText);
+      var ct = (response.headers.get('content-type') || '').toLowerCase();
+      if (responseType === 'arraybuffer' && ct.includes('text/html')) {
+        throw new Error('Expected binary ZK artifact for ' + circuitId + ', got text/html (possible SPA fallback)');
+      }
+      if (responseType === 'text') return await response.text();
+      var arrayBuffer = await response.arrayBuffer();
+      var bytes = new Uint8Array(arrayBuffer);
+      if (ext === '.bzkir' && bytes.length > 20) {
+        var header = new TextDecoder().decode(bytes.subarray(0, 20));
+        if (!header.startsWith('midnight:ir-source')) {
+          throw new Error('Invalid ZKIR data for ' + circuitId + ': expected midnight:ir-source header, got: ' + JSON.stringify(header));
+        }
+      }
+      return bytes;
+    };`;
+                return { contents, loader: 'js' };
+              },
+            );
+          },
+        },
+        {
           name: 'patch-crypto-timingSafeEqual-esbuild',
           setup(build) {
             build.onLoad(
@@ -190,9 +346,10 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      // 'vite-plugin-node-polyfills/shims/buffer': require.resolve(
-      //   'vite-plugin-node-polyfills/shims/buffer',
-      // ),
+      'vite-plugin-node-polyfills/shims/buffer': new URL(
+        './node_modules/vite-plugin-node-polyfills/shims/buffer/dist/index.js',
+        import.meta.url,
+      ).pathname,
       '@src': resolve(__dirname, '../../contracts/dist'),
       '@/components': resolve(__dirname, './components'),
       '@/lib': resolve(__dirname, './lib'),
