@@ -21,7 +21,7 @@ import type {
   ZKConfigProvider,
 } from '@midnight-ntwrk/midnight-js-types';
 import type { Address } from '@midnight-ntwrk/wallet-api';
-import type { LunarswapPrivateState } from '@openzeppelin/midnight-apps-contracts/lunarswap/witnesses';
+import type { LunarswapPrivateState } from '@openzeppelin/midnight-apps-contracts';
 import type {
   LunarswapCircuitKeys,
   LunarswapPrivateStateId,

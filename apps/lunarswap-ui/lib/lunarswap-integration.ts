@@ -6,16 +6,14 @@ import {
 } from '@midnight-ntwrk/ledger-v7';
 import type { FinalizedCallTxData } from '@midnight-ntwrk/midnight-js-contracts';
 import type {
-  Contract,
+  LunarswapContract,
   ContractAddress,
   Either,
-  Ledger,
+  LunarswapLedger,
   Pair,
   ShieldedCoinInfo,
-  Witnesses,
   ZswapCoinPublicKey,
-} from '@openzeppelin/midnight-apps-contracts/lunarswap/contract';
-import type { LunarswapPrivateState } from '@openzeppelin/midnight-apps-contracts/lunarswap/witnesses';
+} from '@openzeppelin/midnight-apps-contracts';
 import {
   Lunarswap,
   type LunarswapProviders,
@@ -26,12 +24,12 @@ import { serializeError } from '../utils/error-utils';
 import { LunarswapSimulator } from './LunarswapSimulator';
 import type { ProviderCallbackAction, WalletAPI } from './wallet-context';
 
-// Contract status types
+// LunarswapContract status types
 export type ContractStatus =
   | 'not-configured' // No contract address configured
   | 'connecting' // Attempting to connect
   | 'connected' // Successfully connected
-  | 'not-deployed' // Contract address configured but not found on network
+  | 'not-deployed' // LunarswapContract address configured but not found on network
   | 'error'; // Connection error
 
 export interface ContractStatusInfo {
@@ -41,18 +39,13 @@ export interface ContractStatusInfo {
   message?: string;
 }
 
-type LunarswapContract = Contract<
-  LunarswapPrivateState,
-  Witnesses<LunarswapPrivateState>
->;
-
-// Contract interaction utilities
+// LunarswapContract interaction utilities
 export class LunarswapIntegration {
   private providers: LunarswapProviders;
   private walletAPI: WalletAPI;
   private lunarswap: Lunarswap | null = null;
   private lunarswapSimulator: LunarswapSimulator;
-  private poolData: Ledger | null = null;
+  private poolData: LunarswapLedger | null = null;
   private _status: ContractStatus = 'not-configured';
   private _statusInfo: ContractStatusInfo = { status: 'not-configured' };
   private contractAddress?: string;
@@ -168,9 +161,9 @@ export class LunarswapIntegration {
   /**
    * Fetch the public ledger pool data
    */
-  async getPublicState(): Promise<Ledger | null> {
+  async getPublicState(): Promise<LunarswapLedger | null> {
     if (!this.lunarswap) {
-      throw new Error('Contract not initialized');
+      throw new Error('LunarswapContract not initialized');
     }
 
     try {
@@ -215,7 +208,7 @@ export class LunarswapIntegration {
    */
   async isPairExists(tokenA: string, tokenB: string): Promise<boolean> {
     if (!this.isReady) {
-      this._logger?.warn('Contract not ready for isPairExists operation');
+      this._logger?.warn('LunarswapContract not ready for isPairExists operation');
       return false;
     }
 
@@ -252,7 +245,7 @@ export class LunarswapIntegration {
     tokenB: RawTokenType,
   ): Promise<[bigint, bigint] | null> {
     if (!this.isReady) {
-      this._logger?.warn('Contract not ready for getPairReserves operation');
+      this._logger?.warn('LunarswapContract not ready for getPairReserves operation');
       return null;
     }
 
@@ -294,7 +287,7 @@ export class LunarswapIntegration {
     tokenB: RawTokenType,
   ): Promise<Uint8Array> {
     if (!this.isReady || !this.lunarswap) {
-      this._logger?.warn('Contract not ready for getPairId operation');
+      this._logger?.warn('LunarswapContract not ready for getPairId operation');
       return new Uint8Array(32);
     }
 
@@ -508,7 +501,7 @@ export class LunarswapIntegration {
     if (!this.lunarswap) {
       const status = await this.joinContract();
       if (status.status !== 'connected') {
-        throw new Error(`Contract not ready: ${status.message}`);
+        throw new Error(`LunarswapContract not ready: ${status.message}`);
       }
     }
   }
@@ -516,7 +509,7 @@ export class LunarswapIntegration {
   private async ensureReady(): Promise<Lunarswap> {
     await this.ensureContractJoined();
     if (!this.lunarswap) {
-      throw new Error('Contract not initialized');
+      throw new Error('LunarswapContract not initialized');
     }
     return this.lunarswap;
   }

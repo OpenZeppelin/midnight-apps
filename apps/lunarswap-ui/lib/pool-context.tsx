@@ -1,9 +1,9 @@
 'use client';
 
 import type {
-  Ledger,
+  LunarswapLedger,
   Pair,
-} from '@openzeppelin/midnight-apps-contracts/lunarswap/contract';
+} from '@openzeppelin/midnight-apps-contracts';
 import {
   createContext,
   type ReactNode,
@@ -17,7 +17,7 @@ import { useLunarswapContext } from './lunarswap-context';
 
 interface PoolData {
   isLoading: boolean;
-  ledger: Ledger | null;
+  ledger: LunarswapLedger | null;
   allPairs: Array<{ pairId: string; pair: Pair }>;
   refreshPoolData: () => Promise<void>;
   checkPairExists: (tokenA: string, tokenB: string) => Promise<boolean>;
@@ -49,7 +49,7 @@ export const PoolProvider = ({ children }: PoolProviderProps) => {
   } = useLunarswapContext();
   const _logger = useLogger();
   const [isLoading, setIsLoading] = useState(false);
-  const [ledger, setLedger] = useState<Ledger | null>(null);
+  const [ledger, setLedger] = useState<LunarswapLedger | null>(null);
   const [allPairs, setAllPairs] = useState<
     Array<{ pairId: string; pair: Pair }>
   >([]);

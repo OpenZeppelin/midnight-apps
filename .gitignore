@@ -160,3 +160,5 @@ artifacts/
 CLAUDE.md
 
 midnight-level-db/
+
+.vite/

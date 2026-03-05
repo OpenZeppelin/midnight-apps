@@ -14,8 +14,9 @@ import {
 } from '@src/artifacts/lunarswap/Lunarswap/contract/index.js';
 import {
   LunarswapPrivateState,
-  LunarswapWitnesses,
+  LunarswapWitnessesImp,
 } from '../../witnesses/Lunarswap.js';
+import { getIdentity, getPairId, sortCoinByColor } from '@src/lunarswap/utils/index.js';
 
 /**
  * Base simulator for Lunarswap contract
@@ -23,7 +24,7 @@ import {
 const LunarswapSimulatorBase = createSimulator<
   LunarswapPrivateState,
   ReturnType<typeof ledger>,
-  ReturnType<typeof LunarswapWitnesses>,
+  ReturnType<typeof LunarswapWitnessesImp>,
   Contract<LunarswapPrivateState>,
   readonly [string, string, Uint8Array, bigint]
 >({
@@ -37,7 +38,7 @@ const LunarswapSimulatorBase = createSimulator<
     decimals,
   ],
   ledgerExtractor: (state) => ledger(state),
-  witnessesFactory: () => LunarswapWitnesses(),
+  witnessesFactory: () => LunarswapWitnessesImp(),
 });
 
 /**
@@ -51,7 +52,7 @@ export class LunarswapSimulator extends LunarswapSimulatorBase {
     decimals: bigint,
     options: BaseSimulatorOptions<
       LunarswapPrivateState,
-      ReturnType<typeof LunarswapWitnesses>
+      ReturnType<typeof LunarswapWitnessesImp>
     > = {},
   ) {
     super([name, symbol, nonce, decimals], options);
@@ -149,21 +150,21 @@ export class LunarswapSimulator extends LunarswapSimulatorBase {
     tokenA: ShieldedCoinInfo,
     tokenB: ShieldedCoinInfo,
   ): Uint8Array {
-    return this.circuits.impure.getPairId(tokenA, tokenB);
+    return getPairId(tokenA, tokenB);
   }
 
   public getReserveId(
     tokenA: ShieldedCoinInfo,
     tokenB: ShieldedCoinInfo,
   ): Uint8Array {
-    return this.circuits.pure.getIdentity(tokenA, tokenB, false);
+    return getIdentity(tokenA.color, tokenB.color, false);
   }
 
   public getSortedCoins(
     tokenA: ShieldedCoinInfo,
     tokenB: ShieldedCoinInfo,
   ): [ShieldedCoinInfo, ShieldedCoinInfo] {
-    return this.circuits.impure.sortCoinByColor(tokenA, tokenB);
+    return sortCoinByColor(tokenA, tokenB);
   }
 
   public getSortedCoinsAndAmounts(
@@ -172,7 +173,7 @@ export class LunarswapSimulator extends LunarswapSimulatorBase {
     amountAMin: bigint,
     amountBMin: bigint,
   ): [ShieldedCoinInfo, ShieldedCoinInfo, bigint, bigint] {
-    const [sortedTokenA, sortedTokenB] = this.circuits.impure.sortCoinByColor(
+    const [sortedTokenA, sortedTokenB] = sortCoinByColor(
       tokenA,
       tokenB,
     );

@@ -2,7 +2,7 @@
 // LunarSwap CLI main loop and handlers
 
 import type { Interface } from 'node:readline/promises';
-import type { ShieldedCoinInfo } from '@openzeppelin/midnight-apps-contracts/lunarswap/contract';
+import type { ShieldedCoinInfo } from '@openzeppelin/midnight-apps-contracts';
 import type {
   Lunarswap,
   LunarswapProviders,

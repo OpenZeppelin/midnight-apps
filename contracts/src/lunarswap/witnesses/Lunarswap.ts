@@ -28,7 +28,7 @@ export const LunarswapPrivateState = {
  * @description Factory function creating witness implementations for Lunarswap module operations.
  * @returns An object implementing the Witnesses interface for LunarswapPrivateState.
  */
-export const LunarswapWitnesses = (): Witnesses<LunarswapPrivateState> => ({
+export const LunarswapWitnessesImp = (): Witnesses<LunarswapPrivateState> => ({
   wit_sqrtU128(_context, radicand) {
     return [{}, wit_sqrtU128(radicand)];
   },

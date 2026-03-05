@@ -1,9 +1,9 @@
 'use client';
 
 import type {
-  Ledger,
+  LunarswapLedger,
   Pair,
-} from '@openzeppelin/midnight-apps-contracts/lunarswap/contract';
+} from '@openzeppelin/midnight-apps-contracts';
 import {
   createContext,
   type ReactNode,
@@ -30,9 +30,9 @@ interface LunarswapContextType {
   hasLoadedDataOnce: boolean; // Track if we've ever loaded data
   error: string | null;
   refreshContract: () => Promise<void>;
-  publicState: Ledger | null;
+  publicState: LunarswapLedger | null;
   allPairs: Pool[];
-  totalSupply: Ledger['totalSupply'] | null;
+  totalSupply: LunarswapLedger['totalSupply'] | null;
   refreshPublicState: () => Promise<void>;
   pauseRefresh: () => void;
   resumeRefresh: () => void;
@@ -70,10 +70,10 @@ export const LunarswapProvider = ({ children }: LunarswapProviderProps) => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [publicState, setPublicState] = useState<Ledger | null>(null);
+  const [publicState, setPublicState] = useState<LunarswapLedger | null>(null);
   const [allPairs, setAllPairs] = useState<Pool[]>([]);
   const [totalSupply, setLpTotalSupply] = useState<
-    Ledger['totalSupply'] | null
+    LunarswapLedger['totalSupply'] | null
   >(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [retryCount, setRetryCount] = useState(0);

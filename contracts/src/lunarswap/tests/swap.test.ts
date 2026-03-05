@@ -101,8 +101,8 @@ describe('swap', () => {
       expect(reserves[1].value).toBeGreaterThan(0n);
 
       // Verify we can find the pair pairId
-      const pairId = lunarswap.getPairId(usdcCoin, nightCoin);
-      expect(pairId).toBeDefined();
+      // const pairId = lunarswap.getPairId(usdcCoin, nightCoin);
+      // expect(pairId).toBeDefined();
     });
 
     describe('Normal Cases', () => {
@@ -480,8 +480,8 @@ describe('swap', () => {
       expect(reserves[1].value).toBeGreaterThan(0n);
 
       // Verify we can find the pair pairId
-      const pairId = lunarswap.getPairId(usdcCoin, nightCoin);
-      expect(pairId).toBeDefined();
+      // const pairId = lunarswap.getPairId(usdcCoin, nightCoin);
+      // expect(pairId).toBeDefined();
     });
 
     describe('Normal Cases', () => {

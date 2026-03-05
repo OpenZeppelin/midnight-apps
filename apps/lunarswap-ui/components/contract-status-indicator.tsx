@@ -6,14 +6,14 @@ import type {
   PrivateStateProvider,
   ProofProvider,
 } from '@midnight-ntwrk/midnight-js-types';
-import { Contract } from '@openzeppelin/midnight-apps-contracts/lunarswap/contract';
+import { LunarswapContract, LunarswapWitnessesImp } from '@openzeppelin/midnight-apps-contracts';
 import {
   type LunarswapPrivateState,
   LunarswapWitnesses,
-} from '@openzeppelin/midnight-apps-contracts/lunarswap/witnesses';
+} from '@openzeppelin/midnight-apps-contracts';
 import type {
   LunarswapCircuitKeys,
-  LunarswapContract,
+  LunarswapContractInstance,
   LunarswapProviders,
 } from '@openzeppelin/midnight-apps-lunarswap-api';
 import { LunarswapPrivateStateId } from '@openzeppelin/midnight-apps-lunarswap-api';
@@ -103,7 +103,7 @@ export function ContractStatusIndicator() {
         midnightProvider: midnightWallet.midnightProvider,
       };
 
-      const contract: LunarswapContract = new Contract(LunarswapWitnesses());
+      const contract: LunarswapContract = new LunarswapContract(LunarswapWitnessesImp());
 
       // Add timeout to prevent hanging
       const timeoutPromise = new Promise((_, reject) => {
@@ -142,7 +142,7 @@ export function ContractStatusIndicator() {
       }
     } catch (error) {
       _logger?.error(
-        `[ContractStatusIndicator] Contract status check failed: ${error instanceof Error ? error.message : String(error)}`,
+        `[ContractStatusIndicator] LunarswapContract status check failed: ${error instanceof Error ? error.message : String(error)}`,
       );
       setStatusInfo({
         status: 'error',
@@ -224,7 +224,7 @@ export function ContractStatusIndicator() {
       case 'not-configured':
         return (
           <div className="text-sm text-gray-600 dark:text-gray-400 mt-4">
-            <p className="mb-2">Contract address not configured.</p>
+            <p className="mb-2">LunarswapContract address not configured.</p>
             <p className="text-xs">
               The LunarSwap contract should be deployed and configured in the
               application settings.
@@ -273,7 +273,7 @@ export function ContractStatusIndicator() {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {getStatusIcon(statusInfo.status)}
-            Contract Status
+            LunarswapContract Status
           </DialogTitle>
         </DialogHeader>
         <div className={`p-4 rounded-lg ${getStatusColor(statusInfo.status)}`}>
@@ -287,7 +287,7 @@ export function ContractStatusIndicator() {
 
             {statusInfo.contractAddress && (
               <div>
-                <h4 className="font-medium text-sm mb-1">Contract Address</h4>
+                <h4 className="font-medium text-sm mb-1">LunarswapContract Address</h4>
                 <code className="block p-2 bg-gray-100 dark:bg-gray-700 rounded text-xs font-mono break-all">
                   {statusInfo.contractAddress}
                 </code>

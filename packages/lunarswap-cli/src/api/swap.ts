@@ -1,9 +1,9 @@
 import type {
-  ContractAddress,
-  Either,
   ShieldedCoinInfo,
+  Either,
   ZswapCoinPublicKey,
-} from '@openzeppelin/midnight-apps-contracts/lunarswap/contract';
+  ContractAddress
+} from '@openzeppelin/midnight-apps-contracts';
 import type { Lunarswap } from '@openzeppelin/midnight-apps-lunarswap-api';
 import type { Logger } from 'pino';
 

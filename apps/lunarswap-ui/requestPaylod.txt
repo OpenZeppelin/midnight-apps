@@ -1,0 +1,267 @@
+[vite] connecting...
+client:827 [vite] connected.
+chunk-2FYZUET2.js:28469 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+chunk-2FYZUET2.js:660 [Violation] 'message' handler took 230ms
+wallet-utils.ts:94 Network detection from wallet state is not currently supported. Please set network manually.
+detectWalletNetwork @ wallet-utils.ts:94
+(anonymous) @ network-context.tsx:83
+await in (anonymous)
+(anonymous) @ network-context.tsx:104
+commitHookEffectListMount @ chunk-2FYZUET2.js:23884
+commitPassiveMountOnFiber @ chunk-2FYZUET2.js:25125
+commitPassiveMountEffects_complete @ chunk-2FYZUET2.js:25098
+commitPassiveMountEffects_begin @ chunk-2FYZUET2.js:25088
+commitPassiveMountEffects @ chunk-2FYZUET2.js:25078
+flushPassiveEffectsImpl @ chunk-2FYZUET2.js:26431
+flushPassiveEffects @ chunk-2FYZUET2.js:26388
+(anonymous) @ chunk-2FYZUET2.js:26269
+workLoop @ chunk-2FYZUET2.js:480
+flushWork @ chunk-2FYZUET2.js:459
+performWorkUntilDeadline @ chunk-2FYZUET2.js:667
+use-logger.ts:40 [INFO] Joining Lunarswap contract...
+chunk-2FYZUET2.js:660 [Violation] 'message' handler took 366ms
+use-logger.ts:40 [INFO] Joining Lunarswap contract...
+wallet-utils.ts:94 Network detection from wallet state is not currently supported. Please set network manually.
+detectWalletNetwork @ wallet-utils.ts:94
+(anonymous) @ network-context.tsx:83
+await in (anonymous)
+(anonymous) @ network-context.tsx:104
+commitHookEffectListMount @ chunk-2FYZUET2.js:23884
+commitPassiveMountOnFiber @ chunk-2FYZUET2.js:25125
+commitPassiveMountEffects_complete @ chunk-2FYZUET2.js:25098
+commitPassiveMountEffects_begin @ chunk-2FYZUET2.js:25088
+commitPassiveMountEffects @ chunk-2FYZUET2.js:25078
+flushPassiveEffectsImpl @ chunk-2FYZUET2.js:26431
+flushPassiveEffects @ chunk-2FYZUET2.js:26388
+(anonymous) @ chunk-2FYZUET2.js:26269
+workLoop @ chunk-2FYZUET2.js:480
+flushWork @ chunk-2FYZUET2.js:459
+performWorkUntilDeadline @ chunk-2FYZUET2.js:667
+chunk-2FYZUET2.js:23884 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ dialog.tsx:543
+commitHookEffectListMount @ chunk-2FYZUET2.js:23884
+commitPassiveMountOnFiber @ chunk-2FYZUET2.js:25125
+commitPassiveMountEffects_complete @ chunk-2FYZUET2.js:25098
+commitPassiveMountEffects_begin @ chunk-2FYZUET2.js:25088
+commitPassiveMountEffects @ chunk-2FYZUET2.js:25078
+flushPassiveEffectsImpl @ chunk-2FYZUET2.js:26431
+flushPassiveEffects @ chunk-2FYZUET2.js:26388
+commitRootImpl @ chunk-2FYZUET2.js:26357
+commitRoot @ chunk-2FYZUET2.js:26218
+performSyncWorkOnRoot @ chunk-2FYZUET2.js:25837
+flushSyncCallbacks @ chunk-2FYZUET2.js:16197
+(anonymous) @ chunk-2FYZUET2.js:25570
+chunk-2FYZUET2.js:23884 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ dialog.tsx:543
+commitHookEffectListMount @ chunk-2FYZUET2.js:23884
+invokePassiveEffectMountInDEV @ chunk-2FYZUET2.js:25293
+invokeEffectsInDev @ chunk-2FYZUET2.js:26642
+commitDoubleInvokeEffectsInDEV @ chunk-2FYZUET2.js:26627
+flushPassiveEffectsImpl @ chunk-2FYZUET2.js:26444
+flushPassiveEffects @ chunk-2FYZUET2.js:26388
+commitRootImpl @ chunk-2FYZUET2.js:26357
+commitRoot @ chunk-2FYZUET2.js:26218
+performSyncWorkOnRoot @ chunk-2FYZUET2.js:25837
+flushSyncCallbacks @ chunk-2FYZUET2.js:16197
+(anonymous) @ chunk-2FYZUET2.js:25570
+@midnight-ntwrk_midnight-js-indexer-public-data-provider.js:80 Download the Apollo DevTools for a better development experience: https://chrome.google.com/webstore/detail/apollo-client-developer-t/jdkknkkbebbapilgoeccciglkfbmbnfm
+2use-logger.ts:40 [INFO] Lunarswap contract joined
+chunk-2FYZUET2.js:23884 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ dialog.tsx:543
+commitHookEffectListMount @ chunk-2FYZUET2.js:23884
+commitPassiveMountOnFiber @ chunk-2FYZUET2.js:25125
+commitPassiveMountEffects_complete @ chunk-2FYZUET2.js:25098
+commitPassiveMountEffects_begin @ chunk-2FYZUET2.js:25088
+commitPassiveMountEffects @ chunk-2FYZUET2.js:25078
+flushPassiveEffectsImpl @ chunk-2FYZUET2.js:26431
+flushPassiveEffects @ chunk-2FYZUET2.js:26388
+commitRootImpl @ chunk-2FYZUET2.js:26357
+commitRoot @ chunk-2FYZUET2.js:26218
+performSyncWorkOnRoot @ chunk-2FYZUET2.js:25837
+flushSyncCallbacks @ chunk-2FYZUET2.js:16197
+(anonymous) @ chunk-2FYZUET2.js:25570
+chunk-2FYZUET2.js:23884 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ dialog.tsx:543
+commitHookEffectListMount @ chunk-2FYZUET2.js:23884
+invokePassiveEffectMountInDEV @ chunk-2FYZUET2.js:25293
+invokeEffectsInDev @ chunk-2FYZUET2.js:26642
+commitDoubleInvokeEffectsInDEV @ chunk-2FYZUET2.js:26627
+flushPassiveEffectsImpl @ chunk-2FYZUET2.js:26444
+flushPassiveEffects @ chunk-2FYZUET2.js:26388
+commitRootImpl @ chunk-2FYZUET2.js:26357
+commitRoot @ chunk-2FYZUET2.js:26218
+performSyncWorkOnRoot @ chunk-2FYZUET2.js:25837
+flushSyncCallbacks @ chunk-2FYZUET2.js:16197
+(anonymous) @ chunk-2FYZUET2.js:25570
+chunk-2FYZUET2.js:10993 [Violation] 'click' handler took 156ms
+[Violation] 'click' handler took 156ms
+zk-config.ts:45  GET http://localhost:5173/keys/midnight/zswap/output.prover 404 (Not Found)
+sendRequest @ fetch-zk-config-provider.ts:71
+getProverKey @ fetch-zk-config-provider.ts:86
+getProverKey @ zk-config.ts:45
+get @ zk-config-provider.ts:73
+getKeyMaterial @ @midnight-ntwrk_midnight-js-http-client-proof-provider.js:175
+prove @ @midnight-ntwrk_midnight-js-http-client-proof-provider.js:210
+(anonymous) @ midnight_ledger_wasm_bg.js:9281
+handleError @ midnight_ledger_wasm_bg.js:15
+__wbg_call_f1fd202ba222e0ec @ midnight_ledger_wasm_bg.js:9280
+$func558 @ 027d23ae:0x14f314
+$func1471 @ 027d23ae:0x2e2ebb
+$func684 @ 027d23ae:0x1bc1a4
+$func5696 @ 027d23ae:0x4882c7
+$func433 @ 027d23ae:0x1082e1
+$func340 @ 027d23ae:0xd1057
+$func2839 @ 027d23ae:0x3a9642
+$func13379 @ 027d23ae:0x641ff2
+$closure2476_externref_shim @ 027d23ae:0x65c982
+__wbg_adapter_18 @ midnight_ledger_wasm_bg.js:1344
+real @ midnight_ledger_wasm_bg.js:219
+zk-config.ts:45  GET http://localhost:5173/keys/midnight/zswap/output.prover 404 (Not Found)
+sendRequest @ fetch-zk-config-provider.ts:71
+getProverKey @ fetch-zk-config-provider.ts:86
+getProverKey @ zk-config.ts:45
+get @ zk-config-provider.ts:73
+getKeyMaterial @ @midnight-ntwrk_midnight-js-http-client-proof-provider.js:175
+prove @ @midnight-ntwrk_midnight-js-http-client-proof-provider.js:210
+(anonymous) @ midnight_ledger_wasm_bg.js:9281
+handleError @ midnight_ledger_wasm_bg.js:15
+__wbg_call_f1fd202ba222e0ec @ midnight_ledger_wasm_bg.js:9280
+$func558 @ 027d23ae:0x14f314
+$func1471 @ 027d23ae:0x2e2ebb
+$func684 @ 027d23ae:0x1bc1a4
+$func5696 @ 027d23ae:0x4882c7
+$func433 @ 027d23ae:0x1082e1
+$func340 @ 027d23ae:0xd1057
+$func2839 @ 027d23ae:0x3a9642
+$func13379 @ 027d23ae:0x641ff2
+$closure2476_externref_shim @ 027d23ae:0x65c982
+__wbg_adapter_18 @ midnight_ledger_wasm_bg.js:1344
+real @ midnight_ledger_wasm_bg.js:219
+zk-config.ts:45  GET http://localhost:5173/keys/midnight/zswap/output.prover 404 (Not Found)
+sendRequest @ fetch-zk-config-provider.ts:71
+getProverKey @ fetch-zk-config-provider.ts:86
+getProverKey @ zk-config.ts:45
+get @ zk-config-provider.ts:73
+getKeyMaterial @ @midnight-ntwrk_midnight-js-http-client-proof-provider.js:175
+prove @ @midnight-ntwrk_midnight-js-http-client-proof-provider.js:210
+(anonymous) @ midnight_ledger_wasm_bg.js:9281
+handleError @ midnight_ledger_wasm_bg.js:15
+__wbg_call_f1fd202ba222e0ec @ midnight_ledger_wasm_bg.js:9280
+$func558 @ 027d23ae:0x14f314
+$func1471 @ 027d23ae:0x2e2ebb
+$func684 @ 027d23ae:0x1bc1a4
+$func5696 @ 027d23ae:0x4882c7
+$func433 @ 027d23ae:0x1082e1
+$func340 @ 027d23ae:0xd1057
+$func2839 @ 027d23ae:0x3a9642
+$func13379 @ 027d23ae:0x641ff2
+$closure2476_externref_shim @ 027d23ae:0x65c982
+__wbg_adapter_18 @ midnight_ledger_wasm_bg.js:1344
+real @ midnight_ledger_wasm_bg.js:219
+moon-dust-background.tsx:114 [Violation] 'requestAnimationFrame' handler took 101ms
+@midnight-ntwrk_midnight-js-http-client-proof-provider.js:89  POST http://localhost:6300/check 400 (Bad Request)
+wrappedFetch @ @midnight-ntwrk_midnight-js-http-client-proof-provider.js:89
+(anonymous) @ @midnight-ntwrk_midnight-js-http-client-proof-provider.js:139
+fetchRetry3 @ @midnight-ntwrk_midnight-js-http-client-proof-provider.js:86
+makeHttpRequest @ @midnight-ntwrk_midnight-js-http-client-proof-provider.js:182
+check @ @midnight-ntwrk_midnight-js-http-client-proof-provider.js:206
+await in check
+(anonymous) @ midnight_ledger_wasm_bg.js:9271
+handleError @ midnight_ledger_wasm_bg.js:15
+__wbg_call_641db1bb5db5a579 @ midnight_ledger_wasm_bg.js:9270
+$func172 @ 027d23ae:0x19111
+$func4459 @ 027d23ae:0x420a60
+$func458 @ 027d23ae:0x11eccf
+$func994 @ 027d23ae:0x272b71
+$func2401 @ 027d23ae:0x3642a5
+$func433 @ 027d23ae:0x108223
+$func340 @ 027d23ae:0xd1057
+$func2839 @ 027d23ae:0x3a9642
+$func13379 @ 027d23ae:0x641ff2
+$closure2476_externref_shim @ 027d23ae:0x65c982
+__wbg_adapter_18 @ midnight_ledger_wasm_bg.js:1344
+real @ midnight_ledger_wasm_bg.js:219
+use-logger.ts:36 [ERROR] [AddLiquidity] Error: Unexpected error submitting scoped transaction '<unnamed>': Error: 'check' returned an error: Error: Failed Proof Server response: url="http://localhost:6300/check", code="400", status="Bad Request" 
+ Error: Unexpected error submitting scoped transaction '<unnamed>': Error: 'check' returned an error: Error: Failed Proof Server response: url="http://localhost:6300/check", code="400", status="Bad Request"
+    at scoped (@midnight-ntwrk_midnight-js-contracts.js:918:23)
+    at async Lunarswap.addLiquidity (Lunarswap.ts:302:20)
+    at async LunarswapIntegration.addLiquidity (lunarswap-integration.ts:420:22)
+    at async handleProceedWithAddLiquidity (set-deposit-step.tsx:243:7)Caused by: Error: 'check' returned an error: Error: Failed Proof Server response: url="http://localhost:6300/check", code="400", status="Bad Request"
+    at __wbg_Error_e17e777aac105295 (midnight_ledger_wasm_bg.js:9218:17)
+    at 027d23ae:0x6539e0
+    at 027d23ae:0x47acfc
+    at 027d23ae:0xd14e9
+    at 027d23ae:0x3a9642
+    at 027d23ae:0x641ff2
+    at 027d23ae:0x65c982
+    at __wbg_adapter_18 (midnight_ledger_wasm_bg.js:1344:10)
+    at real (midnight_ledger_wasm_bg.js:219:20) {fullError: 'message: Unexpected error submitting scoped transa…3/.vite/deps/chunk-3ELWAEZO.js?v=785baefa:889:14)', message: `Unexpected error submitting scoped transaction '<u…ost:6300/check", code="400", status="Bad Request"`, stack: 'Error: Unexpected error submitting scoped transact…components/pool/steps/set-deposit-step.tsx:184:7)'}
+write @ use-logger.ts:36
+LOG @ pino.js:411
+handleProceedWithAddLiquidity @ set-deposit-step.tsx:263
+await in handleProceedWithAddLiquidity
+callCallback2 @ chunk-2FYZUET2.js:10996
+invokeGuardedCallbackDev @ chunk-2FYZUET2.js:11021
+invokeGuardedCallback @ chunk-2FYZUET2.js:11055
+invokeGuardedCallbackAndCatchFirstError @ chunk-2FYZUET2.js:11058
+executeDispatch @ chunk-2FYZUET2.js:14093
+processDispatchQueueItemsInOrder @ chunk-2FYZUET2.js:14113
+processDispatchQueue @ chunk-2FYZUET2.js:14122
+dispatchEventsForPlugins @ chunk-2FYZUET2.js:14130
+(anonymous) @ chunk-2FYZUET2.js:14254
+batchedUpdates$1 @ chunk-2FYZUET2.js:25855
+batchedUpdates @ chunk-2FYZUET2.js:10901
+dispatchEventForPluginEventSystem @ chunk-2FYZUET2.js:14253
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-2FYZUET2.js:12584
+dispatchEvent @ chunk-2FYZUET2.js:12578
+dispatchDiscreteEvent @ chunk-2FYZUET2.js:12555
+set-deposit-step.tsx:274 [AddLiquidity] Full error: message: Unexpected error submitting scoped transaction '<unnamed>': Error: 'check' returned an error: Error: Failed Proof Server response: url="http://localhost:6300/check", code="400", status="Bad Request"
+stack:
+Error: Unexpected error submitting scoped transaction '<unnamed>': Error: 'check' returned an error: Error: Failed Proof Server response: url="http://localhost:6300/check", code="400", status="Bad Request"
+    at scoped (http://localhost:5173/.vite/deps/@midnight-ntwrk_midnight-js-contracts.js?v=5aea7966:918:23)
+    at async Lunarswap.addLiquidity (http://localhost:5173/@fs/home/iskander/Projects/midnight-apps/packages/lunarswap-api/dist/Lunarswap.js:114:24)
+    at async LunarswapIntegration.addLiquidity (http://localhost:5173/lib/lunarswap-integration.ts:303:22)
+    at async handleProceedWithAddLiquidity (http://localhost:5173/components/pool/steps/set-deposit-step.tsx:184:7)
+cause:
+  message: 'check' returned an error: Error: Failed Proof Server response: url="http://localhost:6300/check", code="400", status="Bad Request"
+  stack:
+Error: 'check' returned an error: Error: Failed Proof Server response: url="http://localhost:6300/check", code="400", status="Bad Request"
+    at __wbg_Error_e17e777aac105295 (http://localhost:5173/.vite/deps/chunk-3ELWAEZO.js?v=785baefa:9218:15)
+    at wasm://wasm/027d23ae:wasm-function[14394]:0x6539e0
+    at wasm://wasm/027d23ae:wasm-function[5479]:0x47acfc
+    at wasm://wasm/027d23ae:wasm-function[340]:0xd14e9
+    at wasm://wasm/027d23ae:wasm-function[2839]:0x3a9642
+    at wasm://wasm/027d23ae:wasm-function[13379]:0x641ff2
+    at wasm://wasm/027d23ae:wasm-function[14585]:0x65c982
+    at __wbg_adapter_18 (http://localhost:5173/.vite/deps/chunk-3ELWAEZO.js?v=785baefa:1688:8)
+    at real (http://localhost:5173/.vite/deps/chunk-3ELWAEZO.js?v=785baefa:889:14) Error: Unexpected error submitting scoped transaction '<unnamed>': Error: 'check' returned an error: Error: Failed Proof Server response: url="http://localhost:6300/check", code="400", status="Bad Request"
+    at scoped (@midnight-ntwrk_midnight-js-contracts.js:918:23)
+    at async Lunarswap.addLiquidity (Lunarswap.ts:302:20)
+    at async LunarswapIntegration.addLiquidity (lunarswap-integration.ts:420:22)
+    at async handleProceedWithAddLiquidity (set-deposit-step.tsx:243:7)Caused by: Error: 'check' returned an error: Error: Failed Proof Server response: url="http://localhost:6300/check", code="400", status="Bad Request"
+    at __wbg_Error_e17e777aac105295 (midnight_ledger_wasm_bg.js:9218:17)
+    at 027d23ae:0x6539e0
+    at 027d23ae:0x47acfc
+    at 027d23ae:0xd14e9
+    at 027d23ae:0x3a9642
+    at 027d23ae:0x641ff2
+    at 027d23ae:0x65c982
+    at __wbg_adapter_18 (midnight_ledger_wasm_bg.js:1344:10)
+    at real (midnight_ledger_wasm_bg.js:219:20)
+handleProceedWithAddLiquidity @ set-deposit-step.tsx:274
+await in handleProceedWithAddLiquidity
+callCallback2 @ chunk-2FYZUET2.js:10996
+invokeGuardedCallbackDev @ chunk-2FYZUET2.js:11021
+invokeGuardedCallback @ chunk-2FYZUET2.js:11055
+invokeGuardedCallbackAndCatchFirstError @ chunk-2FYZUET2.js:11058
+executeDispatch @ chunk-2FYZUET2.js:14093
+processDispatchQueueItemsInOrder @ chunk-2FYZUET2.js:14113
+processDispatchQueue @ chunk-2FYZUET2.js:14122
+dispatchEventsForPlugins @ chunk-2FYZUET2.js:14130
+(anonymous) @ chunk-2FYZUET2.js:14254
+batchedUpdates$1 @ chunk-2FYZUET2.js:25855
+batchedUpdates @ chunk-2FYZUET2.js:10901
+dispatchEventForPluginEventSystem @ chunk-2FYZUET2.js:14253
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-2FYZUET2.js:12584
+dispatchEvent @ chunk-2FYZUET2.js:12578
+dispatchDiscreteEvent @ chunk-2FYZUET2.js:12555

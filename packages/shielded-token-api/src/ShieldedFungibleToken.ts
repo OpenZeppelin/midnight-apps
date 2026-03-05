@@ -8,16 +8,16 @@ import type {
   ContractAddress,
   Either,
   ShieldedCoinInfo,
-  Witnesses,
+  ShieldedTokenWitnesses,
   ZswapCoinPublicKey,
-} from '@openzeppelin/midnight-apps-contracts/shielded-token/contract';
+} from '@openzeppelin/midnight-apps-contracts';
 import {
-  Contract,
-} from '@openzeppelin/midnight-apps-contracts/shielded-token/contract';
+  ShieldedTokenContract,
+} from '@openzeppelin/midnight-apps-contracts';
 import type { Logger } from 'pino';
 import type {
   DeployedShieldedFungibleTokenContract,
-  ShieldedFungibleTokenContract,
+  ShieldedFungibleTokenContractInstance,
   ShieldedFungibleTokenPrivateState,
   ShieldedFungibleTokenProviders,
 } from './types.js';
@@ -31,16 +31,16 @@ function bytesToHex(bytes: Uint8Array): string {
     .join('');
 }
 
-function createWitnesses(): Witnesses<ShieldedFungibleTokenPrivateState> {
-  return {} as Witnesses<ShieldedFungibleTokenPrivateState>;
+function createWitnesses(): ShieldedTokenWitnesses<ShieldedFungibleTokenPrivateState> {
+  return {} as ShieldedTokenWitnesses<ShieldedFungibleTokenPrivateState>;
 }
 
 const createCompiledContract = (zkConfigPath: string) => {
   const base = CompiledContract.make(
     'ShieldedFungibleToken',
-    Contract<ShieldedFungibleTokenPrivateState>,
+    ShieldedTokenContract<ShieldedFungibleTokenPrivateState>,
   );
-  // Empty witnesses object; type assertion needed as Witnesses<PS> is empty type
+  // Empty witnesses object; type assertion needed as ShieldedTokenWitnesses<PS> is empty type
   const withWit = CompiledContract.withWitnesses(base, createWitnesses() as never);
   return CompiledContract.withCompiledFileAssets(withWit, zkConfigPath);
 };
@@ -73,7 +73,7 @@ export class ShieldedFungibleToken {
 
     // deployContract sets contract address and initial private state internally (midnight-js 3.1.0)
     const deployedContract =
-      await deployContract<ShieldedFungibleTokenContract>(providers, {
+      await deployContract<ShieldedFungibleTokenContractInstance>(providers, {
         compiledContract: createCompiledContract(zkConfigPath),
         privateStateId: ShieldedFungibleTokenPrivateStateId,
         initialPrivateState: ShieldedFungibleToken.getPrivateState(),
@@ -96,7 +96,7 @@ export class ShieldedFungibleToken {
     const contractAddressHex = bytesToHex(contractAddress.bytes);
 
     const deployedContract =
-      await findDeployedContract<ShieldedFungibleTokenContract>(providers, {
+      await findDeployedContract<ShieldedFungibleTokenContractInstance>(providers, {
         contractAddress: contractAddressHex,
         compiledContract: createCompiledContract(zkConfigPath),
         privateStateId: ShieldedFungibleTokenPrivateStateId,
@@ -111,7 +111,7 @@ export class ShieldedFungibleToken {
     recipient: Either<ZswapCoinPublicKey, ContractAddress>,
     amount: bigint,
   ): Promise<
-    FinalizedCallTxData<ShieldedFungibleTokenContract, 'mint'>
+    FinalizedCallTxData<ShieldedFungibleTokenContractInstance, 'mint'>
   > {
     const txData = await this.deployedContract.callTx.mint(recipient, amount);
     this.logger?.trace({
@@ -128,7 +128,7 @@ export class ShieldedFungibleToken {
     coin: ShieldedCoinInfo,
     amount: bigint,
   ): Promise<
-    FinalizedCallTxData<ShieldedFungibleTokenContract, 'burn'>
+    FinalizedCallTxData<ShieldedFungibleTokenContractInstance, 'burn'>
   > {
     const txData = await this.deployedContract.callTx.burn(coin, amount);
     this.logger?.trace({

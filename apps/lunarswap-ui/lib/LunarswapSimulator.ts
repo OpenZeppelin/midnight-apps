@@ -9,30 +9,30 @@ import {
   QueryContext,
 } from '@midnight-ntwrk/compact-runtime';
 import {
-  Contract,
+  LunarswapContract,
+  LunarswapWitnessesImp,
   type ContractAddress,
   type Either,
   type Pair,
   type QualifiedShieldedCoinInfo,
   type ShieldedCoinInfo,
   type ZswapCoinPublicKey,
-} from '@openzeppelin/midnight-apps-contracts/lunarswap/contract';
+} from '@openzeppelin/midnight-apps-contracts';
 import {
   LunarswapPrivateState,
-  LunarswapWitnesses,
-} from '@openzeppelin/midnight-apps-contracts/lunarswap/witnesses';
+} from '@openzeppelin/midnight-apps-contracts';
 import {
   getPairId as getPairIdUtil,
   getReserveId as getReserveIdUtil,
   sortCoinByColor as sortCoinByColorUtil,
-} from '@openzeppelin/midnight-apps-lunarswap-api';
+} from '@openzeppelin/midnight-apps-contracts';
 
 /**
  * @description A simulator implementation for Lunarswap operations.
  * Used for local circuit computations when needed.
  */
 export class LunarswapSimulator {
-  private contract: Contract<LunarswapPrivateState>;
+  private contract: LunarswapContract<LunarswapPrivateState>;
   private context: CircuitContext<LunarswapPrivateState>;
   private privateState: LunarswapPrivateState;
 
@@ -43,8 +43,8 @@ export class LunarswapSimulator {
     decimals: bigint = BigInt(18),
   ) {
     this.privateState = LunarswapPrivateState.generate();
-    const witnesses = LunarswapWitnesses();
-    this.contract = new Contract<LunarswapPrivateState>(witnesses);
+    const witnesses = LunarswapWitnessesImp();
+    this.contract = new LunarswapContract<LunarswapPrivateState>(witnesses);
 
     // Initialize contract state
     const constructorCtx = createConstructorContext(

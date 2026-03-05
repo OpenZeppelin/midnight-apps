@@ -3,12 +3,10 @@ import type { MidnightProviders } from '@midnight-ntwrk/midnight-js-types';
 // Value import required for typeof in type derivation (cannot use import type)
 // biome-ignore lint/style/useImportType: typeof needs value at compile time
 import lunarswapContractInfo from '@openzeppelin/midnight-apps-contracts/dist/artifacts/lunarswap/Lunarswap/compiler/contract-info.json';
-import type {
-  Contract,
-  Ledger,
-  Witnesses,
-} from '@openzeppelin/midnight-apps-contracts/lunarswap/contract';
-import type { LunarswapPrivateState } from '@openzeppelin/midnight-apps-contracts/lunarswap/witnesses';
+import {
+  LunarswapContract,
+} from '@openzeppelin/midnight-apps-contracts';
+import type { LunarswapLedger, LunarswapPrivateState, LunarswapWitnesses } from '@openzeppelin/midnight-apps-contracts';
 
 // Define EmptyState locally
 export type EmptyState = Record<string, never>;
@@ -18,12 +16,12 @@ export type LunarswapPrivateStates = {
 };
 
 export type LunarswapPublicState = {
-  readonly pool: Ledger['pool'];
+  readonly pool: LunarswapLedger['pool'];
 };
 
-export type LunarswapContract = Contract<
+export type LunarswapContractInstance = LunarswapContract<
   LunarswapPrivateState,
-  Witnesses<LunarswapPrivateState>
+  LunarswapWitnesses<LunarswapPrivateState>
 >;
 
 /** Circuit metadata from contract-info.json */

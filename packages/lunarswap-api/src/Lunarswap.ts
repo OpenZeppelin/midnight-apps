@@ -15,49 +15,44 @@ import {
 import type {
   ContractAddress,
   Either,
+  Pair,
   QualifiedShieldedCoinInfo,
   ShieldedCoinInfo,
   ZswapCoinPublicKey,
-} from '@openzeppelin/midnight-apps-contracts/lunarswap/contract';
+  LunarswapLedger as Ledger,
+} from '@openzeppelin/midnight-apps-contracts';
 import {
-  Contract,
-  type Ledger,
-  ledger,
-  type Pair,
-} from '@openzeppelin/midnight-apps-contracts/lunarswap/contract';
-import {
+  LunarswapContract,
+  lunarswapLedger,
   LunarswapPrivateState,
-  LunarswapWitnesses,
-} from '@openzeppelin/midnight-apps-contracts/lunarswap/witnesses';
-import type { Logger } from 'pino';
-import { combineLatest, from, map, type Observable, tap } from 'rxjs';
-// TODO: Switch back to contract callTx.getPairId/getIdentity/sortCoinByColor/sortQualifiedCoinByColor once https://github.com/LFDT-Minokawa/compact/issues/150 is resolved
-import {
+  LunarswapWitnessesImp,
   getIdentity as getIdentityUtil,
   getPairId as getPairIdUtil,
   sortCoinByColor as sortCoinByColorUtil,
   sortQualifiedCoinByColor as sortQualifiedCoinByColorUtil,
-} from './lunarswap-utils.js';
+} from '@openzeppelin/midnight-apps-contracts';
+import type { Logger } from 'pino';
+import { combineLatest, from, map, type Observable, tap } from 'rxjs';
 import {
   type DeployedLunarswapContract,
-  type LunarswapContract,
+  type LunarswapContractInstance,
   LunarswapPrivateStateId,
   type LunarswapProviders,
   type LunarswapPublicState,
 } from './types';
 
 const createCompiledContract = (zkConfigPath: string) => {
-  const base = CompiledContract.make('Lunarswap', Contract);
-  const withWit = CompiledContract.withWitnesses(base, LunarswapWitnesses());
+  const base = CompiledContract.make('Lunarswap',LunarswapContract);
+  const withWit = CompiledContract.withWitnesses(base, LunarswapWitnessesImp());
   return CompiledContract.withCompiledFileAssets(withWit, zkConfigPath);
 };
 
 // TODO: that should be inside lunarswap contracts package
 export const CompiledLunarswapContract = CompiledContract.make(
   'Lunarswap',
-  Contract<LunarswapPrivateState>,
+  LunarswapContract<LunarswapPrivateState>,
 ).pipe(
-  CompiledContract.withWitnesses(LunarswapWitnesses()),
+  CompiledContract.withWitnesses(LunarswapWitnessesImp()),
   CompiledContract.withCompiledFileAssets(
     '../../../contracts/src/artifacts/lunarswap/Lunarswap/contract',
   ),
@@ -160,7 +155,7 @@ export class Lunarswap implements ILunarswap {
             type: 'latest',
           })
           .pipe(
-            map((contractState) => ledger(contractState.data)),
+            map((contractState) => lunarswapLedger(contractState.data)),
             tap((ledgerState) =>
               logger?.trace({
                 ledgerState: {
@@ -249,7 +244,7 @@ export class Lunarswap implements ILunarswap {
   ): Promise<Ledger | null> {
     const contractState =
       await providers.publicDataProvider.queryContractState(contractAddress);
-    return contractState ? ledger(contractState.data) : null;
+    return contractState ? lunarswapLedger(contractState.data) : null;
   }
 
   static async getZswapChainState(

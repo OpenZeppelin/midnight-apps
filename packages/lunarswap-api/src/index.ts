@@ -4,20 +4,14 @@ export {
   type ILunarswap,
   Lunarswap,
 } from './Lunarswap.js';
-export {
-  getIdentity,
-  getPairId,
-  getReserveId,
-  sortCoinByColor,
-  sortQualifiedCoinByColor,
-} from './lunarswap-utils.js';
+
 export type {
   DeployedLunarswapContract,
   EmptyState,
   LunarswapCircuitKeys,
   LunarswapCircuitKeysNoProof,
   LunarswapCircuitKeysWithProof,
-  LunarswapContract,
+  LunarswapContractInstance,
   LunarswapPrivateStates,
   LunarswapProviders,
   LunarswapPublicState,

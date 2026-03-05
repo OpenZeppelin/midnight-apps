@@ -4,9 +4,9 @@ import type { MidnightProviders } from '@midnight-ntwrk/midnight-js-types';
 // biome-ignore lint/style/useImportType: typeof needs value at compile time
 import shieldedTokenContractInfo from '@openzeppelin/midnight-apps-contracts/dist/artifacts/shielded-token/ShieldedFungibleToken/compiler/contract-info.json';
 import type {
-  Contract,
-  Witnesses,
-} from '@openzeppelin/midnight-apps-contracts/shielded-token/contract';
+  ShieldedTokenContract,
+  ShieldedTokenWitnesses,
+} from '@openzeppelin/midnight-apps-contracts';
 
 export type ShieldedFungibleTokenPrivateState = Record<string, never>;
 
@@ -22,9 +22,9 @@ export type ShieldedFungibleTokenCircuitKeys = ImpureCircuitInfo['name'];
 export const ShieldedFungibleTokenPrivateStateId =
   'shieldedFungibleTokenPrivateState';
 
-export type ShieldedFungibleTokenContract = Contract<
+export type ShieldedFungibleTokenContractInstance = ShieldedTokenContract<
   ShieldedFungibleTokenPrivateState,
-  Witnesses<ShieldedFungibleTokenPrivateState>
+  ShieldedTokenWitnesses<ShieldedFungibleTokenPrivateState>
 >;
 
 export type ShieldedFungibleTokenProviders = MidnightProviders<
@@ -34,4 +34,4 @@ export type ShieldedFungibleTokenProviders = MidnightProviders<
 >;
 
 export type DeployedShieldedFungibleTokenContract =
-  FoundContract<ShieldedFungibleTokenContract>;
+  FoundContract<ShieldedFungibleTokenContractInstance>;

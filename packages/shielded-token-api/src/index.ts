@@ -3,7 +3,7 @@ export { ShieldedFungibleToken } from './ShieldedFungibleToken.js';
 export type {
   DeployedShieldedFungibleTokenContract,
   ShieldedFungibleTokenCircuitKeys,
-  ShieldedFungibleTokenContract,
+  ShieldedFungibleTokenContractInstance as ShieldedFungibleTokenContract,
   ShieldedFungibleTokenPrivateState,
   ShieldedFungibleTokenProviders,
 } from './types.js';
