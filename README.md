@@ -5,7 +5,7 @@
 
 # OpenZeppelin Apps for Midnight
 
-**A collection of sample (starter) apps** on the [Midnight](midnight.network).
+**A collection of sample (starter) apps** on the [Midnight](https://midnight.network).
 
 > ## ⚠️ WARNING! ⚠️
 >
