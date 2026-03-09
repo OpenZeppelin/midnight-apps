@@ -50,7 +50,7 @@ import
     ownPublicKey }
   from CompactStandardLibrary;
 
-import { U128 } from "../math/types/TU128";
+import { U128 } from "../math/Types";
 
 import { DivResultU128 } from "../math/Uint128";
 
