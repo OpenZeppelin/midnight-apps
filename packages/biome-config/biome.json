@@ -9,7 +9,8 @@
       "!**/artifacts",
       "!**/*.css",
       "!**/dist",
-      "!**/.next"
+      "!**/.next",
+      "!**/.vite"
     ]
   },
   "formatter": {

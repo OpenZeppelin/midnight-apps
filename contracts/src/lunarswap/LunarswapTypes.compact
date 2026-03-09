@@ -1,0 +1,22 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (lunarswap-v1/LunarswapTypes.compact)
+
+pragma language_version >= 0.21.0;
+
+/**
+ * @title LunarswapTypes
+ * @description Types for the Lunarswap protocol.
+ * @remarks
+ *  That is needed to avoid circular dependencies.
+ */
+module LunarswapTypes {
+  /**
+   * @type {Bytes<32>} PairId - The unique identifier for a pair.
+   */
+  export new type PairId = Bytes<32>;
+
+  /**
+   * @type {Bytes<32>} ReserveId - The unique identifier for a reserve.
+   */
+  export new type ReserveId = Bytes<32>;
+}

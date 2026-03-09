@@ -159,3 +159,8 @@ artifacts/
 node-compile-cache/
 .pnpm-store/
 midnight-level-db/
+.vite/
+keys/
+shielded-tokens/
+zkir/
+.pnpm-store/

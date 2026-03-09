@@ -37,8 +37,8 @@
     },
     "test": {
       "dependsOn": [
-        "compact:fast",
-        "^compact:fast"
+        "build:fast",
+        "^build:fast"
       ],
       "env": [
         "COMPACT_HOME"

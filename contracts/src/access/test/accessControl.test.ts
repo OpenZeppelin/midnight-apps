@@ -133,7 +133,7 @@ describe('AccessControl', () => {
           AccessControl_Role.Lp,
         ),
       ).toThrowError('AccessControl: Role commitments tree is full!');
-    }, 60000); // 60s timeout
+    }, 120000); // 120s timeout - 1023 iterations is slow
 
     it('should handle concurrent grants to unique users', async () => {
       const user1 = sampleCoinPublicKey();

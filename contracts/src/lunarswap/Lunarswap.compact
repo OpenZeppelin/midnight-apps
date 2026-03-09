@@ -1,0 +1,169 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (lunarswap-v1/Lunarswap.compact)
+
+pragma language_version >= 0.21.0;
+
+/**
+ *  _    _   _ _   _    _    ____  ______        ___    ____
+ * | |  | | | | \ | |  / \  |  _ \/ ___\ \      / / \  |  _ \
+ * | |  | | | |  \| | / _ \ | |_) \___ \\ \ /\ / / _ \ | |_) |
+ * | |__| |_| | |\  |/ ___ \|  _ < ___) |\ V  V / ___ \|  __/
+ * |_____\___/|_| \_/_/   \_\_| \_\____/  \_/\_/_/   \_\_|
+ *
+ * @title Lunarswap-V1
+ * @description Main Lunarswap protocol contract implementing a decentralized exchange (DEX)
+ * with automated market maker (AMM) functionality.
+ *
+ * @remarks
+ * This is the primary entry point for the Lunarswap protocol, providing a comprehensive interface
+ * for decentralized trading and liquidity provision. The protocol implements a constant product
+ * AMM similar to Uniswap V2, with support for shielded transactions and privacy-preserving features.
+ *
+ * Key Features:
+ * - Automated market making with constant product formula
+ * - Liquidity provision and LP token minting
+ * - Pair management and reserve tracking
+ * - Protocol fee collection and distribution
+ * - Shielded transaction support
+ * - Price oracle functionality through cumulative price tracking
+ *
+ * Architecture:
+ * - Factory pattern for pair creation and management
+ * - Router for user-facing operations
+ * - Library for mathematical utilities and token operations
+ * - Fee management system for protocol sustainability
+ * - LP token system for liquidity provider rewards
+ *
+ * Security Features:
+ * - Reentrancy protection through UTXO model
+ * - Slippage protection with minimum amount requirements
+ * - Access control for administrative functions
+ * - Overflow protection with checked arithmetic
+ */
+
+import
+  { Either,
+    ZswapCoinPublicKey,
+    ContractAddress,
+    ShieldedCoinInfo,
+    QualifiedShieldedCoinInfo,
+    ownPublicKey }
+  from CompactStandardLibrary;
+
+import { U128 } from "../math/types/TU128";
+
+import { DivResultU128 } from "../math/Uint128";
+
+import { pool, reserves } from "./LunarswapFactory";
+
+import { Pair } from "./LunarswapPair";
+
+import { PairId, ReserveId } from "./LunarswapTypes";
+
+import { totalSupply, name, symbol, decimals, color } from "./LunarswapLiquidity";
+
+import
+  { addLiquidity,
+    removeLiquidity,
+    swapExactTokensForTokens,
+    swapTokensForExactTokens,
+    getLpTokenTotalSupply,
+    getPair,
+    getPairReserves,
+    isPairExists,
+    getPairId,
+    getAllPairLength,
+    getIdentity,
+    sortCoinByColor,
+    sortQualifiedCoinByColor,
+    getFeeTo,
+    getFeeToSetter, }
+  from "./LunarswapRouter";
+
+import { initialize } from "./LunarswapRouter" prefix LunarswapRouter_;
+
+/**
+ * @title Lunarswap constructor
+ * @description Initializes the Lunarswap protocol with LP token configuration and fee setter.
+ *
+ * @remarks
+ * This constructor sets up the initial state of the Lunarswap protocol including:
+ * - LP token configuration (name, symbol, decimals, nonce)
+ * - Fee setter address for protocol fee management
+ *
+ * TODO: add deadline support
+ * TODO: access control maybe needed in future.
+ * TODO: use initialize contract to prevent double initialize.
+ *
+ * @param {Opaque<"string">} lpTokenName     - The name of the LP token.
+ * @param {Opaque<"string">} lpTokenSymbol   - The symbol of the LP token.
+ * @param {Bytes<32>} lpTokenNonce           - The nonce for LP token generation.
+ * @param {Uint<8>} lpTokenDecimals          - The number of decimals for LP tokens.
+ * @param {ZswapCoinPublicKey} feeToSetter   - The address that can set protocol fees.
+ *
+ * @returns [] - No return values.
+ */
+constructor(name: Opaque<"string">, symbol: Opaque<"string">, nonce: Bytes<32>, decimals: Uint<8>,) {
+  LunarswapRouter_initialize(nonce, name, symbol, decimals, ownPublicKey());
+}
+
+/**
+ * @module Types
+ * @description
+ * The following types are exported for use in Lunarswap contracts and external integrations:
+ *
+ * - `U128`: Unsigned 128-bit integer type for high-precision arithmetic.
+ * - `DivResultU128`: Result type for division operations on U128 values.
+ * - `ShieldedCoinInfo`: Structure representing a coin/token with value, color, and other metadata.
+ * - `QualifiedShieldedCoinInfo`: Extended coin information including nonce and Merkle tree index.
+ * - `Either`: Generic sum type for representing a value of one of two possible types.
+ * - `ZswapCoinPublicKey`: Public key type for shielded coin operations.
+ * - `ContractAddress`: Type representing a contract address.
+ * - `Pair`: Structure representing a Lunarswap trading pair and its metadata.
+ */
+export { U128, DivResultU128 };
+
+export { ShieldedCoinInfo, QualifiedShieldedCoinInfo, Either, ZswapCoinPublicKey, ContractAddress };
+
+export { Pair, PairId, ReserveId };
+
+/**
+ * @ledger {Map<Bytes<32>, Pair>} pool
+ * @ledger {Map<Bytes<32>, QualifiedShieldedCoinInfo>} reserves
+ * @ledger {Map<Bytes<32>, QualifiedShieldedCoinInfo>} totalSupply
+ * @ledger {Opaque<"string">} name
+ * @ledger {Opaque<"string">} symbol
+ * @ledger {Uint<8>} decimals
+ * @ledger {Bytes<32>} color
+ */
+export { pool, reserves, totalSupply, name, symbol, decimals, color };
+
+/**
+ * @title Router functions
+ * @description Functions exported from the LunarswapRouter contract.
+ */
+export { addLiquidity, removeLiquidity, swapExactTokensForTokens, swapTokensForExactTokens };
+
+/**
+ * @title Factory functions
+ * @description Functions exported from the LunarswapFactory contract.
+ */
+export { getPairId, isPairExists, getPair, getPairReserves, getAllPairLength };
+
+/**
+ * @title Library functions
+ * @description Functions exported from the LunarswapLibrary contract.
+ */
+export { getIdentity, sortCoinByColor, sortQualifiedCoinByColor };
+
+/**
+ * @title Liquidity functions
+ * @description Functions exported from the LunarswapLiquidity contract.
+ */
+export { getLpTokenTotalSupply };
+
+/**
+ * @title Fee functions
+ * @description Functions exported from the LunarswapFee contract.
+ */
+export { getFeeTo, getFeeToSetter };
