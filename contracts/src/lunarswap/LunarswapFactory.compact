@@ -327,6 +327,10 @@ module LunarswapFactory {
                    tokenOut: ShieldedCoinInfo,
                    to: Either<ZswapCoinPublicKey, ContractAddress>
                    ): [] {
+    assert(tokenIn.value > 0 || tokenOut.value > 0,
+           "LunarswapFactory: swapReserves() - Invalid token"
+           );
+
     const reserveInType =
             LunarswapLibrary_getIdentity(
               disclose(pairId) as Bytes<32>,
@@ -360,10 +364,6 @@ module LunarswapFactory {
           );
       }
     }
-
-    assert(tokenIn.value > 0 || tokenOut.value > 0,
-           "LunarswapFactory: swapReserves() - Invalid token"
-           );
 
     return [];
   }

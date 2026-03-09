@@ -176,10 +176,11 @@ export class LunarswapSimulator extends LunarswapSimulatorBase {
       tokenA,
       tokenB,
     );
-    const amount0Min =
-      sortedTokenA.color === tokenA.color ? amountAMin : amountBMin;
-    const amount1Min =
-      sortedTokenA.color === tokenA.color ? amountBMin : amountAMin;
+    const tokenAIsFirst = Buffer.from(sortedTokenA.color).equals(
+      Buffer.from(tokenA.color),
+    );
+    const amount0Min = tokenAIsFirst ? amountAMin : amountBMin;
+    const amount1Min = tokenAIsFirst ? amountBMin : amountAMin;
     return [sortedTokenA, sortedTokenB, amount0Min, amount1Min];
   }
 

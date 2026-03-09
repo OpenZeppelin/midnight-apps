@@ -99,8 +99,8 @@ describe("Liquidity Calculations", () => {
 				fee,
 			);
 
-			// With zero fee, should get exactly 500 (1000 * 5000 / 10000)
-			expect(amountOut).toBe(500n);
+			// With zero fee, constant-product formula: amountIn * reserveOut / (reserveIn + amountIn) = 454
+			expect(amountOut).toBe(454n);
 		});
 
 		it("should handle high fee correctly", () => {

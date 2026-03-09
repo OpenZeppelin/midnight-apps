@@ -655,6 +655,11 @@ module LunarswapPair {
             amount1In: Uint<128>,
             ): [Uint<128>, Uint<128>, Uint<128>, Uint<128>] {
     if (reserve0.value != 0 && reserve1.value != 0) {
+      // TODO: Fixed-point VWAP precision — current integer division truncates fractional prices
+      // (e.g. price0 = reserve1 / reserve0 loses sub-unit precision). The fix is to scale the
+      // numerator by a constant (e.g. 1e18) before dividing, using Uint128_mulChecked then
+      // Uint128_div, and store cumulative values in the same scaled units. This requires
+      // a fixed-point math library to avoid overflow.
       const price0 = disclose(Uint128_div(reserve1.value, reserve0.value));
       const price1 = disclose(Uint128_div(reserve0.value, reserve1.value));
 

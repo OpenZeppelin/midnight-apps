@@ -35,8 +35,7 @@ module LunarswapRouter {
   import { PairId, ReserveId } from LunarswapTypes;
   import
     { sortCoinByColor,
-      sortQualifiedCoinByColor,
-      getIdentity,
+getIdentity,
       quote,
       getAmountOut,
       getAmountIn,
@@ -722,13 +721,6 @@ module LunarswapRouter {
                    tokenB: ShieldedCoinInfo
                    ): [ShieldedCoinInfo, ShieldedCoinInfo] {
     return LunarswapLibrary_sortCoinByColor(tokenA, tokenB);
-  }
-
-  export circuit sortQualifiedCoinByColor(
-                   tokenA: QualifiedShieldedCoinInfo,
-                   tokenB: QualifiedShieldedCoinInfo
-                   ): [QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo] {
-    return LunarswapLibrary_sortQualifiedCoinByColor(tokenA, tokenB);
   }
 
   export circuit getFeeTo(): ZswapCoinPublicKey {

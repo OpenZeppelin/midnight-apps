@@ -119,29 +119,6 @@ module LunarswapLibrary {
   }
 
   /**
-   * @title sortQualifiedCoinByColor circuit
-   * @description Sorts a qualified coin by its `color: Bytes<32>` field.
-   *
-   * @remarks
-   * Works with QualifiedShieldedCoinInfo.
-   *
-   * @circuitInfo k=15, rows=22200
-   *
-   * @param {QualifiedShieldedCoinInfo} coin - The qualified coin to sort.
-   * @param {QualifiedShieldedCoinInfo} coin2 - The second qualified coin to sort.
-   *
-   * @throws {Error} "LunarswapLibrary: sortQualifiedCoinByColor() - Identical colors" if colors match.
-   *
-   * @returns {[QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo]} - The sorted pair [smaller, larger] by color.
-   */
-  export circuit sortQualifiedCoinByColor(
-                   coin: QualifiedShieldedCoinInfo,
-                   coin2: QualifiedShieldedCoinInfo
-                   ): [QualifiedShieldedCoinInfo, QualifiedShieldedCoinInfo] {
-    return disclose(sortByColor<QualifiedShieldedCoinInfo>(disclose(coin), disclose(coin)));
-  }
-
-  /**
    * @title getIdentity circuit
    * @description Generates a unique pairId hash for a token pair.
    *
