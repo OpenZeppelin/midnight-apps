@@ -53,6 +53,11 @@ export class Uint256Simulator extends Uint256SimulatorBase {
   ) {
     super([], options);
   }
+
+  ////////////////////////////////////////////////////////////////
+  // Constants
+  ////////////////////////////////////////////////////////////////
+
   public ZERO_U256(): U256 {
     return this.circuits.impure.ZERO_U256();
   }
@@ -61,6 +66,10 @@ export class Uint256Simulator extends Uint256SimulatorBase {
     return this.circuits.impure.MAX_U256();
   }
 
+  ////////////////////////////////////////////////////////////////
+  // Conversions
+  ////////////////////////////////////////////////////////////////
+
   public toUnpackedBytes(value: U256): bigint[] {
     return this.circuits.impure.toUnpackedBytes(value);
   }
@@ -68,6 +77,10 @@ export class Uint256Simulator extends Uint256SimulatorBase {
   public toBytes(value: U256): Uint8Array {
     return this.circuits.impure.toBytes(value);
   }
+
+  ////////////////////////////////////////////////////////////////
+  // Comparisons
+  ////////////////////////////////////////////////////////////////
 
   public eq(a: U256, b: U256): boolean {
     return this.circuits.impure.eq(a, b);

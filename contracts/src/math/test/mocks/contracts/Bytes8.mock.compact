@@ -1,6 +1,3 @@
-// SPDX-License-Identifier: MIT
-// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/test/Bytes8.mock.compact)
-
 pragma language_version >= 0.20.0;
 
 import CompactStandardLibrary;
@@ -10,6 +7,10 @@ import "../../../Bytes8" prefix Bytes8_;
 // Helper for test suite: hardcoded to true in every circuit to enable circuit metadata reporting;
 // only increases circuit size by 3 rows per exposed circuit.
 ledger toImpure: Boolean;
+
+////////////////////////////////////////////////////////////////
+// Conversions
+////////////////////////////////////////////////////////////////
 
 export circuit pack(vec: Vector<8, Uint<8>>): Bytes<8> {
   toImpure = true;

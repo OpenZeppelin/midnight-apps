@@ -155,3 +155,7 @@ artifacts/
 
 # .claude
 .claude
+
+node-compile-cache/
+.pnpm-store/
+midnight-level-db/

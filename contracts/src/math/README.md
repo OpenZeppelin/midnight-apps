@@ -1,4 +1,4 @@
-# `@openzeppelin/midnight-apps-math-contracts`
+# `@openzeppelin/midnight-apps-contracts/math`
 
 A comprehensive mathematical operations library for Midnight Network smart contracts, providing efficient and secure arithmetic operations for various integer types.
 
@@ -6,20 +6,56 @@ A comprehensive mathematical operations library for Midnight Network smart contr
 
 This package provides mathematical contract operations for the Midnight Network, including:
 
-- **Uint64 and Uint128 arithmetic operations** with overflow protection
+- **Uint64, Uint128 and Uint256 arithmetic operations** with overflow protection
 - **Square root calculations** using efficient algorithms
 - **Division operations** with quotient and remainder results
-- **Witness-based computations** for off-chain calculations
+- **Witness-based computations** for off-chain calculations and circuit verification.
 - **Type-safe interfaces** for all mathematical operations
 
-> **Note:** Uint256 operations are currently archived due to breaking changes in Compact compiler v0.27.0 which reduced maximum Uint width from 254 to 248 bits. The Uint256 contract uses `Uint<254>` internally and will be updated in a future release.
+### Module Dependency Diagram
+
+> Arrows point from dependency to dependent (read as "is used by").
+> Shared struct types `U128` and `U256` (from Types) are omitted for clarity.
+
+```mermaid
+graph TD
+    subgraph "<b>Utility</b>"
+        Pack["Pack&lt;N&gt;<br/>(Generic)"]
+    end
+
+    subgraph "<b>8 / 64-bit</b>"
+        Bytes8
+        Uint64
+    end
+
+    subgraph "<b>128-bit</b>"
+        Uint128
+    end
+
+    subgraph "<b>256-bit / 32-byte</b>"
+        Uint256
+        Bytes32
+        Field255
+    end
+
+    Pack --> Bytes8
+    Pack --> Bytes32
+    Bytes8 --> Uint64
+    Uint64 --> Uint128
+    Uint64 --> Uint256
+    Uint128 --> Uint256
+    Uint128 --> Field255
+    Uint256 --> Bytes32
+    Uint256 --> Field255
+    Bytes32 --> Field255
+```
 
 ## Features
 
 ### Supported Integer Types
 - `Uint<64>` - 64-bit unsigned integers
-- `Uint<128>` - 128-bit unsigned integers  
-- `Uint<256>` - 256-bit unsigned integers (archived - see note above)
+- `Uint<128>` - 128-bit unsigned integers
+- `Uint<256>` - 256-bit unsigned integers
 
 ### Mathematical Operations
 - **Basic Arithmetic**: Addition, subtraction, multiplication, division
@@ -29,301 +65,177 @@ This package provides mathematical contract operations for the Midnight Network,
 
 ### Key Components
 
-#### Core Contracts
-- `Uint64.compact` - 64-bit mathematical operations
-- `Uint128.compact` - 128-bit mathematical operations
-- `Uint256.compact` - 256-bit mathematical operations (archived)
+#### Core Modules
 
-#### Archived Contracts
-- `Field254.compact` - Field arithmetic operations
-- `Bytes32.compact` - Byte array operations
+**Arithmetic Operations:**
+- `Uint64.compact` - 64-bit unsigned integer arithmetic with division, multiplication, square root, and utility functions
+- `Uint128.compact` - 128-bit unsigned integer operations using limb-based U128 struct representation
+- `Uint256.compact` - 256-bit unsigned integer operations using nested U128 limbs for efficient comparisons
 
-#### Utility Functions
-- `sqrtBigint()` - Efficient square root calculation using Newton-Raphson method
-- `consts.ts` - Mathematical constants
+**Byte & Field Operations:**
+- `Bytes8.compact` - Conversions between Bytes<8>, Vector<8, Uint<8>>, and Uint<64> (little-endian)
+- `Bytes32.compact` - Conversions and comparisons for Bytes<32> using U256 representation
+- `Field255.compact` - BLS12-381 scalar field arithmetic operations using Bytes<32> as intermediate
 
-#### Witness Implementations
-- Off-chain computation for division and square root operations
-- Type-safe witness contexts
-- Private state management
-
-## Circuit Information
-
-The following table shows the constraint counts and circuit sizes for each mathematical operation:
-
-### Uint64 Operations
-| Operation | Circuit Name | K (Constraint Degree) | Rows |
-|-----------|--------------|----------------------|------|
-| Division | `div` | 10 | 240 |
-| Division with Remainder | `divRem` | 10 | 277 |
-| Remainder | `rem` | 10 | 240 |
-| Square Root | `sqrt` | 10 | 122 |
-| Is Multiple | `isMultiple` | 10 | 243 |
-
-### Uint128 Operations
-| Operation | Circuit Name | K (Constraint Degree) | Rows |
-|-----------|--------------|----------------------|------|
-| Addition | `add` | 10 | 575 |
-| Addition (U128) | `addU128` | 10 | 451 |
-| Division | `div` | 12 | 2,778 |
-| Division with Remainder | `divRem` | 12 | 2,819 |
-| Division (U128) | `divU128` | 12 | 2,641 |
-| Division with Remainder (U128) | `divRemU128` | 12 | 2,695 |
-| Multiplication | `mul` | 11 | 1,874 |
-| Multiplication (U128) | `mulU128` | 11 | 1,750 |
-| Multiplication (Checked) | `mulChecked` | 11 | 1,876 |
-| Multiplication (Checked U128) | `mulCheckedU128` | 11 | 1,752 |
-| Remainder | `rem` | 12 | 2,778 |
-| Is Multiple | `isMultiple` | 12 | 2,759 |
-| Is Multiple (U128) | `isMultipleU128` | 12 | 2,635 |
-
-### Uint256 Operations (Archived)
-
-> These operations are currently archived due to Compact compiler breaking changes. See note above.
-
-| Operation | Circuit Name | K (Constraint Degree) | Rows |
-|-----------|--------------|----------------------|------|
-| Addition | `add` | 11 | 1,305 |
-| Subtraction | `sub` | 11 | 1,271 |
-| Division | `div` | 14 | 10,912 |
-| Division with Remainder | `divRem` | 14 | 11,020 |
-| Multiplication | `mul` | 14 | 9,249 |
-| Remainder | `rem` | 14 | 10,912 |
-| Square Root | `sqrt` | 14 | 11,693 |
-| Is Multiple | `isMultiple` | 14 | 10,897 |
-| From U256 | `fromU256` | 10 | 816 |
-| To U256 | `toU256` | 10 | 739 |
-
-### Field254 Operations (Archived)
-| Operation | Circuit Name | K (Constraint Degree) | Rows |
-|-----------|--------------|----------------------|------|
-| Addition | `add` | 12 | 3,008 |
-| Multiplication | `mul` | 14 | 10,956 |
-| Division | `div` | 14 | 12,623 |
-| Division with Remainder | `divRem` | 14 | 12,101 |
-| Equality | `eq` | 11 | 1,410 |
-| Greater Than | `gt` | 11 | 1,495 |
-| Greater Than or Equal | `gte` | 11 | 1,518 |
-| Less Than | `lt` | 11 | 1,495 |
-| Less Than or Equal | `lte` | 11 | 1,518 |
-| Is Zero | `isZero` | 10 | 724 |
-| From Field | `fromField` | 10 | 739 |
-| Maximum | `max` | 12 | 2,208 |
-| Minimum | `min` | 12 | 2,208 |
-
-### Bytes32 Operations (Archived)
-| Operation | Circuit Name | K (Constraint Degree) | Rows |
-|-----------|--------------|----------------------|------|
-| Greater Than | `gt` | 12 | 2,639 |
-| Greater Than or Equal | `gte` | 12 | 2,643 |
-| Less Than | `lt` | 12 | 2,639 |
-| Less Than or Equal | `lte` | 12 | 2,643 |
-
-### Circuit Complexity Notes
-
-- **K (Constraint Degree)**: Represents the maximum degree of constraints in the circuit
-- **Rows**: Number of constraint rows in the circuit
-- **Higher K values** indicate more complex constraints but potentially better performance
-- **More rows** generally mean larger proof sizes and longer verification times
-- **U64 operations** are the most efficient with the lowest constraint counts
-- **U256 operations** require the most constraints due to larger bit widths
-- **Field operations** have moderate complexity but provide field arithmetic guarantees
-
-## Installation
-
-```bash
-pnpm add @openzeppelin/midnight-apps-math-contracts
-```
+**Utility Modules:**
+- `Pack<N>.compact` - Generic packing/unpacking for Vector<N, Uint<8>> ↔ Bytes<N> (parameterized by size N)
 
 ## Usage
 
-### Basic Import
+### Example: Contract Using Multiple Math Modules
 
-```typescript
-import { 
-  Uint64Witnesses, 
-  sqrtBigint,
-  type Uint64PrivateState 
-} from '@openzeppelin/midnight-apps-math-contracts';
-```
+Consider a Compact contract that imports `Uint64`, `Uint128`, `Uint256`, and `Bytes32` modules:
 
-### Square Root Calculation
+```ts
+// MyContract.compact (Top-level contract)
 
-```typescript
-import { sqrtBigint } from '@openzeppelin/midnight-apps-math-contracts';
+import { div as divU64, sqrt as sqrtU64 } from "./node_modules/@openzeppelin/midnight-apps-contracts/math/Uint64";
+import { mul, div, sqrt } from "./node_modules/@openzeppelin/midnight-apps-contracts/math/Uint128";
+import { toBytes } from "./node_modules/@openzeppelin/midnight-apps-contracts/math/Uint256";
+import { lt } from "./node_modules/@openzeppelin/midnight-apps-contracts/math/Bytes32";
 
-// Calculate square root of a bigint
-const result = sqrtBigint(16n); // Returns 4n
-const largeNumber = sqrtBigint(1000000000000n); // Efficient for large numbers
-```
+// Computes a weighted average using 64-bit arithmetic
+export circuit weightedAverage(value: Uint<64>, weight: Uint<64>, total: Uint<64>): Uint<64> {
+    // Divide value by total (witness-based division)
+    const ratio = divU64(value, total);
 
-### Witness Operations
+    // Compute square root of weight (witness-based sqrt)
+    const sqrtWeight = sqrtU64(weight);
 
-```typescript
-import { Uint64Witnesses } from '@openzeppelin/midnight-apps-math-contracts';
+    // Return the weighted result
+    return ratio.quotient * sqrtWeight;
+}
 
-// Create witness implementations
-const witnesses = Uint64Witnesses();
+// Computes (a * b) / c and returns the square root as Bytes<32>
+export circuit computeAndConvert(a: Uint<128>, b: Uint<128>, c: Uint<128>): Bytes<32> {
+    // Multiply a * b (returns U256 to handle overflow)
+    const product = mul(a, b);
 
-// Use in contract context
-const [newState, sqrtResult] = witnesses.sqrtU64Locally(context, 64n);
-const [newState2, divResult] = witnesses.divU64Locally(context, 10n, 3n);
-// divResult = { quotient: 3n, remainder: 1n }
-```
+    // Divide product by c (witness-based division)
+    const quotient = div(product.low, c);
 
-### Contract Interfaces
+    // Compute square root of the quotient (witness-based sqrt)
+    const sqrtResult = sqrt(quotient);
 
-The package provides Compact interfaces for mathematical operations:
+    // Multiply sqrt result to get U256 for byte conversion
+    const finalProduct = mul(sqrtResult as Uint<128>, sqrtResult as Uint<128>);
 
-```compact
-// Example: Uint64 interface
-module Uint64 {
-    export struct DivResultU64 {
-        quotient: Uint<64>,
-        remainder: Uint<64>
-    }
+    // Convert U256 to Bytes<32> using little-endian ordering
+    return toBytes(finalProduct);
+}
 
-    export witness divU64Locally(a: Uint<64>, b: Uint<64>): DivResultU64;
-    export witness sqrtU64Locally(radicand: Uint<64>): Uint<32>;
+// Compares two byte arrays and returns true if a < b
+export circuit compareBytes(a: Bytes<32>, b: Bytes<32>): Boolean {
+    return lt(a, b);
 }
 ```
 
-## API Reference
+When you compile this contract, the generated `Witnesses` type will be a **combination** of all witness functions required by the imported modules:
 
-### Utility Functions
-
-#### `sqrtBigint(value: bigint): bigint`
-Computes the square root of a non-negative bigint using the Newton-Raphson method.
-
-**Parameters:**
-- `value` - The non-negative bigint to compute the square root of
-
-**Returns:**
-- The floor of the square root as a bigint
-
-**Throws:**
-- Error if the input value is negative
-
-**Example:**
 ```typescript
-sqrtBigint(16n) // Returns 4n
-sqrtBigint(15n) // Returns 3n (floor of sqrt)
-```
+// Generated in artifacts/my-contract/contract/index.d.ts
+export type Witnesses<PS> = {
+  // From Uint64 module (used by div and sqrt circuits)
+  wit_divU64(context: WitnessContext<Ledger, PS>, a: bigint, b: bigint): [PS, DivResultU64];
+  wit_sqrtU64(context: WitnessContext<Ledger, PS>, radicand: bigint): [PS, bigint];
 
-### Witness Functions
-
-#### `Uint64Witnesses()`
-Factory function that creates witness implementations for Uint64 operations.
-
-**Returns:**
-- Object implementing `Uint64Witnesses` interface
-
-**Available Methods:**
-- `sqrtU64Locally(context, radicand)` - Computes square root off-chain
-- `divU64Locally(context, dividend, divisor)` - Computes division off-chain
-
-### Types
-
-#### `Uint64PrivateState`
-Type representing the private state of the Uint64 module.
-
-#### `DivResultU64`
-Structure containing division results:
-```typescript
-{
-  quotient: bigint,
-  remainder: bigint
+  // From Uint128 module (used by div and sqrt circuits)
+  wit_divUint128(context: WitnessContext<Ledger, PS>, a: bigint, b: bigint): [PS, DivResultU128];
+  wit_sqrtU128(context: WitnessContext<Ledger, PS>, radicand: U128): [PS, bigint];
 }
 ```
 
-## Development
+> **Note:** The `mul` and `toBytes` circuits are pure and don't require witnesses. Only `divU64`, `sqrtU64`, `div`, and `sqrt` need witnesses for their off-chain computations.
 
-### Prerequisites
-- Node.js 18+
-- pnpm 10.4.1+
-- TypeScript 5.8+
+To implement the witnesses, import the required functions from the library and combine them:
 
-### Setup
-```bash
-pnpm install
+```typescript
+import type { Witnesses } from './artifacts/my-contract/contract/index.js';
+
+// Import witness functions for Uint64
+import { wit_divU64 } from '@openzeppelin/midnight-apps-contracts/math/witnesses/wit_divU64';
+import { wit_sqrtU64 } from '@openzeppelin/midnight-apps-contracts/math/witnesses/wit_sqrtU64';
+
+// Import witness functions for Uint128
+import { wit_divUint128 } from '@openzeppelin/midnight-apps-contracts/math/witnesses/wit_divUint128';
+import { wit_sqrtU128 } from '@openzeppelin/midnight-apps-contracts/math/witnesses/wit_sqrtU128';
+
+type MyPrivateState = Record<string, never>;
+
+export const MyContractWitnesses = (): Witnesses<MyPrivateState> => ({
+  // Uint64 witnesses (required by div and sqrt circuits)
+  wit_divU64(_context, a, b) {
+    return [{}, wit_divU64(a, b)];
+  },
+  wit_sqrtU64(_context, radicand) {
+    return [{}, wit_sqrtU64(radicand)];
+  },
+
+  // Uint128 witnesses (required by div and sqrt circuits)
+  wit_divUint128(_context, a, b) {
+    return [{}, wit_divUint128(a, b)];
+  },
+  wit_sqrtU128(_context, radicand) {
+    return [{}, wit_sqrtU128(radicand)];
+  },
+});
+
+// Use with contract instantiation
+const witnesses = MyContractWitnesses();
+const contract = new Contract(witnesses);
 ```
 
-### Available Scripts
+### Implementing Witnesses for Your Contract
 
-```bash
-# Build the package
-pnpm build
+When you import a math module in your Compact contract, you need to provide witness implementations for the witness functions declared in that module. This library provides **recommended implementations** for all witness functions that ensure circuit constraints pass successfully.
 
-# Run tests
-pnpm test
+> **Note:** You can build your own witness implementations if needed, but the library-provided implementations are tested and guaranteed to satisfy the circuit constraints.
 
-# Type checking
-pnpm types
+#### Step 1: Import the Witnesses Type from Your Contract
 
-# Check formatting and linting
-pnpm lint
+When you compile your Compact contract that uses math modules, the generated artifacts include a `Witnesses` type that defines the required witness functions:
 
-# Fix formatting and linting
-pnpm lint:fix
-
-# Lint code
-pnpm lint
-
-# Fix linting issues
-pnpm lint:fix
-
-# Pre-commit checks
-pnpm precommit
+```typescript
+import type { Witnesses } from './artifacts/your-contract/contract/index.js';
 ```
 
-### Testing
+#### Step 2: Import the Witness Functions from the Library
 
-The package includes comprehensive tests for all mathematical operations:
+Import the pure witness functions you need:
 
-```bash
-# Run all tests
-pnpm test
+```typescript
+// For Uint64 operations
+import { wit_sqrtU64 } from '@openzeppelin/midnight-apps-contracts/math/witnesses/wit_sqrtU64';
+import { wit_divU64 } from '@openzeppelin/midnight-apps-contracts/math/witnesses/wit_divU64';
 
-# Run tests with console trace
-pnpm test --printConsoleTrace
+// For Uint128 operations
+import { wit_sqrtU128 } from '@openzeppelin/midnight-apps-contracts/math/witnesses/wit_sqrtU128';
+import { wit_divU128 } from '@openzeppelin/midnight-apps-contracts/math/witnesses/wit_divU128';
+import { wit_divUint128 } from '@openzeppelin/midnight-apps-contracts/math/witnesses/wit_divUint128';
+
 ```
 
-## Architecture
+#### Step 3: Create Your Witnesses Object
 
-### Contract Structure
+Implement the `Witnesses` type by wrapping the library functions with your private state:
+
+```typescript
+import type { Witnesses } from './artifacts/your-contract/contract/index.js';
+import { wit_sqrtU64 } from '@openzeppelin/midnight-apps-contracts/math/witnesses/wit_sqrtU64';
+import { wit_divU64 } from '@openzeppelin/midnight-apps-contracts/math/witnesses/wit_divU64';
+
+// Define your private state type
+type MyPrivateState = Record<string, never>; // or your actual private state
+
+// Create the witnesses object
+const createWitnesses = (): Witnesses<MyPrivateState> => ({
+  // Wrap each library function with context handling
+  wit_sqrtU64(_context, radicand) {
+    return [{}, wit_sqrtU64(radicand)];
+  },
+
+  wit_divU64(_context, dividend, divisor) {
+    return [{}, wit_divU64(dividend, divisor)];
+  },
+});
 ```
-src/
-├── interfaces/          # Compact interfaces
-├── witnesses/          # Witness implementations
-├── utils/             # Utility functions
-├── types/             # TypeScript type definitions
-├── test/              # Test utilities
-└── artifacts/         # Generated artifacts
-```
-
-### Key Design Principles
-
-1. **Type Safety**: All operations are fully typed with TypeScript
-2. **Overflow Protection**: Built-in protection against integer overflow
-3. **Efficiency**: Optimized algorithms for large number operations
-4. **Witness Pattern**: Off-chain computation for complex operations
-5. **Modularity**: Separate contracts for different integer sizes
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Run the test suite
-6. Submit a pull request
-
-## License
-
-ISC License - see package.json for details.
-
-## Related Packages
-
-- `@openzeppelin/midnight-apps-compact` - Core Compact framework
-- `@midnight-ntwrk/compact-runtime` - Runtime utilities
-- `@midnight-ntwrk/zswap` - ZK-SNARK operations
