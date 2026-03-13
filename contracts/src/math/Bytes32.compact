@@ -34,6 +34,8 @@ pragma language_version >= 0.20.0;
  * - Utilities:
  *   - TODO: min(a, b): Return the smaller of two Bytes<32> values.
  *   - TODO: max(a, b): Return the larger of two Bytes<32> values.
+ * - Conversions:
+ *   - TODO: toField(bytes): Convert Bytes<32> to Field.
  */
 module Bytes32 {
   import { U128, U256 } from Types;

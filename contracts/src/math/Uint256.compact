@@ -43,6 +43,8 @@ pragma language_version >= 0.20.0;
  *   - TODO: isMultiple(a, b): Check if one U256 value is a multiple of another.
  *   - TODO: min(a, b): Return the smaller of two U256 values.
  *   - TODO: max(a, b): Return the larger of two U256 values.
+ * - Conversions:
+ *   - TODO: toField(value): Convert U256 to Field.
  */
 module Uint256 {
   import { U128, U256 } from Types;
