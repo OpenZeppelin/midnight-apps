@@ -24,6 +24,25 @@ pragma language_version >= 0.20.0;
  *   - lte(a, b): Checks if one U256 value is less than or equal to another.
  *   - gt(a, b): Checks if one U256 value is greater than another.
  *   - gte(a, b): Checks if one U256 value is greater than or equal to another.
+ *
+ * TODO: Missing operations (available in other math modules):
+ * - Arithmetic:
+ *   - TODO: add(a, b): Add two U256 values.
+ *   - TODO: addChecked(a, b): Add two U256 values with overflow checking.
+ *   - TODO: sub(a, b): Subtract one U256 value from another.
+ *   - TODO: mul(a, b): Multiply two U256 values.
+ *   - TODO: mulChecked(a, b): Multiply two U256 values with overflow checking.
+ * - Division:
+ *   - TODO: div(a, b): Divide one U256 value by another.
+ *   - TODO: rem(a, b): Compute remainder of U256 division.
+ *   - TODO: divRem(a, b): Compute quotient and remainder of U256 division.
+ * - Square Root:
+ *   - TODO: sqrt(radicand): Compute floor of square root of a U256 value.
+ * - Utilities:
+ *   - TODO: isZero(a): Check if a U256 value equals zero.
+ *   - TODO: isMultiple(a, b): Check if one U256 value is a multiple of another.
+ *   - TODO: min(a, b): Return the smaller of two U256 values.
+ *   - TODO: max(a, b): Return the larger of two U256 values.
  */
 module Uint256 {
   import { U128, U256 } from Types;
