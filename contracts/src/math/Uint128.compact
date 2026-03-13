@@ -44,6 +44,11 @@ pragma language_version >= 0.20.0;
  *   - isMultiple(a, b): Checks if one value is a multiple of another (Uint<128> and U128 variants).
  *   - min(a, b): Returns the smaller of two values (Uint<128> and U128 variants).
  *   - max(a, b): Returns the larger of two values (Uint<128> and U128 variants).
+ *
+ * TODO: Missing operations (available in other math modules):
+ * - Conversions:
+ *   - TODO: toBytes(value): Convert Uint<128>/U128 to Bytes<16> (little-endian).
+ *   - TODO: toUnpackedBytes(value): Convert Uint<128>/U128 to Vector<16, Uint<8>> (little-endian).
  */
 module Uint128 {
   import { U128, U256 } from Types;

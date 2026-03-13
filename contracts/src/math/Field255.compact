@@ -32,6 +32,26 @@ pragma language_version >= 0.20.0;
  *   - gte(a, b): Checks if one Field value is greater than or equal to another.
  * - Utilities:
  *   - isZero(a): Checks if a Field value is zero.
+ *
+ * TODO: Missing operations (available in other math modules):
+ * - Arithmetic:
+ *   - TODO: add(a, b): Add two Field values (modular arithmetic).
+ *   - TODO: addChecked(a, b): Add two Field values with overflow checking.
+ *   - TODO: sub(a, b): Subtract one Field value from another.
+ *   - TODO: mul(a, b): Multiply two Field values (modular arithmetic).
+ *   - TODO: mulChecked(a, b): Multiply two Field values with overflow checking.
+ * - Division:
+ *   - TODO: div(a, b): Divide one Field value by another.
+ *   - TODO: rem(a, b): Compute remainder of Field division.
+ *   - TODO: divRem(a, b): Compute quotient and remainder of Field division.
+ * - Square Root:
+ *   - TODO: sqrt(radicand): Compute floor of square root of a Field value.
+ * - Conversions:
+ *   - TODO: toUnpackedBytes(value): Convert Field to Vector<32, Uint<8>> (little-endian).
+ * - Utilities:
+ *   - TODO: isMultiple(a, b): Check if one Field value is a multiple of another.
+ *   - TODO: min(a, b): Return the smaller of two Field values.
+ *   - TODO: max(a, b): Return the larger of two Field values.
  */
 module Field255 {
   import { U256 } from Types;

@@ -19,6 +19,18 @@ pragma language_version >= 0.20.0;
  *   - unpack(bytes): Converts Bytes<8> to Vector<8, Uint<8>>.
  *   - toUint64(vec): Converts Vector<8, Uint<8>> to Uint<64>.
  *   - toUint64(bytes): Converts Bytes<8> to Uint<64>.
+ *
+ * TODO: Missing operations (available in other math modules):
+ * - Comparisons:
+ *   - TODO: eq(a, b): Check if two Bytes<8> values are equal.
+ *   - TODO: lt(a, b): Check if one Bytes<8> value is less than another.
+ *   - TODO: lte(a, b): Check if one Bytes<8> value is less than or equal to another.
+ *   - TODO: gt(a, b): Check if one Bytes<8> value is greater than another.
+ *   - TODO: gte(a, b): Check if one Bytes<8> value is greater than or equal to another.
+ * - Utilities:
+ *   - TODO: isZero(a): Check if a Bytes<8> value is zero.
+ *   - TODO: min(a, b): Return the smaller of two Bytes<8> values.
+ *   - TODO: max(a, b): Return the larger of two Bytes<8> values.
  */
 module Bytes8 {
   import { pack, unpack } from Pack<8> prefix Pack8_;

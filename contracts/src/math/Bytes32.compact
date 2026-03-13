@@ -29,6 +29,11 @@ pragma language_version >= 0.20.0;
  *   - isZero(a): Checks if a Bytes<32> value is zero.
  *
  * For the reverse conversion (U256 to Unpacked Bytes (Vector<32, Uint<8>>)), see Uint256_toUnpackedBytes.
+ *
+ * TODO: Missing operations (available in other math modules):
+ * - Utilities:
+ *   - TODO: min(a, b): Return the smaller of two Bytes<32> values.
+ *   - TODO: max(a, b): Return the larger of two Bytes<32> values.
  */
 module Bytes32 {
   import { U128, U256 } from Types;

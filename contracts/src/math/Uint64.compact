@@ -36,6 +36,16 @@ pragma language_version >= 0.20.0;
  *   - isMultiple(a, b): Checks if one `Uint<64>` number is a multiple of another.
  *   - min(a, b): Returns the smaller of two `Uint<64>` numbers.
  *   - max(a, b): Returns the larger of two `Uint<64>` numbers.
+ *
+ * TODO: Missing operations (available in other math modules):
+ * - Comparisons:
+ *   - TODO: eq(a, b): Check if two Uint<64> values are equal.
+ *   - TODO: lt(a, b): Check if one Uint<64> value is less than another.
+ *   - TODO: lte(a, b): Check if one Uint<64> value is less than or equal to another.
+ *   - TODO: gt(a, b): Check if one Uint<64> value is greater than another.
+ *   - TODO: gte(a, b): Check if one Uint<64> value is greater than or equal to another.
+ * - Utilities:
+ *   - TODO: isZero(a): Check if a Uint<64> value equals zero.
  */
 module Uint64 {
   import { toUint64, pack } from Bytes8 prefix Bytes8_;
