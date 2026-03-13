@@ -35,7 +35,7 @@ runs:
       if: ${{ inputs.skip-compact != 'true' }}
       uses: midnightntwrk/setup-compact-action@4130145456ad3f45934788dd4a65647eb283e658
       with:
-        compact-version: "0.28.0"
+        compact-version: "0.29.0"
 
     - name: Verify Compact Compiler Installation
       if: ${{ inputs.skip-compact != 'true' }}

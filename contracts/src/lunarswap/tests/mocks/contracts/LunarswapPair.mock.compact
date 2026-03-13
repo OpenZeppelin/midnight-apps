@@ -1,0 +1,96 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (lunarswap/test/LunarswapPair.mock.compact)
+
+pragma language_version >= 0.21.0;
+
+import CompactStandardLibrary;
+
+import "../../../LunarswapPair" prefix LunarswapPair_;
+
+import { PairId } from "../../../LunarswapTypes";
+
+// Helper for test suite: toggling this variable activates circuit metadata reporting.
+// Only increases circuit size by 3 rows per exposed circuit.
+ledger toImpure: Boolean;
+
+export circuit initializePair(
+                 pairId: PairId,
+                 token0: ShieldedCoinInfo,
+                 token1: ShieldedCoinInfo
+                 ): LunarswapPair_Pair {
+  toImpure = true;
+  const result = LunarswapPair_initializePair(disclose(pairId), disclose(token0), disclose(token1));
+  return disclose(result);
+}
+
+export circuit mint(pairId: PairId,
+                    pair: LunarswapPair_Pair,
+                    amount0: Uint<128>,
+                    amount1: Uint<128>,
+                    reserve0: QualifiedShieldedCoinInfo,
+                    reserve1: QualifiedShieldedCoinInfo,
+                    to: Either<ZswapCoinPublicKey, ContractAddress>
+                    ): [LunarswapPair_Pair, Uint<128>] {
+  toImpure = true;
+  const [resultPair, resultLiquidity] =
+          LunarswapPair_mint(
+            disclose(pairId),
+            disclose(pair),
+            disclose(amount0),
+            disclose(amount1),
+            disclose(reserve0),
+            disclose(reserve1),
+            disclose(to)
+            );
+  return [disclose(resultPair), disclose(resultLiquidity)];
+}
+
+export circuit burn(pairId: PairId,
+                    pair: LunarswapPair_Pair,
+                    liquidity: ShieldedCoinInfo,
+                    token0Type: Bytes<32>,
+                    token1Type: Bytes<32>,
+                    reserve0: QualifiedShieldedCoinInfo,
+                    reserve1: QualifiedShieldedCoinInfo,
+                    to: Either<ZswapCoinPublicKey, ContractAddress>
+                    ): [LunarswapPair_Pair, Uint<128>, Uint<128>] {
+  toImpure = true;
+  const [resultPair, resultAmount0, resultAmount1] =
+          LunarswapPair_burn(
+            disclose(pairId),
+            disclose(pair),
+            disclose(liquidity),
+            disclose(token0Type),
+            disclose(token1Type),
+            disclose(reserve0),
+            disclose(reserve1),
+            disclose(to)
+            );
+  return [disclose(resultPair), disclose(resultAmount0), disclose(resultAmount1)];
+}
+
+export circuit swap(pairId: PairId,
+                    pair: LunarswapPair_Pair,
+                    balance0: Uint<128>,
+                    balance1: Uint<128>,
+                    amount0Out: Uint<128>,
+                    amount1Out: Uint<128>,
+                    reserve0: QualifiedShieldedCoinInfo,
+                    reserve1: QualifiedShieldedCoinInfo,
+                    to: Either<ZswapCoinPublicKey, ContractAddress>
+                    ): LunarswapPair_Pair {
+  toImpure = true;
+  const resultPair =
+          LunarswapPair_swap(
+            disclose(pairId),
+            disclose(pair),
+            disclose(balance0),
+            disclose(balance1),
+            disclose(amount0Out),
+            disclose(amount1Out),
+            disclose(reserve0),
+            disclose(reserve1),
+            disclose(to)
+            );
+  return disclose(resultPair);
+}
