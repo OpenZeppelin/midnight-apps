@@ -6,25 +6,29 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 concurrency:
   group: apps-${{ github.run_id }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   pipeline:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
 
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
         with:
           egress-policy: audit
 
       - name: Checkout repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 1
+          submodules: recursive
 
       - name: Setup Environment
         uses: ./.github/actions/setup
@@ -41,7 +45,7 @@ jobs:
             echo "::error::❌ Build artifacts not found in apps/*/.next directories!"
             exit 1
           fi
-          
+
           # List build artifacts
           echo "✅ Build artifacts found:"
           echo "Application build artifacts:"
@@ -56,7 +60,7 @@ jobs:
 
       - name: Upload build artifacts
         if: steps.build.outcome == 'success'
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: apps-builds
           path: apps/*/.next/
@@ -64,7 +68,7 @@ jobs:
 
       - name: Upload test results
         if: steps.build.outcome == 'success'
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: apps-test-results
           path: |
@@ -77,4 +81,3 @@ jobs:
         run: |
           echo "Apps pipeline failed. Cleaning up..."
           rm -rf apps/*/.next/
- 

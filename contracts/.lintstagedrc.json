@@ -1,0 +1,3 @@
+{
+  "*.ts": ["biome format --write", "biome check --write"]
+}

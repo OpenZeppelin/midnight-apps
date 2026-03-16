@@ -7,7 +7,8 @@ extend-exclude = [
   "dist/",
   "build/",
   ".git/",
-  "artifacts/"
+  "artifacts/",
+  "compact-tools/"
 ]
 
 [default.extend-words]
@@ -18,6 +19,7 @@ ntwrk  = "ntwrk"
 UTXO   = "UTXO"
 UTXOs  = "UTXOs"
 Merkle = "Merkle"
+Inferrable = "Inferrable"  # Biome config uses this spelling
 
 [default.extend-identifiers]
 # Add custom identifiers that should be considered correct

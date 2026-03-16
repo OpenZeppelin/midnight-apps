@@ -1,5 +1,8 @@
 'use client';
 
+import { ChevronDown, Search } from 'lucide-react';
+import Image from 'next/image';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -8,9 +11,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { ChevronDown, Search } from 'lucide-react';
-import Image from 'next/image';
-import { useState } from 'react';
 
 // Sample token list - in a real app, this would come from an API
 const popularTokens = [

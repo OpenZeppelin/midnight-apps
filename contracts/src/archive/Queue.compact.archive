@@ -1,0 +1,126 @@
+pragma language_version >= 0.20.0;
+
+/**
+ * @module Queue
+ * @description Archived queue implementation using Vector<1024, T>.
+ * This version is not in use due to Compact’s limitations and is 
+ * archived until resolved. Compact’s Vector<N, T> only supports 
+ * constant indices (e.g., `vector[0]`), not variable indices 
+ * (e.g., `vector[i]` where `i` is dynamic). This restricts 
+ * dynamic access needed for a queue’s front/tail pointers, 
+ * making Vector impractical. The active implementation uses 
+ * Map<Uint<64>, T> instead, allowing flexible key access 
+ * despite lacking iteration for shifting. This Vector version 
+ * attempts a circular buffer but fails due to indexing 
+ * constraints, requiring manual unrolling (e.g., the 
+ * `0..1023` loop) that still can’t fully generalize.
+ *
+ * @template T - The type of elements stored in the queue.
+ */
+module Queue<T> {
+    import CompactStandardLibrary;
+
+    /**
+     * @struct Queue
+     * @description Fixed-size queue structure with Vector storage.
+     * @property {Vector<1024, T>} elements - Array of queue items.
+     * @property {Uint<64>} front - Index of the front element.
+     * @property {Field} tail - Index of the next free slot.
+     * @property {Counter} size - Number of items in the queue.
+     */
+    struct Queue {
+        elements: Vector<1024, T>,
+        front: Uint<64>,
+        tail: Field,
+        size: Counter
+    }
+
+    /** @type {Queue} The queue’s ledger state. */
+    export ledger queue: Queue;
+
+    /** @type */
+    export sealed ledger MAX_SIZE: Uint<10>;
+
+    export circuit initialize(): [] {
+        MAX_SIZE = 1024;
+    }
+
+    /**
+     * @description Adds an item to the back of the queue.
+     * @param item - The item to enqueue.
+     * @remarks Uses a circular buffer with modulo 1024. Limited 
+     * by Vector’s constant-index requirement; the loop is a 
+     * workaround but still restrictive. Time complexity: O(1) 
+     * for assignment, O(n) due to loop.
+     */
+    export circuit enqueue(item: T): [] {
+        assert (queue.size < 1024) "QueueError: Queue is full!";
+
+        // Workaround for variable index; unrolled loop
+        for (const i of 0..1023) {
+            if (i == queue.tail) {
+                queue.elements[i] = item;
+            }
+        }
+
+        const tail = queue.tail;
+        queue.elements[queue.tail] = item;
+        queue.tail = (queue.tail + 1) % 1024;
+        queue.size.increment(1);
+        return [];
+    }
+
+    /**
+     * @description Removes and returns the front item.
+     * @returns {T} The dequeued item.
+     * @remarks Updates front with modulo 1024 for circular 
+     * behavior. Limited by constant-index access. Time 
+     * complexity: O(1).
+     */
+    export circuit dequeue(): T {
+        assert (queue.size > 0) "QueueError: Queue is empty!";
+        const item = queue.elements[queue.front];
+        queue.front = (queue.front + 1) % 1024;
+        queue.size.decrement(1);
+        return item; // Note: Should return item, not []
+    }
+
+    /**
+     * @description Returns the current number of items.
+     * @returns {Uint<64>} The queue’s size.
+     * @remarks Direct access to size counter. Time complexity: 
+     * O(1).
+     */
+    export circuit length(): Uint<64> {
+        return queue.size;
+    }
+
+    /**
+     * @description Checks if the queue is empty.
+     * @returns {Boolean} True if empty, false otherwise.
+     * @remarks Compares size to 0. Time complexity: O(1).
+     */
+    export circuit isEmpty(): Boolean {
+        return queue.size == 0;
+    }
+
+    /**
+     * @description Checks if the queue is full.
+     * @returns {Boolean} True if full, false otherwise.
+     * @remarks Compares size to 1024. Time complexity: O(1).
+     */
+    export circuit isFull(): Boolean {
+        return queue.size == 1024;
+    }
+
+    /**
+     * @description Returns the front item without removing it.
+     * @returns {T} The front item.
+     * @remarks Peeks at front index. Limited by constant-index 
+     * access. Time complexity: O(1).
+     */
+    export circuit peek(): T {
+        assert (queue.size > 0) "QueueError: Queue is empty!";
+        return queue.elements[queue.front];
+    }
+}

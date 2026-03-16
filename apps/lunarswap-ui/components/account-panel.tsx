@@ -1,10 +1,10 @@
 'use client';
 
+import { ChevronLeft, ChevronsRight, LogOut, Settings } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useWallet } from '@/hooks/use-wallet';
 import { useWalletRx } from '@/hooks/use-wallet-rx';
 import { formatAddress } from '@/lib/wallet-utils';
-import { ChevronLeft, ChevronsRight, LogOut, Settings } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { AccountDetailsModal } from './account-details-modal';
 import { BalanceDisplay } from './balance-display';
 import { Identicon } from './identicon';
