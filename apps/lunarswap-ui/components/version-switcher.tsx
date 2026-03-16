@@ -1,5 +1,6 @@
 'use client';
 
+import { Check, ChevronsUpDown, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -10,7 +11,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { useVersion } from '@/lib/version-context';
-import { Check, ChevronsUpDown, ExternalLink } from 'lucide-react';
 
 export function VersionSwitcher() {
   const { version, setVersion } = useVersion();

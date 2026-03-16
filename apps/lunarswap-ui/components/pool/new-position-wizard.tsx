@@ -1,9 +1,9 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { RotateCcw, Settings } from 'lucide-react';
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { SelectPairStep } from './steps/select-pair-step';
 import { SetDepositStep } from './steps/set-deposit-step';
 

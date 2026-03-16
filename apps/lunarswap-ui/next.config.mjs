@@ -1,4 +1,4 @@
-let userConfig = undefined;
+let userConfig;
 try {
   userConfig = await import('./v0-user-next.config');
 } catch {}
@@ -18,11 +18,9 @@ const nextConfig = {
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
-    asyncWebAssembly: true,
   },
   devIndicators: {
-    buildActivity: false,
-    buildActivityPosition: 'bottom-left',
+    position: 'bottom-left',
   },
 };
 

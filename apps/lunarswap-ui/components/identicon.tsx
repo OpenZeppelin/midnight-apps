@@ -5,7 +5,10 @@ import Avatar from 'boring-avatars';
 export function Identicon({
   address,
   size,
-}: { address: string; size: number }) {
+}: {
+  address: string;
+  size: number;
+}) {
   return (
     <Avatar
       size={size}
