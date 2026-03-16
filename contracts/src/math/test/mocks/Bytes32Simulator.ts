@@ -8,13 +8,13 @@ import {
   ledger,
   type U256,
 } from '@src/artifacts/math/test/mocks/contracts/Bytes32.mock/contract/index.js';
-import { wit_unpackBytes32 } from '@src/math/witnesses/wit_unpackBytes32.js';
+import { wit_unpackBytes } from '@src/math/witnesses/wit_unpackBytes.js';
 
 export type Bytes32PrivateState = Record<string, never>;
 
 export const Bytes32Witnesses = (): Witnesses<Bytes32PrivateState> => ({
-  wit_unpackBytes32(_context, bytes) {
-    return [{}, wit_unpackBytes32(bytes)];
+  wit_unpackBytes(_context, bytes) {
+    return [{}, wit_unpackBytes(bytes)];
   },
 });
 
@@ -48,31 +48,55 @@ export class Bytes32Simulator extends Bytes32SimulatorBase {
     super([], options);
   }
 
-  /**
-   * Packs Vector<32, Uint<8>> into Bytes<32>.
-   */
+  ////////////////////////////////////////////////////////////////
+  // Conversions
+  ////////////////////////////////////////////////////////////////
+
   public pack(vec: bigint[]): Uint8Array {
     return this.circuits.impure.pack(vec);
   }
 
-  /**
-   * Unpacks Bytes<32> into Vector<32, Uint<8>>.
-   */
   public unpack(bytes: Uint8Array): bigint[] {
     return this.circuits.impure.unpack(bytes);
   }
 
-  /**
-   * Converts Vector<32, Uint<8>> to U256 (little-endian).
-   */
   public vectorToU256(vec: bigint[]): U256 {
     return this.circuits.impure.vectorToU256(vec);
   }
 
-  /**
-   * Converts Bytes<32> to U256 (little-endian).
-   */
   public bytesToU256(bytes: Uint8Array): U256 {
     return this.circuits.impure.bytesToU256(bytes);
+  }
+
+  ////////////////////////////////////////////////////////////////
+  // Comparisons
+  ////////////////////////////////////////////////////////////////
+
+  public eq(a: Uint8Array, b: Uint8Array): boolean {
+    return this.circuits.impure.eq(a, b);
+  }
+
+  public lt(a: Uint8Array, b: Uint8Array): boolean {
+    return this.circuits.impure.lt(a, b);
+  }
+
+  public lte(a: Uint8Array, b: Uint8Array): boolean {
+    return this.circuits.impure.lte(a, b);
+  }
+
+  public gt(a: Uint8Array, b: Uint8Array): boolean {
+    return this.circuits.impure.gt(a, b);
+  }
+
+  public gte(a: Uint8Array, b: Uint8Array): boolean {
+    return this.circuits.impure.gte(a, b);
+  }
+
+  ////////////////////////////////////////////////////////////////
+  // Utilities
+  ////////////////////////////////////////////////////////////////
+
+  public isZero(a: Uint8Array): boolean {
+    return this.circuits.impure.isZero(a);
   }
 }
