@@ -25,6 +25,8 @@
     "types:apps": "turbo run types --filter './apps/*'",
     "types:contracts": "turbo run types --filter './contracts/*'",
     "types:packages": "turbo run types --filter './packages/*'",
+    "lunarswap:dev": "turbo run dev --filter @openzeppelin/midnight-apps-lunarswap-ui",
+    "lunarswap:build": "turbo run build --filter @openzeppelin/midnight-apps-lunarswap-ui",
     "precommit": "turbo run precommit"
   },
   "keywords": [],

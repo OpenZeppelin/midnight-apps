@@ -11,6 +11,32 @@ This monorepo contains experimental sample projects built on top of the Midnight
 Check out [LunarSwap](https://midnight.openzeppelin.com/lunarswap
 ), a proof of concept DEX.
 
+## LunarSwap
+
+Turbo handles building all dependencies (contracts, packages) automatically before starting the app.
+
+### Dev mode
+
+```bash
+pnpm lunarswap:dev
+```
+
+Starts the Vite dev server with HMR at `http://localhost:5173`.
+
+### Build mode
+
+```bash
+pnpm lunarswap:build
+```
+
+Produces a static bundle in `apps/lunarswap-ui/dist/` targeting `preprod`.
+
+---
+
+## Shielded Token CLI
+
+In order to deploy a new shielded token on `preprod` you could use the `packages/shielded-token-cli` package, via `cd packages/shielded-token-cli && pnpm preprod`. Then you would need to import your seed, or create a fresh wallet. (Needs proof server to be running pointing to the preprod network)
+
 ## Development Flow
 
 ### Prerequisites

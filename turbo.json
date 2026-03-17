@@ -115,6 +115,13 @@
       ],
       "cache": false
     },
+    "dev": {
+      "dependsOn": [
+        "^build"
+      ],
+      "cache": false,
+      "persistent": true
+    },
     "lint": {
       "inputs": [
         "src/**/*.ts",
