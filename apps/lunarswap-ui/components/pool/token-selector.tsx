@@ -1,7 +1,7 @@
 'use client';
 
 import { ChevronDown, Plus, Search } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { DeployTokenModal } from '@/components/deploy-token-modal';
 import { TokenIcon } from '@/components/token-icon';
 import { Button } from '@/components/ui/button';
@@ -39,8 +39,9 @@ export function TokenSelector({
   const [deployModalOpen, setDeployModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { userDeployedTokens } = useShieldedTokenContext();
-  const defaultTokens = getAllTokens(
-    userDeployedTokens.map(userDeployedTokenToToken),
+  const defaultTokens = useMemo(
+    () => getAllTokens(userDeployedTokens.map(userDeployedTokenToToken)),
+    [userDeployedTokens],
   );
   const availableTokens = tokensProp != null ? tokensProp : defaultTokens;
 

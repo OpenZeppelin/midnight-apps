@@ -8,7 +8,7 @@ import {
   SLIPPAGE_TOLERANCE,
 } from '@openzeppelin/midnight-apps-lunarswap-sdk';
 import { ArrowDown, ExternalLink, Loader2 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { useWallet } from '@/hooks/use-wallet';
 import { useLunarswapContext } from '@/lib/lunarswap-context';
@@ -61,8 +61,9 @@ export function SwapCard({
   const { status, allPairs, lunarswap } = useLunarswapContext();
   const { userDeployedTokens } = useShieldedTokenContext();
   const activeNetwork = useActiveNetworkConfig();
-  const allTokensList = getAllTokens(
-    userDeployedTokens.map(userDeployedTokenToToken),
+  const allTokensList = useMemo(
+    () => getAllTokens(userDeployedTokens.map(userDeployedTokenToToken)),
+    [userDeployedTokens],
   );
   const [isHydrated, setIsHydrated] = useState(false);
 

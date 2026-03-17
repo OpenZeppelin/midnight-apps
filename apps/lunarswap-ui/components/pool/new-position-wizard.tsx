@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -44,8 +44,9 @@ export function NewPositionWizard({
   initialTokens,
 }: NewPositionWizardProps) {
   const { userDeployedTokens } = useShieldedTokenContext();
-  const allTokensList = getAllTokens(
-    userDeployedTokens.map(userDeployedTokenToToken),
+  const allTokensList = useMemo(
+    () => getAllTokens(userDeployedTokens.map(userDeployedTokenToToken)),
+    [userDeployedTokens],
   );
   const [currentStep, setCurrentStep] = useState<Step>('select-pair');
   const [pairData, setPairData] = useState<PairSelectionData>({

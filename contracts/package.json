@@ -32,7 +32,8 @@
     "compactVersion": "+0.29.0",
     "artifactsOutDir": "src/artifacts",
     "artifactsStructure": "--hierarchical",
-    "compactExclude": "**/*.mock.compact"
+    "compactExclude": "**/*.mock.compact",
+    "compactMockInclude": "**/*.mock.compact"
   },
   "scripts": {
     "compact": "compact-compiler $npm_package_config_compactVersion $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir",
@@ -45,8 +46,9 @@
     "compact:math": "compact-compiler $npm_package_config_compactVersion --dir math $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir",
     "compact:fmt": "compact format --check",
     "compact:fmt:fix": "compact format",
-    "build": "compact-builder $npm_package_config_compactVersion $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir --exclude \"$npm_package_config_compactExclude\"",
-    "build:fast": "compact-builder $npm_package_config_compactVersion --skip-zk $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir --exclude \"$npm_package_config_compactExclude\"",
+    "compact:mocks": "compact-compiler $npm_package_config_compactVersion --skip-zk $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir --include \"$npm_package_config_compactMockInclude\"",
+    "build": "pnpm compact:mocks && compact-builder $npm_package_config_compactVersion $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir --exclude \"$npm_package_config_compactExclude\"",
+    "build:fast": "pnpm compact:mocks && compact-builder $npm_package_config_compactVersion --skip-zk $npm_package_config_artifactsStructure --out $npm_package_config_artifactsOutDir --exclude \"$npm_package_config_compactExclude\"",
     "test": "vitest run",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",

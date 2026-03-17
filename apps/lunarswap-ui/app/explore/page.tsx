@@ -8,7 +8,7 @@ import {
   Search,
   X,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { DeployTokenModal } from '@/components/deploy-token-modal';
 import { Header } from '@/components/header';
@@ -71,8 +71,9 @@ export default function ExplorePage() {
   const { isLoadingPublicState, hasLoadedDataOnce, allPairs } =
     useLunarswapContext();
   const { userDeployedTokens } = useShieldedTokenContext();
-  const allTokensList = getAllTokens(
-    userDeployedTokens.map(userDeployedTokenToToken),
+  const allTokensList = useMemo(
+    () => getAllTokens(userDeployedTokens.map(userDeployedTokenToToken)),
+    [userDeployedTokens],
   );
   const location = useLocation();
   const navigate = useNavigate();

@@ -13,10 +13,14 @@ import {
   type ZswapCoinPublicKey,
 } from '@src/artifacts/lunarswap/Lunarswap/contract/index.js';
 import {
+  getIdentity,
+  getPairId,
+  sortCoinByColor,
+} from '@src/lunarswap/utils/index.js';
+import {
   LunarswapPrivateState,
   LunarswapWitnessesImp,
 } from '../../witnesses/Lunarswap.js';
-import { getIdentity, getPairId, sortCoinByColor } from '@src/lunarswap/utils/index.js';
 
 /**
  * Base simulator for Lunarswap contract
@@ -173,10 +177,7 @@ export class LunarswapSimulator extends LunarswapSimulatorBase {
     amountAMin: bigint,
     amountBMin: bigint,
   ): [ShieldedCoinInfo, ShieldedCoinInfo, bigint, bigint] {
-    const [sortedTokenA, sortedTokenB] = sortCoinByColor(
-      tokenA,
-      tokenB,
-    );
+    const [sortedTokenA, sortedTokenB] = sortCoinByColor(tokenA, tokenB);
     const amount0Min =
       sortedTokenA.color === tokenA.color ? amountAMin : amountBMin;
     const amount1Min =

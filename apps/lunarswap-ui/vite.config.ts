@@ -342,7 +342,16 @@ export default defineConfig({
         },
       ],
     },
-    include: ['buffer', 'vite-plugin-node-polyfills/shims/buffer'],
+    include: [
+      'buffer',
+      'vite-plugin-node-polyfills/shims/buffer',
+      '@apollo/client',
+      '@apollo/client/core',
+      '@apollo/client/link/core',
+      '@apollo/client/utilities',
+      '@wry/caches',
+      '@wry/trie',
+    ],
   },
   resolve: {
     alias: {
@@ -394,10 +403,18 @@ export default defineConfig({
               req.on('data', (chunk: Buffer) => chunks.push(chunk));
               req.on('end', () => {
                 const body = Buffer.concat(chunks);
-                const header = body.subarray(0, 80).toString('utf8', 0, Math.min(80, body.length));
-                console.log(`\n[PROOF-DEBUG] POST /prove — ${body.length} bytes`);
-                console.log(`[PROOF-DEBUG] First 80 bytes (utf8): ${JSON.stringify(header)}`);
-                console.log(`[PROOF-DEBUG] First 32 bytes (hex): ${body.subarray(0, 32).toString('hex')}`);
+                const header = body
+                  .subarray(0, 80)
+                  .toString('utf8', 0, Math.min(80, body.length));
+                console.log(
+                  `\n[PROOF-DEBUG] POST /prove — ${body.length} bytes`,
+                );
+                console.log(
+                  `[PROOF-DEBUG] First 80 bytes (utf8): ${JSON.stringify(header)}`,
+                );
+                console.log(
+                  `[PROOF-DEBUG] First 32 bytes (hex): ${body.subarray(0, 32).toString('hex')}`,
+                );
               });
             });
             proxy.on('proxyRes', (proxyRes) => {
@@ -405,7 +422,9 @@ export default defineConfig({
               proxyRes.on('data', (chunk: Buffer) => chunks.push(chunk));
               proxyRes.on('end', () => {
                 const body = Buffer.concat(chunks).toString('utf8');
-                console.log(`[PROOF-DEBUG] /prove response ${proxyRes.statusCode}: ${body.substring(0, 200)}`);
+                console.log(
+                  `[PROOF-DEBUG] /prove response ${proxyRes.statusCode}: ${body.substring(0, 200)}`,
+                );
               });
             });
           },
@@ -419,10 +438,18 @@ export default defineConfig({
               req.on('data', (chunk: Buffer) => chunks.push(chunk));
               req.on('end', () => {
                 const body = Buffer.concat(chunks);
-                const header = body.subarray(0, 80).toString('utf8', 0, Math.min(80, body.length));
-                console.log(`\n[PROOF-DEBUG] POST /check — ${body.length} bytes`);
-                console.log(`[PROOF-DEBUG] First 80 bytes (utf8): ${JSON.stringify(header)}`);
-                console.log(`[PROOF-DEBUG] First 32 bytes (hex): ${body.subarray(0, 32).toString('hex')}`);
+                const header = body
+                  .subarray(0, 80)
+                  .toString('utf8', 0, Math.min(80, body.length));
+                console.log(
+                  `\n[PROOF-DEBUG] POST /check — ${body.length} bytes`,
+                );
+                console.log(
+                  `[PROOF-DEBUG] First 80 bytes (utf8): ${JSON.stringify(header)}`,
+                );
+                console.log(
+                  `[PROOF-DEBUG] First 32 bytes (hex): ${body.subarray(0, 32).toString('hex')}`,
+                );
               });
             });
             proxy.on('proxyRes', (proxyRes) => {
@@ -430,7 +457,9 @@ export default defineConfig({
               proxyRes.on('data', (chunk: Buffer) => chunks.push(chunk));
               proxyRes.on('end', () => {
                 const body = Buffer.concat(chunks).toString('utf8');
-                console.log(`[PROOF-DEBUG] /check response ${proxyRes.statusCode}: ${body.substring(0, 200)}`);
+                console.log(
+                  `[PROOF-DEBUG] /check response ${proxyRes.statusCode}: ${body.substring(0, 200)}`,
+                );
               });
             });
           },

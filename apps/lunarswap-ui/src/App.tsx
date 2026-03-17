@@ -5,7 +5,6 @@ import PoolDetailPage from '@/app/explore/pool/[id]/page';
 import Home from '@/app/page';
 import NewPositionPage from '@/app/pool/new/page';
 import PoolPage from '@/app/pool/page';
-import TokensPage from '@/app/tokens/page';
 import TradePage from '@/app/trade/page';
 import { Toaster } from '@/components/ui/sonner';
 import { LunarswapProvider } from '@/lib/lunarswap-context';
@@ -58,7 +57,6 @@ const App = () => {
                       <Route path="/trade" element={<TradePage />} />
                       <Route path="/pool" element={<PoolPage />} />
                       <Route path="/pool/new" element={<NewPositionPage />} />
-                      <Route path="/tokens" element={<TokensPage />} />
                       <Route path="/explore" element={<ExplorePage />} />
                       <Route
                         path="/explore/pool/:id"

@@ -3,7 +3,7 @@ import type { MidnightProviders } from '@midnight-ntwrk/midnight-js-types';
 // Value import required for typeof in type derivation (cannot use import type)
 // biome-ignore lint/style/useImportType: typeof needs value at compile time
 import lunarswapContractInfo from '@openzeppelin/midnight-apps-contracts/dist/artifacts/lunarswap/Lunarswap/compiler/contract-info.json';
-import {
+import type {
   LunarswapContract,
 } from '@openzeppelin/midnight-apps-contracts';
 import type { LunarswapLedger, LunarswapPrivateState, LunarswapWitnesses } from '@openzeppelin/midnight-apps-contracts';

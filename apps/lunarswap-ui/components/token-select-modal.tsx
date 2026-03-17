@@ -1,6 +1,6 @@
 'use client';
 import { Droplets, Plus, Search } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TokenIcon } from '@/components/token-icon';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { useLogger } from '@/hooks/use-logger';
 import { useLunarswapContext } from '@/lib/lunarswap-context';
 import {
   userDeployedTokenToToken,
@@ -47,77 +46,50 @@ export function TokenSelectModal({
   isLoading: externalIsLoading = false,
 }: TokenSelectModalProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [availableTokens, setAvailableTokens] = useState<Token[]>([]);
-  const [isLoading, _setIsLoading] = useState(false);
   const { allPairs } = useLunarswapContext();
   const { userDeployedTokens } = useShieldedTokenContext();
-  const allTokensList = getAllTokens(
-    userDeployedTokens.map(userDeployedTokenToToken),
+  const allTokensList = useMemo(
+    () => getAllTokens(userDeployedTokens.map(userDeployedTokenToToken)),
+    [userDeployedTokens],
   );
   const navigate = useNavigate();
-  const _logger = useLogger();
 
-  // Filter available tokens from global context (only if no custom tokens provided)
-  useEffect(() => {
-    // If custom tokens are provided, skip the default logic
-    if (customTokens && customTokens.length > 0) {
-      return;
-    }
+  // Convert Uint8Array to lowercase hex
+  const bytesToHex = (bytes: Uint8Array): string =>
+    Array.from(bytes)
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('')
+      .toLowerCase();
 
-    // Convert Uint8Array to lowercase hex
-    const bytesToHex = (bytes: Uint8Array): string =>
-      Array.from(bytes)
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join('')
-        .toLowerCase();
-
-    if (!show) {
-      setAvailableTokens([]);
-      return;
-    }
-
-    if (allPairs.length === 0) {
-      // Don't set empty tokens, let it show loading state
-      return;
+  // Derive available tokens from pairs (pure computation, no side effects)
+  const availableTokens = useMemo(() => {
+    if (!show || allPairs.length === 0) {
+      return [];
     }
 
     // Extract unique tokens from all pairs
     const tokenSet = new Set<string>();
     for (const { pair } of allPairs) {
-      const token0Color = bytesToHex(pair.token0Type);
-      const token1Color = bytesToHex(pair.token1Type);
-      // Add both tokens from each pair
-      tokenSet.add(token0Color);
-      tokenSet.add(token1Color);
+      tokenSet.add(bytesToHex(pair.token0Type));
+      tokenSet.add(bytesToHex(pair.token1Type));
     }
 
     // Filter all tokens to only include those with pools
-    const available = allTokensList.filter((token: TokenConfigType) => {
+    return allTokensList.filter((token: TokenConfigType) => {
       const tokenType = token.type.replace(/^0x/i, '').toLowerCase();
       const tokenTypeWithoutPrefix = tokenType.replace(/^0200/, '');
 
-      // Try exact match first
-      let hasMatch = tokenSet.has(tokenType);
-
-      // If no exact match, try without the 0200 prefix
-      if (!hasMatch) {
-        hasMatch = tokenSet.has(tokenTypeWithoutPrefix);
+      if (tokenSet.has(tokenType) || tokenSet.has(tokenTypeWithoutPrefix)) {
+        return true;
       }
 
-      // If still no match, try adding 0200 prefix to pool tokens
-      if (!hasMatch) {
-        hasMatch = Array.from(tokenSet).some(
-          (poolType) =>
-            poolType === tokenTypeWithoutPrefix ||
-            `0200${poolType}` === tokenType,
-        );
-      }
-
-      return hasMatch;
+      return Array.from(tokenSet).some(
+        (poolType) =>
+          poolType === tokenTypeWithoutPrefix ||
+          `0200${poolType}` === tokenType,
+      );
     });
-
-    setAvailableTokens(available);
-  }, [show, allPairs, customTokens, allTokensList]);
+  }, [show, allPairs, allTokensList]);
 
   // Use custom tokens if provided, otherwise use the default logic
   const tokensToUse =
@@ -163,7 +135,6 @@ export function TokenSelectModal({
         </div>
         <div className="space-y-1 max-h-[300px] overflow-y-auto pr-1">
           {externalIsLoading ||
-          isLoading ||
           allPairs.length === 0 ||
           (customTokens && customTokens.length === 0) ? (
             <div className="text-center py-6 text-gray-500 dark:text-gray-400">
