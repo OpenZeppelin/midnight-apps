@@ -67,7 +67,7 @@ export function ContractStatusIndicator() {
         privateStateStoreName: 'lunarswap-private-state',
         accountId: String(walletAPI.coinPublicKey),
         privateStoragePasswordProvider: () =>
-          `${String(walletAPI.encryptionPublicKey)}A!`,
+          `${btoa(String(walletAPI.encryptionPublicKey))}A1!`,
       } as Parameters<
         typeof levelPrivateStateProvider<typeof LunarswapPrivateStateId>
       >[0];

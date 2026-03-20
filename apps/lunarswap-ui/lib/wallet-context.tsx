@@ -8,7 +8,7 @@ import {
   type FinalizedTransaction,
   Transaction,
   type TransactionId,
-} from '@midnight-ntwrk/ledger-v7';
+} from '@midnight-ntwrk/ledger-v8';
 import { indexerPublicDataProvider } from '@midnight-ntwrk/midnight-js-indexer-public-data-provider';
 import { levelPrivateStateProvider } from '@midnight-ntwrk/midnight-js-level-private-state-provider';
 import type {
@@ -435,7 +435,7 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
       ? String(walletAPI.coinPublicKey)
       : 'lunarswap-disconnected';
     const privateStoragePasswordProvider = walletAPI
-      ? () => `${String(walletAPI.encryptionPublicKey)}A!`
+      ? () => `${Buffer.from(String(walletAPI.encryptionPublicKey)).toString('base64')}A1!`
       : () => {
           const stored = localStorage.getItem('lunarswap-storage-password');
           if (stored) return stored;

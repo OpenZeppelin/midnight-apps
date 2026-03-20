@@ -29,7 +29,7 @@
     "./dist/*": "./dist/*"
   },
   "config": {
-    "compactVersion": "+0.29.0",
+    "compactVersion": "+0.30.0",
     "artifactsOutDir": "src/artifacts",
     "artifactsStructure": "--hierarchical",
     "compactExclude": "**/*.mock.compact",
@@ -74,9 +74,9 @@
     "vitest": "^4.0.14"
   },
   "dependencies": {
-    "@midnight-ntwrk/midnight-js-network-id": "3.2.0-rc.3",
-    "@midnight-ntwrk/wallet-sdk-address-format": "3.0.0",
+    "@midnight-ntwrk/midnight-js-network-id": "4.0.0-rc.2",
+    "@midnight-ntwrk/wallet-sdk-address-format": "3.1.0-rc.0",
     "@midnight-ntwrk/zswap": "4.0.0",
-    "@midnight-ntwrk/compact-runtime": "0.14.0"
+    "@midnight-ntwrk/compact-runtime": "0.15.0"
   }
 }

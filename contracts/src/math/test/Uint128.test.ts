@@ -395,6 +395,92 @@ describe('Uint128', () => {
     });
   });
 
+  describe('addChecked2 vs addChecked', () => {
+    test('should match for 0 + 0', () => {
+      expect(uint128Simulator.addChecked2(0n, 0n)).toBe(
+        uint128Simulator.addChecked(0n, 0n),
+      );
+    });
+
+    test('should match for 0 + 1', () => {
+      expect(uint128Simulator.addChecked2(0n, 1n)).toBe(
+        uint128Simulator.addChecked(0n, 1n),
+      );
+    });
+
+    test('should match for 1 + 0', () => {
+      expect(uint128Simulator.addChecked2(1n, 0n)).toBe(
+        uint128Simulator.addChecked(1n, 0n),
+      );
+    });
+
+    test('should match for small values', () => {
+      expect(uint128Simulator.addChecked2(100n, 200n)).toBe(
+        uint128Simulator.addChecked(100n, 200n),
+      );
+    });
+
+    test('should match at 64-bit boundary', () => {
+      const a = MAX_UINT64;
+      const b = 1n;
+      expect(uint128Simulator.addChecked2(a, b)).toBe(
+        uint128Simulator.addChecked(a, b),
+      );
+    });
+
+    test('should match for two max 64-bit values', () => {
+      const a = MAX_UINT64;
+      const b = MAX_UINT64;
+      expect(uint128Simulator.addChecked2(a, b)).toBe(
+        uint128Simulator.addChecked(a, b),
+      );
+    });
+
+    test('should match near max uint128', () => {
+      const a = MAX_UINT128 - 1n;
+      const b = 1n;
+      expect(uint128Simulator.addChecked2(a, b)).toBe(
+        uint128Simulator.addChecked(a, b),
+      );
+    });
+
+    test('should match for MAX_UINT128 + 0', () => {
+      expect(uint128Simulator.addChecked2(MAX_UINT128, 0n)).toBe(
+        uint128Simulator.addChecked(MAX_UINT128, 0n),
+      );
+    });
+
+    test('should both throw on MAX_UINT128 + 1 overflow', () => {
+      expect(() => uint128Simulator.addChecked2(MAX_UINT128, 1n)).toThrow();
+      expect(() => uint128Simulator.addChecked(MAX_UINT128, 1n)).toThrow();
+    });
+
+    test('should both throw on MAX_UINT128 + MAX_UINT128 overflow', () => {
+      expect(() =>
+        uint128Simulator.addChecked2(MAX_UINT128, MAX_UINT128),
+      ).toThrow();
+      expect(() =>
+        uint128Simulator.addChecked(MAX_UINT128, MAX_UINT128),
+      ).toThrow();
+    });
+
+    test('should match for powers of 2', () => {
+      const a = 2n ** 64n;
+      const b = 2n ** 64n;
+      expect(uint128Simulator.addChecked2(a, b)).toBe(
+        uint128Simulator.addChecked(a, b),
+      );
+    });
+
+    test('should match for large values below max', () => {
+      const a = MAX_UINT128 / 2n;
+      const b = MAX_UINT128 / 2n;
+      expect(uint128Simulator.addChecked2(a, b)).toBe(
+        uint128Simulator.addChecked(a, b),
+      );
+    });
+  });
+
   describe('addCheckedU128', () => {
     test('should add two U128 numbers within bounds', () => {
       const a = uint128Simulator.toU128(100n);

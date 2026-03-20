@@ -122,6 +122,10 @@ export class Uint128Simulator extends Uint128SimulatorBase {
     return this.circuits.impure.addChecked(a, b);
   }
 
+  public addChecked2(a: bigint, b: bigint): bigint {
+    return this.circuits.impure.addChecked2(a, b);
+  }
+
   public addCheckedU128(a: U128, b: U128): bigint {
     return this.circuits.impure.addCheckedU128(a, b);
   }

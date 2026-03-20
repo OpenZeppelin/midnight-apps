@@ -2,7 +2,7 @@ import type {
   ContractAddress,
   ContractState,
 } from '@midnight-ntwrk/compact-runtime';
-import type { TransactionId, ZswapChainState } from '@midnight-ntwrk/ledger-v7';
+import type { LedgerParameters, TransactionId, ZswapChainState } from '@midnight-ntwrk/ledger-v8';
 import type {
   BlockHashConfig,
   BlockHeightConfig,
@@ -38,7 +38,7 @@ export class PublicDataProviderWrapper implements PublicDataProvider {
   queryZSwapAndContractState(
     contractAddress: ContractAddress,
     config?: BlockHeightConfig | BlockHashConfig,
-  ): Promise<[ZswapChainState, ContractState] | null> {
+  ): Promise<[ZswapChainState, ContractState, LedgerParameters] | null> {
     return retry(
       () => this.wrapped.queryZSwapAndContractState(contractAddress, config),
       'queryZSwapAndContractState',

@@ -1,7 +1,7 @@
 import {
 	type CoinPublicKey,
 	encodeCoinPublicKey,
-} from "@midnight-ntwrk/ledger-v7";
+} from "@midnight-ntwrk/ledger-v8";
 import type { ShieldedFungibleToken } from "@openzeppelin/midnight-apps-shielded-token-api";
 import type { Logger } from "pino";
 

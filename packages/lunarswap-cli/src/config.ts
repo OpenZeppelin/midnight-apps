@@ -2,7 +2,6 @@ import path from 'node:path';
 import { setNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 import {
   type EnvironmentConfiguration,
-  getTestEnvironment,
   RemoteTestEnvironment,
   type TestEnvironment,
 } from '@midnight-ntwrk/testkit-js';
@@ -32,15 +31,34 @@ export interface Config {
   readonly zkConfigPath: string;
   getEnvironment(logger: Logger): TestEnvironment;
   readonly requestFaucetTokens: boolean;
-  readonly generateDust: boolean;
   /** Network ID for remote proof server (preprod, preview, testnet). Undefined for local. */
   readonly networkId?: string;
+}
+
+/**
+ * Connects to already-running containers (from local-env.yml) at fixed ports
+ * instead of spinning up new ones via Docker Compose.
+ */
+class ExistingDockerTestEnvironment extends RemoteTestEnvironment {
+  getEnvironmentConfiguration(): EnvironmentConfiguration {
+    return {
+      walletNetworkId: 'undeployed',
+      networkId: 'undeployed',
+      indexer: 'http://127.0.0.1:8088/api/v4/graphql',
+      indexerWS: 'ws://127.0.0.1:8088/api/v4/graphql/ws',
+      node: 'http://127.0.0.1:9944',
+      nodeWS: 'ws://127.0.0.1:9944',
+      proofServer: 'http://127.0.0.1:6300',
+      faucet: undefined as any,
+    };
+  }
 }
 
 /** Standalone (local Docker) - uses genesis wallet, no faucet/dust */
 export class StandaloneConfig implements Config {
   getEnvironment(logger: Logger): TestEnvironment {
-    return getTestEnvironment(logger) as TestEnvironment;
+    setNetworkId('undeployed');
+    return new ExistingDockerTestEnvironment(logger);
   }
   privateStateStoreName = contractConfig.privateStateStoreName;
   logDir = path.resolve(
@@ -52,7 +70,6 @@ export class StandaloneConfig implements Config {
   );
   zkConfigPath = contractConfig.zkConfigPath;
   requestFaucetTokens = false;
-  generateDust = false;
 }
 
 /** Testnet local - same as standalone, uses local Docker stack */
@@ -83,7 +100,6 @@ export class TestnetRemoteConfig implements Config {
   );
   zkConfigPath = contractConfig.zkConfigPath;
   requestFaucetTokens = false;
-  generateDust = true;
 }
 
 /** Preview remote - uses preview network with proof server container */
@@ -103,7 +119,6 @@ export class PreviewRemoteConfig implements Config {
   );
   zkConfigPath = contractConfig.zkConfigPath;
   requestFaucetTokens = false;
-  generateDust = true;
 }
 
 /** Preprod remote - uses preprod network with local proof server container */
@@ -123,7 +138,6 @@ export class PreprodRemoteConfig implements Config {
   );
   zkConfigPath = contractConfig.zkConfigPath;
   requestFaucetTokens = false;
-  generateDust = true;
 }
 
 export class TestnetRemoteTestEnvironment extends RemoteTestEnvironment {

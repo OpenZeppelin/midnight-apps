@@ -1,7 +1,7 @@
 import {
   decodeRawTokenType,
   type RawTokenType,
-} from '@midnight-ntwrk/ledger-v7';
+} from '@midnight-ntwrk/ledger-v8';
 
 export interface Token {
   symbol: string;

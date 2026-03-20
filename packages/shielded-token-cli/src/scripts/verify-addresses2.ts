@@ -13,7 +13,7 @@
  *   source .env && npx tsx scripts/verify-addresses.ts
  */
 
-import { DustSecretKey, ZswapSecretKeys } from "@midnight-ntwrk/ledger-v7";
+import { DustSecretKey, ZswapSecretKeys } from "@midnight-ntwrk/ledger-v8";
 import {
 	DustAddress,
 	MidnightBech32m,

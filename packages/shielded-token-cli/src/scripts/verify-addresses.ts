@@ -15,7 +15,7 @@
  *   Or import and call verifyAddresses(networkId) from the CLI.
  */
 
-import { DustSecretKey, ZswapSecretKeys } from "@midnight-ntwrk/ledger-v7";
+import { DustSecretKey, ZswapSecretKeys } from "@midnight-ntwrk/ledger-v8";
 import {
 	DustAddress,
 	MidnightBech32m,

@@ -6,7 +6,7 @@ import type {
   ContractAddress as ContractAddressRuntime,
   ContractState,
 } from '@midnight-ntwrk/compact-runtime';
-import type { ZswapChainState } from '@midnight-ntwrk/ledger-v7';
+import type { ZswapChainState } from '@midnight-ntwrk/ledger-v8';
 import {
   deployContract,
   type FinalizedCallTxData,

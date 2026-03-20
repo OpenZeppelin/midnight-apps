@@ -42,7 +42,7 @@ export function getVersionInfo(): VersionInfo {
   const midnightNtwrkPackages: { [key: string]: string } = {
     '@midnight-ntwrk/compact-runtime': '0.14.0',
     '@midnight-ntwrk/dapp-connector-api': '4.0.0',
-    '@midnight-ntwrk/ledger-v7': '7.0.0',
+    '@midnight-ntwrk/ledger-v8': '7.0.0',
     '@midnight-ntwrk/midnight-js-contracts': '3.2.0-rc.1',
     '@midnight-ntwrk/midnight-js-fetch-zk-config-provider': '3.2.0-rc.1',
     '@midnight-ntwrk/midnight-js-http-client-proof-provider': '3.2.0-rc.1',

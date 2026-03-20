@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (math/test/Uint128.mock.compact)
 
-pragma language_version >= 0.21.0;
+pragma language_version >= 0.22.0;
 
 import CompactStandardLibrary;
 
@@ -112,6 +112,11 @@ export circuit addU128(a: U128, b: U128): U256 {
 export circuit addChecked(a: Uint<128>, b: Uint<128>): Uint<128> {
   _isCircuitInfoExposed = true;
   return disclose(Uint128_addChecked(a, b));
+}
+
+export circuit addChecked2(a: Uint<128>, b: Uint<128>): Uint<128> {
+  _isCircuitInfoExposed = true;
+  return a + b as Uint<128>;
 }
 
 export circuit addCheckedU128(a: U128, b: U128): Uint<128> {

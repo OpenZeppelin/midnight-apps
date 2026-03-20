@@ -1,9 +1,9 @@
-import type { RawTokenType } from '@midnight-ntwrk/ledger-v7';
+import type { RawTokenType } from '@midnight-ntwrk/ledger-v8';
 import {
   createShieldedCoinInfo,
   encodeCoinPublicKey,
   encodeShieldedCoinInfo,
-} from '@midnight-ntwrk/ledger-v7';
+} from '@midnight-ntwrk/ledger-v8';
 import type { FinalizedCallTxData } from '@midnight-ntwrk/midnight-js-contracts';
 import type {
   LunarswapContract,

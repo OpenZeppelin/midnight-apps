@@ -5,7 +5,7 @@ import {
   type FinalizedTransaction,
   LedgerParameters,
   ZswapSecretKeys,
-} from '@midnight-ntwrk/ledger-v7';
+} from '@midnight-ntwrk/ledger-v8';
 import type {
   MidnightProvider,
   UnboundTransaction,
@@ -88,7 +88,7 @@ export class MidnightWalletProvider
   static async build(
     logger: Logger,
     env: EnvironmentConfiguration,
-    seed?: string,
+    seed: string,
   ): Promise<MidnightWalletProvider> {
     const DEFAULT_DUST_OPTIONS: DustWalletOptions = {
       ledgerParams: LedgerParameters.initialParameters(),
@@ -103,9 +103,7 @@ export class MidnightWalletProvider
     }
     const builder =
       FluentWalletBuilder.forEnvironment(env).withDustOptions(dustOptions);
-    const buildResult = seed
-      ? await builder.withSeed(seed).buildWithoutStarting()
-      : await builder.withRandomSeed().buildWithoutStarting();
+    const buildResult = await builder.withSeed(seed).buildWithoutStarting();
     const { wallet, seeds } = buildResult as {
       wallet: WalletFacade;
       seeds: { masterSeed: string; shielded: Uint8Array; dust: Uint8Array };

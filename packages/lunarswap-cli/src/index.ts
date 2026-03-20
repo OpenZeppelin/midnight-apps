@@ -1,7 +1,6 @@
-import { randomBytes } from 'node:crypto';
 import { stdin as input, stdout as output } from 'node:process';
 import { createInterface, type Interface } from 'node:readline/promises';
-import { unshieldedToken } from '@midnight-ntwrk/ledger-v7';
+import { unshieldedToken } from '@midnight-ntwrk/ledger-v8';
 import { toHex } from '@midnight-ntwrk/midnight-js-utils';
 import {
   DynamicProofServerContainer,
@@ -15,9 +14,8 @@ import { WebSocket } from 'ws';
 import { configureProviders } from './api/providers.js';
 import { mainLoop } from './cli.js';
 import { type Config, StandaloneConfig } from './config.js';
-import { generateDust } from './generate-dust.js';
 import { MidnightWalletProvider } from './midnight-wallet-provider.js';
-import { syncWallet, waitForUnshieldedFunds } from './wallet-utils.js';
+import { waitForUnshieldedFunds } from './wallet-utils.js';
 
 // @ts-expect-error: Enable WebSocket for Apollo
 globalThis.WebSocket = WebSocket;
@@ -25,12 +23,11 @@ globalThis.WebSocket = WebSocket;
 const GENESIS_MINT_WALLET_SEED =
   '0000000000000000000000000000000000000000000000000000000000000001';
 
-const getWalletLoopQuestion = (): string => `
+const WALLET_QUESTION = `
 You can do one of the following:
-  1. Build a fresh wallet
-  2. Build wallet from a seed (hex or BIP39 mnemonic)
-  3. Exit
-${process.env.TEST_RECOVERY_PHRASE ? '  4. Recover from TEST_RECOVERY_PHRASE (env)\n' : ''}Which would you like to do? `;
+  1. Build wallet from a seed (hex or BIP39 mnemonic)
+  2. Exit
+${process.env.TEST_RECOVERY_PHRASE ? '  3. Recover from TEST_RECOVERY_PHRASE (env)\n' : ''}Which would you like to do? `;
 
 /** Converts BIP39 mnemonic or hex seed to the hex format expected by FluentWalletBuilder. */
 function normalizeSeed(input: string): string {
@@ -62,11 +59,9 @@ const buildWallet = async (
     return GENESIS_MINT_WALLET_SEED;
   }
   while (true) {
-    const choice = (await rli.question(getWalletLoopQuestion())).trim();
+    const choice = (await rli.question(WALLET_QUESTION)).trim();
     switch (choice) {
-      case '1':
-        return toHex(randomBytes(32));
-      case '2': {
+      case '1': {
         const raw = await rli.question(
           'Enter your wallet seed (hex or BIP39 mnemonic): ',
         );
@@ -77,10 +72,10 @@ const buildWallet = async (
           continue;
         }
       }
-      case '3':
+      case '2':
         logger.info('Exiting...');
         return undefined;
-      case '4':
+      case '3':
         if (process.env.TEST_RECOVERY_PHRASE) {
           try {
             return normalizeSeed(process.env.TEST_RECOVERY_PHRASE);
@@ -172,21 +167,6 @@ export const run = async (
       return;
     }
     logger.info(`Your NIGHT wallet balance is: ${nightBalance}`);
-
-    if (config.generateDust) {
-      const dustGeneration = await generateDust(
-        logger,
-        seed,
-        unshieldedState,
-        walletProvider.wallet,
-      );
-      if (dustGeneration) {
-        logger.info(
-          `Submitted dust generation registration transaction: ${dustGeneration}`,
-        );
-        await syncWallet(logger, walletProvider.wallet);
-      }
-    }
 
     const providers = configureProviders(walletProvider, config);
 

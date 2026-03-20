@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Based on bboard-cli wallet-utils pattern
 
-import type { UnshieldedTokenType } from '@midnight-ntwrk/ledger-v7';
+import type { UnshieldedTokenType } from '@midnight-ntwrk/ledger-v8';
 import { getNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 import {
   type EnvironmentConfiguration,
@@ -12,26 +12,17 @@ import type {
   FacadeState,
   WalletFacade,
 } from '@midnight-ntwrk/wallet-sdk-facade';
-import { ShieldedWallet } from '@midnight-ntwrk/wallet-sdk-shielded';
+import type { ShieldedWalletAPI } from '@midnight-ntwrk/wallet-sdk-shielded';
 import type {
-  UnshieldedWallet,
+  UnshieldedWalletAPI,
   UnshieldedWalletState,
 } from '@midnight-ntwrk/wallet-sdk-unshielded-wallet';
 import type { Logger } from 'pino';
 import * as Rx from 'rxjs';
 
-export const getInitialState = async (
-  wallet: ShieldedWallet | UnshieldedWallet,
-) => {
-  if (wallet instanceof ShieldedWallet) {
-    return Rx.firstValueFrom((wallet as ShieldedWallet).state);
-  }
-  return Rx.firstValueFrom((wallet as UnshieldedWallet).state);
-};
-
 export const getInitialShieldedState = async (
   logger: Logger,
-  wallet: ShieldedWallet,
+  wallet: ShieldedWalletAPI,
 ) => {
   logger.info('Getting initial state of wallet...');
   return Rx.firstValueFrom(wallet.state);
@@ -39,21 +30,10 @@ export const getInitialShieldedState = async (
 
 export const getInitialUnshieldedState = async (
   logger: Logger,
-  wallet: UnshieldedWallet,
+  wallet: UnshieldedWalletAPI,
 ) => {
   logger.info('Getting initial state of wallet...');
   return Rx.firstValueFrom(wallet.state);
-};
-
-const isProgressStrictlyComplete = (progress: unknown): boolean => {
-  if (!progress || typeof progress !== 'object') {
-    return false;
-  }
-  const candidate = progress as { isStrictlyComplete?: unknown };
-  if (typeof candidate.isStrictlyComplete !== 'function') {
-    return false;
-  }
-  return (candidate.isStrictlyComplete as () => boolean)();
 };
 
 export const syncWallet = (
@@ -67,32 +47,18 @@ export const syncWallet = (
   return Rx.firstValueFrom(
     wallet.state().pipe(
       Rx.tap((state: FacadeState) => {
-        const shieldedSynced = isProgressStrictlyComplete(
-          state.shielded.state.progress,
-        );
-        const unshieldedSynced = isProgressStrictlyComplete(
-          state.unshielded.progress,
-        );
-        const dustSynced = isProgressStrictlyComplete(
-          state.dust.state.progress,
-        );
         logger.debug(
-          `Wallet synced state emission: { shielded=${shieldedSynced}, unshielded=${unshieldedSynced}, dust=${dustSynced} }`,
+          `Wallet synced state emission: { isSynced=${state.isSynced} }`,
         );
       }),
       Rx.throttleTime(throttleTime),
-      Rx.filter(
-        (state: FacadeState) =>
-          isProgressStrictlyComplete(state.shielded.state.progress) &&
-          isProgressStrictlyComplete(state.dust.state.progress) &&
-          isProgressStrictlyComplete(state.unshielded.progress),
-      ),
+      Rx.filter((state: FacadeState) => state.isSynced),
       Rx.tap(() => logger.info('Sync complete')),
       Rx.tap((state: FacadeState) => {
         const shieldedBalances = state.shielded.balances || {};
         const unshieldedBalances = state.unshielded.balances || {};
         const dustBalances =
-          state.dust.walletBalance(new Date(Date.now())) || 0n;
+          state.dust.balance(new Date(Date.now())) || 0n;
 
         logger.info(
           `Wallet balances after sync - Shielded: ${JSON.stringify(shieldedBalances)}, Unshielded: ${JSON.stringify(unshieldedBalances)}, Dust: ${dustBalances}`,

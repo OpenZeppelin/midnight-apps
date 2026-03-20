@@ -2,6 +2,7 @@ import path from "node:path";
 import { setNetworkId } from "@midnight-ntwrk/midnight-js-network-id";
 import type { EnvironmentConfiguration } from "@midnight-ntwrk/testkit-js";
 import {
+	getTestEnvironment,
 	RemoteTestEnvironment,
 	type TestEnvironment,
 } from "@midnight-ntwrk/testkit-js";
@@ -31,7 +32,6 @@ export interface Config {
 	readonly zkConfigPath: string;
 	getEnvironment(logger: Logger): TestEnvironment;
 	readonly requestFaucetTokens: boolean;
-	readonly generateDust: boolean;
 	/** Network ID for remote proof server (preprod, preview, testnet). Undefined for local. */
 	readonly networkId?: string;
 }
@@ -53,7 +53,23 @@ export class PreprodRemoteConfig implements Config {
 	);
 	zkConfigPath = contractConfig.zkConfigPath;
 	requestFaucetTokens = false;
-	generateDust = true;
+}
+
+/** Local - uses local Docker stack (local-env.yml) */
+export class LocalConfig implements Config {
+	getEnvironment(logger: Logger): TestEnvironment {
+		return getTestEnvironment(logger) as TestEnvironment;
+	}
+	privateStateStoreName = contractConfig.privateStateStoreName;
+	logDir = path.resolve(
+		currentDir,
+		"..",
+		"logs",
+		"local",
+		`${new Date().toISOString()}.log`,
+	);
+	zkConfigPath = contractConfig.zkConfigPath;
+	requestFaucetTokens = false;
 }
 
 export class PreprodTestEnvironment extends RemoteTestEnvironment {

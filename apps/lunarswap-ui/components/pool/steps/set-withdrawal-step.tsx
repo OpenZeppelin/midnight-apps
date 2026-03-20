@@ -1,5 +1,5 @@
 'use client';
-import { decodeRawTokenType } from '@midnight-ntwrk/ledger-v7';
+import { decodeRawTokenType } from '@midnight-ntwrk/ledger-v8';
 import {
   calculateRemoveLiquidityMinimums,
   SLIPPAGE_TOLERANCE,

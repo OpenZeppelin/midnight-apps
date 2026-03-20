@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (lunarswap-v1/LunarswapRouter.compact)
 
-pragma language_version >= 0.21.0;
+pragma language_version >= 0.22.0;
 
 /**
  * @title LunarswapRouter
@@ -77,6 +77,7 @@ module LunarswapRouter {
    * @param {Opaque<"string">} symbol - The symbol of the LP token.
    * @param {Uint<8>} decimals     - The number of decimals for LP tokens.
    * @param {ZswapCoinPublicKey} feeToSetter - The address that can set protocol fees.
+   * @param {ZswapCoinPublicKey} feeTo - The address that gets protocol fees.
    *
    * @returns [] - No return values.
    */
@@ -85,10 +86,11 @@ module LunarswapRouter {
                    name: Opaque<"string">,
                    symbol: Opaque<"string">,
                    decimals: Uint<8>,
-                   feeToSetter: ZswapCoinPublicKey
+                   feeToSetter: ZswapCoinPublicKey,
+                   feeTo: ZswapCoinPublicKey
                    ): [] {
     LunarswapFactory_initialize(nonce, name, symbol, decimals);
-    LunarswapFee_initialize(feeToSetter);
+    LunarswapFee_initialize(feeToSetter, feeTo);
     return [];
   }
 
