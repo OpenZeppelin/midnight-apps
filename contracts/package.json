@@ -74,7 +74,7 @@
     "vitest": "^4.0.14"
   },
   "dependencies": {
-    "@midnight-ntwrk/midnight-js-network-id": "4.0.0-rc.2",
+    "@midnight-ntwrk/midnight-js-network-id": "4.0.2",
     "@midnight-ntwrk/wallet-sdk-address-format": "3.1.0-rc.0",
     "@midnight-ntwrk/zswap": "4.0.0",
     "@midnight-ntwrk/compact-runtime": "0.15.0"

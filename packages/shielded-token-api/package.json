@@ -13,6 +13,7 @@
   },
   "scripts": {
     "build": "rm -rf dist && tsc --project tsconfig.build.json",
+    "build:fast": "tsc --project tsconfig.build.json",
     "fmt": "biome format --write",
     "lint": "biome lint",
     "lint:fix": "biome lint --write",
@@ -21,9 +22,9 @@
   },
   "dependencies": {
     "@openzeppelin/midnight-apps-contracts": "workspace:*",
-    "@midnight-ntwrk/compact-js": "2.5.0-rc.3",
-    "@midnight-ntwrk/midnight-js-contracts": "4.0.0-rc.2",
-    "@midnight-ntwrk/midnight-js-types": "4.0.0-rc.2",
+    "@midnight-ntwrk/compact-js": "2.5.0",
+    "@midnight-ntwrk/midnight-js-contracts": "4.0.2",
+    "@midnight-ntwrk/midnight-js-types": "4.0.2",
     "pino": "^9.7.0"
   },
   "devDependencies": {

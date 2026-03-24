@@ -116,24 +116,25 @@ export const run = async (
       | Awaited<ReturnType<typeof DynamicProofServerContainer.start>>
       | StaticProofServerContainer
       | undefined;
-    if (config.networkId !== undefined) {
-      const existingPort = process.env.PROOF_SERVER_PORT;
-      if (existingPort !== undefined) {
-        const port = Number.parseInt(existingPort, 10);
-        if (Number.isNaN(port)) {
-          throw new Error(
-            `Invalid PROOF_SERVER_PORT: ${existingPort}. Must be a number.`,
-          );
-        }
-        logger.info(`Using existing proof server at localhost:${port}`);
-        proofServer = new StaticProofServerContainer(port);
-      } else {
-        proofServer = await DynamicProofServerContainer.start(
-          logger,
-          undefined,
-          config.networkId,
+    const existingPort = process.env.PROOF_SERVER_PORT;
+    if (existingPort !== undefined) {
+      const port = Number.parseInt(existingPort, 10);
+      if (Number.isNaN(port)) {
+        throw new Error(
+          `Invalid PROOF_SERVER_PORT: ${existingPort}. Must be a number.`,
         );
       }
+      logger.info(`Using existing proof server at localhost:${port}`);
+      proofServer = new StaticProofServerContainer(port);
+    } else if (config.networkId !== undefined) {
+      proofServer = await DynamicProofServerContainer.start(
+        logger,
+        undefined,
+        config.networkId,
+      );
+    } else {
+      logger.info('Using existing proof server at localhost:6300');
+      proofServer = new StaticProofServerContainer(6300);
     }
     const envConfiguration = await testEnv.start(proofServer);
     logger.info(

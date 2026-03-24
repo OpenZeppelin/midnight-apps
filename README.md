@@ -43,6 +43,8 @@ In order to deploy a new shielded token on `preprod` you could use the `packages
 - **Node.js**: Version 22.14.0 (see `.nvmrc` and `package.json` `engines`).
 - **pnpm**: Version 10.4.1 (specified in `packageManager`).
 - **Compact Developer Tools**: Required to compile `.compact` smart contracts.
+- **Docker**: Required for running the local environment (node, indexer, proof server).
+- **Make**: Required for local environment orchestration (`make env-up`, etc.).
 
 Install Node.js 22.x using `nvm`:
 ```bash
@@ -103,6 +105,29 @@ cd compact-tools && yarn install && yarn build && cd -
    ```
    - **Note**: Running `pnpm build:contracts`, `pnpm compact`, or `pnpm compact:fast` from the root may cause repetitive output due to Turbo's logging behavior. It's recommended to compile contracts individually from within each package directory.
    - **Feature Request**: A logging output mode flag is being requested to fix Turbo animation log flooding. See [GitHub Issue #1188](https://github.com/midnightntwrk/compactc/issues/1188) for more details.
+
+### Local Environment
+
+The local environment runs a Midnight node, indexer, and proof server via Docker Compose.
+
+```bash
+# Start (tears down existing containers first, streams logs to logs/)
+pnpm env:up
+
+# Check container status
+pnpm env:status
+
+# Tail all container logs
+pnpm env:logs
+
+# Stop
+pnpm env:down
+```
+
+Container logs are streamed to `logs/` (gitignored):
+- `logs/proof-server.log`
+- `logs/indexer.log`
+- `logs/node.log`
 
 ### Tasks with Turbo
 Turbo manages tasks across the monorepo, defined in `turbo.json`. Key tasks:
