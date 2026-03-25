@@ -28,8 +28,10 @@
     "lunarswap:dev": "turbo run dev --filter @openzeppelin/midnight-apps-lunarswap-ui",
     "lunarswap:build": "turbo run build --filter @openzeppelin/midnight-apps-lunarswap-ui",
     "precommit": "turbo run precommit",
-    "env:up": "docker compose -f local-env.yml up -d",
-    "env:down": "docker compose -f local-env.yml down"
+    "env:up": "make env-up",
+    "env:down": "make env-down",
+    "env:logs": "make env-logs",
+    "env:status": "make env-status"
   },
   "keywords": [],
   "author": "",
