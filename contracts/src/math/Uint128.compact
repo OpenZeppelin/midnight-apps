@@ -535,13 +535,17 @@ module Uint128 {
     const highWithBorrow = b.high + borrow;
     const highDiff = a.high - highWithBorrow;
 
-    if (borrow == 0) {
-      const lowDiff = a.low - b.low;
-      return U128 { low: lowDiff, high: highDiff };
-    } else {
-      const lowDiff = a.low + MODULUS() - b.low;
-      return U128 { low: lowDiff as Uint<64>, high: highDiff };
-    }
+    // Branchless low-part subtraction. In ZK circuits, both if/else branches
+    // execute unconditionally — only the result is selected via cond_select.
+    // The previous implementation used `as Uint<64>` in the borrow branch,
+    // generating a constrain_bits(64) that fires even when borrow=0.
+    // When borrow=0 and a.low >= b.low, the borrow branch computes
+    // a.low + MODULUS - b.low >= 2^64, failing the 64-bit constraint.
+    // Fix: compute branchlessly so the constraint is never needed.
+    // borrow=0: lowDiff = a.low - b.low          (< 2^64 since a.low >= b.low)
+    // borrow=1: lowDiff = a.low + 2^64 - b.low   (< 2^64 since a.low < b.low)
+    const lowDiff = a.low + borrow * MODULUS() - b.low;
+    return U128 { low: lowDiff as Uint<64>, high: highDiff };
   }
 
   /**
