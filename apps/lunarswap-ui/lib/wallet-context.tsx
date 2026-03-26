@@ -332,6 +332,7 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
         window.location.origin,
         providerCallback,
         fetch.bind(window),
+        [`${window.location.origin}/shielded-token`],
       ),
     [providerCallback],
   );
@@ -381,26 +382,27 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
   const walletProvider: WalletProvider = useMemo(() => {
     if (walletAPI) {
       return {
-        balanceTx(
+          async balanceTx(
           tx: UnboundTransaction,
           _ttl?: Date,
         ): Promise<FinalizedTransaction> {
           providerCallback('balanceTxStarted');
-          return walletAPI.wallet
-            .balanceUnsealedTransaction(
-              Buffer.from(tx.serialize()).toString('hex'),
-            )
-            .then((result) => {
-              return Transaction.deserialize(
-                'signature',
-                'proof',
-                'binding',
-                Buffer.from(result.tx, 'hex'),
-              ) as FinalizedTransaction;
-            })
-            .finally(() => {
-              providerCallback('balanceTxDone');
-            });
+          const rawBytes = tx.serialize();
+          const serialized = Array.from(rawBytes).map((b) => b.toString(16).padStart(2, '0')).join('');
+          try {
+            const result = await walletAPI.wallet.balanceUnsealedTransaction(serialized);
+            const cleaned = result.tx.replace(/^0x/, '');
+            const matches = cleaned.match(/.{1,2}/g);
+            const resultBytes = matches ? new Uint8Array(matches.map((byte: string) => parseInt(byte, 16))) : new Uint8Array();
+            return Transaction.deserialize(
+              'signature',
+              'proof',
+              'binding',
+              resultBytes,
+            ) as FinalizedTransaction;
+          } finally {
+            providerCallback('balanceTxDone');
+          }
         },
         getCoinPublicKey(): CoinPublicKey {
           return walletAPI.coinPublicKey;
@@ -461,17 +463,13 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
   const midnightProvider: MidnightProvider = useMemo(() => {
     if (walletAPI) {
       return {
-        async submitTx(tx: FinalizedTransaction): Promise<TransactionId> {
+          async submitTx(tx: FinalizedTransaction): Promise<TransactionId> {
           providerCallback('submitTxStarted');
-          await walletAPI.wallet.submitTransaction(
-            Buffer.from(tx.serialize()).toString('hex'),
-          );
-          providerCallback('submitTxDone');
-          // Generate transaction ID from the transaction serialization
           const serialized = tx.serialize();
-          return Buffer.from(serialized.slice(0, 32)).toString(
-            'hex',
-          ) as TransactionId;
+          const hex = Array.from(serialized).map((b) => b.toString(16).padStart(2, '0')).join('');
+          await walletAPI.wallet.submitTransaction(hex);
+          providerCallback('submitTxDone');
+          return tx.identifiers()[0];
         },
       };
     }

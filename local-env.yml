@@ -14,11 +14,6 @@ services:
       timeout: 5s
       retries: 20
       start_period: 10s
-    logging:
-      driver: local
-      options:
-        max-size: '10m'
-        max-file: '3'
 
   indexer:
     image: 'midnightntwrk/indexer-standalone:latest'

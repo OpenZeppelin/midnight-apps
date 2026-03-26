@@ -105,11 +105,11 @@ importers:
         specifier: 5.0.0
         version: 5.0.0(rxjs@7.8.2)
       '@midnight-ntwrk/wallet-sdk-address-format':
-        specifier: 3.1.0-rc.0
-        version: 3.1.0-rc.0
+        specifier: 3.1.0
+        version: 3.1.0
       '@midnight-ntwrk/wallet-sdk-facade':
-        specifier: 3.0.0-rc.0
-        version: 3.0.0-rc.0(ws@8.19.0)
+        specifier: 3.0.0
+        version: 3.0.0(ws@8.19.0)
       '@midnight-ntwrk/zswap':
         specifier: 4.0.0
         version: 4.0.0
@@ -370,8 +370,8 @@ importers:
         specifier: 4.0.2
         version: 4.0.2
       '@midnight-ntwrk/wallet-sdk-address-format':
-        specifier: 3.1.0-rc.0
-        version: 3.1.0-rc.0
+        specifier: 3.1.0
+        version: 3.1.0
       '@midnight-ntwrk/zswap':
         specifier: 4.0.0
         version: 4.0.0
@@ -504,26 +504,26 @@ importers:
         specifier: 4.0.2
         version: 4.0.2
       '@midnight-ntwrk/testkit-js':
-        specifier: 4.0.0-rc.1
-        version: 4.0.0-rc.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 4.0.2
+        version: 4.0.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@midnight-ntwrk/wallet-sdk-address-format':
-        specifier: 3.1.0-rc.0
-        version: 3.1.0-rc.0
+        specifier: 3.1.0
+        version: 3.1.0
       '@midnight-ntwrk/wallet-sdk-dust-wallet':
-        specifier: 3.0.0-rc.0
-        version: 3.0.0-rc.0(ws@8.19.0)
+        specifier: 3.0.0
+        version: 3.0.0(ws@8.19.0)
       '@midnight-ntwrk/wallet-sdk-facade':
-        specifier: 3.0.0-rc.0
-        version: 3.0.0-rc.0(ws@8.19.0)
+        specifier: 3.0.0
+        version: 3.0.0(ws@8.19.0)
       '@midnight-ntwrk/wallet-sdk-hd':
         specifier: 3.0.1
         version: 3.0.1
       '@midnight-ntwrk/wallet-sdk-shielded':
-        specifier: 2.1.0-rc.0
-        version: 2.1.0-rc.0(ws@8.19.0)
+        specifier: 2.1.0
+        version: 2.1.0(ws@8.19.0)
       '@midnight-ntwrk/wallet-sdk-unshielded-wallet':
-        specifier: 2.1.0-rc.0
-        version: 2.1.0-rc.0(ws@8.19.0)
+        specifier: 2.1.0
+        version: 2.1.0(ws@8.19.0)
       '@openzeppelin/midnight-apps-biome-config':
         specifier: workspace:*
         version: link:../biome-config
@@ -635,8 +635,8 @@ importers:
         specifier: 0.15.0
         version: 0.15.0
       '@midnight-ntwrk/ledger-v8':
-        specifier: 8.0.2
-        version: 8.0.2
+        specifier: 8.0.3
+        version: 8.0.3
       '@midnight-ntwrk/midnight-js-contracts':
         specifier: 4.0.2
         version: 4.0.2
@@ -662,26 +662,26 @@ importers:
         specifier: 4.0.2
         version: 4.0.2
       '@midnight-ntwrk/testkit-js':
-        specifier: 4.0.0-rc.1
-        version: 4.0.0-rc.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 4.0.2
+        version: 4.0.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@midnight-ntwrk/wallet-sdk-address-format':
-        specifier: 3.1.0-rc.0
-        version: 3.1.0-rc.0
+        specifier: 3.1.0
+        version: 3.1.0
       '@midnight-ntwrk/wallet-sdk-dust-wallet':
-        specifier: 3.0.0-rc.0
-        version: 3.0.0-rc.0(ws@8.19.0)
+        specifier: 3.0.0
+        version: 3.0.0(ws@8.19.0)
       '@midnight-ntwrk/wallet-sdk-facade':
-        specifier: 3.0.0-rc.0
-        version: 3.0.0-rc.0(ws@8.19.0)
+        specifier: 3.0.0
+        version: 3.0.0(ws@8.19.0)
       '@midnight-ntwrk/wallet-sdk-hd':
         specifier: 3.0.1
         version: 3.0.1
       '@midnight-ntwrk/wallet-sdk-shielded':
-        specifier: 2.1.0-rc.0
-        version: 2.1.0-rc.0(ws@8.19.0)
+        specifier: 2.1.0
+        version: 2.1.0(ws@8.19.0)
       '@midnight-ntwrk/wallet-sdk-unshielded-wallet':
-        specifier: 2.1.0-rc.0
-        version: 2.1.0-rc.0(ws@8.19.0)
+        specifier: 2.1.0
+        version: 2.1.0(ws@8.19.0)
       '@openzeppelin/midnight-apps-contracts':
         specifier: workspace:*
         version: link:../../contracts
@@ -1497,14 +1497,8 @@ packages:
   '@midnight-ntwrk/compact-js@2.5.0':
     resolution: {integrity: sha512-vCLbndc3GtSTjZE30NtNqINOrrjZ2O/m8q4jCVeyx9t+rTLwwFqGXUOYobKbM34rwfnTz95ZAI6vVixYnarfrA==}
 
-  '@midnight-ntwrk/compact-js@2.5.0-rc.1':
-    resolution: {integrity: sha512-ojlH1Ly4CJp+2XCwBvDWz9xjiingbQg+4Wkklj9pZ+yXBQwH6bKOYc8AlXm/UigDRtPMw4l+K8zWtAiHCtt7Dw==}
-
   '@midnight-ntwrk/compact-runtime@0.15.0':
     resolution: {integrity: sha512-6+odrxb83ZZwF29SqNBBgaOR3hf5ej4KZVGibDwdXta9+uiv6qYW0fMrsKP9S+c2AqvY+vEb5NEFFI54lA7G5A==}
-
-  '@midnight-ntwrk/compact-runtime@0.15.0-rc.0':
-    resolution: {integrity: sha512-8TjsprFPvS/vq9jpoA6CejOdTRItr22nq/Qn0EEyETAvxCTMMRotuqq7x+ei9QwvfxKqaAK3XDkWJKGqxGpGkw==}
 
   '@midnight-ntwrk/dapp-connector-api@4.0.0':
     resolution: {integrity: sha512-XiAesY32uPPDYOk6MXquO1lDsUhe7J/CMbMOIfEgjwDgXfkLvvKFMfNz672O1aSJYkqm1I65o2XjPXNnwloQtA==}
@@ -1512,22 +1506,13 @@ packages:
   '@midnight-ntwrk/ledger-v7@7.0.0':
     resolution: {integrity: sha512-9rch1jU0T9pwt64nR79PhrnrT/mwrS1EKGh4J3q0UT0sBqmylw0c2eREdd26Mq9Kf4FOfAdKxJUaV+IlNh5yUA==}
 
-  '@midnight-ntwrk/ledger-v8@8.0.0':
-    resolution: {integrity: sha512-IL3bJJ4WiLCV81Fn4zHfxxnH3f8kx5WB/uIj3Jhz0XneuwBI7vHXbsOz8aLb3sZqFbFw5kuzFX660sZy1qzv4Q==}
-
-  '@midnight-ntwrk/ledger-v8@8.0.2':
-    resolution: {integrity: sha512-tg12OxjW+Z4GR8ScUW9P9YRHHHlUpItCwPUxm8O3+j4F+xqFKWVMdayUY42vmXxgVGSA2Ze0XmV8CIuJ4YDyDQ==}
-
   '@midnight-ntwrk/ledger-v8@8.0.3':
     resolution: {integrity: sha512-2BLMfHnZyKAHZxaGWjlenhity096lZ9jvyp1qrQH5J3ogpy7H5ostCW8kRj70dGv5T55qDAC5nJ+wnU/8CGUcQ==}
 
-  '@midnight-ntwrk/midnight-js-compact@4.0.0-rc.1':
-    resolution: {integrity: sha512-45pozIPDpCsRqTHnLCjQtJhwZhS8ra4Z8BOC+AlxDmzwuXEtPVV1FgKCb1XVpK8MkCMBvZbzv0eCC190IFYNNA==}
+  '@midnight-ntwrk/midnight-js-compact@4.0.2':
+    resolution: {integrity: sha512-261uzzw7RfY6p0ni4Z9K3iZUNa8GN76BpggjSiFm8ih7XSQji6YZrQfOptimmZMaubsFQt+8TAokdMZHj/QQgA==}
     engines: {node: '>=22.0.0'}
     hasBin: true
-
-  '@midnight-ntwrk/midnight-js-contracts@4.0.0-rc.1':
-    resolution: {integrity: sha512-+JVGYEYSMdYTEdo5dvFpiDh2jnsB2n/Ek5M+FZM7mOQrhFZsHpXXtmMOCaUmGG/w2PGbf9waUV73bQqAbz/iKQ==}
 
   '@midnight-ntwrk/midnight-js-contracts@4.0.2':
     resolution: {integrity: sha512-mzUmelrhWEKR+f0uThgQb6IfQK+9LzOlWXlh74LjwuqDAIQgAuZZIXLuC1U58uYCTXVdmkJlmtQdORzXphJKOg==}
@@ -1535,20 +1520,11 @@ packages:
   '@midnight-ntwrk/midnight-js-fetch-zk-config-provider@4.0.2':
     resolution: {integrity: sha512-CuGpjrBxaemoFpm0s9kBp6+1ZH7Sm/jE1upPJDifVvuUBvaYDATiH4CYhMYCMdHCeCQUxdrwq0i7Ah1GPlgL+A==}
 
-  '@midnight-ntwrk/midnight-js-http-client-proof-provider@4.0.0-rc.1':
-    resolution: {integrity: sha512-g9270oG9yn2eDlyJZo0Zgzo4AkYypVmepzYcucLoJe/MOvoBygEO++GEBLXNpa0sLRHrPGEsieNouhTreS0lbg==}
-
   '@midnight-ntwrk/midnight-js-http-client-proof-provider@4.0.2':
     resolution: {integrity: sha512-TeqP4SDEqWsJCGn25C2+eJZ3/X5rZ1TNxi9c68eYu5wzjgUJKsdzMA0u3PreyUinQ5iCixhSUpuiKKmeB+LAjA==}
 
-  '@midnight-ntwrk/midnight-js-indexer-public-data-provider@4.0.0-rc.1':
-    resolution: {integrity: sha512-ZOo1HEiK3+VgzqbbPAqYLQgIs/9ZHQhyOzlkXogG+XuDqSotB5s6qYorSpJXM28DmAhYtAaMZokVf/k7fWDkTw==}
-
   '@midnight-ntwrk/midnight-js-indexer-public-data-provider@4.0.2':
     resolution: {integrity: sha512-eFQ2BXlIACigA2AApB7vsngIwKGpJil4crmSKv7YY7ZZPr8WsxaehMB5iIwvMfYmABiQ8IWI01IjDRfM3R4EIQ==}
-
-  '@midnight-ntwrk/midnight-js-level-private-state-provider@4.0.0-rc.1':
-    resolution: {integrity: sha512-yoZhTd0C2UxUP6P7AxnnQiV+JCVFJqXXsoTPnUvbwHEn0qDIquOnt+MnhB3Wi86z4Dfh9bEMfDRmyCaq/nwixw==}
 
   '@midnight-ntwrk/midnight-js-level-private-state-provider@4.0.2':
     resolution: {integrity: sha512-V6XB67gxLHPgJOyL6k7MFbyh+xLbPhPO0IBus1lGQ/mJHSoxdUEOb/maZTgWzZLPYVj2NW2IxrdquOhk/mACsg==}
@@ -1556,14 +1532,8 @@ packages:
   '@midnight-ntwrk/midnight-js-network-id@2.0.2':
     resolution: {integrity: sha512-ogBBC5Ox2B2QZo4XxXYr3AxwgUeC4LEmLasLInjMk0p0m//8iI6NmH4/5f0pEOxDtGSuA+piuSonxuQMLM6GUg==}
 
-  '@midnight-ntwrk/midnight-js-network-id@4.0.0-rc.1':
-    resolution: {integrity: sha512-1P39U+ghifhLsNcW9EyX30aibyk3KkHPvID+a+nXV3kU53vavAlNuGmmYQxoeffETlTh+2dNgFDDHjv4oZlS1Q==}
-
   '@midnight-ntwrk/midnight-js-network-id@4.0.2':
     resolution: {integrity: sha512-6XYxm267tZ6ckgMxp337QJkycxX9XqZT+3HdQGvR24Z/K7XLV9sR6Qyv2aPKquEk7nn0JhF4yKbiODw6VjfbuA==}
-
-  '@midnight-ntwrk/midnight-js-node-zk-config-provider@4.0.0-rc.1':
-    resolution: {integrity: sha512-PNVOx6MTzeiTkfeTD01KP0fAkk3B8NJfcroT9MEZ9qjKS4CXDtwOUBiq49DxWtLhZw5F37hYXTo53iplU1zAbA==}
 
   '@midnight-ntwrk/midnight-js-node-zk-config-provider@4.0.2':
     resolution: {integrity: sha512-P1BmmKBYlQkpJGmgRjUpSGyt53aWzpuB2Rn1sK1zPUrvRD6hUiOmv4K5L+PV3tRQasi1GjUFj4y/qI9S17pcTw==}
@@ -1574,14 +1544,8 @@ packages:
   '@midnight-ntwrk/midnight-js-types@2.0.2':
     resolution: {integrity: sha512-ewHBQRCvY8u0+JAGdjQ86KsyoTA3dbNBLkuZ1o5U6vU/1jFjnFA1FL9skTgdXzSKjjfwA930i+OvbaUaUzFEHQ==}
 
-  '@midnight-ntwrk/midnight-js-types@4.0.0-rc.1':
-    resolution: {integrity: sha512-i0/HscyG1ga+xmeXN3b6m9IuzpxhMe3ysgWVAPyhcwJE3LHC4wICDdExbuk+qrQ5IFj06oteLi4riA+j4opupw==}
-
   '@midnight-ntwrk/midnight-js-types@4.0.2':
     resolution: {integrity: sha512-I8ztUcKvGy6n7gLGx45rTM+3D9v+UgZNoPLoIKNLn4R15a676TbJ+Xu28GLdUkmkypR7qmxyYCY4FDr5oBb3Pg==}
-
-  '@midnight-ntwrk/midnight-js-utils@4.0.0-rc.1':
-    resolution: {integrity: sha512-OStkCN3pepifU/KRmn95zwm6M/FX9u1I2bEPXODelnRYHWMasIHI5o6TCBRQVAfFqOvbjoz2LKHkEm7ji/IEEA==}
 
   '@midnight-ntwrk/midnight-js-utils@4.0.2':
     resolution: {integrity: sha512-b4CJXraJvttkwuTo90DEtRD1ObrOEeGkk45zAVKRAAwUYEY+TaYK+u4azsl2rb00Xgjr15Yz127YPEm3dcudcA==}
@@ -1589,14 +1553,11 @@ packages:
   '@midnight-ntwrk/onchain-runtime-v3@3.0.0':
     resolution: {integrity: sha512-HbFbUOsvgpEFy1OT0Ni2LMFk4jnMQS1em+H+Mof/B3DpnNKl0Lkx5QiulKOc6pyU4KPEagOqx4fYNyVXFwgZ7g==}
 
-  '@midnight-ntwrk/platform-js@2.2.2':
-    resolution: {integrity: sha512-NaoCCKvPS0htufK9BKDsSb7sWPiuJpWM8x/3BON9njep926gojuIlzpB0Sx4a3gTslRDIPWAhqa1/mecVBztiw==}
-
   '@midnight-ntwrk/platform-js@2.2.4':
     resolution: {integrity: sha512-6mrYKSSE8kPgn/5rQ2xofDJk1yAZZRdLOO6Yelweuh5GOnOGz7Qw4venDG/c4TRqtV9ouFp+F5j7ta8aprMinw==}
 
-  '@midnight-ntwrk/testkit-js@4.0.0-rc.1':
-    resolution: {integrity: sha512-vFvkxY1JbmMH+rBp6vU/bl1almF7/ItUapqOVSuUEt0f0SEhnBngGOjbDZG4Wve0pviPp8C4G1Jn6ZUyGt+8VQ==}
+  '@midnight-ntwrk/testkit-js@4.0.2':
+    resolution: {integrity: sha512-PNTl1p2I9zgbASJ4YFGgY2qArBqMu3Z8pix8cUuafT9ldKPGriK+XFswp0k2vgQoCZ+j96QKoJRwmOD5qm90uA==}
 
   '@midnight-ntwrk/wallet-api@5.0.0':
     resolution: {integrity: sha512-L5Z9+v+ouqTtPLoXpngtBVHZ0SmC3zLrCZbuYnd/ul6p9UbwUQ3AQeqMhclv2jhwFRNYsL0fBOqpD5dvs4SvLQ==}
@@ -1606,41 +1567,41 @@ packages:
   '@midnight-ntwrk/wallet-sdk-abstractions@2.0.0':
     resolution: {integrity: sha512-urmdK+lpw/gmX3mKjN3p9rVUn6Ba3TyHVEYN5oAXc0na4NkHsvvhgxcn9t4Oh9FYoYWuUA0xDiiLJsAkO05b/A==}
 
-  '@midnight-ntwrk/wallet-sdk-address-format@3.1.0-rc.0':
-    resolution: {integrity: sha512-6UFm+Z+zHqV+dnkg/PZjsfY+ADr1AJxAXhcWAoLHOnHAvzrmehu/lAEwF/EYlfI1514xK1N5lGZGon2NQS0W2g==}
+  '@midnight-ntwrk/wallet-sdk-address-format@3.1.0':
+    resolution: {integrity: sha512-X/MQnbyQQ1SoFVJrxhczkHza1SMJghp3Eo49nXXnHZw2qKUUmpiNa8Hx3MYFq36NXi3m3gsMH7rW0bilMFvdhw==}
 
-  '@midnight-ntwrk/wallet-sdk-capabilities@3.2.0-rc.0':
-    resolution: {integrity: sha512-e8aMgOGTvG13A1Dr3ZyITqC/RbbNgnxsQQcrC6PNJKngxTzJaJvi211MvSz1ugwLBbwroWwKRxcZzI3AYqI2dA==}
+  '@midnight-ntwrk/wallet-sdk-capabilities@3.2.0':
+    resolution: {integrity: sha512-3S06DbFJ/I+2Zn30jG98a9T3xPxtBwRjm4fCiYnsn8CEcNgH8XINhVimpItWLakeCAviGRA2x7M93phk9u7hbw==}
 
-  '@midnight-ntwrk/wallet-sdk-dust-wallet@3.0.0-rc.0':
-    resolution: {integrity: sha512-hSdyTEGZC/WMHAilbJXWWCS1rXhgV9j4nrrRzfFXaSXKgPwFReVkr5wuyoMx5XeiWan55gSHG85aTFmcdCG0AQ==}
+  '@midnight-ntwrk/wallet-sdk-dust-wallet@3.0.0':
+    resolution: {integrity: sha512-7xkaOyPby5uVPfZ16X06xj0Jct5oDjpzXCsTYb7JFYK0v3zaEoWeyQUI1O/3J8/EJBRIlQwCpKNnQWMBPvsOlA==}
 
-  '@midnight-ntwrk/wallet-sdk-facade@3.0.0-rc.0':
-    resolution: {integrity: sha512-SFVA3L33V4oaWuXFEPs20o7MVKKl0/pxAeWDMB3QpRJNn7XPnWjAfP4RdiAxfuIwdL+t/fu260PLFLQRHpJx0g==}
+  '@midnight-ntwrk/wallet-sdk-facade@3.0.0':
+    resolution: {integrity: sha512-UrMHh0JI5eBKI6NcyWQ8r90CLAMF3cxnGWvChEpdTGYVQmK6LleBkXsFvfDJhORMjd+RB1aOt+oG5bEpY1o/9g==}
 
   '@midnight-ntwrk/wallet-sdk-hd@3.0.1':
     resolution: {integrity: sha512-N2s4fPQofIHL9r+Wt4qvWGHQoBFjIO7pZhOALfKuAZEaDUZdwbwrw8NnfA4vKklfhEZ5wWrIBUeFgKFI9qD6hw==}
 
-  '@midnight-ntwrk/wallet-sdk-indexer-client@1.2.0-rc.0':
-    resolution: {integrity: sha512-EmwOnmvyLKBUx9zwkYu1SZDvu49nqZN+2rXURHq1oQ99IpcKihaN343b0elSkLl1iMJSmIZe4hYDnj/5ElacSw==}
+  '@midnight-ntwrk/wallet-sdk-indexer-client@1.2.0':
+    resolution: {integrity: sha512-VzwJ0LTBcUWqr5H4a56DhT6zpLYLjg/H6vRrwKYEz3EhQTKLGnQ7d2PKS0Z0QcKGEXOHzeeSmI41FsvG4FbTAQ==}
 
-  '@midnight-ntwrk/wallet-sdk-node-client@1.1.0-rc.0':
-    resolution: {integrity: sha512-6vDSj2MfntV02H8oBPqcx9afGxCW+WM+00e7gkee19iuzXvu/WXwiv6MB7j2wEamdwHK3+QxmAc66ivyLwYdUA==}
+  '@midnight-ntwrk/wallet-sdk-node-client@1.1.0':
+    resolution: {integrity: sha512-jdY61aHIT8IeCSVJvV1WWTGm7GL4B7ot0WHbguTetWl0O1BDwjQxFlljsRiOJ4o32rYTSeoncs26khRUTGGg2A==}
 
-  '@midnight-ntwrk/wallet-sdk-prover-client@1.2.0-rc.0':
-    resolution: {integrity: sha512-jqeTGdvaGcoOSARAtXMPnrv/f/sbPqbGMUTTNt0uGV/RjZif1ewNkRjJLr1BXVzIKNn2rzathfd9bPVA6y/M0g==}
+  '@midnight-ntwrk/wallet-sdk-prover-client@1.2.0':
+    resolution: {integrity: sha512-8s0y6CJ+lvDVLHeAs6ik0iWPoj4lAJU8ZHInPOTgCyO7GmWfEp6Fy8VHTDEuEtWNJjX9Xp+BRVjaoWzRNVA3xQ==}
 
-  '@midnight-ntwrk/wallet-sdk-runtime@1.0.2-rc.0':
-    resolution: {integrity: sha512-h/DjIX4aTx1H8YiIvVJJ/25eK43KXdlk7g3oXwi0yftiMOoNdCH6LDXA0DdX7vWmK+qdhS7BGyUbF3p3Qhx7RA==}
+  '@midnight-ntwrk/wallet-sdk-runtime@1.0.2':
+    resolution: {integrity: sha512-AcDNF2TsH8U/2twe/pYPAEyal9mOCr9TUkViODoaNzeoRSz2HPTO81wGEfD89t5Lf+GS8xkaT2ju3Il30goOtg==}
 
-  '@midnight-ntwrk/wallet-sdk-shielded@2.1.0-rc.0':
-    resolution: {integrity: sha512-kjchQ2VDvm3Zr4MhNvHiCbUAjVx1ag2fE48OhwIp1mm69eq1VvHIng/BeOTMXm6DueRLi9hZF+ITEiI5v0rkIg==}
+  '@midnight-ntwrk/wallet-sdk-shielded@2.1.0':
+    resolution: {integrity: sha512-Qy0jeBqFso0hc2clpv5GAqscKS2b/1JBqjBhJzamsiqaCbZauaD+CbhaxGdpyc0s+WBDBuc7UnkbVDVQadWG0g==}
 
-  '@midnight-ntwrk/wallet-sdk-unshielded-wallet@2.1.0-rc.0':
-    resolution: {integrity: sha512-zLcQxCOnGhENgxqhxW9C2u09HsiaKJN9IJprAXj1Av6VCRCa9SyHKYBuhDDpj5t6N5If1letzVSzEEFEQDZvDA==}
+  '@midnight-ntwrk/wallet-sdk-unshielded-wallet@2.1.0':
+    resolution: {integrity: sha512-d+IZLTAQ0rJzqvJraaixcFOg+AgDX/D/g+EAjTTrsaB+RCfU/E2jD8iWPIPl0NnG239p9uB0PuPcxbpGHlefNg==}
 
-  '@midnight-ntwrk/wallet-sdk-utilities@1.1.0-rc.0':
-    resolution: {integrity: sha512-6+61YD17/OZh9UjFhLbuGyZ5yyJKelpRoA9apC00qmgqI3dj371AqikHw6QzkU8g7uM/eQpq5C2KKZb7UTczEQ==}
+  '@midnight-ntwrk/wallet-sdk-utilities@1.1.0':
+    resolution: {integrity: sha512-iTxP+VKPGtjhZWVY4AmliYf1WYwRVaPJsvdub7/BZYXg7gOoH9H3DsXGY64aPYwA3ZXuUm/Cjiy0Ak6CnkB5XQ==}
 
   '@midnight-ntwrk/zkir-v2@2.1.0':
     resolution: {integrity: sha512-UDMujjzCt0SA89uqOFWUL4LZTkxVAS8JjvOaYMAgxlSrWfN7m5th1R1qGlpDJuSH39rbWt6WwtuK3k08Mta6LA==}
@@ -6962,22 +6923,7 @@ snapshots:
       effect: 3.20.0
       tslib: 2.8.1
 
-  '@midnight-ntwrk/compact-js@2.5.0-rc.1':
-    dependencies:
-      '@effect/platform': 0.94.5(effect@3.20.0)
-      '@midnight-ntwrk/compact-runtime': 0.15.0-rc.0
-      '@midnight-ntwrk/ledger-v8': 8.0.0
-      '@midnight-ntwrk/platform-js': 2.2.4
-      effect: 3.20.0
-      tslib: 2.8.1
-
   '@midnight-ntwrk/compact-runtime@0.15.0':
-    dependencies:
-      '@midnight-ntwrk/onchain-runtime-v3': 3.0.0
-      '@types/object-inspect': 1.13.0
-      object-inspect: 1.13.4
-
-  '@midnight-ntwrk/compact-runtime@0.15.0-rc.0':
     dependencies:
       '@midnight-ntwrk/onchain-runtime-v3': 3.0.0
       '@types/object-inspect': 1.13.0
@@ -6987,20 +6933,9 @@ snapshots:
 
   '@midnight-ntwrk/ledger-v7@7.0.0': {}
 
-  '@midnight-ntwrk/ledger-v8@8.0.0': {}
-
-  '@midnight-ntwrk/ledger-v8@8.0.2': {}
-
   '@midnight-ntwrk/ledger-v8@8.0.3': {}
 
-  '@midnight-ntwrk/midnight-js-compact@4.0.0-rc.1': {}
-
-  '@midnight-ntwrk/midnight-js-contracts@4.0.0-rc.1':
-    dependencies:
-      '@midnight-ntwrk/compact-js': 2.5.0-rc.1
-      '@midnight-ntwrk/midnight-js-network-id': 4.0.0-rc.1
-      '@midnight-ntwrk/midnight-js-types': 4.0.0-rc.1
-      '@midnight-ntwrk/midnight-js-utils': 4.0.0-rc.1
+  '@midnight-ntwrk/midnight-js-compact@4.0.2': {}
 
   '@midnight-ntwrk/midnight-js-contracts@4.0.2':
     dependencies:
@@ -7016,18 +6951,6 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@midnight-ntwrk/midnight-js-http-client-proof-provider@4.0.0-rc.1':
-    dependencies:
-      '@midnight-ntwrk/midnight-js-contracts': 4.0.0-rc.1
-      '@midnight-ntwrk/midnight-js-network-id': 4.0.0-rc.1
-      '@midnight-ntwrk/midnight-js-types': 4.0.0-rc.1
-      '@midnight-ntwrk/midnight-js-utils': 4.0.0-rc.1
-      cross-fetch: 4.1.0
-      fetch-retry: 6.0.0
-      lodash: 4.17.23
-    transitivePeerDependencies:
-      - encoding
-
   '@midnight-ntwrk/midnight-js-http-client-proof-provider@4.0.2':
     dependencies:
       '@midnight-ntwrk/midnight-js-contracts': 4.0.2
@@ -7039,31 +6962,6 @@ snapshots:
       lodash: 4.17.23
     transitivePeerDependencies:
       - encoding
-
-  '@midnight-ntwrk/midnight-js-indexer-public-data-provider@4.0.0-rc.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@apollo/client': 3.14.0(@types/react@18.3.28)(graphql-ws@6.0.7(graphql@16.13.1)(ws@8.19.0))(graphql@16.13.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@midnight-ntwrk/midnight-js-network-id': 4.0.0-rc.1
-      '@midnight-ntwrk/midnight-js-types': 4.0.0-rc.1
-      '@midnight-ntwrk/midnight-js-utils': 4.0.0-rc.1
-      buffer: 6.0.3
-      cross-fetch: 4.1.0
-      graphql: 16.13.1
-      graphql-ws: 6.0.7(graphql@16.13.1)(ws@8.19.0)
-      isomorphic-ws: 5.0.0(ws@8.19.0)
-      rxjs: 7.8.2
-      ws: 8.19.0
-      zen-observable-ts: 1.1.0
-    transitivePeerDependencies:
-      - '@fastify/websocket'
-      - '@types/react'
-      - bufferutil
-      - crossws
-      - encoding
-      - react
-      - react-dom
-      - subscriptions-transport-ws
-      - utf-8-validate
 
   '@midnight-ntwrk/midnight-js-indexer-public-data-provider@4.0.2(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
@@ -7090,16 +6988,6 @@ snapshots:
       - subscriptions-transport-ws
       - utf-8-validate
 
-  '@midnight-ntwrk/midnight-js-level-private-state-provider@4.0.0-rc.1':
-    dependencies:
-      '@midnight-ntwrk/midnight-js-types': 4.0.0-rc.1
-      abstract-level: 3.1.1
-      buffer: 6.0.3
-      fp-ts: 2.16.11
-      io-ts: 2.2.22(fp-ts@2.16.11)
-      level: 10.0.0
-      superjson: 2.2.6
-
   '@midnight-ntwrk/midnight-js-level-private-state-provider@4.0.2':
     dependencies:
       '@midnight-ntwrk/midnight-js-types': 4.0.2
@@ -7112,13 +7000,7 @@ snapshots:
 
   '@midnight-ntwrk/midnight-js-network-id@2.0.2': {}
 
-  '@midnight-ntwrk/midnight-js-network-id@4.0.0-rc.1': {}
-
   '@midnight-ntwrk/midnight-js-network-id@4.0.2': {}
-
-  '@midnight-ntwrk/midnight-js-node-zk-config-provider@4.0.0-rc.1':
-    dependencies:
-      '@midnight-ntwrk/midnight-js-types': 4.0.0-rc.1
 
   '@midnight-ntwrk/midnight-js-node-zk-config-provider@4.0.2':
     dependencies:
@@ -7133,22 +7015,11 @@ snapshots:
     dependencies:
       rxjs: 7.8.2
 
-  '@midnight-ntwrk/midnight-js-types@4.0.0-rc.1':
-    dependencies:
-      '@midnight-ntwrk/compact-js': 2.5.0-rc.1
-      '@midnight-ntwrk/platform-js': 2.2.2
-      rxjs: 7.8.2
-
   '@midnight-ntwrk/midnight-js-types@4.0.2':
     dependencies:
       '@midnight-ntwrk/compact-js': 2.5.0
       '@midnight-ntwrk/platform-js': 2.2.4
       rxjs: 7.8.2
-
-  '@midnight-ntwrk/midnight-js-utils@4.0.0-rc.1':
-    dependencies:
-      '@midnight-ntwrk/midnight-js-network-id': 4.0.0-rc.1
-      '@scure/base': 2.0.0
 
   '@midnight-ntwrk/midnight-js-utils@4.0.2':
     dependencies:
@@ -7157,31 +7028,25 @@ snapshots:
 
   '@midnight-ntwrk/onchain-runtime-v3@3.0.0': {}
 
-  '@midnight-ntwrk/platform-js@2.2.2':
-    dependencies:
-      '@effect/platform': 0.94.5(effect@3.20.0)
-      effect: 3.20.0
-      tslib: 2.8.1
-
   '@midnight-ntwrk/platform-js@2.2.4':
     dependencies:
       '@effect/platform': 0.95.0(effect@3.20.0)
       effect: 3.20.0
       tslib: 2.8.1
 
-  '@midnight-ntwrk/testkit-js@4.0.0-rc.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@midnight-ntwrk/testkit-js@4.0.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@midnight-ntwrk/compact-js': 2.5.0-rc.1
-      '@midnight-ntwrk/ledger-v8': 8.0.2
-      '@midnight-ntwrk/midnight-js-compact': 4.0.0-rc.1
-      '@midnight-ntwrk/midnight-js-contracts': 4.0.0-rc.1
-      '@midnight-ntwrk/midnight-js-http-client-proof-provider': 4.0.0-rc.1
-      '@midnight-ntwrk/midnight-js-indexer-public-data-provider': 4.0.0-rc.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@midnight-ntwrk/midnight-js-level-private-state-provider': 4.0.0-rc.1
-      '@midnight-ntwrk/midnight-js-network-id': 4.0.0-rc.1
-      '@midnight-ntwrk/midnight-js-node-zk-config-provider': 4.0.0-rc.1
-      '@midnight-ntwrk/midnight-js-types': 4.0.0-rc.1
-      '@midnight-ntwrk/midnight-js-utils': 4.0.0-rc.1
+      '@midnight-ntwrk/compact-js': 2.5.0
+      '@midnight-ntwrk/ledger-v8': 8.0.3
+      '@midnight-ntwrk/midnight-js-compact': 4.0.2
+      '@midnight-ntwrk/midnight-js-contracts': 4.0.2
+      '@midnight-ntwrk/midnight-js-http-client-proof-provider': 4.0.2
+      '@midnight-ntwrk/midnight-js-indexer-public-data-provider': 4.0.2(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@midnight-ntwrk/midnight-js-level-private-state-provider': 4.0.2
+      '@midnight-ntwrk/midnight-js-network-id': 4.0.2
+      '@midnight-ntwrk/midnight-js-node-zk-config-provider': 4.0.2
+      '@midnight-ntwrk/midnight-js-types': 4.0.2
+      '@midnight-ntwrk/midnight-js-utils': 4.0.2
       '@midnight-ntwrk/wallet-sdk-hd': 3.0.1
       buffer: 6.0.3
       cross-fetch: 4.1.0
@@ -7207,20 +7072,20 @@ snapshots:
     dependencies:
       effect: 3.20.0
 
-  '@midnight-ntwrk/wallet-sdk-address-format@3.1.0-rc.0':
+  '@midnight-ntwrk/wallet-sdk-address-format@3.1.0':
     dependencies:
       '@midnight-ntwrk/ledger-v8': 8.0.3
       '@scure/base': 2.0.0
       '@subsquid/scale-codec': 4.0.1
 
-  '@midnight-ntwrk/wallet-sdk-capabilities@3.2.0-rc.0(ws@8.19.0)':
+  '@midnight-ntwrk/wallet-sdk-capabilities@3.2.0(ws@8.19.0)':
     dependencies:
       '@midnight-ntwrk/ledger-v8': 8.0.3
       '@midnight-ntwrk/wallet-sdk-abstractions': 2.0.0
-      '@midnight-ntwrk/wallet-sdk-indexer-client': 1.2.0-rc.0(ws@8.19.0)
-      '@midnight-ntwrk/wallet-sdk-node-client': 1.1.0-rc.0
-      '@midnight-ntwrk/wallet-sdk-prover-client': 1.2.0-rc.0
-      '@midnight-ntwrk/wallet-sdk-utilities': 1.1.0-rc.0
+      '@midnight-ntwrk/wallet-sdk-indexer-client': 1.2.0(ws@8.19.0)
+      '@midnight-ntwrk/wallet-sdk-node-client': 1.1.0
+      '@midnight-ntwrk/wallet-sdk-prover-client': 1.2.0
+      '@midnight-ntwrk/wallet-sdk-utilities': 1.1.0
       '@midnight-ntwrk/zkir-v2': 2.1.0
       effect: 3.20.0
       rxjs: 7.8.2
@@ -7232,15 +7097,15 @@ snapshots:
       - utf-8-validate
       - ws
 
-  '@midnight-ntwrk/wallet-sdk-dust-wallet@3.0.0-rc.0(ws@8.19.0)':
+  '@midnight-ntwrk/wallet-sdk-dust-wallet@3.0.0(ws@8.19.0)':
     dependencies:
       '@midnight-ntwrk/ledger-v8': 8.0.3
       '@midnight-ntwrk/wallet-sdk-abstractions': 2.0.0
-      '@midnight-ntwrk/wallet-sdk-address-format': 3.1.0-rc.0
-      '@midnight-ntwrk/wallet-sdk-capabilities': 3.2.0-rc.0(ws@8.19.0)
-      '@midnight-ntwrk/wallet-sdk-indexer-client': 1.2.0-rc.0(ws@8.19.0)
-      '@midnight-ntwrk/wallet-sdk-runtime': 1.0.2-rc.0
-      '@midnight-ntwrk/wallet-sdk-utilities': 1.1.0-rc.0
+      '@midnight-ntwrk/wallet-sdk-address-format': 3.1.0
+      '@midnight-ntwrk/wallet-sdk-capabilities': 3.2.0(ws@8.19.0)
+      '@midnight-ntwrk/wallet-sdk-indexer-client': 1.2.0(ws@8.19.0)
+      '@midnight-ntwrk/wallet-sdk-runtime': 1.0.2
+      '@midnight-ntwrk/wallet-sdk-utilities': 1.1.0
       effect: 3.20.0
       rxjs: 7.8.2
     transitivePeerDependencies:
@@ -7251,15 +7116,15 @@ snapshots:
       - utf-8-validate
       - ws
 
-  '@midnight-ntwrk/wallet-sdk-facade@3.0.0-rc.0(ws@8.19.0)':
+  '@midnight-ntwrk/wallet-sdk-facade@3.0.0(ws@8.19.0)':
     dependencies:
       '@midnight-ntwrk/ledger-v8': 8.0.3
-      '@midnight-ntwrk/wallet-sdk-address-format': 3.1.0-rc.0
-      '@midnight-ntwrk/wallet-sdk-capabilities': 3.2.0-rc.0(ws@8.19.0)
-      '@midnight-ntwrk/wallet-sdk-dust-wallet': 3.0.0-rc.0(ws@8.19.0)
-      '@midnight-ntwrk/wallet-sdk-indexer-client': 1.2.0-rc.0(ws@8.19.0)
-      '@midnight-ntwrk/wallet-sdk-shielded': 2.1.0-rc.0(ws@8.19.0)
-      '@midnight-ntwrk/wallet-sdk-unshielded-wallet': 2.1.0-rc.0(ws@8.19.0)
+      '@midnight-ntwrk/wallet-sdk-address-format': 3.1.0
+      '@midnight-ntwrk/wallet-sdk-capabilities': 3.2.0(ws@8.19.0)
+      '@midnight-ntwrk/wallet-sdk-dust-wallet': 3.0.0(ws@8.19.0)
+      '@midnight-ntwrk/wallet-sdk-indexer-client': 1.2.0(ws@8.19.0)
+      '@midnight-ntwrk/wallet-sdk-shielded': 2.1.0(ws@8.19.0)
+      '@midnight-ntwrk/wallet-sdk-unshielded-wallet': 2.1.0(ws@8.19.0)
       rxjs: 7.8.2
     transitivePeerDependencies:
       - '@fastify/websocket'
@@ -7274,10 +7139,10 @@ snapshots:
       '@scure/bip32': 2.0.1
       '@scure/bip39': 2.0.1
 
-  '@midnight-ntwrk/wallet-sdk-indexer-client@1.2.0-rc.0(ws@8.19.0)':
+  '@midnight-ntwrk/wallet-sdk-indexer-client@1.2.0(ws@8.19.0)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.13.1)
-      '@midnight-ntwrk/wallet-sdk-utilities': 1.1.0-rc.0
+      '@midnight-ntwrk/wallet-sdk-utilities': 1.1.0
       effect: 3.20.0
       graphql: 16.13.1
       graphql-http: 1.22.4(graphql@16.13.1)
@@ -7287,10 +7152,10 @@ snapshots:
       - crossws
       - ws
 
-  '@midnight-ntwrk/wallet-sdk-node-client@1.1.0-rc.0':
+  '@midnight-ntwrk/wallet-sdk-node-client@1.1.0':
     dependencies:
       '@midnight-ntwrk/wallet-sdk-abstractions': 2.0.0
-      '@midnight-ntwrk/wallet-sdk-utilities': 1.1.0-rc.0
+      '@midnight-ntwrk/wallet-sdk-utilities': 1.1.0
       '@polkadot/api': 16.5.4
       '@polkadot/types': 16.5.4
       '@polkadot/util': 14.0.1
@@ -7302,31 +7167,31 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@midnight-ntwrk/wallet-sdk-prover-client@1.2.0-rc.0':
+  '@midnight-ntwrk/wallet-sdk-prover-client@1.2.0':
     dependencies:
       '@effect/platform': 0.94.5(effect@3.20.0)
       '@midnight-ntwrk/ledger-v8': 8.0.3
-      '@midnight-ntwrk/wallet-sdk-utilities': 1.1.0-rc.0
+      '@midnight-ntwrk/wallet-sdk-utilities': 1.1.0
       '@midnight-ntwrk/zkir-v2': 2.1.0
       effect: 3.20.0
       web-worker: 1.5.0
 
-  '@midnight-ntwrk/wallet-sdk-runtime@1.0.2-rc.0':
+  '@midnight-ntwrk/wallet-sdk-runtime@1.0.2':
     dependencies:
       '@midnight-ntwrk/wallet-sdk-abstractions': 2.0.0
-      '@midnight-ntwrk/wallet-sdk-utilities': 1.1.0-rc.0
+      '@midnight-ntwrk/wallet-sdk-utilities': 1.1.0
       effect: 3.20.0
       rxjs: 7.8.2
 
-  '@midnight-ntwrk/wallet-sdk-shielded@2.1.0-rc.0(ws@8.19.0)':
+  '@midnight-ntwrk/wallet-sdk-shielded@2.1.0(ws@8.19.0)':
     dependencies:
       '@midnight-ntwrk/ledger-v8': 8.0.3
       '@midnight-ntwrk/wallet-sdk-abstractions': 2.0.0
-      '@midnight-ntwrk/wallet-sdk-address-format': 3.1.0-rc.0
-      '@midnight-ntwrk/wallet-sdk-capabilities': 3.2.0-rc.0(ws@8.19.0)
-      '@midnight-ntwrk/wallet-sdk-indexer-client': 1.2.0-rc.0(ws@8.19.0)
-      '@midnight-ntwrk/wallet-sdk-runtime': 1.0.2-rc.0
-      '@midnight-ntwrk/wallet-sdk-utilities': 1.1.0-rc.0
+      '@midnight-ntwrk/wallet-sdk-address-format': 3.1.0
+      '@midnight-ntwrk/wallet-sdk-capabilities': 3.2.0(ws@8.19.0)
+      '@midnight-ntwrk/wallet-sdk-indexer-client': 1.2.0(ws@8.19.0)
+      '@midnight-ntwrk/wallet-sdk-runtime': 1.0.2
+      '@midnight-ntwrk/wallet-sdk-utilities': 1.1.0
       effect: 3.20.0
       rxjs: 7.8.2
     transitivePeerDependencies:
@@ -7337,15 +7202,15 @@ snapshots:
       - utf-8-validate
       - ws
 
-  '@midnight-ntwrk/wallet-sdk-unshielded-wallet@2.1.0-rc.0(ws@8.19.0)':
+  '@midnight-ntwrk/wallet-sdk-unshielded-wallet@2.1.0(ws@8.19.0)':
     dependencies:
       '@midnight-ntwrk/ledger-v8': 8.0.3
       '@midnight-ntwrk/wallet-sdk-abstractions': 2.0.0
-      '@midnight-ntwrk/wallet-sdk-address-format': 3.1.0-rc.0
-      '@midnight-ntwrk/wallet-sdk-capabilities': 3.2.0-rc.0(ws@8.19.0)
-      '@midnight-ntwrk/wallet-sdk-indexer-client': 1.2.0-rc.0(ws@8.19.0)
-      '@midnight-ntwrk/wallet-sdk-runtime': 1.0.2-rc.0
-      '@midnight-ntwrk/wallet-sdk-utilities': 1.1.0-rc.0
+      '@midnight-ntwrk/wallet-sdk-address-format': 3.1.0
+      '@midnight-ntwrk/wallet-sdk-capabilities': 3.2.0(ws@8.19.0)
+      '@midnight-ntwrk/wallet-sdk-indexer-client': 1.2.0(ws@8.19.0)
+      '@midnight-ntwrk/wallet-sdk-runtime': 1.0.2
+      '@midnight-ntwrk/wallet-sdk-utilities': 1.1.0
       effect: 3.20.0
       rxjs: 7.8.2
     transitivePeerDependencies:
@@ -7356,7 +7221,7 @@ snapshots:
       - utf-8-validate
       - ws
 
-  '@midnight-ntwrk/wallet-sdk-utilities@1.1.0-rc.0':
+  '@midnight-ntwrk/wallet-sdk-utilities@1.1.0':
     dependencies:
       effect: 3.20.0
       rxjs: 7.8.2

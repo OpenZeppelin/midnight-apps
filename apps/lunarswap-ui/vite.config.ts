@@ -13,33 +13,6 @@ import wasm from 'vite-plugin-wasm';
  * Works by intercepting the resolved crypto-browserify module and appending
  * the timing-safe-equal browser implementation inline.
  */
-/**
- * Returns 404 for missing ZK artifact files (/keys/*, /zkir/*, /shielded-token/*)
- * instead of letting Vite's SPA fallback serve index.html as 200 OK.
- * Without this, the SDK treats HTML as valid binary key data and corrupts proof payloads.
- */
-/**
- * Patches proof provider: `body: payload.buffer` → `body: new Uint8Array(payload)`.
- * payload.buffer sends the entire WASM heap when payload is a view on WASM memory.
- */
-function patchProofProviderPayload(): Plugin {
-  return {
-    name: 'patch-proof-provider-payload',
-    transform(code, id) {
-      if (
-        !id.includes('midnight-js-http-client-proof-provider') ||
-        !code.includes('payload.buffer')
-      ) {
-        return null;
-      }
-      return {
-        code: code.replaceAll('payload.buffer', 'new Uint8Array(payload)'),
-        map: null,
-      };
-    },
-  };
-}
-
 function zkArtifact404(): Plugin {
   const zkPrefixes = ['/keys/', '/zkir/', '/shielded-token/'];
   return {
@@ -57,96 +30,6 @@ function zkArtifact404(): Plugin {
         }
         next();
       });
-    },
-  };
-}
-
-/**
- * Patches getKeyMaterial to log which circuits are missing key material
- * instead of silently swallowing errors.
- */
-function patchGetKeyMaterial(): Plugin {
-  return {
-    name: 'patch-get-key-material',
-    transform(code, id) {
-      if (
-        !id.includes('midnight-js-http-client-proof-provider') ||
-        !code.includes('getKeyMaterial')
-      ) {
-        return null;
-      }
-      const original = `const getKeyMaterial = async (zkConfigProvider, keyLocation) => {
-    try {
-        const zkConfig = await zkConfigProvider.get(keyLocation);
-        return zkConfigToProvingKeyMaterial(zkConfig);
-    }
-    catch {
-        return undefined;
-    }
-};`;
-      const patched = `const getKeyMaterial = async (zkConfigProvider, keyLocation) => {
-    try {
-        const zkConfig = await zkConfigProvider.get(keyLocation);
-        const material = zkConfigToProvingKeyMaterial(zkConfig);
-        console.debug('[getKeyMaterial] OK for "' + keyLocation + '" — ir:', !!material?.ir, ', proverKey:', !!material?.proverKey);
-        return material;
-    }
-    catch (err) {
-        console.error('[getKeyMaterial] MISSING key material for "' + keyLocation + '":', err?.message || err);
-        throw new Error('[getKeyMaterial] Missing key material for "' + keyLocation + '": ' + (err?.message || err));
-    }
-};`;
-      if (!code.includes(original)) return null;
-      return { code: code.replace(original, patched), map: null };
-    },
-  };
-}
-
-/**
- * Patches FetchZkConfigProvider.sendRequest to validate responses:
- * 1. Rejects text/html content-type (catches SPA fallback serving index.html)
- * 2. Validates ZKIR magic bytes header (midnight:ir-source)
- */
-function patchZkConfigProvider(): Plugin {
-  const PATCH = `
-    var _origSendRequest = FetchZkConfigProvider.prototype.sendRequest;
-    FetchZkConfigProvider.prototype.sendRequest = async function(url, circuitId, ext, responseType) {
-      var fullUrl = this.baseURL + '/' + url + '/' + circuitId + ext;
-      var response = await this.fetchFunc(fullUrl, { method: 'GET' });
-      if (!response.ok) throw new Error(response.statusText);
-
-      // 1. Content-Type check: reject text/html (SPA fallback)
-      var ct = (response.headers.get('content-type') || '').toLowerCase();
-      if (responseType === 'arraybuffer' && ct.includes('text/html')) {
-        throw new Error('Expected binary ZK artifact for ' + circuitId + ', got text/html (possible SPA fallback)');
-      }
-
-      if (responseType === 'text') return await response.text();
-
-      var arrayBuffer = await response.arrayBuffer();
-      var bytes = new Uint8Array(arrayBuffer);
-
-      // 2. Magic bytes check for ZKIR files
-      if (ext === '.bzkir' && bytes.length > 20) {
-        var header = new TextDecoder().decode(bytes.subarray(0, 20));
-        if (!header.startsWith('midnight:ir-source')) {
-          throw new Error('Invalid ZKIR data for ' + circuitId + ': expected midnight:ir-source header, got: ' + JSON.stringify(header));
-        }
-      }
-
-      return bytes;
-    };
-  `;
-  return {
-    name: 'patch-zk-config-provider',
-    transform(code, id) {
-      if (
-        !id.includes('midnight-js-fetch-zk-config-provider') ||
-        !code.includes('FetchZkConfigProvider')
-      ) {
-        return null;
-      }
-      return { code: code + PATCH, map: null };
     },
   };
 }
@@ -200,11 +83,11 @@ export default defineConfig({
       },
       protocolImports: true,
     }),
-    // zkArtifact404(),
-    // patchProofProviderPayload(),
-    patchGetKeyMaterial(),
-    patchZkConfigProvider(),
-    patchCryptoTimingSafeEqual(),
+    zkArtifact404(),
+    // patchProofProviderPayload(), // Fixed upstream in midnight-js 4.0.2
+    //patchGetKeyMaterial(),
+    //atchZkConfigProvider(),
+    //patchCryptoTimingSafeEqual(),
     wasm(),
     react(),
     viteCommonjs(),
@@ -229,56 +112,37 @@ export default defineConfig({
     esbuildOptions: {
       target: 'esnext',
       plugins: [
-        // {
-        //   name: 'patch-proof-provider-payload-esbuild',
-        //   setup(build) {
-        //     build.onLoad(
-        //       {
-        //         filter:
-        //           /midnight-js-http-client-proof-provider.*index\.(mjs|cjs|js)$/,
-        //       },
-        //       (args) => {
-        //         let contents = readFileSync(args.path, 'utf8');
-        //         if (!contents.includes('payload.buffer')) return null;
-        //         contents = contents.replaceAll(
-        //           'payload.buffer',
-        //           'new Uint8Array(payload)',
-        //         );
-        //         return { contents, loader: 'js' };
-        //       },
-        //     );
-        //   },
-        // },
-        {
-          name: 'patch-get-key-material-esbuild',
-          setup(build) {
-            build.onLoad(
-              {
-                filter:
-                  /midnight-js-http-client-proof-provider.*index\.(mjs|cjs|js)$/,
-              },
-              (args) => {
-                let contents = readFileSync(args.path, 'utf8');
-                if (!contents.includes('getKeyMaterial')) return null;
-                contents = contents.replace(
-                  /catch\s*\{\s*\n?\s*return undefined;\s*\n?\s*\}/,
-                  `catch (err) {
-        console.error('[getKeyMaterial] MISSING key material for "' + keyLocation + '":', err?.message || err);
-        throw new Error('[getKeyMaterial] Missing key material for "' + keyLocation + '": ' + (err?.message || err));
-    }`,
-                );
-                // Also add success logging
-                contents = contents.replace(
-                  'return zkConfigToProvingKeyMaterial(zkConfig);',
-                  `var material = zkConfigToProvingKeyMaterial(zkConfig);
-        console.debug('[getKeyMaterial] OK for "' + keyLocation + '" — ir:', !!material?.ir, ', proverKey:', !!material?.proverKey);
-        return material;`,
-                );
-                return { contents, loader: 'js' };
-              },
-            );
-          },
-        },
+        // patch-proof-provider-payload-esbuild: removed — fixed upstream in midnight-js 4.0.2
+    //     {
+    //       name: 'patch-get-key-material-esbuild',
+    //       setup(build) {
+    //         build.onLoad(
+    //           {
+    //             filter:
+    //               /midnight-js-http-client-proof-provider.*index\.(mjs|cjs|js)$/,
+    //           },
+    //           (args) => {
+    //             let contents = readFileSync(args.path, 'utf8');
+    //             if (!contents.includes('getKeyMaterial')) return null;
+    //             contents = contents.replace(
+    //               /catch\s*\{\s*\n?\s*return undefined;\s*\n?\s*\}/,
+    //               `catch (err) {
+    //     console.warn('[getKeyMaterial] No local key material for "' + keyLocation + '" — proof server will use built-in keys:', err?.message || err);
+    //     return undefined;
+    // }`,
+    //             );
+    //             // Also add success logging
+    //             contents = contents.replace(
+    //               'return zkConfigToProvingKeyMaterial(zkConfig);',
+    //               `var material = zkConfigToProvingKeyMaterial(zkConfig);
+    //     console.debug('[getKeyMaterial] OK for "' + keyLocation + '" — ir:', !!material?.ir, ', proverKey:', !!material?.proverKey);
+    //     return material;`,
+    //             );
+    //             return { contents, loader: 'js' };
+    //           },
+    //         );
+    //       },
+    //     },
         {
           name: 'patch-zk-config-provider-esbuild',
           setup(build) {
@@ -345,12 +209,6 @@ export default defineConfig({
     include: [
       'buffer',
       'vite-plugin-node-polyfills/shims/buffer',
-      '@apollo/client',
-      '@apollo/client/core',
-      '@apollo/client/link/core',
-      '@apollo/client/utilities',
-      '@wry/caches',
-      '@wry/trie',
     ],
   },
   resolve: {
@@ -392,77 +250,6 @@ export default defineConfig({
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/faucet/, ''),
           secure: true,
-        },
-        // Temporary: proxy proof server requests to log payloads for debugging
-        '/prove': {
-          target: 'http://localhost:6300',
-          changeOrigin: true,
-          configure: (proxy) => {
-            proxy.on('proxyReq', (proxyReq, req) => {
-              const chunks: Buffer[] = [];
-              req.on('data', (chunk: Buffer) => chunks.push(chunk));
-              req.on('end', () => {
-                const body = Buffer.concat(chunks);
-                const header = body
-                  .subarray(0, 80)
-                  .toString('utf8', 0, Math.min(80, body.length));
-                console.log(
-                  `\n[PROOF-DEBUG] POST /prove — ${body.length} bytes`,
-                );
-                console.log(
-                  `[PROOF-DEBUG] First 80 bytes (utf8): ${JSON.stringify(header)}`,
-                );
-                console.log(
-                  `[PROOF-DEBUG] First 32 bytes (hex): ${body.subarray(0, 32).toString('hex')}`,
-                );
-              });
-            });
-            proxy.on('proxyRes', (proxyRes) => {
-              const chunks: Buffer[] = [];
-              proxyRes.on('data', (chunk: Buffer) => chunks.push(chunk));
-              proxyRes.on('end', () => {
-                const body = Buffer.concat(chunks).toString('utf8');
-                console.log(
-                  `[PROOF-DEBUG] /prove response ${proxyRes.statusCode}: ${body.substring(0, 200)}`,
-                );
-              });
-            });
-          },
-        },
-        '/check': {
-          target: 'http://localhost:6300',
-          changeOrigin: true,
-          configure: (proxy) => {
-            proxy.on('proxyReq', (proxyReq, req) => {
-              const chunks: Buffer[] = [];
-              req.on('data', (chunk: Buffer) => chunks.push(chunk));
-              req.on('end', () => {
-                const body = Buffer.concat(chunks);
-                const header = body
-                  .subarray(0, 80)
-                  .toString('utf8', 0, Math.min(80, body.length));
-                console.log(
-                  `\n[PROOF-DEBUG] POST /check — ${body.length} bytes`,
-                );
-                console.log(
-                  `[PROOF-DEBUG] First 80 bytes (utf8): ${JSON.stringify(header)}`,
-                );
-                console.log(
-                  `[PROOF-DEBUG] First 32 bytes (hex): ${body.subarray(0, 32).toString('hex')}`,
-                );
-              });
-            });
-            proxy.on('proxyRes', (proxyRes) => {
-              const chunks: Buffer[] = [];
-              proxyRes.on('data', (chunk: Buffer) => chunks.push(chunk));
-              proxyRes.on('end', () => {
-                const body = Buffer.concat(chunks).toString('utf8');
-                console.log(
-                  `[PROOF-DEBUG] /check response ${proxyRes.statusCode}: ${body.substring(0, 200)}`,
-                );
-              });
-            });
-          },
         },
       };
     })(),
