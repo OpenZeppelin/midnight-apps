@@ -240,6 +240,7 @@ export function SetDepositStep({ pairData }: SetDepositStepProps) {
         SLIPPAGE_TOLERANCE.LOW, // 0.5% slippage tolerance
       );
 
+      console.log('[addLiquidity] token types:', pairData.tokenA.type, pairData.tokenB.type);
       await lunarswapIntegration.addLiquidity(
         pairData.tokenA.type,
         pairData.tokenB.type,

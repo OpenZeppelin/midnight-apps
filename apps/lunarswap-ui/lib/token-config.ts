@@ -155,15 +155,23 @@ export function getAvailableTokensForSelection(
 export function getTokensFromShieldedBalances(
   balances: Record<string, bigint>,
 ): Token[] {
-  return Object.entries(balances).map(([colorHex, _balance]) => {
-    const normalized = colorHex.replace(/^0x/i, '').toLowerCase();
-    const short = normalized.length >= 8 ? normalized.slice(0, 8) : normalized;
-    return {
-      symbol: `Wallet (${short}…)`,
-      name: 'From wallet',
-      type: normalized as RawTokenType,
-      address: '',
-      shielded: true,
-    };
-  });
+  return Object.entries(balances)
+    .filter(([colorHex]) => {
+      const normalized = colorHex.replace(/^0x/i, '').toLowerCase();
+      return normalized.length === 0 || !/^0+$/.test(normalized);
+    })
+    .map(([colorHex, _balance]) => {
+      const normalized = colorHex.replace(/^0x/i, '').toLowerCase();
+      const symbol =
+        normalized.length > 16
+          ? `${normalized.slice(0, 8)}…${normalized.slice(-8)}`
+          : normalized;
+      return {
+        symbol,
+        name: '',
+        type: normalized as RawTokenType,
+        address: '',
+        shielded: true,
+      };
+    });
 }

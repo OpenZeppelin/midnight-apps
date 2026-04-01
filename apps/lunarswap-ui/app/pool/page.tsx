@@ -1,6 +1,5 @@
 import { Minus, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { DeployTokenModal } from '@/components/deploy-token-modal';
 import { Header } from '@/components/header';
 import { MoonDustBackground } from '@/components/moon-dust-background';
 import { NewPositionWizard } from '@/components/pool/new-position-wizard';
@@ -17,8 +16,6 @@ export const metadata = {
 export default function PoolPage() {
   const [showNewPosition, setShowNewPosition] = useState(true); // Default to Add Liquidity
   const [showRemoveLiquidity, setShowRemoveLiquidity] = useState(false);
-  const [deployModalOpen, setDeployModalOpen] = useState(false);
-
   useEffect(() => {
     document.title = 'Manage Liquidity & Positions';
   }, []);
@@ -127,10 +124,6 @@ export default function PoolPage() {
         </div>
       </main>
 
-      <DeployTokenModal
-        open={deployModalOpen}
-        onOpenChange={setDeployModalOpen}
-      />
     </div>
   );
 }

@@ -1,8 +1,7 @@
 'use client';
 
-import { ChevronDown, Plus, Search } from 'lucide-react';
+import { ChevronDown, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { DeployTokenModal } from '@/components/deploy-token-modal';
 import { TokenIcon } from '@/components/token-icon';
 import { Button } from '@/components/ui/button';
 import {
@@ -36,7 +35,6 @@ export function TokenSelector({
   tokens: tokensProp,
 }: TokenSelectorProps) {
   const [open, setOpen] = useState(false);
-  const [deployModalOpen, setDeployModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { userDeployedTokens } = useShieldedTokenContext();
   const defaultTokens = useMemo(
@@ -130,38 +128,15 @@ export function TokenSelector({
 
             {filteredTokens.length === 0 && (
               <div className="text-center py-6">
-                {availableTokens.length === 0 ? (
-                  <div className="space-y-3">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      No tokens available. Deploy a shielded token to get
-                      started.
-                    </p>
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        setOpen(false);
-                        setDeployModalOpen(true);
-                      }}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Deploy Token
-                    </Button>
-                  </div>
-                ) : (
-                  <p className="text-gray-500 dark:text-gray-400">
-                    No tokens found
-                  </p>
-                )}
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {availableTokens.length === 0 ? 'No tokens available.' : 'No tokens found'}
+                </p>
               </div>
             )}
           </div>
         </DialogContent>
       </Dialog>
 
-      <DeployTokenModal
-        open={deployModalOpen}
-        onOpenChange={setDeployModalOpen}
-      />
     </>
   );
 }

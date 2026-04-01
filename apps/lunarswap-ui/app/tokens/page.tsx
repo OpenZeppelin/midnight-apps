@@ -1,7 +1,6 @@
 import { Buffer } from 'buffer';
 import { Clock, Coins, Grid3X3, List, Plus, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { DeployTokenModal } from '@/components/deploy-token-modal';
 import { Header } from '@/components/header';
 import { MintTokenModal } from '@/components/mint-token-modal';
 import { MoonDustBackground } from '@/components/moon-dust-background';
@@ -53,7 +52,6 @@ function TokensContent() {
     viewPreference === 'horizontal' ? 'grid' : 'list',
   );
   const [availableTokens, setAvailableTokens] = useState<Token[]>([]);
-  const [deployModalOpen, setDeployModalOpen] = useState(false);
   const [mintModalOpen, setMintModalOpen] = useState(false);
   const [mintModalContractAddress, setMintModalContractAddress] = useState<
     string | undefined
@@ -398,14 +396,6 @@ function TokensContent() {
                 <>
                   <Button
                     size="sm"
-                    variant="default"
-                    onClick={() => setDeployModalOpen(true)}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Deploy Token
-                  </Button>
-                  <Button
-                    size="sm"
                     variant="outline"
                     onClick={() => {
                       setMintModalContractAddress(undefined);
@@ -435,10 +425,6 @@ function TokensContent() {
             </div>
           </div>
 
-          <DeployTokenModal
-            open={deployModalOpen}
-            onOpenChange={setDeployModalOpen}
-          />
 
           <MintTokenModal
             open={mintModalOpen}
@@ -494,12 +480,6 @@ function TokensContent() {
                   : 'Deploy a shielded token to get started, or wait for pools to be created.'}
               </p>
               <div className="mt-4 flex flex-wrap justify-center gap-2">
-                {!searchQuery && (
-                  <Button size="sm" onClick={() => setDeployModalOpen(true)}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Deploy Token
-                  </Button>
-                )}
                 {searchQuery && (
                   <Button
                     variant="outline"

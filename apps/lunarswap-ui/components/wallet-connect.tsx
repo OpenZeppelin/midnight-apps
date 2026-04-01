@@ -4,8 +4,15 @@ import { ChevronDown, Chrome, ExternalLink, Wallet } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useWallet } from '@/hooks/use-wallet';
-import { getLaceMidnightProvider } from '@/utils/wallet-utils';
+import type { InitialAPI } from '@midnight-ntwrk/dapp-connector-api';
+import { getSupportedMidnightProviders } from '@/utils/wallet-utils';
 import { AccountPanel } from './account-panel';
 import { Identicon } from './identicon';
 
@@ -22,9 +29,9 @@ export function WalletConnect({
   const [browserStatus, setBrowserStatus] = useState<
     'firefox' | 'no-wallet' | 'supported' | 'checking'
   >('checking');
+  const [availableWallets, setAvailableWallets] = useState<InitialAPI[]>([]);
 
   useEffect(() => {
-    // Check browser type
     const userAgent = navigator.userAgent.toLowerCase();
     const isFirefox =
       userAgent.includes('firefox') ||
@@ -36,7 +43,6 @@ export function WalletConnect({
       return;
     }
 
-    // Check if it's a Chromium-based browser
     const isChromium =
       userAgent.includes('chrome') ||
       userAgent.includes('edge') ||
@@ -44,30 +50,23 @@ export function WalletConnect({
       userAgent.includes('chromium');
 
     if (isChromium) {
-      // Check if Midnight Lace wallet is available (API 4.x uses UUID-based discovery, not mnLace)
       const checkWalletAvailability = () => {
-        if (typeof window !== 'undefined' && getLaceMidnightProvider()) {
-          setBrowserStatus('supported');
-        } else {
-          setBrowserStatus('no-wallet');
-        }
+        const providers = getSupportedMidnightProviders();
+        setAvailableWallets(providers);
+        setBrowserStatus(providers.length > 0 ? 'supported' : 'no-wallet');
       };
 
-      // Check immediately
       checkWalletAvailability();
-
-      // Also check after a short delay in case the wallet loads later
       const timeout = setTimeout(checkWalletAvailability, 1000);
       return () => clearTimeout(timeout);
     }
 
-    // Other browsers, assume supported
     setBrowserStatus('supported');
   }, []);
 
-  const handleConnect = async () => {
+  const handleConnect = async (rdns?: string) => {
     try {
-      await connect(true);
+      await connect(true, rdns);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       console.error('[WalletConnect] Connect failed:', error);
@@ -76,7 +75,7 @@ export function WalletConnect({
         message.includes("Require '4.x'")
       ) {
         toast.error(
-          'Midnight Lace wallet is outdated. Please update the Lace extension to the latest version (requires connector API 4.x).',
+          'Midnight wallet is outdated. Please update your wallet extension to the latest version (requires connector API 4.x).',
           { duration: 8000 },
         );
       } else {
@@ -118,9 +117,7 @@ export function WalletConnect({
   };
 
   if (isConnected && address) {
-    const shortAddress = address
-      ? `${address.slice(0, 6)}...${address.slice(-5)}`
-      : '...';
+    const shortAddress = `${address.slice(0, 6)}...${address.slice(-5)}`;
 
     return (
       <>
@@ -144,7 +141,6 @@ export function WalletConnect({
     );
   }
 
-  // Show appropriate message based on browser status
   if (browserStatus === 'firefox') {
     return (
       <Button
@@ -153,7 +149,7 @@ export function WalletConnect({
         className="flex items-center gap-2 rounded-full border-red-200 text-red-700 hover:bg-red-50 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-900/20"
       >
         <Chrome className="h-4 w-4" />
-        Lace Wallet Not Available in Firefox
+        Midnight Wallets Not Available in Firefox
         <ExternalLink className="h-3 w-3" />
       </Button>
     );
@@ -167,7 +163,7 @@ export function WalletConnect({
         className="flex items-center gap-2 rounded-full border-blue-200 text-blue-700 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-300 dark:hover:bg-blue-900/20"
       >
         <Wallet className="h-4 w-4" />
-        Install Lace Wallet
+        Install a Midnight Wallet
         <ExternalLink className="h-3 w-3" />
       </Button>
     );
@@ -186,10 +182,44 @@ export function WalletConnect({
     );
   }
 
-  // Default case - show normal connect wallet button
+  // Multiple wallets: show picker dropdown
+  if (availableWallets.length > 1) {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            disabled={isConnecting}
+            className="flex items-center gap-2 rounded-full"
+          >
+            <Wallet className="h-4 w-4" />
+            {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+            <ChevronDown className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {availableWallets.map((wallet) => (
+            <DropdownMenuItem
+              key={wallet.rdns}
+              onClick={() => handleConnect(wallet.rdns)}
+              className="flex items-center gap-2"
+            >
+              {wallet.icon ? (
+                <img src={wallet.icon} alt="" className="h-4 w-4" />
+              ) : (
+                <Wallet className="h-4 w-4" />
+              )}
+              {wallet.name}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
+
+  // Single wallet: connect directly
   return (
     <Button
-      onClick={handleConnect}
+      onClick={() => handleConnect(availableWallets[0]?.rdns)}
       disabled={isConnecting}
       className="flex items-center gap-2 rounded-full"
     >

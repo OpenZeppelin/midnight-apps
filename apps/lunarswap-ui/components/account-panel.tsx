@@ -114,21 +114,21 @@ export function AccountPanel({
                   Shielded Balances
                 </div>
                 <div className="space-y-1">
-                  {Object.entries(walletState.shieldedBalances).map(
-                    ([token, amount]) => (
+                  {Object.entries(walletState.shieldedBalances)
+                    .filter(([token]) => !/^0+$/.test(token))
+                    .map(([token, amount]) => (
                       <div
                         key={token}
                         className="flex items-center justify-between text-xs"
                       >
                         <span className="font-mono text-muted-foreground truncate">
-                          {token.slice(0, 8)}...
+                          {token.slice(0, 8)}…{token.slice(-8)}
                         </span>
                         <span className="font-mono font-semibold">
                           {formatTokenBalance(token, amount)}
                         </span>
                       </div>
-                    ),
-                  )}
+                    ))}
                 </div>
               </div>
             </div>

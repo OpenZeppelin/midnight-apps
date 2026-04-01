@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { DeployTokenModal } from '@/components/deploy-token-modal';
 import { Header } from '@/components/header';
 import { MoonDustBackground } from '@/components/moon-dust-background';
 import { SplitTokenIcon } from '@/components/pool/split-token-icon';
@@ -95,7 +94,6 @@ export default function ExplorePage() {
   // Token dialog state
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
   const [isTokenDialogOpen, setIsTokenDialogOpen] = useState(false);
-  const [deployModalOpen, setDeployModalOpen] = useState(false);
   const [copiedDialogField, setCopiedDialogField] = useState<string | null>(
     null,
   );
@@ -522,15 +520,6 @@ export default function ExplorePage() {
                       className="pl-10 w-48 h-9"
                     />
                   </div>
-                  {isConnected && (
-                    <Button
-                      onClick={() => setDeployModalOpen(true)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white gap-2 h-9 px-3 text-sm"
-                    >
-                      <Plus className="h-4 w-4" />
-                      Deploy Token
-                    </Button>
-                  )}
                 </>
               )}
 
@@ -692,10 +681,6 @@ export default function ExplorePage() {
         </DialogContent>
       </Dialog>
 
-      <DeployTokenModal
-        open={deployModalOpen}
-        onOpenChange={setDeployModalOpen}
-      />
     </div>
   );
 }

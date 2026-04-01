@@ -4,28 +4,36 @@ import type {
   WalletConnectedAPI,
 } from '@midnight-ntwrk/dapp-connector-api';
 
-const LACE_RDNS = 'io.lace.wallet';
-const LACE_NAME = 'lace';
+const SUPPORTED_WALLET_RDNS = ['io.lace.wallet', 'io.shielded.gsd'];
+const SUPPORTED_WALLET_NAMES = ['lace', 'gsd'];
 
 /**
- * Get the Lace Midnight provider from window.midnight using UUID-based discovery.
- * In API 4.x, Lace injects under a UUID key, not window.midnight.mnLace.
+ * Get all supported Midnight providers from window.midnight using UUID-based discovery.
+ * In API 4.x, wallets inject under a UUID key. Supports Lace and GSD wallets.
  */
-export function getLaceMidnightProvider(): InitialAPI | undefined {
+export function getSupportedMidnightProviders(): InitialAPI[] {
   if (
     typeof window === 'undefined' ||
     !window.midnight ||
     typeof window.midnight !== 'object'
   ) {
-    return undefined;
+    return [];
   }
   const providers = Object.values(window.midnight) as InitialAPI[];
-  return providers.find(
+  return providers.filter(
     (p) =>
       p &&
       typeof p === 'object' &&
-      (p.rdns === LACE_RDNS || p.name?.toLowerCase() === LACE_NAME),
+      (SUPPORTED_WALLET_RDNS.includes(p.rdns ?? '') ||
+        SUPPORTED_WALLET_NAMES.includes(p.name?.toLowerCase() ?? '')),
   );
+}
+
+/**
+ * Get the first supported Midnight provider. Used for availability checks.
+ */
+export function getLaceMidnightProvider(): InitialAPI | undefined {
+  return getSupportedMidnightProviders()[0];
 }
 
 import { pipe as fnPipe } from 'fp-ts/function';
@@ -43,6 +51,8 @@ import {
   timeout,
 } from 'rxjs';
 import semver from 'semver';
+
+const NETWORK_ID_MISMATCH = 'Network ID mismatch';
 
 // Helper function to add timeout to promises
 export const withTimeout = (
@@ -99,6 +109,7 @@ export const detectWalletNetwork = async (
 
 export interface ConnectToWalletOptions {
   networkId?: string;
+  rdns?: string;
 }
 
 /**
@@ -110,13 +121,22 @@ export const connectToWallet = (
 ): Promise<{ wallet: WalletConnectedAPI; configuration: Configuration }> => {
   const COMPATIBLE_CONNECTOR_API_VERSION = '4.x';
   const networkId = options.networkId ?? 'preprod';
+  const targetRdns = options.rdns;
 
   return firstValueFrom(
     fnPipe(
       interval(100),
-      map(() => getLaceMidnightProvider()),
+      map(() => {
+        const providers = getSupportedMidnightProviders();
+        return targetRdns
+          ? providers.find((p) => p.rdns === targetRdns)
+          : providers[0];
+      }),
       tap((connectorAPI) => {
-        logger.info(connectorAPI, 'Check for wallet connector API');
+        logger.info(
+          { rdns: connectorAPI?.rdns, name: connectorAPI?.name, apiVersion: connectorAPI?.apiVersion },
+          'Check for wallet connector API',
+        );
       }),
       filter((connectorAPI): connectorAPI is InitialAPI => !!connectorAPI),
       concatMap((connectorAPI) =>
@@ -135,7 +155,7 @@ export const connectToWallet = (
               );
 
               return new Error(
-                `Incompatible version of Midnight Lace wallet found. Require '${COMPATIBLE_CONNECTOR_API_VERSION}', got '${connectorAPI.apiVersion}'.`,
+                `Incompatible version of Midnight wallet found. Require '${COMPATIBLE_CONNECTOR_API_VERSION}', got '${connectorAPI.apiVersion}'.`,
               );
             }),
       ),
@@ -153,7 +173,7 @@ export const connectToWallet = (
             logger.error({}, 'Could not find wallet connector API');
 
             return new Error(
-              'Could not find Midnight Lace wallet. Extension installed?',
+              'Could not find a Midnight wallet. Extension installed?',
             );
           }),
       }),
@@ -168,7 +188,7 @@ export const connectToWallet = (
           throwError(() => {
             logger.error({}, 'Wallet connector API has failed to respond');
             return new Error(
-              'Midnight Lace wallet has failed to respond. Extension enabled?',
+              'Midnight wallet has failed to respond. Extension enabled?',
             );
           }),
       }),
@@ -179,9 +199,16 @@ export const connectToWallet = (
             walletConnectorAPI: connectedAPI,
             connectorAPI,
           };
-        } catch (_e) {
-          logger.error({}, 'Unable to connect to wallet API');
-          throw new Error('Application is not authorized');
+        } catch (e) {
+          const reason = e instanceof Error ? e.message : String(e);
+          console.error('[wallet] connect() failed', {
+            walletRdns: connectorAPI.rdns,
+            walletName: connectorAPI.name,
+            requestedNetworkId: networkId,
+            reason,
+            rawError: e,
+          });
+          throw new Error(`Application is not authorized: ${reason}`);
         }
       }),
       concatMap(async ({ walletConnectorAPI }) => {
@@ -233,9 +260,9 @@ export const formatAddress = (address: string | undefined) => {
 };
 
 export function getErrorType(error: Error): string {
-  if (error.message.includes('Midnight Lace wallet not found'))
+  if (error.message.includes('Midnight wallet not found') || error.message.includes('Could not find a Midnight wallet'))
     return 'WALLET_NOT_FOUND';
-  if (error.message.includes('Incompatible version of Midnight Lace wallet'))
+  if (error.message.includes('Incompatible version of Midnight wallet'))
     return 'INCOMPATIBLE_API_VERSION';
   if (error.message.includes('Wallet connector API has failed to respond'))
     return 'TIMEOUT_API_RESPONSE';
@@ -243,7 +270,7 @@ export function getErrorType(error: Error): string {
     return 'TIMEOUT_FINDING_API';
   if (error.message.includes('Unable to enable connector API'))
     return 'ENABLE_API_FAILED';
-  if (error.message.includes('Application is not authorized'))
+  if (error.message.startsWith('Application is not authorized'))
     return 'UNAUTHORIZED';
   if (error.message.includes('Timeout')) return 'TIMEOUT';
   return 'UNKNOWN_ERROR';

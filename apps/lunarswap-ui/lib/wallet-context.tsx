@@ -67,7 +67,7 @@ export interface MidnightWalletState {
   callback: (action: ProviderCallbackAction) => void;
   disconnect: () => void;
   reconnect: () => void;
-  connect: (manual: boolean) => Promise<void>;
+  connect: (manual: boolean, rdns?: string) => Promise<void>;
   walletError?: MidnightWalletErrorType;
   snackBarText?: string;
 }
@@ -193,7 +193,7 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
 
   // Enhanced connect function with better error handling
   const connect = useCallback(
-    async (manual: boolean): Promise<void> => {
+    async (manual: boolean, rdns?: string): Promise<void> => {
       setIsConnecting(true);
       setWalletError(undefined);
 
@@ -204,6 +204,7 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
       try {
         walletResult = await connectToWallet(logger, {
           networkId: config?.DEFAULT_NETWORK ?? 'preprod',
+          rdns,
         });
       } catch (e) {
         const errorType = getErrorType(e as Error);
