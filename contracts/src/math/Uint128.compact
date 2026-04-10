@@ -608,52 +608,23 @@ module Uint128 {
     * @returns {U256} The product a * b as a U256 struct.
     */
   circuit _mul(a: U128, b: U128): U256 {
-    // Compute partial products (each is Uint<128>)
-    const ll = a.low * b.low; // Bits 0-127
-    const hl = a.high * b.low; // Bits 64-191
-    const lh = a.low * b.high; // Bits 64-191
-    const hh = a.high * b.high; // Bits 128-255
+    // Work with 64-bit words
+    // Compute partial products (each is Uint<128> comprising 2 words within a 4-word result)
+    const ll = toU128(a.low * b.low);   //  0       || 0        || ll.high  || ll.low
+    const hl = toU128(a.high * b.low);  //  0       || hl.high  || hl.low   || 0
+    const lh = toU128(a.low * b.high);  //  0       || lh.high  || lh.low   || 0
+    const hh = toU128(a.high * b.high); //  hh.high || hh.low   || 0        || 0
 
-    // Convert partial products to U128 structs
-    const llU128 = toU128(ll);
-    const hlU128 = toU128(hl);
-    const lhU128 = toU128(lh);
-    const hhU128 = toU128(hh);
+    // add the values at word 1. offset1.high is the carry, which is added to the next word
+    const offset1 = toU128(ll.high + hl.low + lh.low);
+    // add the values at word 2. offset2.high is the carry, which is added to the next word
+    const offset2 = toU128(offset1.high + hl.high + lh.high + hh.low);
+    // add the values at word 3. There should be no carry here since the result fits in 256 bits
+    const offset3 = toU128(offset2.high + hh.high);
 
-    // Add cross terms (hl + lh) with carry propagation
-    // Add low part of hl and lh
-    const crossSum = hlU128.low + lhU128.low;
-    const crossSumU128 = toU128(crossSum); // { low: sum, high: carry }
-    const carry0 = crossSumU128.high;
-
-    // Add high parts of cross terms + carry0 (bits 128-191)
-    const crossHigh = hlU128.high + lhU128.high + carry0;
-    const crossHighU128 = toU128(crossHigh); // { low: sum, high: carry }
-    const carry1 = crossHighU128.high; // carry for bits 128-191 (0 or 1)
-
-    // Build result low 128 bit (bits 0-127)
-    // Result = ll + (crossSum << 64)
-    const resultLowLow = llU128.low;
-
-    // Bits 64-127: ll.high + crossLow.low (with potential carry)
-    const midSum = llU128.high + crossSumU128.low;
-    const midSumU128 = toU128(midSum); // { low: sum, high: carry }
-    const carry2 = midSumU128.high; // carry for bits 64-127 (0 or 1)
-
-    const resultLow = U128 { low: resultLowLow, high: midSumU128.low };
-
-    // Build result high 128 bits (bits 128-255)
-    // Result = hh + (crossSum >> 64) + carries
-    // Bits 128-191: hh.low + crossHigh.low + carry2
-    const highLowSum = hhU128.low + crossHighU128.low + carry2;
-    const highLowSumU128 = toU128(highLowSum); // { low: sum, high: carry }
-    const carry3 = highLowSumU128.high; // carry for bits 128-191 (0 or 1)
-
-    // Bits 192-255: hh.high + carry1 + carry3
-    const highHighSum = hhU128.high + carry1 + carry3;
-    const highHighSumU128 = toU128(highHighSum); // { low: sum, high: carry }
-
-    const resultHigh = U128 { low: highLowSumU128.low, high: highHighSumU128.low };
+    const resultLow = U128 { low: ll.low, high: offset1.low };
+    const resultHigh = U128 { low: offset2.low, high: offset3.low };
+    assert(isZero(offset3.high), "Uint128: unexpected multiplication overflow");
 
     return U256 { low: resultLow, high: resultHigh };
   }
