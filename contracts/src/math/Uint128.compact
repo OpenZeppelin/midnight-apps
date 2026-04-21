@@ -570,43 +570,41 @@ module Uint128 {
    *
    * @remarks
    * Computes P = a · b for a, b ∈ [0, 2¹²⁸ - 1], returning P as U256 {low: U128, high: U128}.
-   * Uses schoolbook multiplication with partial products and carry propagation.
+   * Uses schoolbook multiplication by aligning 64-bit partial products to their
+   * respective word positions and accumulating each word in a single operation.
    * For a = a_h · 2⁶⁴ + a_l and b = b_h · 2⁶⁴ + b_l:
    * P = a · b = hh · 2¹²⁸ + (hl + lh) · 2⁶⁴ + ll, where ll = a_l·b_l, hl = a_h·b_l,
    * lh = a_l·b_h, hh = a_h·b_h.
    *
    * Mathematical Steps:
-   * 1. Partial Products:
-   *    Compute ll, hl, lh, hh where each ≤ (2⁶⁴ - 1)² = 2¹²⁸ - 2⁶⁵ + 1 < 2¹²⁸.
-   *    - ll = a_l · b_l (bits [0, 127])
-   *    - hl = a_h · b_l (bits [64, 191])
-   *    - lh = a_l · b_h (bits [64, 191])
-   *    - hh = a_h · b_h (bits [128, 255])
+   * 1. Partial Products (each a U128 spanning 2 of the 4 result words):
+   *    - ll = a_l · b_l → occupies words [0, 1]
+   *    - hl = a_h · b_l → occupies words [1, 2]
+   *    - lh = a_l · b_h → occupies words [1, 2]
+   *    - hh = a_h · b_h → occupies words [2, 3]
    *
-   * 2. Cross Terms Addition:
-   *    S = hl + lh ≤ 2(2¹²⁸ - 2⁶⁵ + 1) < 2¹²⁹ (fits in 129 bits)
-   *    - Add low parts: (hl mod 2⁶⁴) + (lh mod 2⁶⁴) → sum s_0, carry c_0
-   *    - Add high parts: ⌊hl/2⁶⁴⌋ + ⌊lh/2⁶⁴⌋ + c_0 → sum s_1, carry c_1
+   * 2. Word-Aligned Accumulation:
+   *    - Word 0: ll.low (no additions needed)
+   *    - Word 1: offset1 = ll.high + hl.low + lh.low (carry → word 2)
+   *    - Word 2: offset2 = offset1.high + hl.high + lh.high + hh.low (carry → word 3)
+   *    - Word 3: offset3 = offset2.high + hh.high (no carry; result fits in 256 bits)
    *
-   * 3. Lower Half [0-127]:
-   *    - Bits [0, 63]: ll mod 2⁶⁴
-   *    - Bits [64, 127]: (⌊ll/2⁶⁴⌋ + s_0) mod 2⁶⁴, with carry c_2 to bit 128
+   * 3. Result Construction:
+   *    - resultLow  = {low: ll.low,     high: offset1.low}
+   *    - resultHigh = {low: offset2.low, high: offset3.low}
    *
-   * 4. Upper Half [128-255]:
-   *    - Bits [128, 191]: (hh mod 2⁶⁴) + s_1 + c_2 → sum, carry c_3
-   *    - Bits [192, 255]: ⌊hh/2⁶⁴⌋ + c_1 + c_3
-   *
-   * 5. Result Bounds:
-   *    Max product = (2¹²⁸ - 1)² = 2²⁵⁶ - 2¹²⁹ + 1 < 2²⁵⁶
-   *    The final high carry is always 0 (result always fits in 256 bits).
+   * 4. Overflow Check:
+   *    Max product = (2¹²⁸ - 1)² = 2²⁵⁶ - 2¹²⁹ + 1 < 2²⁵⁶, so offset3.high must be 0.
    *
    * @circuitInfo k=12, rows=2766
-    *
-    * @param {U128} a - The first U128 value to multiply.
-    * @param {U128} b - The second U128 value to multiply.
-    *
-    * @returns {U256} The product a * b as a U256 struct.
-    */
+   *
+   * @param {U128} a - The first U128 value to multiply.
+   * @param {U128} b - The second U128 value to multiply.
+   *
+   * @throws {Error} "Uint128: unexpected multiplication overflow" if the result does not fit in 256 bits.
+   *
+   * @returns {U256} The product a * b as a U256 struct.
+   */
   circuit _mul(a: U128, b: U128): U256 {
     // Work with 64-bit words
     // Compute partial products (each is Uint<128> comprising 2 words within a 4-word result)
