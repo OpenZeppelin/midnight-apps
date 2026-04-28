@@ -20,6 +20,7 @@ import type {
   WalletProvider,
   ZKConfigProvider,
 } from '@midnight-ntwrk/midnight-js-types';
+import { ttlOneHour } from '@midnight-ntwrk/midnight-js-utils';
 import type { Address } from '@midnight-ntwrk/wallet-api';
 import type { LunarswapPrivateState } from '@openzeppelin/midnight-apps-contracts';
 import type {
@@ -37,11 +38,17 @@ import React, {
   useMemo,
   useState,
 } from 'react';
+import * as Rx from 'rxjs';
 import { PrivateDataProviderWrapper } from '@/providers/private';
 import { noopProofClient, proofClient } from '@/providers/proof';
 import { PublicDataProviderWrapper } from '@/providers/public';
 import { ZkConfigProviderWrapper } from '@/providers/zk-config';
 import { connectToWallet, getLaceMidnightProvider } from '@/utils/wallet-utils';
+import {
+  buildLocalWallet,
+  isLocalWalletModeEnabled,
+  type LocalWalletHandle,
+} from './local-wallet';
 import {
   useActiveNetworkConfig,
   useRuntimeConfiguration,
@@ -163,6 +170,13 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
   const [lastReconnectTime, setLastReconnectTime] = useState(0);
   const [isReconnecting, setIsReconnecting] = useState(false);
 
+  // Local-wallet mode: bypass Lace and run wallet-sdk-facade@4 directly in-browser.
+  // Toggled by `?localWallet=1` query param or `VITE_USE_LOCAL_WALLET=1` env var.
+  const localMode = useMemo(() => isLocalWalletModeEnabled(), []);
+  const [localWallet, setLocalWallet] = useState<LocalWalletHandle | undefined>(
+    undefined,
+  );
+
   // Disconnect function to reset wallet state
   const disconnect = useCallback(() => {
     setAddress(undefined);
@@ -174,6 +188,78 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
     setReconnectAttempts(0);
     setIsReconnecting(false);
   }, []);
+
+  // Local-wallet mode: build the in-browser wallet-sdk-facade@4 once, start it,
+  // and populate `address` + a stub `walletAPI` so downstream code keeps working.
+  useEffect(() => {
+    if (!localMode) return;
+    if (config?.DEFAULT_NETWORK !== 'undeployed') {
+      logger.warn(
+        'Local wallet mode requires DEFAULT_NETWORK="undeployed"; skipping bootstrap.',
+      );
+      return;
+    }
+    let cancelled = false;
+    let handle: LocalWalletHandle | undefined;
+    setIsConnecting(true);
+    (async () => {
+      try {
+        handle = await buildLocalWallet({
+          network: activeNetwork,
+          walletNetworkId: 'undeployed',
+        });
+        if (cancelled) {
+          await handle.wallet.stop();
+          return;
+        }
+        const shieldedState = await Rx.firstValueFrom(handle.shielded.state);
+        if (cancelled) {
+          await handle.wallet.stop();
+          return;
+        }
+        const shieldedAddress = shieldedState.address.coinPublicKeyString();
+        const coinPublicKey = handle.zswapSecretKeys.coinPublicKey;
+        const encryptionPublicKey = handle.zswapSecretKeys.encryptionPublicKey;
+        setLocalWallet(handle);
+        setAddress(shieldedAddress as Address);
+        setWalletAPI({
+          address: shieldedAddress as Address,
+          coinPublicKey,
+          encryptionPublicKey,
+          // No real Lace connector in local mode — provide a stub so type checks pass.
+          // Downstream code only reads `coinPublicKey`/`encryptionPublicKey`/`configuration`/`address`
+          // and calls `getShieldedAddresses()` from the periodic health check (skipped below).
+          wallet: {
+            getShieldedAddresses: async () => ({
+              shieldedAddress: shieldedAddress as Address,
+              shieldedCoinPublicKey: coinPublicKey,
+              shieldedEncryptionPublicKey: encryptionPublicKey,
+            }),
+          } as unknown as WalletConnectedAPI,
+          configuration: {
+            proverServerUri: activeNetwork.PROOF_SERVER_URL,
+          } as Configuration,
+        });
+        setProofServerIsOnline(true);
+        setIsConnecting(false);
+        logger.info(
+          { address: shieldedAddress },
+          'Local wallet started against local node',
+        );
+      } catch (e) {
+        if (cancelled) return;
+        logger.error({ err: e }, 'Failed to start local wallet');
+        setWalletError(MidnightWalletErrorType.UNKNOWN_ERROR);
+        setIsConnecting(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+      if (handle) {
+        void handle.wallet.stop();
+      }
+    };
+  }, [localMode, config?.DEFAULT_NETWORK, activeNetwork, logger]);
 
   const checkProofServerStatus = useCallback(
     async (proverServerUri: string): Promise<void> => {
@@ -381,20 +467,56 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
   ]);
 
   const walletProvider: WalletProvider = useMemo(() => {
+    if (localMode && localWallet && walletAPI) {
+      return {
+        async balanceTx(
+          tx: UnboundTransaction,
+          ttl: Date = ttlOneHour(),
+        ): Promise<FinalizedTransaction> {
+          providerCallback('balanceTxStarted');
+          try {
+            const recipe = await localWallet.wallet.balanceUnboundTransaction(
+              tx,
+              {
+                shieldedSecretKeys: localWallet.zswapSecretKeys,
+                dustSecretKey: localWallet.dustSecretKey,
+              },
+              { ttl },
+            );
+            return await localWallet.wallet.finalizeRecipe(recipe);
+          } finally {
+            providerCallback('balanceTxDone');
+          }
+        },
+        getCoinPublicKey(): CoinPublicKey {
+          return walletAPI.coinPublicKey;
+        },
+        getEncryptionPublicKey(): EncPublicKey {
+          return walletAPI.encryptionPublicKey;
+        },
+      };
+    }
     if (walletAPI) {
       return {
-          async balanceTx(
+        async balanceTx(
           tx: UnboundTransaction,
           _ttl?: Date,
         ): Promise<FinalizedTransaction> {
           providerCallback('balanceTxStarted');
           const rawBytes = tx.serialize();
-          const serialized = Array.from(rawBytes).map((b) => b.toString(16).padStart(2, '0')).join('');
+          const serialized = Array.from(rawBytes)
+            .map((b) => b.toString(16).padStart(2, '0'))
+            .join('');
           try {
-            const result = await walletAPI.wallet.balanceUnsealedTransaction(serialized);
+            const result =
+              await walletAPI.wallet.balanceUnsealedTransaction(serialized);
             const cleaned = result.tx.replace(/^0x/, '');
             const matches = cleaned.match(/.{1,2}/g);
-            const resultBytes = matches ? new Uint8Array(matches.map((byte: string) => parseInt(byte, 16))) : new Uint8Array();
+            const resultBytes = matches
+              ? new Uint8Array(
+                  matches.map((byte: string) => parseInt(byte, 16)),
+                )
+              : new Uint8Array();
             return Transaction.deserialize(
               'signature',
               'proof',
@@ -427,7 +549,7 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
         throw new Error('Wallet not connected');
       },
     };
-  }, [walletAPI, providerCallback]);
+  }, [localMode, localWallet, walletAPI, providerCallback]);
 
   const privateStateProvider: PrivateStateProvider<
     typeof LunarswapPrivateStateId,
@@ -438,7 +560,8 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
       ? String(walletAPI.coinPublicKey)
       : 'lunarswap-disconnected';
     const privateStoragePasswordProvider = walletAPI
-      ? () => `${Buffer.from(String(walletAPI.encryptionPublicKey)).toString('base64')}A1!`
+      ? () =>
+          `${Buffer.from(String(walletAPI.encryptionPublicKey)).toString('base64')}A1!`
       : () => {
           const stored = localStorage.getItem('lunarswap-storage-password');
           if (stored) return stored;
@@ -462,12 +585,26 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
   }, [walletAPI, logger]);
 
   const midnightProvider: MidnightProvider = useMemo(() => {
+    if (localMode && localWallet) {
+      return {
+        async submitTx(tx: FinalizedTransaction): Promise<TransactionId> {
+          providerCallback('submitTxStarted');
+          try {
+            return await localWallet.wallet.submitTransaction(tx);
+          } finally {
+            providerCallback('submitTxDone');
+          }
+        },
+      };
+    }
     if (walletAPI) {
       return {
-          async submitTx(tx: FinalizedTransaction): Promise<TransactionId> {
+        async submitTx(tx: FinalizedTransaction): Promise<TransactionId> {
           providerCallback('submitTxStarted');
           const serialized = tx.serialize();
-          const hex = Array.from(serialized).map((b) => b.toString(16).padStart(2, '0')).join('');
+          const hex = Array.from(serialized)
+            .map((b) => b.toString(16).padStart(2, '0'))
+            .join('');
           await walletAPI.wallet.submitTransaction(hex);
           providerCallback('submitTxDone');
           return tx.identifiers()[0];
@@ -479,7 +616,7 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
         return Promise.reject(new Error('readonly'));
       },
     };
-  }, [walletAPI, providerCallback]);
+  }, [localMode, localWallet, walletAPI, providerCallback]);
 
   // Add manual reconnect to wallet state
   const [walletState, setWalletState] = useState<MidnightWalletState>({
@@ -580,6 +717,7 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
   }, []);
 
   useEffect(() => {
+    if (localMode) return; // local-wallet bootstrap handles connection
     // Only auto-connect if wallet is available and we're not already connected/connecting
     if (
       isWalletAvailable &&
@@ -590,6 +728,7 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
       void connect(false); // auto connect
     }
   }, [
+    localMode,
     walletState.isConnected,
     isConnecting,
     isWalletAvailable,
@@ -619,6 +758,9 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
     if (!walletState.isConnected || !walletAPI) {
       return;
     }
+    if (localMode) {
+      return; // no extension to ping in local mode
+    }
 
     const healthCheckInterval = setInterval(async () => {
       try {
@@ -635,7 +777,7 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
     }, 30000); // Check every 30 seconds
 
     return () => clearInterval(healthCheckInterval);
-  }, [walletState.isConnected, walletAPI, logger]);
+  }, [localMode, walletState.isConnected, walletAPI, logger]);
 
   // Expose wallet state for debugging
   useEffect(() => {
