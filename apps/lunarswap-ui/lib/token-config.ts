@@ -9,6 +9,29 @@ export interface Token {
   type: RawTokenType;
   address: string;
   shielded: boolean;
+  /**
+   * Current shielded balance the wallet holds of this color, in atomic units.
+   * Optional — undefined means "not yet known"; `0n` means "explicitly empty".
+   */
+  balance?: bigint;
+}
+
+/**
+ * Look up a token's current shielded balance from a `Record<color, bigint>` map,
+ * tolerating both `0x`-prefixed and bare-hex normalisations.
+ */
+export function getBalanceForType(
+  balances: Record<string, bigint> | undefined,
+  tokenType: string,
+): bigint | undefined {
+  if (!balances) return undefined;
+  const normalized = tokenType.replace(/^0x/i, '').toLowerCase();
+  return (
+    balances[tokenType] ??
+    balances[normalized] ??
+    balances[`0x${normalized}`] ??
+    undefined
+  );
 }
 
 export const popularTokens: Token[] = [];

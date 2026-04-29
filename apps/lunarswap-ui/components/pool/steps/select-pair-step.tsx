@@ -9,6 +9,7 @@ import {
 } from '@/lib/shielded-token-context';
 import {
   getAllTokens,
+  getBalanceForType,
   getTokensFromShieldedBalances,
   type Token as UiToken,
 } from '@/lib/token-config';
@@ -76,8 +77,16 @@ export function SelectPairStep({ onSubmit, initialData }: SelectPairStepProps) {
     const fromWallet = walletTokens.filter(
       (t) => !baseTypes.has(normalizeType(t.type)),
     );
-    return [...baseTokens, ...fromWallet];
-  }, [baseTokens, walletTokens, baseTypes]);
+    // Annotate every token with its current shielded balance and drop any
+    // entry the wallet holds zero of — picking a zero-balance token can only
+    // ever fail downstream with `Wallet.InsufficientFunds`.
+    return [...baseTokens, ...fromWallet]
+      .map((t) => ({
+        ...t,
+        balance: getBalanceForType(walletState?.shieldedBalances, t.type) ?? 0n,
+      }))
+      .filter((t) => (t.balance ?? 0n) > 0n);
+  }, [baseTokens, walletTokens, baseTypes, walletState?.shieldedBalances]);
 
   // Validate tokens whenever they change
   useEffect(() => {

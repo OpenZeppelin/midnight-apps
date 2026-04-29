@@ -154,16 +154,54 @@ export const buildLocalWallet = async ({
   };
 };
 
+const LOCAL_WALLET_STORAGE_KEY = 'lunarswap.localWalletMode';
+
 /**
- * Reads `?localWallet=1` (or any truthy value) from the current URL.
- * Falls back to `VITE_USE_LOCAL_WALLET` at build time.
+ * Persists the local-wallet mode preference to `localStorage`. Pass `true` when
+ * the user clicks the "Test Wallet" button, `false` on disconnect.
+ */
+export const setLocalWalletModeEnabled = (enabled: boolean): void => {
+  if (typeof window === 'undefined') return;
+  try {
+    if (enabled) {
+      window.localStorage.setItem(LOCAL_WALLET_STORAGE_KEY, '1');
+    } else {
+      window.localStorage.removeItem(LOCAL_WALLET_STORAGE_KEY);
+    }
+  } catch {
+    // localStorage may be unavailable (private mode etc.) — ignore.
+  }
+};
+
+/**
+ * Reads `?localWallet=1` from the URL (or any truthy value), persists it to
+ * `localStorage` so internal SPA navigation doesn't lose the flag, and falls
+ * back to `VITE_USE_LOCAL_WALLET` at build time. Pass `?localWallet=0` to
+ * clear the persisted flag and revert to Lace.
  */
 export const isLocalWalletModeEnabled = (): boolean => {
   if (typeof window === 'undefined') return false;
   const params = new URLSearchParams(window.location.search);
   const flag = params.get('localWallet');
   if (flag !== null) {
-    return flag !== '0' && flag.toLowerCase() !== 'false';
+    const enabled = flag !== '0' && flag.toLowerCase() !== 'false';
+    try {
+      if (enabled) {
+        window.localStorage.setItem(LOCAL_WALLET_STORAGE_KEY, '1');
+      } else {
+        window.localStorage.removeItem(LOCAL_WALLET_STORAGE_KEY);
+      }
+    } catch {
+      // localStorage may be unavailable (private mode etc.) — ignore.
+    }
+    return enabled;
+  }
+  try {
+    if (window.localStorage.getItem(LOCAL_WALLET_STORAGE_KEY) === '1') {
+      return true;
+    }
+  } catch {
+    // ignore
   }
   const envFlag =
     typeof import.meta !== 'undefined' &&

@@ -60,7 +60,10 @@
     "ignoredBuiltDependencies": [
       "@biomejs/biome",
       "esbuild"
-    ]
+    ],
+    "patchedDependencies": {
+      "@midnight-ntwrk/testkit-js@4.0.2": "patches/@midnight-ntwrk__testkit-js@4.0.2.patch"
+    }
   },
   "engines": {
     "node": "22.x"

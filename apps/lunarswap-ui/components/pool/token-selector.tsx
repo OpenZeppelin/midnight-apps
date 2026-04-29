@@ -117,12 +117,17 @@ export function TokenSelector({
                 <div className="relative h-8 w-8 rounded-full overflow-hidden">
                   <TokenIcon symbol={token.symbol} size={32} />
                 </div>
-                <div className="flex flex-col items-start">
+                <div className="flex flex-col items-start flex-1 min-w-0">
                   <span className="font-medium">{token.symbol}</span>
                   <span className="text-sm text-gray-500 dark:text-gray-400">
                     {token.name}
                   </span>
                 </div>
+                {token.balance !== undefined && (
+                  <span className="ml-auto text-xs font-mono text-gray-600 dark:text-gray-300 tabular-nums">
+                    {token.balance.toLocaleString()}
+                  </span>
+                )}
               </button>
             ))}
 

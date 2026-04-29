@@ -4,12 +4,13 @@ import type {
   WalletConnectedAPI,
 } from '@midnight-ntwrk/dapp-connector-api';
 
-const SUPPORTED_WALLET_RDNS = ['io.lace.wallet', 'io.shielded.gsd'];
-const SUPPORTED_WALLET_NAMES = ['lace', 'gsd'];
+const SUPPORTED_WALLET_RDNS = ['io.lace.wallet'];
+const SUPPORTED_WALLET_NAMES = ['lace'];
 
 /**
  * Get all supported Midnight providers from window.midnight using UUID-based discovery.
- * In API 4.x, wallets inject under a UUID key. Supports Lace and GSD wallets.
+ * In API 4.x, wallets inject under a UUID key. Currently only Lace is supported here;
+ * the in-browser test wallet is wired separately via `connectLocal()`.
  */
 export function getSupportedMidnightProviders(): InitialAPI[] {
   if (

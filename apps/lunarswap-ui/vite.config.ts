@@ -1,6 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { viteCommonjs } from '@originjs/vite-plugin-commonjs';
 import react from '@vitejs/plugin-react';
 import { defineConfig, type Plugin } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
@@ -90,7 +89,9 @@ export default defineConfig({
     //patchCryptoTimingSafeEqual(),
     wasm(),
     react(),
-    viteCommonjs(),
+    // viteCommonjs() removed: no source code uses CommonJS require(), and the
+    // plugin's bundled esbuild@0.14 chokes on long string literals (wasm/base64
+    // blobs) in the wallet-sdk chunks Vite's own optimizer produces.
     topLevelAwait(),
   ],
   build: {
@@ -111,6 +112,11 @@ export default defineConfig({
   optimizeDeps: {
     esbuildOptions: {
       target: 'esnext',
+      // Inline sourcemaps so stack frames from pre-bundled deps resolve back
+      // to the package's original .ts/.js source paths (e.g. wallet-sdk's
+      // Transacting.ts) instead of the chunk-XXX.js bundle.
+      sourcemap: 'inline',
+      keepNames: true,
       plugins: [
         // patch-proof-provider-payload-esbuild: removed — fixed upstream in midnight-js 4.0.2
     //     {

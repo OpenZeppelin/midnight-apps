@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@midnight-ntwrk/testkit-js@4.0.2':
+    hash: 14e079cb7676eaa2c783d246c64b994fc7be74907c6d32c561bbeb9567cfcab1
+    path: patches/@midnight-ntwrk__testkit-js@4.0.2.patch
+
 importers:
 
   .:
@@ -523,7 +528,7 @@ importers:
         version: 4.0.2
       '@midnight-ntwrk/testkit-js':
         specifier: 4.0.2
-        version: 4.0.2(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 4.0.2(patch_hash=14e079cb7676eaa2c783d246c64b994fc7be74907c6d32c561bbeb9567cfcab1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@midnight-ntwrk/wallet-sdk-address-format':
         specifier: 3.1.0
         version: 3.1.0
@@ -681,7 +686,7 @@ importers:
         version: 4.0.2
       '@midnight-ntwrk/testkit-js':
         specifier: 4.0.2
-        version: 4.0.2(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 4.0.2(patch_hash=14e079cb7676eaa2c783d246c64b994fc7be74907c6d32c561bbeb9567cfcab1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@midnight-ntwrk/wallet-sdk-address-format':
         specifier: 3.1.0
         version: 3.1.0
@@ -1515,9 +1520,6 @@ packages:
   '@midnight-ntwrk/compact-js@2.5.0':
     resolution: {integrity: sha512-vCLbndc3GtSTjZE30NtNqINOrrjZ2O/m8q4jCVeyx9t+rTLwwFqGXUOYobKbM34rwfnTz95ZAI6vVixYnarfrA==}
 
-  '@midnight-ntwrk/compact-runtime@0.14.0':
-    resolution: {integrity: sha512-VfZmfPDedRUPAYIhKAgS5y+KtxOkSSOCS24PAsGMjhMpzJaaWVSd5SajF6HtNZsciL54sqru4EpWvmCAqsbmYQ==}
-
   '@midnight-ntwrk/compact-runtime@0.15.0':
     resolution: {integrity: sha512-6+odrxb83ZZwF29SqNBBgaOR3hf5ej4KZVGibDwdXta9+uiv6qYW0fMrsKP9S+c2AqvY+vEb5NEFFI54lA7G5A==}
 
@@ -1570,9 +1572,6 @@ packages:
 
   '@midnight-ntwrk/midnight-js-utils@4.0.2':
     resolution: {integrity: sha512-b4CJXraJvttkwuTo90DEtRD1ObrOEeGkk45zAVKRAAwUYEY+TaYK+u4azsl2rb00Xgjr15Yz127YPEm3dcudcA==}
-
-  '@midnight-ntwrk/onchain-runtime-v2@2.0.1':
-    resolution: {integrity: sha512-nVtDyPaWD14thZuSz/MVUNNkv4HO2nYf3E3QbaRCE4UR+jKnUrd0s/BN0fLpnrYFlcMNHS7/sZqAeosV80tsOQ==}
 
   '@midnight-ntwrk/onchain-runtime-v3@3.0.0':
     resolution: {integrity: sha512-HbFbUOsvgpEFy1OT0Ni2LMFk4jnMQS1em+H+Mof/B3DpnNKl0Lkx5QiulKOc6pyU4KPEagOqx4fYNyVXFwgZ7g==}
@@ -6984,12 +6983,6 @@ snapshots:
       effect: 3.20.0
       tslib: 2.8.1
 
-  '@midnight-ntwrk/compact-runtime@0.14.0':
-    dependencies:
-      '@midnight-ntwrk/onchain-runtime-v2': 2.0.1
-      '@types/object-inspect': 1.13.0
-      object-inspect: 1.13.4
-
   '@midnight-ntwrk/compact-runtime@0.15.0':
     dependencies:
       '@midnight-ntwrk/onchain-runtime-v3': 3.0.0
@@ -7093,8 +7086,6 @@ snapshots:
       '@midnight-ntwrk/midnight-js-network-id': 4.0.2
       '@scure/base': 2.0.0
 
-  '@midnight-ntwrk/onchain-runtime-v2@2.0.1': {}
-
   '@midnight-ntwrk/onchain-runtime-v3@3.0.0': {}
 
   '@midnight-ntwrk/platform-js@2.2.4':
@@ -7103,7 +7094,7 @@ snapshots:
       effect: 3.20.0
       tslib: 2.8.1
 
-  '@midnight-ntwrk/testkit-js@4.0.2(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@midnight-ntwrk/testkit-js@4.0.2(patch_hash=14e079cb7676eaa2c783d246c64b994fc7be74907c6d32c561bbeb9567cfcab1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@midnight-ntwrk/compact-js': 2.5.0
       '@midnight-ntwrk/ledger-v8': 8.0.3
@@ -7483,7 +7474,7 @@ snapshots:
 
   '@openzeppelin/compact-tools-simulator@file:compact-tools/packages/simulator':
     dependencies:
-      '@midnight-ntwrk/compact-runtime': 0.14.0
+      '@midnight-ntwrk/compact-runtime': 0.15.0
       '@midnight-ntwrk/ledger-v7': 7.0.0
 
   '@originjs/vite-plugin-commonjs@1.0.3':

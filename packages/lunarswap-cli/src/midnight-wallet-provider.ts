@@ -104,7 +104,7 @@ export class MidnightWalletProvider
     const builder =
       FluentWalletBuilder.forEnvironment(env).withDustOptions(dustOptions);
     const buildResult = await builder.withSeed(seed).buildWithoutStarting();
-    const { wallet, seeds } = buildResult as {
+    const { wallet, seeds } = buildResult as unknown as {
       wallet: WalletFacade;
       seeds: { masterSeed: string; shielded: Uint8Array; dust: Uint8Array };
     };

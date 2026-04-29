@@ -13,11 +13,13 @@ import { Input } from '@/components/ui/input';
 import { useLogger } from '@/hooks/use-logger';
 import { useWalletRx } from '@/hooks/use-wallet-rx';
 import { useActiveNetworkConfig } from '@/lib/runtime-configuration';
-import type { Token as UiToken } from '@/lib/token-config';
+import {
+  getBalanceForType,
+  type Token as UiToken,
+} from '@/lib/token-config';
 import { useWallet } from '../../../hooks/use-wallet';
 import { useLunarswapContext } from '../../../lib/lunarswap-context';
 import { createContractIntegration } from '../../../lib/lunarswap-integration';
-import { serializeError } from '../../../utils/error-utils';
 import { Button } from '../../ui/button';
 import { LiquidityProgress } from '../liquidity-progress';
 import { SplitTokenIcon } from '../split-token-icon';
@@ -32,20 +34,6 @@ interface PairData {
 
 interface SetDepositStepProps {
   pairData: PairData;
-}
-
-function getBalanceForType(
-  balances: Record<string, bigint> | undefined,
-  tokenType: string,
-): bigint | undefined {
-  if (!balances) return undefined;
-  const normalized = tokenType.replace(/^0x/i, '').toLowerCase();
-  return (
-    balances[tokenType] ??
-    balances[normalized] ??
-    balances[`0x${normalized}`] ??
-    undefined
-  );
 }
 
 export function SetDepositStep({ pairData }: SetDepositStepProps) {
@@ -260,19 +248,26 @@ export function SetDepositStep({ pairData }: SetDepositStepProps) {
 
       // Transaction completed successfully - progress dialog will close via onComplete callback
     } catch (error) {
-      const fullErrorText = serializeError(error);
       _logger?.error(
         {
           error,
-          fullError: fullErrorText,
           message: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
         },
         `[AddLiquidity] Error: ${error instanceof Error ? error.message : String(error)}`,
       );
-      // In development, log full error to console so it's visible without truncation
-      // Always log full error to console so it's visible in browser DevTools (no truncation)
-      console.error('[AddLiquidity] Full error:', fullErrorText, error);
+      // Log the live Error object (and its `cause` chain) so DevTools can resolve
+      // each stack frame through the inline sourcemaps to package source paths
+      // (e.g. wallet-sdk-capabilities/Transacting.ts:182). A stringified
+      // `error.stack` would freeze the chunk-XYZ.js paths it was thrown with.
+      console.error('[AddLiquidity] error:', error);
+      let cause: unknown =
+        error instanceof Error ? (error as { cause?: unknown }).cause : undefined;
+      while (cause) {
+        console.error('[AddLiquidity] caused by:', cause);
+        cause =
+          cause instanceof Error ? (cause as { cause?: unknown }).cause : undefined;
+      }
 
       // Provide more specific error messages
       if (error instanceof Error) {
@@ -355,6 +350,25 @@ export function SetDepositStep({ pairData }: SetDepositStepProps) {
   );
   const hasBalanceA = balanceA != null && balanceA > 0n;
   const hasBalanceB = balanceB != null && balanceB > 0n;
+
+  // Pre-flight: would the entered amount exceed the wallet's balance? When
+  // true, the wallet's balancer would later throw `Wallet.InsufficientFunds`
+  // — we block the submission here with a clear inline error instead.
+  const parseAmount = (raw: string): bigint | null => {
+    const trimmed = raw.trim();
+    if (!trimmed) return null;
+    try {
+      return BigInt(trimmed);
+    } catch {
+      return null;
+    }
+  };
+  const requestedA = parseAmount(amountA);
+  const requestedB = parseAmount(amountB);
+  const overspendA =
+    requestedA !== null && balanceA != null && requestedA > balanceA;
+  const overspendB =
+    requestedB !== null && balanceB != null && requestedB > balanceB;
 
   // Validate token details exist
   if (!tokenADetails || !tokenBDetails) {
@@ -475,6 +489,12 @@ export function SetDepositStep({ pairData }: SetDepositStepProps) {
                   </span>
                 )}
               </div>
+              {overspendA && balanceA != null && (
+                <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                  Insufficient balance: have {balanceA.toString()}, need{' '}
+                  {amountA}.
+                </p>
+              )}
             </div>
 
             <div className="p-3 bg-gray-50/50 dark:bg-gray-800/30 backdrop-blur-sm rounded">
@@ -510,6 +530,12 @@ export function SetDepositStep({ pairData }: SetDepositStepProps) {
                   </span>
                 )}
               </div>
+              {overspendB && balanceB != null && (
+                <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                  Insufficient balance: have {balanceB.toString()}, need{' '}
+                  {amountB}.
+                </p>
+              )}
             </div>
           </div>
 
@@ -579,6 +605,8 @@ export function SetDepositStep({ pairData }: SetDepositStepProps) {
             status !== 'connected' ||
             !amountA ||
             !amountB ||
+            overspendA ||
+            overspendB ||
             isSubmitting
           }
           onClick={handleAddLiquidity}
@@ -590,9 +618,13 @@ export function SetDepositStep({ pairData }: SetDepositStepProps) {
               ? 'Connecting...'
               : !amountA || !amountB
                 ? 'Enter Amounts'
-                : isSubmitting
-                  ? 'Processing...'
-                  : 'Add Liquidity'}
+                : overspendA
+                  ? `Insufficient ${tokenADetails.symbol || 'Token A'}`
+                  : overspendB
+                    ? `Insufficient ${tokenBDetails.symbol || 'Token B'}`
+                    : isSubmitting
+                      ? 'Processing...'
+                      : 'Add Liquidity'}
         </Button>
       </CardFooter>
     </>

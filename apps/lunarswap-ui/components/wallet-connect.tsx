@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDown, Chrome, ExternalLink, Wallet } from 'lucide-react';
+import { ChevronDown, Chrome, ExternalLink, FlaskConical, Wallet } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -8,9 +8,12 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useWallet } from '@/hooks/use-wallet';
+import { useRuntimeConfiguration } from '@/lib/runtime-configuration';
 import type { InitialAPI } from '@midnight-ntwrk/dapp-connector-api';
 import { getSupportedMidnightProviders } from '@/utils/wallet-utils';
 import { AccountPanel } from './account-panel';
@@ -23,8 +26,10 @@ interface WalletConnectProps {
 export function WalletConnect({
   onAccountPanelStateChange,
 }: WalletConnectProps) {
-  const { isConnected, isConnecting, connect, disconnect, address } =
+  const { isConnected, isConnecting, connect, connectLocal, disconnect, address } =
     useWallet();
+  const runtimeConfig = useRuntimeConfiguration();
+  const testWalletAvailable = runtimeConfig.DEFAULT_NETWORK === 'undeployed';
   const [isAccountPanelOpen, setIsAccountPanelOpen] = useState(false);
   const [browserStatus, setBrowserStatus] = useState<
     'firefox' | 'no-wallet' | 'supported' | 'checking'
@@ -63,6 +68,17 @@ export function WalletConnect({
 
     setBrowserStatus('supported');
   }, []);
+
+  const handleConnectLocal = async () => {
+    try {
+      await connectLocal();
+      toast.success('Test wallet connecting (genesis seed, local node)');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      console.error('[WalletConnect] connectLocal failed:', error);
+      toast.error(message || 'Failed to start test wallet');
+    }
+  };
 
   const handleConnect = async (rdns?: string) => {
     try {
@@ -142,6 +158,20 @@ export function WalletConnect({
   }
 
   if (browserStatus === 'firefox') {
+    if (testWalletAvailable) {
+      // Local-net dev still works in Firefox — only Lace requires Chromium.
+      return (
+        <Button
+          onClick={handleConnectLocal}
+          disabled={isConnecting}
+          variant="outline"
+          className="flex items-center gap-2 rounded-full border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-900/20"
+        >
+          <FlaskConical className="h-4 w-4" />
+          {isConnecting ? 'Connecting...' : 'Use Test Wallet'}
+        </Button>
+      );
+    }
     return (
       <Button
         onClick={openChromeDownload}
@@ -156,6 +186,46 @@ export function WalletConnect({
   }
 
   if (browserStatus === 'no-wallet') {
+    if (testWalletAvailable) {
+      // Lace not installed but we're on local-net — offer the test wallet directly.
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              disabled={isConnecting}
+              className="flex items-center gap-2 rounded-full"
+            >
+              <Wallet className="h-4 w-4" />
+              {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Local network (undeployed)</DropdownMenuLabel>
+            <DropdownMenuItem
+              onClick={handleConnectLocal}
+              className="flex items-center gap-2"
+            >
+              <FlaskConical className="h-4 w-4 text-amber-600" />
+              <div className="flex flex-col">
+                <span>Test Wallet</span>
+                <span className="text-muted-foreground text-xs">
+                  Genesis seed, local docker only
+                </span>
+              </div>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={openLaceWalletDownload}
+              className="flex items-center gap-2"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Install a Midnight Wallet
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    }
     return (
       <Button
         onClick={openLaceWalletDownload}
@@ -182,8 +252,9 @@ export function WalletConnect({
     );
   }
 
-  // Multiple wallets: show picker dropdown
-  if (availableWallets.length > 1) {
+  // Multiple wallets, or single wallet + test wallet available on local-net:
+  // show a picker dropdown so both options are reachable.
+  if (availableWallets.length > 1 || testWalletAvailable) {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -211,12 +282,30 @@ export function WalletConnect({
               {wallet.name}
             </DropdownMenuItem>
           ))}
+          {testWalletAvailable && (
+            <>
+              {availableWallets.length > 0 && <DropdownMenuSeparator />}
+              <DropdownMenuLabel>Local network (undeployed)</DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={handleConnectLocal}
+                className="flex items-center gap-2"
+              >
+                <FlaskConical className="h-4 w-4 text-amber-600" />
+                <div className="flex flex-col">
+                  <span>Test Wallet</span>
+                  <span className="text-muted-foreground text-xs">
+                    Genesis seed, local docker only
+                  </span>
+                </div>
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     );
   }
 
-  // Single wallet: connect directly
+  // Single wallet, no test wallet available: connect directly to it.
   return (
     <Button
       onClick={() => handleConnect(availableWallets[0]?.rdns)}

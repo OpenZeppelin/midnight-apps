@@ -22,6 +22,10 @@ import type {
 } from '@midnight-ntwrk/midnight-js-types';
 import { ttlOneHour } from '@midnight-ntwrk/midnight-js-utils';
 import type { Address } from '@midnight-ntwrk/wallet-api';
+import {
+  DustAddress,
+  UnshieldedAddress,
+} from '@midnight-ntwrk/wallet-sdk-address-format';
 import type { LunarswapPrivateState } from '@openzeppelin/midnight-apps-contracts';
 import type {
   LunarswapCircuitKeys,
@@ -48,6 +52,7 @@ import {
   buildLocalWallet,
   isLocalWalletModeEnabled,
   type LocalWalletHandle,
+  setLocalWalletModeEnabled,
 } from './local-wallet';
 import {
   useActiveNetworkConfig,
@@ -75,6 +80,10 @@ export interface MidnightWalletState {
   disconnect: () => void;
   reconnect: () => void;
   connect: (manual: boolean, rdns?: string) => Promise<void>;
+  /** Bootstrap the in-browser test wallet (genesis seed, local docker only). */
+  connectLocal: () => Promise<void>;
+  /** True when the test wallet is active instead of Lace. */
+  isLocalMode: boolean;
   walletError?: MidnightWalletErrorType;
   snackBarText?: string;
 }
@@ -171,11 +180,26 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
   const [isReconnecting, setIsReconnecting] = useState(false);
 
   // Local-wallet mode: bypass Lace and run wallet-sdk-facade@4 directly in-browser.
-  // Toggled by `?localWallet=1` query param or `VITE_USE_LOCAL_WALLET=1` env var.
-  const localMode = useMemo(() => isLocalWalletModeEnabled(), []);
+  // Toggled by the "Test Wallet" button, `?localWallet=1` query param, or
+  // `VITE_USE_LOCAL_WALLET=1` env var. Persists across SPA navigation via
+  // localStorage so internal route changes don't drop the flag.
+  const [localMode, setLocalMode] = useState<boolean>(() =>
+    isLocalWalletModeEnabled(),
+  );
   const [localWallet, setLocalWallet] = useState<LocalWalletHandle | undefined>(
     undefined,
   );
+
+  const connectLocal = useCallback(async (): Promise<void> => {
+    if (config?.DEFAULT_NETWORK !== 'undeployed') {
+      logger.warn(
+        'Test wallet is only available on the local (undeployed) network.',
+      );
+      return;
+    }
+    setLocalWalletModeEnabled(true);
+    setLocalMode(true);
+  }, [config?.DEFAULT_NETWORK, logger]);
 
   // Disconnect function to reset wallet state
   const disconnect = useCallback(() => {
@@ -187,6 +211,10 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
     setProofServerIsOnline(false);
     setReconnectAttempts(0);
     setIsReconnecting(false);
+    // Clear local-wallet mode so we don't auto-bootstrap again on refresh.
+    setLocalWalletModeEnabled(false);
+    setLocalMode(false);
+    setLocalWallet(undefined);
   }, []);
 
   // Local-wallet mode: build the in-browser wallet-sdk-facade@4 once, start it,
@@ -201,6 +229,7 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
     }
     let cancelled = false;
     let handle: LocalWalletHandle | undefined;
+    let stateSub: { unsubscribe(): void } | undefined;
     setIsConnecting(true);
     (async () => {
       try {
@@ -212,7 +241,11 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
           await handle.wallet.stop();
           return;
         }
-        const shieldedState = await Rx.firstValueFrom(handle.shielded.state);
+        const [shieldedState, unshieldedState, dustState] = await Promise.all([
+          Rx.firstValueFrom(handle.shielded.state),
+          Rx.firstValueFrom(handle.unshielded.state),
+          Rx.firstValueFrom(handle.dust.state),
+        ]);
         if (cancelled) {
           await handle.wallet.stop();
           return;
@@ -220,23 +253,92 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
         const shieldedAddress = shieldedState.address.coinPublicKeyString();
         const coinPublicKey = handle.zswapSecretKeys.coinPublicKey;
         const encryptionPublicKey = handle.zswapSecretKeys.encryptionPublicKey;
+        const networkId = activeNetwork.name?.toLowerCase().includes('local')
+          ? 'undeployed'
+          : 'undeployed';
+        const unshieldedAddressStr = (() => {
+          try {
+            return UnshieldedAddress.codec
+              .encode(networkId, unshieldedState.address)
+              .toString();
+          } catch {
+            return String(unshieldedState.address);
+          }
+        })();
+        const dustAddressStr = (() => {
+          try {
+            return DustAddress.codec
+              .encode(networkId, dustState.address)
+              .toString();
+          } catch {
+            return String(dustState.address);
+          }
+        })();
+
+        // Cache balances live from the facade state observable for the
+        // poll-based getters below.
+        let latestShieldedBalances = (shieldedState.balances ?? {}) as Record<
+          string,
+          bigint
+        >;
+        let latestUnshieldedBalances = (unshieldedState.balances ?? {}) as Record<
+          string,
+          bigint
+        >;
+        let latestDustBalance: bigint = (() => {
+          try {
+            return dustState.balance(new Date());
+          } catch {
+            return 0n;
+          }
+        })();
+        stateSub = handle.wallet.state().subscribe((s) => {
+          latestShieldedBalances = (s.shielded.balances ?? {}) as Record<
+            string,
+            bigint
+          >;
+          latestUnshieldedBalances = (s.unshielded.balances ?? {}) as Record<
+            string,
+            bigint
+          >;
+          try {
+            latestDustBalance = s.dust.balance(new Date());
+          } catch {
+            // ignore — keep last value
+          }
+        });
+
+        const stubConnector = {
+          getShieldedAddresses: async () => ({
+            shieldedAddress: shieldedAddress as Address,
+            shieldedCoinPublicKey: coinPublicKey,
+            shieldedEncryptionPublicKey: encryptionPublicKey,
+          }),
+          getShieldedBalances: async () => latestShieldedBalances,
+          getUnshieldedAddress: async () => ({
+            unshieldedAddress: unshieldedAddressStr,
+          }),
+          getUnshieldedBalances: async () => latestUnshieldedBalances,
+          getDustAddress: async () => ({ dustAddress: dustAddressStr }),
+          getDustBalance: async () => ({
+            balance: latestDustBalance,
+            // No public "cap" surface from facade@4; report balance for now
+            cap: latestDustBalance,
+          }),
+        } as unknown as WalletConnectedAPI;
+
         setLocalWallet(handle);
         setAddress(shieldedAddress as Address);
         setWalletAPI({
           address: shieldedAddress as Address,
           coinPublicKey,
           encryptionPublicKey,
-          // No real Lace connector in local mode — provide a stub so type checks pass.
-          // Downstream code only reads `coinPublicKey`/`encryptionPublicKey`/`configuration`/`address`
-          // and calls `getShieldedAddresses()` from the periodic health check (skipped below).
-          wallet: {
-            getShieldedAddresses: async () => ({
-              shieldedAddress: shieldedAddress as Address,
-              shieldedCoinPublicKey: coinPublicKey,
-              shieldedEncryptionPublicKey: encryptionPublicKey,
-            }),
-          } as unknown as WalletConnectedAPI,
+          wallet: stubConnector,
           configuration: {
+            networkId,
+            indexerUri: activeNetwork.INDEXER_URI,
+            indexerWsUri: activeNetwork.INDEXER_WS_URI,
+            substrateNodeUri: activeNetwork.RPC_URL,
             proverServerUri: activeNetwork.PROOF_SERVER_URL,
           } as Configuration,
         });
@@ -255,6 +357,13 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
     })();
     return () => {
       cancelled = true;
+      if (stateSub) {
+        try {
+          stateSub.unsubscribe();
+        } catch {
+          // ignore
+        }
+      }
       if (handle) {
         void handle.wallet.stop();
       }
@@ -475,15 +584,128 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
         ): Promise<FinalizedTransaction> {
           providerCallback('balanceTxStarted');
           try {
-            const recipe = await localWallet.wallet.balanceUnboundTransaction(
-              tx,
-              {
-                shieldedSecretKeys: localWallet.zswapSecretKeys,
-                dustSecretKey: localWallet.dustSecretKey,
-              },
-              { ttl },
-            );
-            return await localWallet.wallet.finalizeRecipe(recipe);
+            // Snapshot wallet state right before balancing so we can compare
+            // requested token types against actually-held UTXO colors when the
+            // balancer throws InsufficientFundsError (which carries `tokenType`
+            // on the live Error object — click into it in DevTools).
+            try {
+              const facadeState = await Rx.firstValueFrom(
+                localWallet.wallet.state(),
+              );
+              // Emit at warn level so the snapshots stand out from the Effect
+              // runtime's per-second info-level dedupe warnings spamming the
+              // Info channel.
+              // eslint-disable-next-line no-console
+              console.warn('[balanceTx] shielded balances:', {
+                ...facadeState.shielded.balances,
+              });
+              // eslint-disable-next-line no-console
+              console.warn('[balanceTx] unshielded balances:', {
+                ...facadeState.unshielded.balances,
+              });
+              // eslint-disable-next-line no-console
+              console.warn('[balanceTx] tx bytes:', tx.serialize().byteLength);
+            } catch (snapshotErr) {
+              // eslint-disable-next-line no-console
+              console.warn(
+                '[balanceTx] snapshot failed (non-fatal):',
+                snapshotErr,
+              );
+            }
+            try {
+              const recipe = await localWallet.wallet.balanceUnboundTransaction(
+                tx,
+                {
+                  shieldedSecretKeys: localWallet.zswapSecretKeys,
+                  dustSecretKey: localWallet.dustSecretKey,
+                },
+                { ttl },
+              );
+              return await localWallet.wallet.finalizeRecipe(recipe);
+            } catch (err) {
+              // Tree-walk the error so the deeply-nested
+              // InsufficientFundsError's `tokenType` field surfaces as plain
+              // text. Effect.ts stores its `Cause<E>` on **Symbol-keyed**
+              // properties of FiberFailureImpl, so we must use `Reflect.ownKeys`
+              // (string + symbol) and recurse over every object value. We also
+              // special-case any node tagged `_tag: "Wallet.InsufficientFunds"`
+              // and print its tokenType/amount loudly.
+              const visited = new WeakSet<object>();
+              const queue: Array<{ value: unknown; path: string }> = [
+                { value: err, path: 'err' },
+              ];
+              let nodeIdx = 0;
+              while (queue.length > 0 && nodeIdx < 256) {
+                const { value, path } = queue.shift() as {
+                  value: unknown;
+                  path: string;
+                };
+                if (!value || typeof value !== 'object') continue;
+                if (visited.has(value as object)) continue;
+                visited.add(value as object);
+                nodeIdx++;
+                const v = value as Record<string | symbol, unknown>;
+                const ctor =
+                  (value as { constructor?: { name?: string } }).constructor
+                    ?.name ?? typeof value;
+                const tagVal = (v as { _tag?: unknown })._tag;
+                const tag = typeof tagVal === 'string' ? ` _tag=${tagVal}` : '';
+
+                // Loud match on the wallet-sdk-shielded InsufficientFundsError.
+                if (tagVal === 'Wallet.InsufficientFunds') {
+                  // eslint-disable-next-line no-console
+                  console.error(
+                    `[balanceTx] >>> InsufficientFundsError at ${path}: tokenType=${String(
+                      v.tokenType,
+                    )} amount=${String(v.amount)}`,
+                  );
+                }
+
+                const ownKeys = Reflect.ownKeys(value as object).filter(
+                  (k) => k !== 'stack',
+                );
+                const fields: Record<string, unknown> = {};
+                for (const k of ownKeys) {
+                  const label = typeof k === 'symbol' ? `@@${k.toString()}` : k;
+                  let fv: unknown;
+                  try {
+                    fv = (v as Record<string | symbol, unknown>)[k];
+                  } catch {
+                    fv = '<getter threw>';
+                  }
+                  fields[label] =
+                    typeof fv === 'string' ||
+                    typeof fv === 'number' ||
+                    typeof fv === 'bigint' ||
+                    typeof fv === 'boolean' ||
+                    fv == null
+                      ? fv
+                      : Array.isArray(fv)
+                        ? `[Array(${fv.length})]`
+                        : (fv as { constructor?: { name?: string } })
+                            ?.constructor?.name ?? typeof fv;
+                  // Recurse into every object value (string- or symbol-keyed).
+                  if (fv && typeof fv === 'object') {
+                    if (Array.isArray(fv)) {
+                      fv.forEach((item, i) =>
+                        queue.push({
+                          value: item,
+                          path: `${path}.${label}[${i}]`,
+                        }),
+                      );
+                    } else {
+                      queue.push({ value: fv, path: `${path}.${label}` });
+                    }
+                  }
+                }
+                // eslint-disable-next-line no-console
+                console.error(
+                  `[balanceTx] ${path} ${ctor}${tag}:`,
+                  fields,
+                );
+              }
+              throw err;
+            }
           } finally {
             providerCallback('balanceTxDone');
           }
@@ -644,6 +866,8 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
     disconnect,
     reconnect: manualReconnect,
     connect,
+    connectLocal,
+    isLocalMode: localMode,
     walletError,
     snackBarText,
   });
@@ -705,8 +929,17 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
       disconnect,
       reconnect: manualReconnect,
       callback: providerCallback,
+      connectLocal,
+      isLocalMode: localMode,
     }));
-  }, [connect, disconnect, manualReconnect, providerCallback]);
+  }, [
+    connect,
+    disconnect,
+    manualReconnect,
+    providerCallback,
+    connectLocal,
+    localMode,
+  ]);
 
   //const connectMemo = useCallback(connect, []);
 
