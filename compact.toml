@@ -1,0 +1,75 @@
+# compact-deploy config for midnight-apps.
+#
+# Used to deploy the bundled Lunarswap contract (and any future apps) via
+# `@openzeppelin/compact-deployer` without going through lunarswap-cli's
+# bespoke launcher. All paths are relative to this file's directory.
+#
+# Quick start:
+#   compact-deploy Lunarswap --network preview \
+#     --config /home/iskander-work/projects/midnight-apps/compact.toml \
+#     --seed-file /home/iskander-work/projects/compact-tools/deploy/Counter.preprod.seed \
+#     --sync-timeout 3600 -v
+#
+# Preprod is currently blocked on an upstream wallet-SDK bug — see
+# `compact-tools/packages/deployer/README.md` for details. Preview is the
+# working public testnet for now.
+
+[profile]
+artifacts_dir   = "contracts/src/artifacts"
+deployments_dir = "deployments/compact"
+
+[networks.preview]
+network_id   = "preview"
+indexer      = "https://indexer.preview.midnight.network/api/v4/graphql"
+indexer_ws   = "wss://indexer.preview.midnight.network/api/v4/graphql/ws"
+node         = "https://rpc.preview.midnight.network"
+node_ws      = "wss://rpc.preview.midnight.network"
+proof_server = "http://127.0.0.1:6300"   # reuse the local-stack proof-server
+explorer     = "https://preview.midnightexplorer.com"
+
+[networks.preprod]
+network_id   = "preprod"
+indexer      = "https://indexer.preprod.midnight.network/api/v4/graphql"
+indexer_ws   = "wss://indexer.preprod.midnight.network/api/v4/graphql/ws"
+node         = "https://rpc.preprod.midnight.network"
+node_ws      = "wss://rpc.preprod.midnight.network"
+proof_server = "http://127.0.0.1:6300"
+explorer     = "https://preprod.midnightexplorer.com"
+# Sync tuning for preprod's ~1M-event dust history. Picked up by
+# compact-deployer (CLI flags --sync-timeout / --sync-batch-size override).
+sync_timeout    = 5400   # seconds; raise the 10 min default for a cold sync
+sync_batch_size = 5000   # avoids the dust-sync OOM at the SDK default of 10
+
+# ---------- Contracts ----------
+
+# `lunarswap/Lunarswap` is the bundled contract that compiles the Factory +
+# Pair + Router + Library + Fee + Liquidity + Types modules into one
+# deployable artifact. (The standalone `LunarswapFactory` artifact in
+# `contracts/src/artifacts/lunarswap/LunarswapFactory/` is for testing the
+# Factory module in isolation; production deploys go through this one.)
+[contracts.Lunarswap]
+artifact                = "lunarswap/Lunarswap"
+private_state_id        = "lunarswapPrivateState"
+init_private_state      = { file = "./deploy/Lunarswap.private-state.json" }
+args                    = { module = "./deploy/Lunarswap.args.mjs", export = "args" }
+witnesses               = { module = "./deploy/Lunarswap.witnesses.mjs", export = "witnesses" }
+signing_key_file        = "./deploy/Lunarswap.signingkey"
+
+# OpenZeppelin ShieldedFungibleToken — the same contract deployed bespoke via
+# shielded-token-cli, here through the generic compact-deploy tool.
+#   compact-deploy ShieldedFungibleToken --network preprod \
+#     --config ./compact.toml --seed-file ./deploy/preprod.seed --sync-timeout 5400 -v
+#
+# artifact points at contracts/dist/... because that's where the prover `keys/`
+# live (src/artifacts has zkir but no keys). resolveUnderRoot tries
+# resolve(rootDir, artifact) first and uses it when it exists, so this bypasses
+# `profile.artifacts_dir` without affecting the Lunarswap entry above.
+# No `witnesses` key → the deployer uses vacant witnesses, matching the token's
+# empty witness set. Init private state is `{}` (ShieldedFungibleToken.getPrivateState()).
+[contracts.ShieldedFungibleToken]
+artifact                = "contracts/dist/artifacts/shielded-token/ShieldedFungibleToken"
+private_state_id        = "shieldedFungibleTokenPrivateState"
+private_state_store_name = "shielded-token-private-state"
+init_private_state      = { file = "./deploy/ShieldedFungibleToken.private-state.json" }
+args                    = { module = "./deploy/ShieldedFungibleToken.args.mjs", export = "args" }
+signing_key_file        = "./deploy/ShieldedFungibleToken.signingkey"
