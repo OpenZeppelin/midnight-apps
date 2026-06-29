@@ -1,9 +1,14 @@
 import { CompiledContract } from '@midnight-ntwrk/compact-js';
 import {
+  createCallTxOptions,
   deployContract,
   type FinalizedCallTxData,
   findDeployedContract,
+  submitCallTx,
 } from '@midnight-ntwrk/midnight-js-contracts';
+
+/** coinPublicKey -> encryptionPublicKey mapping for shielded sends to other users. */
+type CoinEncMappings = ReadonlyMap<unknown, unknown>;
 import type {
   ContractAddress,
   Either,
@@ -49,6 +54,7 @@ export class ShieldedFungibleToken {
   constructor(
     private readonly deployedContract: DeployedShieldedFungibleTokenContract,
     private readonly providers: ShieldedFungibleTokenProviders,
+    private readonly zkConfigPath?: string,
     private readonly logger?: Logger,
   ) {}
 
@@ -81,7 +87,7 @@ export class ShieldedFungibleToken {
       });
 
     logger?.info('ShieldedFungibleToken contract deployed');
-    return new ShieldedFungibleToken(deployedContract, providers, logger);
+    return new ShieldedFungibleToken(deployedContract, providers, zkConfigPath, logger);
   }
 
   static async join(
@@ -104,7 +110,7 @@ export class ShieldedFungibleToken {
       });
 
     logger?.info('ShieldedFungibleToken contract joined');
-    return new ShieldedFungibleToken(deployedContract, providers, logger);
+    return new ShieldedFungibleToken(deployedContract, providers, zkConfigPath, logger);
   }
 
   async mint(
@@ -134,6 +140,61 @@ export class ShieldedFungibleToken {
     this.logger?.trace({
       transactionAdded: {
         circuit: 'burn',
+        txHash: txData.public.txHash,
+        blockHeight: txData.public.blockHeight,
+      },
+    });
+    return txData;
+  }
+
+  /**
+   * Sends `value` of `coin` to `to` (a user public key or a contract address).
+   * Privacy experiment: the recipient is a public Either<ZswapCoinPublicKey,
+   * ContractAddress> circuit argument; decode the resulting tx to see whether
+   * the recipient stays private on-chain.
+   */
+  async send(
+    to: Either<ZswapCoinPublicKey, ContractAddress>,
+    coin: ShieldedCoinInfo,
+    value: bigint,
+    additionalCoinEncPublicKeyMappings?: CoinEncMappings,
+  ): Promise<
+    FinalizedCallTxData<ShieldedFungibleTokenContractInstance, 'send'>
+  > {
+    // Sending a shielded coin to ANOTHER USER's ZswapCoinPublicKey needs that
+    // user's encryption (viewing) key so the SDK can build the coin ciphertext.
+    // When a mapping is supplied, route through the lower-level call path that
+    // accepts it; otherwise use the generated callTx (fine for self/contract).
+    if (additionalCoinEncPublicKeyMappings && this.zkConfigPath) {
+      const options = createCallTxOptions(
+        createCompiledContract(this.zkConfigPath) as never,
+        'send' as never,
+        this.deployedContractAddressHex as never,
+        ShieldedFungibleTokenPrivateStateId as never,
+        additionalCoinEncPublicKeyMappings as never,
+        [to, coin, value] as never,
+      );
+      const txData = (await submitCallTx(
+        this.providers as never,
+        options as never,
+      )) as unknown as FinalizedCallTxData<
+        ShieldedFungibleTokenContractInstance,
+        'send'
+      >;
+      this.logger?.trace({
+        transactionAdded: {
+          circuit: 'send',
+          txHash: txData.public.txHash,
+          blockHeight: txData.public.blockHeight,
+        },
+      });
+      return txData;
+    }
+
+    const txData = await this.deployedContract.callTx.send(to, coin, value);
+    this.logger?.trace({
+      transactionAdded: {
+        circuit: 'send',
         txHash: txData.public.txHash,
         blockHeight: txData.public.blockHeight,
       },

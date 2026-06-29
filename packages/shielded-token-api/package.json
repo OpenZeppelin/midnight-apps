@@ -23,8 +23,8 @@
   "dependencies": {
     "@openzeppelin/midnight-apps-contracts": "workspace:*",
     "@midnight-ntwrk/compact-js": "2.5.0",
-    "@midnight-ntwrk/midnight-js-contracts": "4.0.2",
-    "@midnight-ntwrk/midnight-js-types": "4.0.2",
+    "@midnight-ntwrk/midnight-js-contracts": "4.1.1",
+    "@midnight-ntwrk/midnight-js-types": "4.1.1",
     "pino": "^9.7.0"
   },
   "devDependencies": {

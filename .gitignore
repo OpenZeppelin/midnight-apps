@@ -70,6 +70,10 @@ web_modules/
 
 # Output of 'npm pack'
 *.tgz
+!vendor/*.tgz
+
+# Vendored upstream source clones (kept locally, not committed; built tarballs in vendor/*.tgz are committed)
+vendor/midnight-js-src/
 
 # Yarn Integrity file
 .yarn-integrity
@@ -154,6 +158,15 @@ dist
 
 # Compact
 artifacts/
+
+# compact-deploy: secrets and per-seed wallet state cache.
+deploy/*.signingkey
+deploy/*.keystore.json
+.states/
+**/.states/
+
+# compact-deploy: deployment records — contain the contract signing key.
+deployments/
 
 # AI
 .claude/

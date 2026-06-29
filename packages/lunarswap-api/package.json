@@ -23,10 +23,10 @@
   "dependencies": {
     "@openzeppelin/midnight-apps-contracts": "workspace:*",
     "@midnight-ntwrk/compact-js": "2.5.0",
-    "@midnight-ntwrk/compact-runtime": "0.15.0",
-    "@midnight-ntwrk/ledger-v8": "8.0.3",
-    "@midnight-ntwrk/midnight-js-contracts": "4.0.2",
-    "@midnight-ntwrk/midnight-js-types": "4.0.2",
+    "@midnight-ntwrk/compact-runtime": "0.16.0",
+    "@midnight-ntwrk/ledger-v8": "8.1.0",
+    "@midnight-ntwrk/midnight-js-contracts": "4.1.1",
+    "@midnight-ntwrk/midnight-js-types": "4.1.1",
     "pino": "^9.7.0",
     "rxjs": "^7.8.2"
   },

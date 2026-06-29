@@ -49,6 +49,7 @@
     "husky": "^9.1.7",
     "is-ci": "^4.1.0",
     "lint-staged": "^16.1.2",
+    "@openzeppelin/compact-cli": "file:./vendor/compact-cli-0.0.1.tgz",
     "tailwindcss": "^4.0.6",
     "ts-node": "^10.9.2",
     "turbo": "^2.6.0",
@@ -61,8 +62,36 @@
       "@biomejs/biome",
       "esbuild"
     ],
-    "patchedDependencies": {
-      "@midnight-ntwrk/testkit-js@4.0.2": "patches/@midnight-ntwrk__testkit-js@4.0.2.patch"
+    "overrides": {
+      "@midnight-ntwrk/midnight-js-contracts": "4.1.1",
+      "@midnight-ntwrk/midnight-js-types": "4.1.1",
+      "@midnight-ntwrk/midnight-js-utils": "4.1.1",
+      "@midnight-ntwrk/midnight-js-network-id": "4.1.1",
+      "@midnight-ntwrk/midnight-js-http-client-proof-provider": "4.1.1",
+      "@midnight-ntwrk/midnight-js-indexer-public-data-provider": "4.1.1",
+      "@midnight-ntwrk/midnight-js-level-private-state-provider": "4.1.1",
+      "@midnight-ntwrk/midnight-js-node-zk-config-provider": "4.1.1",
+      "@midnight-ntwrk/midnight-js-fetch-zk-config-provider": "4.1.1",
+      "@midnight-ntwrk/midnight-js-protocol": "4.1.1",
+      "@midnight-ntwrk/midnight-js-compact": "4.1.1",
+      "@midnight-ntwrk/midnight-js-logger-provider": "4.1.1",
+      "@midnight-ntwrk/testkit-js": "4.1.1",
+      "@midnight-ntwrk/compact-js": "2.5.1",
+      "@midnight-ntwrk/compact-runtime": "0.16.0",
+      "@midnight-ntwrk/ledger-v8": "8.1.0",
+      "@midnight-ntwrk/onchain-runtime-v3": "3.0.0",
+      "@midnight-ntwrk/wallet-sdk": "1.1.0",
+      "@midnight-ntwrk/wallet-sdk-dust-wallet": "4.1.0",
+      "@midnight-ntwrk/wallet-sdk-facade": "4.0.1",
+      "@midnight-ntwrk/wallet-sdk-shielded": "3.0.1",
+      "@midnight-ntwrk/wallet-sdk-unshielded-wallet": "3.1.0",
+      "@midnight-ntwrk/wallet-sdk-address-format": "3.1.2",
+      "@midnight-ntwrk/wallet-sdk-capabilities": "3.3.1",
+      "@midnight-ntwrk/wallet-sdk-prover-client": "1.2.2",
+      "@midnight-ntwrk/wallet-sdk-abstractions": "2.1.0",
+      "@midnight-ntwrk/wallet-sdk-runtime": "1.0.4",
+      "@openzeppelin/compact-builder": "file:./vendor/compact-builder-0.0.1.tgz",
+      "@openzeppelin/compact-deployer": "file:./vendor/compact-deployer-0.0.1.tgz"
     }
   },
   "engines": {

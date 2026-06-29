@@ -93,7 +93,7 @@ export class ShieldedTokenIntegration {
       throw new Error('No token contract: deploy or join a token first');
     }
     const { MidnightBech32m, ShieldedCoinPublicKey } = await import(
-      '@midnight-ntwrk/wallet-sdk-address-format'
+      '@midnight-ntwrk/wallet-sdk'
     );
     const { getNetworkId } = await import(
       '@midnight-ntwrk/midnight-js-network-id'

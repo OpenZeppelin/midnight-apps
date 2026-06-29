@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (shielded-token/openzeppelin/ShieldedERC20.compact)
 
-pragma language_version >= 0.22.0;
+pragma language_version >= 0.23.0;
 
 /**
  * @module ShieldedToken (archived until further notice, DO NOT USE IN PRODUCTION)
@@ -204,6 +204,44 @@ module ShieldedERC20 { // DO NOT USE IN PRODUCTION!
     if (sendRes.change.is_some) {
       // tmp for only zswap because we should be able to handle contracts burning tokens
       // and returning change.
+      const caller = left<ZswapCoinPublicKey, ContractAddress>(ownPublicKey());
+      sendImmediateShielded(sendRes.change.value, caller, sendRes.change.value.value);
+    }
+
+    return sendRes;
+  }
+
+  /**
+   * @description Sends `value` of `coin` to the recipient `to`, which may be a
+   * user (`ZswapCoinPublicKey`) or a `ContractAddress`. Privacy experiment: this
+   * mirrors `multisig/ForwarderPrivate._drain`, but instead of keeping the
+   * destination ("parent") hidden behind a commitment preimage, it exposes the
+   * recipient directly as a public `Either<ZswapCoinPublicKey, ContractAddress>`
+   * circuit parameter. The question under test is whether the recipient stays
+   * private on-chain once it is passed and `disclose`d into `sendImmediateShielded`.
+   * @dev No access control: anyone holding a coin of this token can move it. The
+   * caller receives any change back. Pattern matches `burn` (receive then send).
+   * @throws Will throw if `coin` color is not this contract's token type.
+   * @throws Will throw if `value` exceeds the `coin` value.
+   * @throws Will throw if `to` is the zero key/address.
+   *
+   * @param {to} - The recipient (user public key or contract address).
+   * @param {coin} - The coin to spend.
+   * @param {value} - The amount of `coin` to forward to `to`.
+   * @return {ShieldedSendResult} - The send output, including any change coin.
+   */
+  export circuit send(
+                   to: Either<ZswapCoinPublicKey, ContractAddress>,
+                   coin: ShieldedCoinInfo,
+                   value: Uint<128>
+                   ): ShieldedSendResult {
+    assert(coin.value >= value, "ShieldedToken: insufficient token amount to send");
+    assert(!isKeyOrAddressZero(to), "ShieldedToken: invalid recipient");
+
+    receiveShielded(disclose(coin));
+
+    const sendRes = sendImmediateShielded(disclose(coin), disclose(to), disclose(value));
+    if (sendRes.change.is_some) {
       const caller = left<ZswapCoinPublicKey, ContractAddress>(ownPublicKey());
       sendImmediateShielded(sendRes.change.value, caller, sendRes.change.value.value);
     }

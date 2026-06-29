@@ -18,10 +18,11 @@
 import { DustSecretKey, ZswapSecretKeys } from "@midnight-ntwrk/ledger-v8";
 import {
 	DustAddress,
+	HDWallet,
 	MidnightBech32m,
+	Roles,
 	ShieldedAddress,
-} from "@midnight-ntwrk/wallet-sdk-address-format";
-import { HDWallet, Roles } from "@midnight-ntwrk/wallet-sdk-hd";
+} from "@midnight-ntwrk/wallet-sdk";
 import * as bip39 from "@scure/bip39";
 import { wordlist as english } from "@scure/bip39/wordlists/english";
 import assert from "assert";

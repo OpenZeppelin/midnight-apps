@@ -22,10 +22,7 @@ import type {
 } from '@midnight-ntwrk/midnight-js-types';
 import { ttlOneHour } from '@midnight-ntwrk/midnight-js-utils';
 import type { Address } from '@midnight-ntwrk/wallet-api';
-import {
-  DustAddress,
-  UnshieldedAddress,
-} from '@midnight-ntwrk/wallet-sdk-address-format';
+import { DustAddress, UnshieldedAddress } from '@midnight-ntwrk/wallet-sdk';
 import type { LunarswapPrivateState } from '@openzeppelin/midnight-apps-contracts';
 import type {
   LunarswapCircuitKeys,
@@ -605,6 +602,19 @@ export const MidnightWalletProvider: React.FC<MidnightWalletProviderProps> = ({
               });
               // eslint-disable-next-line no-console
               console.warn('[balanceTx] tx bytes:', tx.serialize().byteLength);
+              // Full pre-balance tx dump — pasted into upstream issues so the
+              // wallet-sdk team can inspect the structure passed to
+              // `balanceUnboundTransaction(...)`.
+              try {
+                // eslint-disable-next-line no-console
+                console.warn('[balanceTx] tx.toString():\n' + tx.toString());
+              } catch (toStringErr) {
+                // eslint-disable-next-line no-console
+                console.warn(
+                  '[balanceTx] tx.toString() threw (non-fatal):',
+                  toStringErr,
+                );
+              }
             } catch (snapshotErr) {
               // eslint-disable-next-line no-console
               console.warn(

@@ -7,16 +7,14 @@ import {
   type EnvironmentConfiguration,
   FaucetClient,
 } from '@midnight-ntwrk/testkit-js';
-import { UnshieldedAddress } from '@midnight-ntwrk/wallet-sdk-address-format';
-import type {
-  FacadeState,
-  WalletFacade,
-} from '@midnight-ntwrk/wallet-sdk-facade';
-import type { ShieldedWalletAPI } from '@midnight-ntwrk/wallet-sdk-shielded';
-import type {
-  UnshieldedWalletAPI,
-  UnshieldedWalletState,
-} from '@midnight-ntwrk/wallet-sdk-unshielded-wallet';
+import {
+  type FacadeState,
+  type ShieldedWalletAPI,
+  UnshieldedAddress,
+  type UnshieldedWalletAPI,
+  type UnshieldedWalletState,
+  type WalletFacade,
+} from '@midnight-ntwrk/wallet-sdk';
 import type { Logger } from 'pino';
 import * as Rx from 'rxjs';
 

@@ -19,7 +19,7 @@ export const contractConfig = {
 		"..",
 		"..",
 		"contracts",
-		"src",
+		"dist",
 		"artifacts",
 		"shielded-token",
 		"ShieldedFungibleToken",

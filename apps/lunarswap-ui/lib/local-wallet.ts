@@ -3,23 +3,21 @@ import {
   LedgerParameters,
   ZswapSecretKeys,
 } from '@midnight-ntwrk/ledger-v8';
-import { NoOpTransactionHistoryStorage } from '@midnight-ntwrk/wallet-sdk-abstractions';
-import {
-  DustWallet,
-  type DustWalletAPI,
-} from '@midnight-ntwrk/wallet-sdk-dust-wallet';
-import { WalletFacade } from '@midnight-ntwrk/wallet-sdk-facade';
-import { HDWallet, type Role, Roles } from '@midnight-ntwrk/wallet-sdk-hd';
-import {
-  ShieldedWallet,
-  type ShieldedWalletAPI,
-} from '@midnight-ntwrk/wallet-sdk-shielded';
 import {
   createKeystore,
+  DustWallet,
+  type DustWalletAPI,
+  HDWallet,
+  NoOpTransactionHistoryStorage,
   PublicKey,
+  type Role,
+  Roles,
+  ShieldedWallet,
+  type ShieldedWalletAPI,
   UnshieldedWallet,
   type UnshieldedWalletAPI,
-} from '@midnight-ntwrk/wallet-sdk-unshielded-wallet';
+  WalletFacade,
+} from '@midnight-ntwrk/wallet-sdk';
 import { Buffer } from 'buffer';
 import type { NetworkConfig } from '@/utils/config';
 

@@ -7,10 +7,7 @@ import {
   type NetworkId,
   setNetworkId,
 } from '@midnight-ntwrk/midnight-js-network-id';
-import {
-  MidnightBech32m,
-  ShieldedAddress,
-} from '@midnight-ntwrk/wallet-sdk-address-format';
+import { MidnightBech32m, ShieldedAddress } from '@midnight-ntwrk/wallet-sdk';
 import type {
   ContractAddress,
   Either,

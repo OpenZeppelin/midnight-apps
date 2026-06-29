@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (shielded-token/ShieldedFungibleToken.compact)
 
-pragma language_version >= 0.22.0;
+pragma language_version >= 0.23.0;
 
 import
   { ShieldedCoinInfo, ShieldedSendResult, ZswapCoinPublicKey, ContractAddress, Either }
@@ -50,4 +50,14 @@ export circuit mint(recipient: Either<ZswapCoinPublicKey, ContractAddress>,
 
 export circuit burn(coin: ShieldedCoinInfo, amount: Uint<128>): ShieldedSendResult {
   return ShieldedFungibleToken_burn(coin, amount);
+}
+
+// Privacy experiment: a ForwarderPrivate._drain-style transfer where the recipient
+// ("parent") is exposed as a public Either<ZswapCoinPublicKey, ContractAddress>
+// parameter, to verify whether the recipient stays private during a send tx.
+export circuit send(to: Either<ZswapCoinPublicKey, ContractAddress>,
+                    coin: ShieldedCoinInfo,
+                    value: Uint<128>
+                    ): ShieldedSendResult {
+  return ShieldedFungibleToken_send(to, coin, value);
 }

@@ -7,7 +7,7 @@
       "available": true,
       "INDEXER_URI": "http://localhost:8088/api/v4/graphql",
       "INDEXER_WS_URI": "ws://localhost:8088/api/v4/graphql/ws",
-      "LUNARSWAP_ADDRESS": "13206b48bfe6d2b6b4c9c523461609f00e7a0a95ff4c57f88d7193c4dfa643cc",
+      "LUNARSWAP_ADDRESS": "4478e3c022d49a3a13759ea12c9e209cd8851202590376e307d897151e8eef85",
       "FAUCET_URL": "",
       "EXPLORER_URL": "",
       "RPC_URL": "http://localhost:9944",

@@ -17,7 +17,7 @@ import {
   type EnvironmentConfiguration,
   FluentWalletBuilder,
 } from '@midnight-ntwrk/testkit-js';
-import type { WalletFacade } from '@midnight-ntwrk/wallet-sdk-facade';
+import type { WalletFacade } from '@midnight-ntwrk/wallet-sdk';
 import type { Logger } from 'pino';
 
 import { getInitialShieldedState } from './wallet-utils.js';
