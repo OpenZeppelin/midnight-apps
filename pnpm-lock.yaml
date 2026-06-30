@@ -258,9 +258,6 @@ importers:
       '@midnight-ntwrk/midnight-js-network-id':
         specifier: 3.0.0
         version: 3.0.0
-      '@midnight-ntwrk/wallet-sdk-address-format':
-        specifier: 3.0.0
-        version: 3.0.0
       '@midnight-ntwrk/zswap':
         specifier: 4.0.0
         version: 4.0.0
@@ -842,6 +839,9 @@ packages:
   '@midnight-ntwrk/compact-runtime@0.14.0':
     resolution: {integrity: sha512-VfZmfPDedRUPAYIhKAgS5y+KtxOkSSOCS24PAsGMjhMpzJaaWVSd5SajF6HtNZsciL54sqru4EpWvmCAqsbmYQ==}
 
+  '@midnight-ntwrk/compact-runtime@0.15.0':
+    resolution: {integrity: sha512-6+odrxb83ZZwF29SqNBBgaOR3hf5ej4KZVGibDwdXta9+uiv6qYW0fMrsKP9S+c2AqvY+vEb5NEFFI54lA7G5A==}
+
   '@midnight-ntwrk/dapp-connector-api@4.0.0':
     resolution: {integrity: sha512-XiAesY32uPPDYOk6MXquO1lDsUhe7J/CMbMOIfEgjwDgXfkLvvKFMfNz672O1aSJYkqm1I65o2XjPXNnwloQtA==}
 
@@ -854,13 +854,13 @@ packages:
   '@midnight-ntwrk/onchain-runtime-v2@2.0.0':
     resolution: {integrity: sha512-9LfU3xJDI4aWcElE4ZxsGLKKAjj/7+O6nepvqMngojc+YLmlpR29ju4C+/isDbBk/4m/9m9fq89d8qIvX8Y4/Q==}
 
+  '@midnight-ntwrk/onchain-runtime-v3@3.0.0':
+    resolution: {integrity: sha512-HbFbUOsvgpEFy1OT0Ni2LMFk4jnMQS1em+H+Mof/B3DpnNKl0Lkx5QiulKOc6pyU4KPEagOqx4fYNyVXFwgZ7g==}
+
   '@midnight-ntwrk/wallet-api@5.0.0':
     resolution: {integrity: sha512-L5Z9+v+ouqTtPLoXpngtBVHZ0SmC3zLrCZbuYnd/ul6p9UbwUQ3AQeqMhclv2jhwFRNYsL0fBOqpD5dvs4SvLQ==}
     peerDependencies:
       rxjs: 7.x
-
-  '@midnight-ntwrk/wallet-sdk-address-format@3.0.0':
-    resolution: {integrity: sha512-h46Dq+vY6Ymbll58tZyHJGd0dJmNE/Ae2PJKslP3Mb8rpDG0HhiGcqYkGvRxH6Tc/MqM0yABgAcQetjcvIe8qA==}
 
   '@midnight-ntwrk/zswap@4.0.0':
     resolution: {integrity: sha512-yKfzp4M/wUkqxUJv1D2SizojYdWYnF3FDeKaxPehLPOFC4BrR9KnLZsNR2Y/occ8a4yFDtQXf7bN1QvK5k7Grw==}
@@ -1932,23 +1932,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@scure/base@1.2.6':
-    resolution: {integrity: sha512-g/nm5FgUa//MCj1gV09zTJTaM6KBAHqLN907YVQqf7zC49+DcO4B1so4ZX07Ef10Twr6nuqYEH9GEggFXA4Fmg==}
-
   '@standard-schema/spec@1.0.0':
     resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
 
   '@standard-schema/utils@0.3.0':
     resolution: {integrity: sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==}
-
-  '@subsquid/scale-codec@4.0.1':
-    resolution: {integrity: sha512-H3mi5GIvlrvOSJVSYQRNnaiulSDktPF4TwUvquAgN86tN4kokyX8XcEM2Htrm1sVWRtMi7SgYpyVR5Yg5iPKUQ==}
-
-  '@subsquid/util-internal-hex@1.2.2':
-    resolution: {integrity: sha512-E43HVqf23jP5hvtWF9GsiN8luANjnJ1daR2SVTwaIUAYU/uNjv1Bi6tHz2uexlflBhyxAgBDmHgunXZ45wQTIw==}
-
-  '@subsquid/util-internal-json@1.2.3':
-    resolution: {integrity: sha512-H5qW5kG20IzVMpb7GhPbVRxGuACEf1DPIXE1+LNXYxt8t/GX4zQREQWHRvCB3lck+RORLJD3WJbQUtxN5UYB3Q==}
 
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
@@ -2679,6 +2667,7 @@ packages:
   git-raw-commits@4.0.0:
     resolution: {integrity: sha512-ICsMM1Wk8xSGMowkOmPrzo2Fgmfo4bMHLNX6ytHjajRJUqvHOw/TFapQ+QG75c3X/tTDDhOSRPGC52dDbNM8FQ==}
     engines: {node: '>=16'}
+    deprecated: This package is no longer maintained. For the JavaScript API, please use @conventional-changelog/git-client instead.
     hasBin: true
 
   glob-parent@5.1.2:
@@ -2691,6 +2680,7 @@ packages:
 
   glob@10.4.5:
     resolution: {integrity: sha512-7Bv8RF0k6xjo7d4A/PxYLbUCfb6c+Vpd2/mB2yRDlew7Jb5hEXiCD9ibfO7wpk8i4sevK6DFny9h7EYbM3/sHg==}
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
     hasBin: true
 
   global-directory@4.0.1:
@@ -3060,6 +3050,7 @@ packages:
   next@15.4.8:
     resolution: {integrity: sha512-jwOXTz/bo0Pvlf20FSb6VXVeWRssA2vbvq9SdrOPEg9x8E1B27C2rQtvriAn600o9hH61kjrVRexEffv3JybuA==}
     engines: {node: ^18.18.0 || ^19.8.0 || >= 20.0.0}
+    deprecated: This version has a security vulnerability. Please upgrade to a patched version. See https://nextjs.org/blog/security-update-2025-12-11 for more details.
     hasBin: true
     peerDependencies:
       '@opentelemetry/api': ^1.1.0
@@ -3577,6 +3568,7 @@ packages:
   tar@7.4.3:
     resolution: {integrity: sha512-5S7Va8hKfV7W5U6g3aYxXmlPoZVAwUMy9AOKyF2fVuZa2UD3qZjg578OrLRt8PcNN1PleVaL/5/yYATNL0ICUw==}
     engines: {node: '>=18'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   test-exclude@7.0.1:
     resolution: {integrity: sha512-pFYqmTw68LXVjeWJMST4+borgQP2AyMNbg1BpZh9LbyhUeNkeaPF9gzfPGUAnSMV3qPYdWUwDIjjCLiSDOl7vg==}
@@ -4375,6 +4367,12 @@ snapshots:
       '@types/object-inspect': 1.13.0
       object-inspect: 1.13.4
 
+  '@midnight-ntwrk/compact-runtime@0.15.0':
+    dependencies:
+      '@midnight-ntwrk/onchain-runtime-v3': 3.0.0
+      '@types/object-inspect': 1.13.0
+      object-inspect: 1.13.4
+
   '@midnight-ntwrk/dapp-connector-api@4.0.0': {}
 
   '@midnight-ntwrk/ledger-v7@7.0.0': {}
@@ -4383,16 +4381,12 @@ snapshots:
 
   '@midnight-ntwrk/onchain-runtime-v2@2.0.0': {}
 
+  '@midnight-ntwrk/onchain-runtime-v3@3.0.0': {}
+
   '@midnight-ntwrk/wallet-api@5.0.0(rxjs@7.8.2)':
     dependencies:
       '@midnight-ntwrk/zswap': 4.0.0
       rxjs: 7.8.2
-
-  '@midnight-ntwrk/wallet-sdk-address-format@3.0.0':
-    dependencies:
-      '@midnight-ntwrk/ledger-v7': 7.0.0
-      '@scure/base': 1.2.6
-      '@subsquid/scale-codec': 4.0.1
 
   '@midnight-ntwrk/zswap@4.0.0': {}
 
@@ -4442,7 +4436,8 @@ snapshots:
 
   '@openzeppelin/compact-tools-simulator@file:compact-tools/packages/simulator':
     dependencies:
-      '@midnight-ntwrk/compact-runtime': 0.14.0
+      '@midnight-ntwrk/compact-runtime': 0.15.0
+      '@midnight-ntwrk/ledger-v7': 7.0.0
 
   '@pinojs/redact@0.4.0': {}
 
@@ -5430,22 +5425,9 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.41.1':
     optional: true
 
-  '@scure/base@1.2.6': {}
-
   '@standard-schema/spec@1.0.0': {}
 
   '@standard-schema/utils@0.3.0': {}
-
-  '@subsquid/scale-codec@4.0.1':
-    dependencies:
-      '@subsquid/util-internal-hex': 1.2.2
-      '@subsquid/util-internal-json': 1.2.3
-
-  '@subsquid/util-internal-hex@1.2.2': {}
-
-  '@subsquid/util-internal-json@1.2.3':
-    dependencies:
-      '@subsquid/util-internal-hex': 1.2.2
 
   '@swc/helpers@0.5.15':
     dependencies:
