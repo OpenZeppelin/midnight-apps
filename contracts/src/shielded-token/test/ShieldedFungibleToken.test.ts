@@ -3,14 +3,9 @@ import {
   rawTokenType,
 } from '@midnight-ntwrk/compact-runtime';
 import {
-  getNetworkId,
   type NetworkId,
   setNetworkId,
 } from '@midnight-ntwrk/midnight-js-network-id';
-import {
-  MidnightBech32m,
-  ShieldedAddress,
-} from '@midnight-ntwrk/wallet-sdk-address-format';
 import type {
   ContractAddress,
   Either,
@@ -33,16 +28,35 @@ const NETWORK_ID: NetworkId = 'test';
 
 setNetworkId(NETWORK_ID);
 
-// Helper function to create Either for hex addresses
+const hexToBytes = (hex: string): Uint8Array => {
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < bytes.length; i++) {
+    bytes[i] = Number.parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+  }
+  return bytes;
+};
+
+// Coin public keys for the static test addresses above, pre-decoded from their
+// bech32m shielded-address form. Inlined so the test does not depend on
+// @midnight-ntwrk/wallet-sdk-address-format, which pulls in GPL-licensed
+// transitive dependencies (@subsquid/*).
+const COIN_PUBLIC_KEYS: Record<string, Uint8Array> = {
+  [ADMIN]: hexToBytes(
+    '208b4cd79c3c8e75f99264a60391cc28bc3455a46760538affb2c0b6de5a7be6',
+  ),
+  [USER]: hexToBytes(
+    'd271f57c33edd9f01d9e2af6e77c3fbe7088c1e7e9b1c9b836c8848b50b64a9e',
+  ),
+};
+
+// Helper function to create Either for the static test addresses
 const createEitherFromHex = (
-  hexString: string,
+  address: string,
 ): Either<ZswapCoinPublicKey, ContractAddress> => {
-  const bech32mAddress = MidnightBech32m.parse(hexString);
-  const shieldedAddress = ShieldedAddress.codec.decode(
-    getNetworkId(),
-    bech32mAddress,
-  );
-  const coinPublicKeyBytes = shieldedAddress.coinPublicKey.data;
+  const coinPublicKeyBytes = COIN_PUBLIC_KEYS[address];
+  if (!coinPublicKeyBytes) {
+    throw new Error(`No precomputed coin public key for address ${address}`);
+  }
   return {
     is_left: true,
     left: { bytes: coinPublicKeyBytes },
