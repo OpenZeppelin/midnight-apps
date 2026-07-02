@@ -1,0 +1,38 @@
+{
+	"name": "@openzeppelin-midnight-apps/lunarswap-sdk",
+	"version": "1.0.0",
+	"description": "SDK for Lunarswap liquidity calculations. Provides a simple function to calculate minimum amounts for addLiquidity calls.",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"require": "./dist/index.js"
+		}
+	},
+	"files": ["dist", "README.md"],
+	"scripts": {
+		"build": "tsc",
+		"build:fast": "tsc",
+		"dev": "tsc --watch",
+		"clean": "rm -rf dist",
+		"test": "vitest",
+		"test:watch": "vitest --watch",
+		"test:coverage": "vitest --coverage",
+		"lint": "biome check .",
+		"lint:fix": "biome check --write .",
+		"fmt": "biome format --write .",
+		"types": "tsc --noEmit"
+	},
+	"keywords": ["lunarswap", "defi", "liquidity", "amm", "midnight", "compact"],
+	"author": "Midnight Dapps Team",
+	"license": "ISC",
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@types/node": "^22.14.0",
+		"@vitest/coverage-v8": "^3.1.4",
+		"typescript": "^5.8.3",
+		"vitest": "^3.0.9"
+	}
+}

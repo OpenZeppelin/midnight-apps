@@ -1,0 +1,37 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (lunarswap/test/LunarswapFee.mock.compact)
+
+pragma language_version >= 0.21.0;
+
+import CompactStandardLibrary;
+
+import "../../../LunarswapFee" prefix LunarswapFee_;
+
+// Helper for test suite: toggling this variable activates circuit metadata reporting.
+// Only increases circuit size by 3 rows per exposed circuit.
+ledger toImpure: Boolean;
+
+constructor(feeToSetter_: ZswapCoinPublicKey) {
+  toImpure = true;
+  return LunarswapFee_initialize(feeToSetter_);
+}
+
+export circuit getFeeTo(): ZswapCoinPublicKey {
+  toImpure = true;
+  return LunarswapFee_getFeeTo();
+}
+
+export circuit getFeeToSetter(): ZswapCoinPublicKey {
+  toImpure = true;
+  return LunarswapFee_getFeeToSetter();
+}
+
+export circuit setFeeTo(feeTo_: ZswapCoinPublicKey): [] {
+  toImpure = true;
+  return LunarswapFee_setFeeTo(feeTo_);
+}
+
+export circuit setFeeToSetter(feeToSetter_: ZswapCoinPublicKey): [] {
+  toImpure = true;
+  return LunarswapFee_setFeeToSetter(feeToSetter_);
+}

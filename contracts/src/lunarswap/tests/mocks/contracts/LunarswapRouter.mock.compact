@@ -1,0 +1,57 @@
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Midnight Apps Contracts v0.0.1-alpha.0 (lunarswap/test/LunarswapRouter.mock.compact)
+
+pragma language_version >= 0.21.0;
+
+import CompactStandardLibrary;
+
+import "../../../LunarswapRouter" prefix LunarswapRouter_;
+
+// Helper for test suite: toggling this variable activates circuit metadata reporting.
+// Only increases circuit size by 3 rows per exposed circuit.
+ledger toImpure: Boolean;
+
+export circuit addLiquidity(
+                 tokenA: ShieldedCoinInfo,
+                 tokenB: ShieldedCoinInfo,
+                 amountAMin: Uint<128>,
+                 amountBMin: Uint<128>,
+                 to: Either<ZswapCoinPublicKey, ContractAddress>,
+                 ): Uint<128> {
+  toImpure = true;
+  return LunarswapRouter_addLiquidity(tokenA, tokenB, amountAMin, amountBMin, to);
+}
+
+export circuit removeLiquidity(
+                 tokenA: ShieldedCoinInfo,
+                 tokenB: ShieldedCoinInfo,
+                 liquidity: ShieldedCoinInfo,
+                 amountAMin: Uint<128>,
+                 amountBMin: Uint<128>,
+                 to: Either<ZswapCoinPublicKey, ContractAddress>,
+                 ): [Uint<128>, Uint<128>] {
+  toImpure = true;
+  return LunarswapRouter_removeLiquidity(tokenA, tokenB, liquidity, amountAMin, amountBMin, to);
+}
+
+export circuit swapExactTokensForTokens(
+                 tokenIn: ShieldedCoinInfo,
+                 tokenOut: ShieldedCoinInfo,
+                 amountIn: Uint<128>,
+                 amountOutMin: Uint<128>,
+                 to: Either<ZswapCoinPublicKey, ContractAddress>
+                 ): Uint<128> {
+  toImpure = true;
+  return LunarswapRouter_swapExactTokensForTokens(tokenIn, tokenOut, amountIn, amountOutMin, to);
+}
+
+export circuit swapTokensForExactTokens(
+                 tokenIn: ShieldedCoinInfo,
+                 tokenOut: ShieldedCoinInfo,
+                 amountOut: Uint<128>,
+                 amountInMax: Uint<128>,
+                 to: Either<ZswapCoinPublicKey, ContractAddress>
+                 ): Uint<128> {
+  toImpure = true;
+  return LunarswapRouter_swapTokensForExactTokens(tokenIn, tokenOut, amountOut, amountInMax, to);
+}
