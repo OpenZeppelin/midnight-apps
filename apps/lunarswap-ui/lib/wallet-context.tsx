@@ -13,7 +13,11 @@ import {
   useRef,
   useState,
 } from 'react';
-import { connectToWallet, disconnectWallet } from './wallet-utils';
+import {
+  connectToWallet,
+  disconnectWallet,
+  WALLET_CONNECTOR_STORAGE_KEYS,
+} from './wallet-utils';
 
 type WalletConnectionStatusType =
   | 'disconnected'
@@ -177,13 +181,29 @@ export const WalletProvider: React.FC<Readonly<WalletProviderProps>> = ({
         setWalletConnectionStatus('connecting');
 
         try {
-          // Use the shared connectToWallet utility
+          // Reuse the previously selected connector identity when multiple
+          // wallets are injected so we reconnect to the same provider.
+          let savedWalletKey: string | null = null;
+          let savedWalletRdns: string | null = null;
+          try {
+            savedWalletKey = localStorage.getItem(
+              WALLET_CONNECTOR_STORAGE_KEYS.KEY,
+            );
+            savedWalletRdns = localStorage.getItem(
+              WALLET_CONNECTOR_STORAGE_KEYS.RDNS,
+            );
+          } catch {
+            // ignore storage errors; connectToWallet still falls back
+          }
+
           const { wallet: reconnectedWallet, state: currentState } =
             await connectToWallet({
               checkExisting: true,
               enableTimeout: 15000,
               stateTimeout: 10000,
               isEnabledTimeout: 10000,
+              walletKey: savedWalletKey,
+              walletRdns: savedWalletRdns,
             });
 
           // Verify the wallet address matches what we saved
@@ -193,6 +213,8 @@ export const WalletProvider: React.FC<Readonly<WalletProviderProps>> = ({
             setWalletAddress(currentState.address || null);
             setWalletConnectionStatus('connected');
           } else {
+            // Different account on the selected wallet — clear saved session
+            // rather than silently adopting another address.
             console.warn('Wallet address mismatch during reconnection');
             setWalletConnectionStatus('disconnected');
             setWalletState(null);
