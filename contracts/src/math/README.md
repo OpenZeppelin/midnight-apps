@@ -1,5 +1,16 @@
 # `@openzeppelin/midnight-apps-contracts/math`
 
+> [!WARNING]
+> **Deprecated.** This library moved to [OpenZeppelin/compact-contracts](https://github.com/OpenZeppelin/compact-contracts/tree/main/contracts/src/math). Use that version for new and existing contracts.
+>
+> This copy stays here for reference only. It gets no fixes or updates. The compact-contracts version has the same API and fixes these defects of this copy:
+>
+> - `Uint128.sub(U128)` and every `Uint128` division cannot be proven with compilers 0.28.0 to 0.30.0 for common inputs, for example `div(10, 5)`.
+> - The fixes of audit findings L-06 and N-01 ([#313](https://github.com/OpenZeppelin/midnight-apps/pull/313), [#312](https://github.com/OpenZeppelin/midnight-apps/pull/312)).
+> - Wrong failure messages for a bad division witness, and wrong witness names in this README.
+>
+> The migration guide is `contracts/src/math/MIGRATION.md` in compact-contracts. The migration PRs start at [compact-contracts#1125](https://github.com/OpenZeppelin/compact-contracts/pull/1125).
+
 A comprehensive mathematical operations library for Midnight Network smart contracts, providing efficient and secure arithmetic operations for various integer types.
 
 ## Overview
